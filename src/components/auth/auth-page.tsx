@@ -18,7 +18,7 @@ export function AuthPage() {
   // Default to signup since most invited users are new
   const getInitialView = (): AuthView => {
     if (typeof window !== 'undefined') {
-      const hasPendingInvite = sessionStorage.getItem('pending_invite_token');
+      const hasPendingInvite = localStorage.getItem('pending_invite_token');
       if (returnTo === 'invite' || hasPendingInvite) {
         return 'signup';
       }

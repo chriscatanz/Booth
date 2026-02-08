@@ -106,7 +106,7 @@ function InviteContent() {
   const handleSignIn = () => {
     // Store token in session storage so we can use it after login
     if (token) {
-      sessionStorage.setItem('pending_invite_token', token);
+      localStorage.setItem('pending_invite_token', token);
     }
     router.push('/?returnTo=invite');
   };

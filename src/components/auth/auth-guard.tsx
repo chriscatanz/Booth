@@ -34,7 +34,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
   useEffect(() => {
     if (typeof window !== 'undefined' && !hasCheckedInvite.current) {
       hasCheckedInvite.current = true;
-      const token = sessionStorage.getItem('pending_invite_token');
+      const token = localStorage.getItem('pending_invite_token');
       if (token) {
         setPendingInviteToken(token);
       }
@@ -46,7 +46,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     if (isAuthenticated && user && pendingInviteToken && !isRedirectingToInvite) {
       setIsRedirectingToInvite(true);
       // Clear the token from storage now that we're redirecting
-      sessionStorage.removeItem('pending_invite_token');
+      localStorage.removeItem('pending_invite_token');
       router.push(`/invite?token=${pendingInviteToken}`);
     }
   }, [isAuthenticated, user, pendingInviteToken, router, isRedirectingToInvite]);
