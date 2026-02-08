@@ -200,7 +200,7 @@ export async function fetchOrganizationMembers(orgId: string): Promise<Organizat
     .from('organization_members')
     .select(`
       *,
-      user_profiles (*)
+      user_profiles!organization_members_user_id_fkey (*)
     `)
     .eq('organization_id', orgId)
     .order('role', { ascending: true });
