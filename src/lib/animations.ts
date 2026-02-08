@@ -53,7 +53,7 @@ export const staggerItem: Variants = {
   animate: { 
     opacity: 1, 
     y: 0,
-    transition: { type: 'spring', stiffness: 400, damping: 25 }
+    transition: { type: 'spring' as const, stiffness: 400, damping: 25 }
   },
 };
 
@@ -63,7 +63,7 @@ export const listItem: Variants = {
   animate: { 
     opacity: 1, 
     x: 0,
-    transition: { type: 'spring', stiffness: 400, damping: 25 }
+    transition: { type: 'spring' as const, stiffness: 400, damping: 25 }
   },
   exit: { opacity: 0, x: -16 },
 };
@@ -85,7 +85,7 @@ export const accordion: Variants = {
   expanded: { 
     height: 'auto', 
     opacity: 1,
-    transition: { type: 'spring', stiffness: 300, damping: 30 }
+    transition: { type: 'spring' as const, stiffness: 300, damping: 30 }
   },
 };
 
@@ -102,12 +102,12 @@ export const sidebarItem: Variants = {
   animate: { 
     opacity: 1, 
     x: 0,
-    transition: { type: 'spring', stiffness: 500, damping: 30 }
+    transition: { type: 'spring' as const, stiffness: 500, damping: 30 }
   },
   exit: { 
     opacity: 0, 
     x: -8,
-    transition: { duration: 0.15 }
+    transition: { type: 'tween' as const, duration: 0.15 }
   },
 };
 
@@ -124,12 +124,12 @@ export const notification: Variants = {
     opacity: 1, 
     y: 0, 
     scale: 1,
-    transition: { type: 'spring', stiffness: 400, damping: 25 }
+    transition: { type: 'spring' as const, stiffness: 400, damping: 25 }
   },
   exit: { 
     opacity: 0, 
     y: -20, 
     scale: 0.95,
-    transition: { duration: 0.2 }
+    transition: { type: 'tween' as const, duration: 0.2 }
   },
 };
