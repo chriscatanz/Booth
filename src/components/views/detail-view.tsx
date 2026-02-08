@@ -19,7 +19,8 @@ import { StatusBadge } from '@/components/ui/badge';
 import { HotelMap } from '@/components/ui/hotel-map';
 import { formatCurrency } from '@/lib/utils';
 import { totalEstimatedCost, totalServicesCost, estimatedHotelCost, roiPercentage, costPerLead, costPerQualifiedLead, leadQualificationRate, dealCloseRate, revenuePerDeal, parseJsonStringArray } from '@/types/computed';
-import { BOOTH_OPTIONS, GRAPHICS_OPTIONS, PACKING_LIST_OPTIONS, TABLECLOTH_OPTIONS, SHOW_STATUSES } from '@/lib/constants';
+import { SHOW_STATUSES } from '@/lib/constants';
+import { useCustomLists } from '@/hooks/use-custom-lists';
 import {
   ArrowLeft, Save, Trash2, Copy, Info, Truck, Hotel,
   Users, Award, FileText, BarChart3, Plus, X, Package,
@@ -50,6 +51,9 @@ export default function DetailView() {
   // Permission checks
   const canEdit = usePermission('editor');
   const canDelete = usePermission('admin');
+  
+  // Custom lists from org settings
+  const { boothOptions, graphicsOptions, packingListOptions, tableclothOptions } = useCustomLists();
 
   if (!selectedShow) return null;
 
@@ -246,7 +250,7 @@ export default function DetailView() {
           <div className="mt-3">
             <p className="text-xs font-medium text-text-secondary mb-2">Booth Items to Ship</p>
             <div className="flex flex-wrap gap-2">
-              {BOOTH_OPTIONS.map(opt => (
+              {boothOptions.map(opt => (
                 <Checkbox key={opt} label={opt} checked={parseJsonStringArray(show.boothToShip).includes(opt)} onChange={() => toggleJsonArrayItem('boothToShip', opt)} />
               ))}
             </div>
@@ -255,7 +259,7 @@ export default function DetailView() {
           <div className="mt-3">
             <p className="text-xs font-medium text-text-secondary mb-2">Graphics to Ship</p>
             <div className="flex flex-wrap gap-2">
-              {GRAPHICS_OPTIONS.map(opt => (
+              {graphicsOptions.map(opt => (
                 <Checkbox key={opt} label={opt} checked={parseJsonStringArray(show.graphicsToShip).includes(opt)} onChange={() => toggleJsonArrayItem('graphicsToShip', opt)} />
               ))}
             </div>
@@ -307,7 +311,7 @@ export default function DetailView() {
           <div>
             <p className="text-xs font-medium text-text-secondary mb-2">Standard Items</p>
             <div className="flex flex-wrap gap-2">
-              {PACKING_LIST_OPTIONS.map(opt => (
+              {packingListOptions.map(opt => (
                 <Checkbox key={opt} label={opt} checked={parseJsonStringArray(show.packingListItems).includes(opt)} onChange={() => toggleJsonArrayItem('packingListItems', opt)} />
               ))}
             </div>
@@ -328,7 +332,7 @@ export default function DetailView() {
               label="Tablecloth Type"
               value={show.tableclothType ?? ''}
               onChange={e => updateSelectedShow({ tableclothType: e.target.value || null })}
-              options={TABLECLOTH_OPTIONS.map(t => ({ value: t, label: t }))}
+              options={tableclothOptions.map(t => ({ value: t, label: t }))}
               placeholder="Select type"
             />
           </div>

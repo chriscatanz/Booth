@@ -6,26 +6,27 @@ import { useAuthStore } from '@/store/auth-store';
 import * as authService from '@/services/auth-service';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { 
+import {
   X, Building2, Users, Shield, Save, Upload,
-  Crown, AlertCircle, Check, Trash2, Settings, Clock, Download
+  Crown, AlertCircle, Check, Trash2, Settings, Clock, Download, List
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MembersModal } from '@/components/auth/members-modal';
 import { AuditLog } from './audit-log';
 import { DataExport } from './data-export';
 import { DeleteAccountModal } from './delete-account-modal';
+import { CustomListsEditor } from './custom-lists-editor';
 
 interface OrgSettingsModalProps {
   onClose: () => void;
 }
 
-type SettingsTab = 'general' | 'members' | 'data' | 'audit' | 'danger';
+type SettingsTab = 'general' | 'members' | 'lists' | 'data' | 'audit' | 'danger';
 
 export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
   const { organization, user, isOwner, isAdmin, refreshOrganizations } = useAuthStore();
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
-  
+
   // General settings form
   const [orgName, setOrgName] = useState(organization?.name || '');
   const [isSaving, setIsSaving] = useState(false);
@@ -70,6 +71,7 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
   const tabs: { id: SettingsTab; label: string; icon: React.ReactNode; adminOnly?: boolean }[] = [
     { id: 'general', label: 'General', icon: <Building2 size={16} /> },
     { id: 'members', label: 'Members', icon: <Users size={16} /> },
+    { id: 'lists', label: 'Custom Lists', icon: <List size={16} />, adminOnly: true },
     { id: 'data', label: 'Data Export', icon: <Download size={16} /> },
     { id: 'audit', label: 'Audit Log', icon: <Clock size={16} />, adminOnly: true },
     { id: 'danger', label: 'Danger Zone', icon: <AlertCircle size={16} />, adminOnly: true },
@@ -152,7 +154,7 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
               >
                 <div>
                   <h3 className="text-sm font-medium text-text-primary mb-4">Organization Details</h3>
-                  
+
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-text-secondary mb-1">
@@ -222,6 +224,17 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
               </motion.div>
             )}
 
+            {activeTab === 'lists' && isAdmin && (
+              <motion.div
+                key="lists"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+              >
+                <CustomListsEditor />
+              </motion.div>
+            )}
+
             {activeTab === 'data' && (
               <motion.div
                 key="data"
@@ -258,10 +271,10 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
                     Delete Organization
                   </h3>
                   <p className="text-sm text-text-secondary mb-4">
-                    Once you delete an organization, there is no going back. All trade shows, 
+                    Once you delete an organization, there is no going back. All trade shows,
                     attendees, files, and member data will be permanently deleted.
                   </p>
-                  
+
                   <div className="space-y-3">
                     <div>
                       <label className="block text-xs text-text-tertiary mb-1">
@@ -290,7 +303,7 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
                     Delete My Account
                   </h3>
                   <p className="text-sm text-text-secondary mb-4">
-                    Permanently delete your account and all associated data. If you're the only 
+                    Permanently delete your account and all associated data. If you're the only
                     owner of this organization, it will be deleted as well.
                   </p>
                   <Button
@@ -307,9 +320,9 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
       </motion.div>
 
       {/* Delete Account Modal */}
-      <DeleteAccountModal 
-        isOpen={showDeleteAccountModal} 
-        onClose={() => setShowDeleteAccountModal(false)} 
+      <DeleteAccountModal
+        isOpen={showDeleteAccountModal}
+        onClose={() => setShowDeleteAccountModal(false)}
       />
     </div>
   );
@@ -350,7 +363,7 @@ function MembersContent() {
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault();
     if (!organization?.id || !user?.id) return;
-    
+
     setIsInviting(true);
     try {
       const invite = await authService.createInvitation(
@@ -359,7 +372,7 @@ function MembersContent() {
         inviteRole,
         user.id
       );
-      
+
       // Send email
       try {
         await fetch('/api/invite', {
@@ -375,7 +388,7 @@ function MembersContent() {
           }),
         });
       } catch {}
-      
+
       setInvitations([invite, ...invitations]);
       setInviteEmail('');
       setShowInviteForm(false);
