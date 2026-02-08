@@ -13,7 +13,7 @@ import { SHOW_STATUSES } from '@/lib/constants';
 import { sidebarItem, staggerContainer, buttonPress } from '@/lib/animations';
 import {
   LayoutDashboard, LayoutGrid, List, Calendar, BarChart3,
-  Search, Plus, Archive, ChevronDown, MapPin, FileStack, X,
+  Search, Plus, Archive, ChevronDown, MapPin, FileStack, X, CheckSquare,
 } from 'lucide-react';
 import { TemplateModal } from '@/components/ui/template-modal';
 import { PermissionGate } from '@/components/auth/permission-gate';
@@ -25,6 +25,7 @@ const VIEW_ICONS: Record<ViewMode, React.ElementType> = {
   [ViewMode.List]: List,
   [ViewMode.Calendar]: Calendar,
   [ViewMode.Budget]: BarChart3,
+  [ViewMode.Tasks]: CheckSquare,
 };
 
 interface SidebarProps {

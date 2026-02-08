@@ -18,6 +18,7 @@ import QuickLookView from '@/components/views/quick-look-view';
 import ListView from '@/components/views/list-view';
 import CalendarView from '@/components/views/calendar-view';
 import BudgetView from '@/components/views/budget-view';
+import TasksView from '@/components/views/tasks-view';
 import DetailView from '@/components/views/detail-view';
 import SettingsView from '@/components/views/settings-view';
 import ExportFieldSelector from '@/components/export/export-field-selector';
@@ -154,6 +155,8 @@ export function AppShell() {
         return <CalendarView />;
       case ViewMode.Budget:
         return <BudgetView />;
+      case ViewMode.Tasks:
+        return <TasksView />;
       default:
         return <DashboardView viewMode={viewMode} onViewModeChange={handleViewModeChange} />;
     }

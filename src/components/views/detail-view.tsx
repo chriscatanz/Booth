@@ -25,7 +25,7 @@ import {
   ArrowLeft, Save, Trash2, Copy, Info, Truck, Hotel,
   Users, Award, FileText, BarChart3, Plus, X, Package,
   Ticket, DollarSign, FileStack, Printer, CalendarPlus, Mail,
-  Repeat, Upload, Clock,
+  Repeat, Upload, Clock, CheckSquare,
 } from 'lucide-react';
 import { downloadICS, openMailto } from '@/services/export-service';
 import { TemplateModal } from '@/components/ui/template-modal';
@@ -33,6 +33,7 @@ import { PackingListModal } from '@/components/ui/packing-list-modal';
 import { FileUploadZone } from '@/components/ui/file-upload-zone';
 import { ActivityTimeline } from '@/components/ui/activity-timeline';
 import { PermissionGate, usePermission } from '@/components/auth/permission-gate';
+import { TaskList } from '@/components/tasks';
 
 export default function DetailView() {
   const {
@@ -189,6 +190,11 @@ export default function DetailView() {
             <Checkbox label="Registration Confirmed" checked={show.registrationConfirmed ?? false} onChange={v => updateSelectedShow({ registrationConfirmed: v })} />
             <Checkbox label="Attendee List Received" checked={show.attendeeListReceived ?? false} onChange={v => updateSelectedShow({ attendeeListReceived: v })} />
           </div>
+        </FormSection>
+
+        {/* 2b. Tasks */}
+        <FormSection title="Tasks" icon={CheckSquare} defaultOpen={false}>
+          <TaskList tradeShowId={show.id} readOnly={!canEdit} />
         </FormSection>
 
         {/* 3. Attendees & Travel */}
