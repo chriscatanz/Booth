@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
@@ -15,7 +15,20 @@ import {
 
 type InviteStatus = 'loading' | 'valid' | 'invalid' | 'expired' | 'accepted' | 'error';
 
+// Wrap in Suspense to handle useSearchParams during static generation
 export default function InvitePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <LoadingOverlay message="Loading..." />
+      </div>
+    }>
+      <InviteContent />
+    </Suspense>
+  );
+}
+
+function InviteContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
