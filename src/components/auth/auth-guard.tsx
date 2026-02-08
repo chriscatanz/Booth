@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, ReactNode } from 'react';
+import React, { useEffect, useState, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
 import { AuthPage } from './auth-page';
@@ -21,6 +21,8 @@ export function AuthGuard({ children }: AuthGuardProps) {
     organizations,
     initialize 
   } = useAuthStore();
+  
+  const [isRedirectingToInvite, setIsRedirectingToInvite] = useState(false);
 
   useEffect(() => {
     initialize();
@@ -28,20 +30,21 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   // After auth, check for pending invite token
   useEffect(() => {
-    if (isAuthenticated && user && typeof window !== 'undefined') {
+    if (isAuthenticated && user && typeof window !== 'undefined' && !isRedirectingToInvite) {
       const pendingToken = sessionStorage.getItem('pending_invite_token');
       if (pendingToken) {
+        setIsRedirectingToInvite(true);
         sessionStorage.removeItem('pending_invite_token');
         router.push(`/invite?token=${pendingToken}`);
       }
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, router, isRedirectingToInvite]);
 
-  // Show loading while checking auth
-  if (isLoading) {
+  // Show loading while checking auth or redirecting to invite
+  if (isLoading || isRedirectingToInvite) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingOverlay message="Loading..." />
+        <LoadingOverlay message={isRedirectingToInvite ? "Redirecting to invitation..." : "Loading..."} />
       </div>
     );
   }
@@ -59,6 +62,12 @@ export function AuthGuard({ children }: AuthGuardProps) {
     if (!hasPendingInvite) {
       return <OrganizationSetup />;
     }
+    // Has pending invite - show loading until redirect happens
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <LoadingOverlay message="Processing invitation..." />
+      </div>
+    );
   }
 
   // Fully authenticated with org - show app
