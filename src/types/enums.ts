@@ -25,6 +25,8 @@ export enum ViewMode {
   Calendar = 'Calendar',
   Budget = 'Budget',
   Tasks = 'Tasks',
+  Assets = 'Assets',
+  Activity = 'Activity',
 }
 
 export const viewModeIcons: Record<ViewMode, string> = {
@@ -34,6 +36,8 @@ export const viewModeIcons: Record<ViewMode, string> = {
   [ViewMode.Calendar]: 'Calendar',
   [ViewMode.Budget]: 'BarChart3',
   [ViewMode.Tasks]: 'CheckSquare',
+  [ViewMode.Assets]: 'Package',
+  [ViewMode.Activity]: 'Activity',
 };
 
 // Toast notification types

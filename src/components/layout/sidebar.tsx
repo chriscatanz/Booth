@@ -14,6 +14,7 @@ import { sidebarItem, staggerContainer, buttonPress } from '@/lib/animations';
 import {
   LayoutDashboard, LayoutGrid, List, Calendar, BarChart3,
   Search, Plus, Archive, ChevronDown, MapPin, FileStack, X, CheckSquare,
+  Package, Activity,
 } from 'lucide-react';
 import { TemplateModal } from '@/components/ui/template-modal';
 import { PermissionGate } from '@/components/auth/permission-gate';
@@ -26,6 +27,8 @@ const VIEW_ICONS: Record<ViewMode, React.ElementType> = {
   [ViewMode.Calendar]: Calendar,
   [ViewMode.Budget]: BarChart3,
   [ViewMode.Tasks]: CheckSquare,
+  [ViewMode.Assets]: Package,
+  [ViewMode.Activity]: Activity,
 };
 
 interface SidebarProps {
