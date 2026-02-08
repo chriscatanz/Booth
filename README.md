@@ -112,3 +112,4 @@ MIT License - see [LICENSE](LICENSE) for details.
 ---
 
 Built with ❤️ by trade show professionals, for trade show professionals.
+
