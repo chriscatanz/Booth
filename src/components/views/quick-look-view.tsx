@@ -121,9 +121,9 @@ export default function QuickLookView() {
                 <div className="relative flex items-center gap-2">
                   <Users size={12} className="text-brand-cyan shrink-0" />
                   <div className="flex flex-wrap gap-1">
-                    {showAttendees.slice(0, 4).map((attendee, i) => (
+                    {showAttendees.slice(0, 4).map((attendee) => (
                       <span 
-                        key={attendee.id} 
+                        key={attendee.localId} 
                         className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-brand-cyan/10 text-brand-cyan"
                       >
                         {attendee.name}
