@@ -356,7 +356,7 @@ CREATE POLICY "Admins can delete invitations" ON public.invitations
 
 CREATE POLICY "Users can view their invitations by email" ON public.invitations
   FOR SELECT USING (
-    email = (SELECT email FROM auth.users WHERE id = auth.uid())
+    lower(email) = lower(auth.email())
   );
 
 CREATE POLICY "Anyone can view invite by token" ON public.invitations
@@ -364,7 +364,7 @@ CREATE POLICY "Anyone can view invite by token" ON public.invitations
 
 CREATE POLICY "Users can accept invitations" ON public.invitations
   FOR UPDATE USING (
-    email = (SELECT email FROM auth.users WHERE id = auth.uid())
+    lower(email) = lower(auth.email())
   );
 
 -- Tradeshows policies
