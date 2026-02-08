@@ -30,18 +30,15 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }: SignUpFormProps) {
       return;
     }
 
-    console.log('[SignUp] Starting signup for:', email);
     try {
       const result = await signUp(email, password, fullName);
-      console.log('[SignUp] Result:', result);
       if (result) {
-        console.log('[SignUp] Success! Setting success state');
+        // Store success flag for display even if component unmounts
+        localStorage.setItem('signup_success_email', email);
         setSuccess(true);
-      } else {
-        console.log('[SignUp] Result was falsy:', result);
       }
     } catch (err) {
-      console.error('[SignUp] Caught error:', err);
+      console.error('[SignUp] Error:', err);
     }
   };
 

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
-import { Building2, AlertCircle, Loader2, LogOut, Mail } from 'lucide-react';
+import { Building2, AlertCircle, Loader2, LogOut, Mail, CheckCircle } from 'lucide-react';
 import * as authService from '@/services/auth-service';
 import { Invitation } from '@/types/auth';
 
@@ -14,6 +14,16 @@ export function OrganizationSetup() {
   const [pendingInvites, setPendingInvites] = useState<Invitation[]>([]);
   const [loadingInvites, setLoadingInvites] = useState(true);
   const [acceptingInvite, setAcceptingInvite] = useState<string | null>(null);
+  const [signupSuccessEmail, setSignupSuccessEmail] = useState<string | null>(null);
+
+  // Check for signup success message
+  useEffect(() => {
+    const email = localStorage.getItem('signup_success_email');
+    if (email) {
+      setSignupSuccessEmail(email);
+      localStorage.removeItem('signup_success_email');
+    }
+  }, []);
 
   // Check for pending invitations
   useEffect(() => {
@@ -80,6 +90,23 @@ export function OrganizationSetup() {
             Create an organization to get started, or accept an invitation.
           </p>
         </div>
+
+        {/* Signup Success Message */}
+        {signupSuccessEmail && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 rounded-lg bg-success-bg border border-success/20"
+          >
+            <div className="flex items-center gap-2 text-success">
+              <CheckCircle size={16} />
+              <span className="font-medium">Account created!</span>
+            </div>
+            <p className="text-sm text-text-secondary mt-1">
+              Your email <strong>{signupSuccessEmail}</strong> has been verified.
+            </p>
+          </motion.div>
+        )}
 
         {/* Pending Invitations */}
         {pendingInvites.length > 0 && (
