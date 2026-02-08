@@ -1,0 +1,297 @@
+'use client';
+
+import React, { useMemo } from 'react';
+import { useTradeShowStore } from '@/store/trade-show-store';
+import { useFilteredShows } from '@/hooks/use-filtered-shows';
+import { ViewMode, AlertType, AlertPriority } from '@/types/enums';
+import { TradeShow } from '@/types';
+import { StatCard } from '@/components/ui/stat-card';
+import { formatCurrency } from '@/lib/utils';
+import { formatDateRange, daysUntil, getMonthAbbrev, getDayNumber, formatDate } from '@/lib/date-utils';
+import { daysUntilShow } from '@/types/computed';
+import {
+  Calendar, Clock, CalendarDays, DollarSign, AlertTriangle,
+  CheckCircle, CalendarClock, Plus, BarChart3, CalendarPlus, Upload,
+  ChevronRight, Package, UserPlus, Building2, SquareDashed, Zap, Truck,
+} from 'lucide-react';
+import { ShippingTimeline } from '@/components/ui/shipping-timeline';
+import { parseISO, isValid, isSameMonth, addDays, addMonths } from 'date-fns';
+import { format } from 'date-fns';
+
+interface ShowAlert {
+  show: TradeShow;
+  type: AlertType;
+  title: string;
+  priority: AlertPriority;
+  daysUntilDeadline?: number;
+}
+
+interface DashboardViewProps {
+  viewMode: ViewMode;
+  onViewModeChange: (mode: ViewMode) => void;
+}
+
+export default function DashboardView({ viewMode, onViewModeChange }: DashboardViewProps) {
+  const { shows, selectShow, createNewShow, loadShows } = useTradeShowStore();
+  const now = new Date();
+
+  const upcomingShows = useMemo(() =>
+    shows.filter(s => {
+      if (!s.startDate) return false;
+      const d = parseISO(s.startDate);
+      return isValid(d) && d >= now;
+    }).sort((a, b) => (a.startDate ?? '').localeCompare(b.startDate ?? '')),
+  [shows, now]);
+
+  const showsThisMonth = useMemo(() =>
+    shows.filter(s => {
+      if (!s.startDate) return false;
+      const d = parseISO(s.startDate);
+      return isValid(d) && isSameMonth(d, now);
+    }),
+  [shows, now]);
+
+  const showsNext30 = useMemo(() =>
+    upcomingShows.filter(s => {
+      const days = daysUntilShow(s);
+      return days !== null && days <= 30;
+    }),
+  [upcomingShows]);
+
+  const totalBudget = useMemo(() => shows.reduce((sum, s) => sum + (s.cost ?? 0), 0), [shows]);
+  const upcomingBudget = useMemo(() => upcomingShows.reduce((sum, s) => sum + (s.cost ?? 0), 0), [upcomingShows]);
+
+  // Alerts
+  const alerts = useMemo(() => {
+    const list: ShowAlert[] = [];
+    const thirtyDaysOut = addDays(now, 30);
+    const fourteenDaysOut = addDays(now, 14);
+    const twentyOneDaysOut = addDays(now, 21);
+
+    for (const show of upcomingShows) {
+      const start = show.startDate ? parseISO(show.startDate) : null;
+
+      if (show.registrationConfirmed !== true && start && start <= thirtyDaysOut) {
+        list.push({ show, type: AlertType.RegistrationNeeded, title: 'Registration needed', priority: AlertPriority.High });
+      }
+
+      if (show.shippingCutoff) {
+        const cutoff = parseISO(show.shippingCutoff);
+        if (isValid(cutoff)) {
+          const daysToCutoff = Math.ceil((cutoff.getTime() - now.getTime()) / 86400000);
+          if (daysToCutoff >= 0 && daysToCutoff <= 7) {
+            list.push({
+              show, type: AlertType.ShippingDeadline,
+              title: daysToCutoff === 0 ? 'Shipping deadline today!' : `Shipping in ${daysToCutoff} days`,
+              priority: daysToCutoff <= 3 ? AlertPriority.High : AlertPriority.Medium,
+              daysUntilDeadline: daysToCutoff,
+            });
+          }
+        }
+      }
+
+      if (show.hotelConfirmed !== true && show.hotelName && start && start <= fourteenDaysOut) {
+        list.push({ show, type: AlertType.HotelNotConfirmed, title: 'Hotel not confirmed', priority: AlertPriority.Medium });
+      }
+
+      if ((!show.boothToShip || show.boothToShip === '[]') && start && start <= twentyOneDaysOut) {
+        list.push({ show, type: AlertType.NoBoothSelected, title: 'No booth selected', priority: AlertPriority.Low });
+      }
+    }
+
+    return list.sort((a, b) => b.priority - a.priority);
+  }, [upcomingShows, now]);
+
+  // Timeline months
+  const timelineMonths = useMemo(() =>
+    [0, 1, 2].map(i => addMonths(now, i)),
+  [now]);
+
+  const alertIcon = (type: AlertType) => {
+    switch (type) {
+      case AlertType.RegistrationNeeded: return <UserPlus size={16} />;
+      case AlertType.ShippingDeadline: return <Package size={16} />;
+      case AlertType.HotelNotConfirmed: return <Building2 size={16} />;
+      case AlertType.NoBoothSelected: return <SquareDashed size={16} />;
+    }
+  };
+
+  const alertColor = (type: AlertType, days?: number) => {
+    switch (type) {
+      case AlertType.RegistrationNeeded: return '#CF222E';
+      case AlertType.ShippingDeadline: return (days !== undefined && days <= 3) ? '#CF222E' : '#BF8700';
+      case AlertType.HotelNotConfirmed: return '#BF8700';
+      case AlertType.NoBoothSelected: return '#656D76';
+    }
+  };
+
+  return (
+    <div className="p-4 sm:p-6 space-y-6 max-w-[1400px]">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-text-primary tracking-tight">Dashboard</h1>
+          <p className="text-sm text-text-secondary mt-1">{format(now, 'EEEE, MMMM d, yyyy')}</p>
+        </div>
+        <button onClick={() => loadShows()} className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-purple to-brand-purple-dark text-white text-sm font-medium hover:shadow-lg hover:shadow-brand-purple/25 transition-all duration-200 hover:-translate-y-0.5">
+          Refresh
+        </button>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+        <StatCard title="Total Shows" value={`${shows.length}`} subtitle="All time" icon={Calendar} color="#A62B9F" />
+        <StatCard title="Upcoming" value={`${upcomingShows.length}`} subtitle={`${showsNext30.length} in next 30 days`} icon={Clock} color="#59C8FA" />
+        <StatCard title="This Month" value={`${showsThisMonth.length}`} subtitle={format(now, 'MMMM')} icon={CalendarDays} color="#1A7F37" />
+        <StatCard title="Total Budget" value={formatCurrency(totalBudget)} subtitle={`${formatCurrency(upcomingBudget)} upcoming`} icon={DollarSign} color="#BF8700" />
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Left column */}
+        <div className="flex-1 space-y-6 min-w-0">
+          {/* Alerts */}
+          <div className="bg-surface rounded-2xl border border-border-subtle shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle size={16} className="text-warning" />
+              <h2 className="text-sm font-semibold text-text-primary">Needs Attention</h2>
+              {alerts.length > 0 && (
+                <span className="ml-auto px-2 py-0.5 rounded-full bg-error text-white text-[10px] font-medium">{alerts.length}</span>
+              )}
+            </div>
+            {alerts.length === 0 ? (
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-success-bg">
+                <CheckCircle size={24} className="text-success" />
+                <div>
+                  <p className="text-sm font-medium text-text-primary">All caught up!</p>
+                  <p className="text-xs text-text-secondary">No urgent items need your attention</p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                {alerts.slice(0, 5).map((alert, i) => (
+                  <button key={i} onClick={() => selectShow(alert.show)} className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-bg-tertiary transition-colors text-left">
+                    <div className="p-1.5 rounded" style={{ backgroundColor: `${alertColor(alert.type, alert.daysUntilDeadline)}1A`, color: alertColor(alert.type, alert.daysUntilDeadline) }}>
+                      {alertIcon(alert.type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-text-primary truncate">{alert.show.name}</p>
+                      <p className="text-xs" style={{ color: alertColor(alert.type, alert.daysUntilDeadline) }}>{alert.title}</p>
+                    </div>
+                    <ChevronRight size={14} className="text-border-strong" />
+                  </button>
+                ))}
+                {alerts.length > 5 && <p className="text-xs text-text-secondary text-center pt-1">+{alerts.length - 5} more items</p>}
+              </div>
+            )}
+          </div>
+
+          {/* Upcoming shows */}
+          <div className="bg-surface rounded-2xl border border-border-subtle shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+            <div className="flex items-center gap-2 mb-3">
+              <CalendarClock size={16} className="text-brand-purple" />
+              <h2 className="text-sm font-semibold text-text-primary">Upcoming Shows</h2>
+            </div>
+            {upcomingShows.length === 0 ? (
+              <div className="text-center py-8">
+                <CalendarPlus size={32} className="mx-auto text-border-strong mb-2" />
+                <p className="text-sm text-text-secondary">No upcoming shows</p>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {upcomingShows.slice(0, 5).map(show => {
+                  const days = daysUntilShow(show);
+                  return (
+                    <button key={show.id} onClick={() => selectShow(show)} className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-bg-tertiary transition-colors text-left">
+                      <div className="w-12 h-12 flex flex-col items-center justify-center rounded-lg bg-brand-purple/10">
+                        <span className="text-[10px] font-bold text-brand-purple">{getMonthAbbrev(show.startDate)}</span>
+                        <span className="text-lg font-bold text-text-primary leading-none">{getDayNumber(show.startDate)}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-text-primary truncate">{show.name}</p>
+                        {show.location && <p className="text-xs text-text-secondary truncate">{show.location}</p>}
+                      </div>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded ${days !== null && days <= 7 ? 'bg-error-bg text-error' : 'bg-bg-tertiary text-text-secondary'}`}>
+                        {days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days}d`}
+                      </span>
+                      <ChevronRight size={14} className="text-border-strong" />
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right column */}
+        <div className="w-full lg:w-80 space-y-6">
+          {/* Timeline */}
+          <div className="bg-surface rounded-2xl border border-border-subtle shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+            <div className="flex items-center gap-2 mb-3">
+              <BarChart3 size={16} className="text-brand-cyan" />
+              <h2 className="text-sm font-semibold text-text-primary">Next 90 Days</h2>
+            </div>
+            <div className="space-y-3">
+              {timelineMonths.map(month => {
+                const monthShows = upcomingShows.filter(s => {
+                  if (!s.startDate) return false;
+                  const d = parseISO(s.startDate);
+                  return isValid(d) && isSameMonth(d, month);
+                });
+                return (
+                  <div key={month.toISOString()} className="flex items-center gap-3">
+                    <span className="text-xs text-text-secondary w-8">{format(month, 'MMM')}</span>
+                    <div className="flex-1">
+                      {monthShows.length === 0 ? (
+                        <div className="h-2 rounded-sm bg-border-subtle" />
+                      ) : (
+                        <div className="flex gap-1">
+                          {monthShows.slice(0, 5).map(s => (
+                            <div key={s.id} className="h-2 flex-1 rounded-sm bg-brand-purple" />
+                          ))}
+                          {monthShows.length > 5 && <span className="text-[9px] text-text-secondary">+{monthShows.length - 5}</span>}
+                        </div>
+                      )}
+                    </div>
+                    <span className={`text-xs w-5 text-right ${monthShows.length > 0 ? 'text-brand-purple font-medium' : 'text-border-strong'}`}>{monthShows.length}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="bg-surface rounded-2xl border border-border-subtle shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+            <div className="flex items-center gap-2 mb-3">
+              <Zap size={16} className="text-warning" />
+              <h2 className="text-sm font-semibold text-text-primary">Quick Actions</h2>
+            </div>
+            <div className="space-y-1">
+              {[
+                { title: 'New Trade Show', icon: Plus, color: '#A62B9F', action: createNewShow },
+                { title: 'View Calendar', icon: Calendar, color: '#59C8FA', action: () => onViewModeChange(ViewMode.Calendar) },
+                { title: 'Budget Reports', icon: BarChart3, color: '#BF8700', action: () => onViewModeChange(ViewMode.Budget) },
+              ].map(item => (
+                <button key={item.title} onClick={item.action} className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-bg-tertiary transition-colors">
+                  <div className="p-1.5 rounded" style={{ backgroundColor: `${item.color}1A`, color: item.color }}>
+                    <item.icon size={16} />
+                  </div>
+                  <span className="text-sm font-medium text-text-primary">{item.title}</span>
+                  <ChevronRight size={14} className="ml-auto text-border-strong" />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Shipping Timeline */}
+      <div className="bg-surface rounded-2xl border border-border-subtle shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+        <div className="flex items-center gap-2 mb-3">
+          <Truck size={16} className="text-brand-cyan" />
+          <h2 className="text-sm font-semibold text-text-primary">Shipping Timeline</h2>
+        </div>
+        <ShippingTimeline shows={shows} onSelectShow={selectShow} daysToShow={45} />
+      </div>
+    </div>
+  );
+}

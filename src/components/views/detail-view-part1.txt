@@ -1,0 +1,23 @@
+﻿'use client';
+
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useTradeShowStore } from '@/store/trade-show-store';
+import { useToastStore } from '@/store/toast-store';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Toggle } from '@/components/ui/toggle';
+import { DatePicker } from '@/components/ui/date-picker';
+import { FormSection } from '@/components/ui/form-section';
+import { StatusBadge } from '@/components/ui/badge';
+import { formatCurrency } from '@/lib/utils';
+import { totalEstimatedCost, totalServicesCost, estimatedHotelCost, roiPercentage, parseJsonStringArray } from '@/types/computed';
+import { BOOTH_OPTIONS, GRAPHICS_OPTIONS, PACKING_LIST_OPTIONS, TABLECLOTH_OPTIONS, SHOW_STATUSES } from '@/lib/constants';
+import {
+  ArrowLeft, Save, Trash2, Copy, Info, Truck, Hotel,
+  Users, Award, FileText, BarChart3, Plus, X, Package,
+  Ticket, DollarSign,
+} from 'lucide-react';

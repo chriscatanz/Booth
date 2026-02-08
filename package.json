@@ -1,20 +1,38 @@
 {
-  "name": "trade-show-manager-web",
+  "name": "booth",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.95.3",
+    "@tauri-apps/api": "^2.10.1",
+    "@tiptap/extension-placeholder": "^3.19.0",
+    "@tiptap/extension-underline": "^3.19.0",
+    "@tiptap/react": "^3.19.0",
+    "@tiptap/starter-kit": "^3.19.0",
+    "@types/leaflet": "^1.9.21",
+    "date-fns": "^4.1.0",
+    "framer-motion": "^12.33.0",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.563.0",
     "next": "16.1.6",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-leaflet": "^5.0.0",
+    "recharts": "^3.7.0",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@tauri-apps/cli": "^2.10.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

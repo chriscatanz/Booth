@@ -1,0 +1,28 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradient4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  
+  <g transform="translate(35, 35)">
+    <!-- 2x2 Calendar/Grid -->
+    <!-- Top left -->
+    <rect x="0" y="0" width="55" height="55" rx="8" fill="url(#gradient4)" opacity="0.4"/>
+    <!-- Top right -->
+    <rect x="65" y="0" width="55" height="55" rx="8" fill="url(#gradient4)" opacity="0.6"/>
+    <!-- Bottom left -->
+    <rect x="0" y="65" width="55" height="55" rx="8" fill="url(#gradient4)" opacity="0.8"/>
+    <!-- Bottom right - highlighted with check -->
+    <rect x="65" y="65" width="55" height="55" rx="8" fill="#22d3ee"/>
+    
+    <!-- Checkmark -->
+    <path d="M 78,95 L 88,105 L 108,80" 
+          fill="none" 
+          stroke="white" 
+          stroke-width="6" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+  </g>
+</svg>

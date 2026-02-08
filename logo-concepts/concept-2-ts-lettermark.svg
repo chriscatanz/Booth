@@ -1,0 +1,27 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  
+  <g transform="translate(100, 100)">
+    <!-- T shape -->
+    <rect x="-70" y="-60" width="90" height="20" rx="4" fill="url(#gradient2)"/>
+    <rect x="-40" y="-60" width="20" height="120" rx="4" fill="url(#gradient2)"/>
+    
+    <!-- S shape (simplified) -->
+    <path d="M 10,-40 
+             Q 60,-40 60,-10 
+             Q 60,20 10,20 
+             Q -20,20 -20,50 
+             Q -20,70 30,70
+             L 60,70" 
+          fill="none" 
+          stroke="#22d3ee" 
+          stroke-width="18" 
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+  </g>
+</svg>
