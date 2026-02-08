@@ -15,11 +15,12 @@ export function AuthPage() {
   const returnTo = searchParams.get('returnTo');
   
   // Skip landing page if coming from invite flow or has pending invite
+  // Default to signup since most invited users are new
   const getInitialView = (): AuthView => {
     if (typeof window !== 'undefined') {
       const hasPendingInvite = sessionStorage.getItem('pending_invite_token');
       if (returnTo === 'invite' || hasPendingInvite) {
-        return 'login';
+        return 'signup';
       }
     }
     return 'landing';
