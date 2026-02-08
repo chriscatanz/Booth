@@ -10,7 +10,7 @@ export const pageVariants: Variants = {
 };
 
 export const pageTransition = {
-  type: 'spring',
+  type: 'spring' as const,
   stiffness: 380,
   damping: 30,
 };
@@ -74,7 +74,7 @@ export const cardHover = {
   hover: { 
     scale: 1.02, 
     boxShadow: '0 10px 40px rgba(0,0,0,0.12)',
-    transition: { type: 'spring', stiffness: 400, damping: 25 }
+    transition: { type: 'spring' as const, stiffness: 400, damping: 25 }
   },
   tap: { scale: 0.98 },
 };
@@ -91,7 +91,7 @@ export const accordion: Variants = {
 
 // Stat counter animation config
 export const counterSpring = {
-  type: 'spring',
+  type: 'spring' as const,
   stiffness: 100,
   damping: 15,
 };
