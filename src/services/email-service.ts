@@ -26,10 +26,23 @@ interface InviteEmailData {
 
 // Get base URL for invite links
 function getBaseUrl(): string {
+  // Client-side: use window.location
   if (typeof window !== 'undefined') {
     return window.location.origin;
   }
-  return process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  
+  // Server-side: check env vars in order of preference
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+  
+  // Vercel provides VERCEL_URL for deployments
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  
+  // Fallback for local development
+  return 'http://localhost:3000';
 }
 
 // Email templates
