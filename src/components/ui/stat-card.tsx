@@ -25,7 +25,6 @@ function AnimatedValue({ value, delay = 0 }: { value: string; delay?: number }) 
   const spring = useSpring(0, { 
     stiffness: 75, 
     damping: 15,
-    delay: delay * 1000 
   });
   
   const display = useTransform(spring, (current) => {
@@ -38,9 +37,13 @@ function AnimatedValue({ value, delay = 0 }: { value: string; delay?: number }) 
 
   useEffect(() => {
     if (isNumeric) {
-      spring.set(numericValue);
+      // Use timeout to handle delay since useSpring doesn't support it
+      const timeout = setTimeout(() => {
+        spring.set(numericValue);
+      }, delay * 1000);
+      return () => clearTimeout(timeout);
     }
-  }, [numericValue, spring, isNumeric]);
+  }, [numericValue, spring, isNumeric, delay]);
 
   if (!isNumeric) {
     return <span>{value}</span>;
