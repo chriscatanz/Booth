@@ -174,7 +174,43 @@ export default function DetailView() {
               placeholder="Select status"
             />
             <Input label="Management Company" value={show.managementCompany ?? ''} onChange={e => updateSelectedShow({ managementCompany: e.target.value || null })} />
+            <Select
+              label="Event Type"
+              value={show.eventType ?? 'in_person'}
+              onChange={e => updateSelectedShow({ eventType: e.target.value as 'in_person' | 'virtual' | 'hybrid' })}
+              options={[
+                { value: 'in_person', label: 'In-Person' },
+                { value: 'virtual', label: 'Virtual' },
+                { value: 'hybrid', label: 'Hybrid' },
+              ]}
+            />
           </div>
+          
+          {/* Virtual Event Fields - shown for virtual/hybrid */}
+          {(show.eventType === 'virtual' || show.eventType === 'hybrid') && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 p-3 rounded-lg bg-brand-cyan/5 border border-brand-cyan/20">
+              <Input 
+                label="Virtual Platform" 
+                value={show.virtualPlatform ?? ''} 
+                onChange={e => updateSelectedShow({ virtualPlatform: e.target.value || null })} 
+                placeholder="e.g., Zoom, Hopin, ON24"
+              />
+              <Input 
+                label="Platform URL" 
+                value={show.virtualPlatformUrl ?? ''} 
+                onChange={e => updateSelectedShow({ virtualPlatformUrl: e.target.value || null })} 
+                placeholder="https://..."
+              />
+              <Input 
+                label="Virtual Booth URL" 
+                value={show.virtualBoothUrl ?? ''} 
+                onChange={e => updateSelectedShow({ virtualBoothUrl: e.target.value || null })} 
+                placeholder="Your exhibitor/booth page URL"
+                className="sm:col-span-2"
+              />
+            </div>
+          )}
+          
           <RichTextEditor label="General Notes" value={show.generalNotes} onChange={v => updateSelectedShow({ generalNotes: v || null })} placeholder="Notes about this show..." />
         </FormSection>
 

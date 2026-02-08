@@ -15,6 +15,12 @@ export interface TradeShow {
   totalLeads: number | null;
   managementCompany: string | null;
 
+  // Event Type (in-person, virtual, hybrid)
+  eventType: 'in_person' | 'virtual' | 'hybrid' | null;
+  virtualPlatform: string | null;
+  virtualPlatformUrl: string | null;
+  virtualBoothUrl: string | null;
+
   // Registration
   registrationConfirmed: boolean | null;
   attendeeListReceived: boolean | null;

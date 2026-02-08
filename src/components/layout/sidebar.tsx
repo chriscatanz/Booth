@@ -279,15 +279,25 @@ export function Sidebar({ viewMode, onViewModeChange, onCloseMobile, isMobile }:
                     )}>
                       {show.name}
                     </p>
-                    {days !== null && days >= 0 && days <= 30 && (
-                      <motion.span 
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="text-[10px] font-medium text-brand-cyan shrink-0 px-1.5 py-0.5 bg-brand-cyan/20 rounded-full"
-                      >
-                        {days === 0 ? 'Today' : `${days}d`}
-                      </motion.span>
-                    )}
+                    <div className="flex items-center gap-1 shrink-0">
+                      {show.eventType && show.eventType !== 'in_person' && (
+                        <span className={cn(
+                          'text-[9px] font-medium px-1.5 py-0.5 rounded-full',
+                          show.eventType === 'virtual' ? 'bg-brand-purple/30 text-brand-purple' : 'bg-warning/30 text-warning'
+                        )}>
+                          {show.eventType === 'virtual' ? 'Virtual' : 'Hybrid'}
+                        </span>
+                      )}
+                      {days !== null && days >= 0 && days <= 30 && (
+                        <motion.span 
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="text-[10px] font-medium text-brand-cyan px-1.5 py-0.5 bg-brand-cyan/20 rounded-full"
+                        >
+                          {days === 0 ? 'Today' : `${days}d`}
+                        </motion.span>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-2 mt-1">
                     {show.location && (
