@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LoginForm } from './login-form';
 import { SignUpForm } from './signup-form';
@@ -10,7 +11,21 @@ import { LandingPage } from '@/components/marketing/landing-page';
 type AuthView = 'landing' | 'login' | 'signup' | 'forgot-password';
 
 export function AuthPage() {
-  const [view, setView] = useState<AuthView>('landing');
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get('returnTo');
+  
+  // Skip landing page if coming from invite flow or has pending invite
+  const getInitialView = (): AuthView => {
+    if (typeof window !== 'undefined') {
+      const hasPendingInvite = sessionStorage.getItem('pending_invite_token');
+      if (returnTo === 'invite' || hasPendingInvite) {
+        return 'login';
+      }
+    }
+    return 'landing';
+  };
+  
+  const [view, setView] = useState<AuthView>(getInitialView);
 
   // Show landing page first
   if (view === 'landing') {
