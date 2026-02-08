@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, ReactNode } from 'react';
+import React, { useEffect, useState, useRef, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
 import { AuthPage } from './auth-page';
@@ -23,22 +23,33 @@ export function AuthGuard({ children }: AuthGuardProps) {
   } = useAuthStore();
   
   const [isRedirectingToInvite, setIsRedirectingToInvite] = useState(false);
+  const [pendingInviteToken, setPendingInviteToken] = useState<string | null>(null);
+  const hasCheckedInvite = useRef(false);
 
   useEffect(() => {
     initialize();
   }, [initialize]);
 
-  // After auth, check for pending invite token
+  // Check for pending invite token on mount
   useEffect(() => {
-    if (isAuthenticated && user && typeof window !== 'undefined' && !isRedirectingToInvite) {
-      const pendingToken = sessionStorage.getItem('pending_invite_token');
-      if (pendingToken) {
-        setIsRedirectingToInvite(true);
-        sessionStorage.removeItem('pending_invite_token');
-        router.push(`/invite?token=${pendingToken}`);
+    if (typeof window !== 'undefined' && !hasCheckedInvite.current) {
+      hasCheckedInvite.current = true;
+      const token = sessionStorage.getItem('pending_invite_token');
+      if (token) {
+        setPendingInviteToken(token);
       }
     }
-  }, [isAuthenticated, user, router, isRedirectingToInvite]);
+  }, []);
+
+  // After auth, redirect to invite if we have a pending token
+  useEffect(() => {
+    if (isAuthenticated && user && pendingInviteToken && !isRedirectingToInvite) {
+      setIsRedirectingToInvite(true);
+      // Clear the token from storage now that we're redirecting
+      sessionStorage.removeItem('pending_invite_token');
+      router.push(`/invite?token=${pendingInviteToken}`);
+    }
+  }, [isAuthenticated, user, pendingInviteToken, router, isRedirectingToInvite]);
 
   // Show loading while checking auth or redirecting to invite
   if (isLoading || isRedirectingToInvite) {
@@ -57,9 +68,8 @@ export function AuthGuard({ children }: AuthGuardProps) {
   // Authenticated but no organization - show setup
   // Skip this if user has a pending invite (they'll join via invite)
   if (organizations.length === 0) {
-    const hasPendingInvite = typeof window !== 'undefined' && 
-      sessionStorage.getItem('pending_invite_token');
-    if (!hasPendingInvite) {
+    // Check both state and sessionStorage for pending invite
+    if (!pendingInviteToken) {
       return <OrganizationSetup />;
     }
     // Has pending invite - show loading until redirect happens
