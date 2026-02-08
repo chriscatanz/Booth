@@ -47,7 +47,7 @@ function mapMembership(row: Record<string, unknown>): OrganizationMember {
     invitedAt: row.invited_at as string,
     joinedAt: row.joined_at as string | null,
     organization: row.organizations ? mapOrganization(row.organizations as Record<string, unknown>) : undefined,
-    user: row.user_profiles ? mapUserProfile(row.user_profiles as Record<string, unknown>) : undefined,
+    user: row.user ? mapUserProfile(row.user as Record<string, unknown>) : undefined,
   };
 }
 
@@ -200,7 +200,7 @@ export async function fetchOrganizationMembers(orgId: string): Promise<Organizat
     .from('organization_members')
     .select(`
       *,
-      user_profiles!organization_members_user_id_fkey (*)
+      user:user_profiles!user_id (*)
     `)
     .eq('organization_id', orgId)
     .order('role', { ascending: true });
