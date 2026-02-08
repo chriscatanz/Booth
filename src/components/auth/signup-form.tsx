@@ -30,9 +30,18 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }: SignUpFormProps) {
       return;
     }
 
-    const result = await signUp(email, password, fullName);
-    if (result) {
-      setSuccess(true);
+    console.log('[SignUp] Starting signup for:', email);
+    try {
+      const result = await signUp(email, password, fullName);
+      console.log('[SignUp] Result:', result);
+      if (result) {
+        console.log('[SignUp] Success! Setting success state');
+        setSuccess(true);
+      } else {
+        console.log('[SignUp] Result was falsy:', result);
+      }
+    } catch (err) {
+      console.error('[SignUp] Caught error:', err);
     }
   };
 
