@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   X, Building2, Users, Shield, Save, Upload,
-  Crown, AlertCircle, Check, Trash2, Settings, Clock, Download, List
+  Crown, AlertCircle, Check, Trash2, Settings, Clock, Download, List, Palette
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MembersModal } from '@/components/auth/members-modal';
@@ -16,12 +16,13 @@ import { AuditLog } from './audit-log';
 import { DataExport } from './data-export';
 import { DeleteAccountModal } from './delete-account-modal';
 import { CustomListsEditor } from './custom-lists-editor';
+import { BrandingEditor } from './branding-editor';
 
 interface OrgSettingsModalProps {
   onClose: () => void;
 }
 
-type SettingsTab = 'general' | 'members' | 'lists' | 'data' | 'audit' | 'danger';
+type SettingsTab = 'general' | 'branding' | 'members' | 'lists' | 'data' | 'audit' | 'danger';
 
 export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
   const { organization, user, isOwner, isAdmin, refreshOrganizations } = useAuthStore();
@@ -70,6 +71,7 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
 
   const tabs: { id: SettingsTab; label: string; icon: React.ReactNode; adminOnly?: boolean }[] = [
     { id: 'general', label: 'General', icon: <Building2 size={16} /> },
+    { id: 'branding', label: 'Branding', icon: <Palette size={16} />, adminOnly: true },
     { id: 'members', label: 'Members', icon: <Users size={16} /> },
     { id: 'lists', label: 'Custom Lists', icon: <List size={16} />, adminOnly: true },
     { id: 'data', label: 'Data Export', icon: <Download size={16} /> },
@@ -210,6 +212,17 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
                     </Button>
                   </div>
                 )}
+              </motion.div>
+            )}
+
+            {activeTab === 'branding' && isAdmin && (
+              <motion.div
+                key="branding"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+              >
+                <BrandingEditor />
               </motion.div>
             )}
 

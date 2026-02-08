@@ -51,6 +51,19 @@ export function AppShell() {
   const { user, organization } = useAuthStore();
   const [showOnboarding, setShowOnboarding] = useState(false);
   
+  // Apply brand color as CSS variable
+  const brandColor = organization?.brandColor || '#9333ea';
+  
+  useEffect(() => {
+    document.documentElement.style.setProperty('--brand-color', brandColor);
+    // Also set RGB values for transparency variants
+    const hex = brandColor.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    document.documentElement.style.setProperty('--brand-color-rgb', `${r}, ${g}, ${b}`);
+  }, [brandColor]);
+  
   // Check if user needs onboarding (first time)
   useEffect(() => {
     if (user && organization) {

@@ -17,6 +17,7 @@ function mapOrganization(row: Record<string, unknown>): Organization {
     plan: row.plan as Organization['plan'],
     planSeats: row.plan_seats as number,
     logoUrl: row.logo_url as string | null,
+    brandColor: row.brand_color as string | null,
     settings: (row.settings as Record<string, unknown>) ?? {},
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
@@ -186,6 +187,7 @@ export async function updateOrganization(orgId: string, updates: Partial<Organiz
     .update({
       name: updates.name,
       logo_url: updates.logoUrl,
+      brand_color: updates.brandColor,
       settings: updates.settings,
       updated_at: new Date().toISOString(),
     })

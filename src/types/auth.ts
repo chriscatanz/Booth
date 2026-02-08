@@ -7,6 +7,7 @@ export interface Organization {
   plan: 'free' | 'pro' | 'enterprise';
   planSeats: number;
   logoUrl: string | null;
+  brandColor: string | null;
   settings: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;

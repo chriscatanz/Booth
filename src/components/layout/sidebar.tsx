@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { TemplateModal } from '@/components/ui/template-modal';
 import { PermissionGate } from '@/components/auth/permission-gate';
+import { useAuthStore } from '@/store/auth-store';
 
 const VIEW_ICONS: Record<ViewMode, React.ElementType> = {
   [ViewMode.Dashboard]: LayoutDashboard,
@@ -48,6 +49,10 @@ export function Sidebar({ viewMode, onViewModeChange, onCloseMobile, isMobile }:
   const filteredShows = useFilteredShows();
   const locations = uniqueLocations();
   const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const { organization } = useAuthStore();
+  
+  // Brand color with fallback
+  const brandColor = organization?.brandColor || '#9333ea';
 
   const handleSelectShow = (show: typeof filteredShows[0]) => {
     selectShow(show);
@@ -65,9 +70,27 @@ export function Sidebar({ viewMode, onViewModeChange, onCloseMobile, isMobile }:
         transition={{ duration: 0.3 }}
         className="px-4 py-5 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-white/5 to-transparent"
       >
-        <div>
-          <h1 className="text-2xl font-black tracking-tight bg-gradient-to-r from-white to-brand-cyan bg-clip-text text-transparent">Booth</h1>
-          <p className="text-[10px] text-white/50 mt-0.5 font-medium uppercase tracking-widest">Trade Show HQ</p>
+        <div className="flex items-center gap-3">
+          {organization?.logoUrl ? (
+            <img 
+              src={organization.logoUrl} 
+              alt={organization.name || 'Logo'} 
+              className="w-10 h-10 rounded-lg object-contain bg-white/10"
+            />
+          ) : (
+            <div 
+              className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-lg"
+              style={{ backgroundColor: brandColor }}
+            >
+              {organization?.name?.[0]?.toUpperCase() || 'B'}
+            </div>
+          )}
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-white">
+              {organization?.name || 'Booth'}
+            </h1>
+            <p className="text-[10px] text-white/50 mt-0.5 font-medium uppercase tracking-widest">Trade Show HQ</p>
+          </div>
         </div>
         {isMobile && onCloseMobile && (
           <button 
