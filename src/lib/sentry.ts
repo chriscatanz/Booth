@@ -16,7 +16,8 @@ const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const SENTRY_ENABLED = !!SENTRY_DSN && IS_PRODUCTION;
 
 // Lazy-load Sentry only if configured
-let Sentry: typeof import('@sentry/nextjs') | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let Sentry: any = null;
 
 async function loadSentry() {
   if (!SENTRY_ENABLED) return null;
@@ -24,7 +25,7 @@ async function loadSentry() {
   try {
     Sentry = await import('@sentry/nextjs');
     return Sentry;
-  } catch (err) {
+  } catch {
     console.warn('Sentry not installed. Run: npm install @sentry/nextjs');
     return null;
   }
