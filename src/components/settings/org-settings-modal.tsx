@@ -355,7 +355,8 @@ function MembersContent() {
       setMembers(m);
       setInvitations(i);
     } catch (err) {
-      setError('Failed to load members');
+      console.error('Load members error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load members');
     }
     setIsLoading(false);
   }

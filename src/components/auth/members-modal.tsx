@@ -48,7 +48,8 @@ export function MembersModal({ onClose }: MembersModalProps) {
       setMembers(membersData);
       setInvitations(invitesData);
     } catch (err) {
-      setError('Failed to load members');
+      console.error('Load members error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load members');
     }
     
     setIsLoading(false);
