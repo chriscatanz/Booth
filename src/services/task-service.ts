@@ -5,12 +5,12 @@ import { Task, TaskComment, CreateTaskInput, UpdateTaskInput, TaskStatus } from 
 
 function mapTask(row: Record<string, unknown>): Task {
   const assignee = row.assignee as Record<string, unknown> | null;
-  const tradeShow = row.trade_shows as Record<string, unknown> | null;
+  const tradeShow = row.tradeshows as Record<string, unknown> | null;
   
   return {
     id: row.id as string,
     organizationId: row.organization_id as string,
-    tradeShowId: row.trade_show_id as number | null,
+    tradeShowId: row.tradeshow_id as number | null,
     title: row.title as string,
     description: row.description as string | null,
     status: row.status as Task['status'],
@@ -68,14 +68,14 @@ export async function fetchTasks(orgId: string, filters?: {
       assignee:user_profiles!tasks_assignee_id_fkey (
         id, full_name, email, avatar_url
       ),
-      trade_shows (id, name)
+      tradeshows (id, name)
     `)
     .eq('organization_id', orgId)
     .order('position', { ascending: true })
     .order('created_at', { ascending: false });
 
   if (filters?.tradeShowId) {
-    query = query.eq('trade_show_id', filters.tradeShowId);
+    query = query.eq('tradeshow_id', filters.tradeShowId);
   }
   if (filters?.assigneeId) {
     query = query.eq('assignee_id', filters.assigneeId);
@@ -98,7 +98,7 @@ export async function fetchTasksByShow(showId: number): Promise<Task[]> {
         id, full_name, email, avatar_url
       )
     `)
-    .eq('trade_show_id', showId)
+    .eq('tradeshow_id', showId)
     .order('position', { ascending: true })
     .order('created_at', { ascending: false });
 
@@ -127,7 +127,7 @@ export async function createTask(
     .from('tasks')
     .insert({
       organization_id: orgId,
-      trade_show_id: input.tradeShowId || null,
+      tradeshow_id: input.tradeShowId || null,
       title: input.title,
       description: input.description || null,
       priority: input.priority || 'medium',
@@ -141,7 +141,7 @@ export async function createTask(
       assignee:user_profiles!tasks_assignee_id_fkey (
         id, full_name, email, avatar_url
       ),
-      trade_shows (id, name)
+      tradeshows (id, name)
     `)
     .single();
 
@@ -176,7 +176,7 @@ export async function updateTask(taskId: string, input: UpdateTaskInput): Promis
       assignee:user_profiles!tasks_assignee_id_fkey (
         id, full_name, email, avatar_url
       ),
-      trade_shows (id, name)
+      tradeshows (id, name)
     `)
     .single();
 

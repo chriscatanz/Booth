@@ -24,12 +24,12 @@ function mapAsset(row: Record<string, unknown>): Asset {
 }
 
 function mapReservation(row: Record<string, unknown>): AssetReservation {
-  const tradeShow = row.trade_shows as Record<string, unknown> | null;
+  const tradeShow = row.tradeshows as Record<string, unknown> | null;
   
   return {
     id: row.id as string,
     assetId: row.asset_id as string,
-    tradeShowId: row.trade_show_id as number,
+    tradeShowId: row.tradeshow_id as number,
     quantityReserved: row.quantity_reserved as number,
     status: row.status as ReservationStatus,
     notes: row.notes as string | null,
@@ -72,7 +72,7 @@ export async function fetchAssetWithReservations(assetId: string): Promise<Asset
     .from('asset_reservations')
     .select(`
       *,
-      trade_shows (id, name, start_date, end_date)
+      tradeshows (id, name, start_date, end_date)
     `)
     .eq('asset_id', assetId)
     .order('reserved_at', { ascending: false });
@@ -161,7 +161,7 @@ export async function fetchShowReservations(showId: string): Promise<AssetReserv
       *,
       assets (*)
     `)
-    .eq('trade_show_id', showId);
+    .eq('tradeshow_id', showId);
 
   if (error) throw new Error(error.message);
   
@@ -182,14 +182,14 @@ export async function createReservation(
     .from('asset_reservations')
     .insert({
       asset_id: assetId,
-      trade_show_id: showId,
+      tradeshow_id: showId,
       quantity_reserved: quantity,
       reserved_by: userId,
       notes: notes || null,
     })
     .select(`
       *,
-      trade_shows (id, name, start_date, end_date)
+      tradeshows (id, name, start_date, end_date)
     `)
     .single();
 
@@ -207,7 +207,7 @@ export async function updateReservationStatus(
     .eq('id', reservationId)
     .select(`
       *,
-      trade_shows (id, name, start_date, end_date)
+      tradeshows (id, name, start_date, end_date)
     `)
     .single();
 

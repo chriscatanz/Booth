@@ -5,14 +5,14 @@ import { ActivityItem, ActivityReaction, ActivityComment, ActivityType } from '@
 
 function mapActivity(row: Record<string, unknown>): ActivityItem {
   const actor = row.actor as Record<string, unknown> | null;
-  const tradeShow = row.trade_shows as Record<string, unknown> | null;
+  const tradeShow = row.tradeshows as Record<string, unknown> | null;
   
   return {
     id: row.id as string,
     organizationId: row.organization_id as string,
     type: row.type as ActivityType,
     actorId: row.actor_id as string | null,
-    tradeShowId: row.trade_show_id as number | null,
+    tradeShowId: row.tradeshow_id as number | null,
     taskId: row.task_id as string | null,
     assetId: row.asset_id as string | null,
     title: row.title as string,
@@ -83,13 +83,13 @@ export async function fetchActivityFeed(
       actor:user_profiles!activity_feed_actor_id_fkey (
         id, full_name, email, avatar_url
       ),
-      trade_shows (id, name)
+      tradeshows (id, name)
     `)
     .eq('organization_id', orgId)
     .order('created_at', { ascending: false });
 
   if (options?.showId) {
-    query = query.eq('trade_show_id', options.showId);
+    query = query.eq('tradeshow_id', options.showId);
   }
 
   if (options?.limit) {
@@ -126,7 +126,7 @@ export async function createActivity(
       type,
       title,
       description: options?.description || null,
-      trade_show_id: options?.showId || null,
+      tradeshow_id: options?.showId || null,
       task_id: options?.taskId || null,
       asset_id: options?.assetId || null,
       metadata: options?.metadata || {},
@@ -136,7 +136,7 @@ export async function createActivity(
       actor:user_profiles!activity_feed_actor_id_fkey (
         id, full_name, email, avatar_url
       ),
-      trade_shows (id, name)
+      tradeshows (id, name)
     `)
     .single();
 

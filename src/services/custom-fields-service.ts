@@ -27,7 +27,7 @@ function mapFieldValue(row: Record<string, unknown>): CustomFieldValue {
   return {
     id: row.id as string,
     fieldId: row.field_id as string,
-    tradeShowId: row.trade_show_id as number,
+    tradeShowId: row.tradeshow_id as number,
     value: row.value as string | null,
     updatedAt: row.updated_at as string,
     field: field ? mapFieldDefinition(field) : undefined,
@@ -129,7 +129,7 @@ export async function fetchFieldValues(showId: string): Promise<CustomFieldValue
       *,
       custom_field_definitions (*)
     `)
-    .eq('trade_show_id', showId);
+    .eq('tradeshow_id', showId);
 
   if (error) throw new Error(error.message);
   return (data || []).map(mapFieldValue);
@@ -162,10 +162,10 @@ export async function setFieldValue(
     .from('custom_field_values')
     .upsert({
       field_id: fieldId,
-      trade_show_id: showId,
+      tradeshow_id: showId,
       value,
     }, {
-      onConflict: 'field_id,trade_show_id',
+      onConflict: 'field_id,tradeshow_id',
     })
     .select(`
       *,
@@ -183,14 +183,14 @@ export async function setFieldValues(
 ): Promise<void> {
   const upserts = values.map(v => ({
     field_id: v.fieldId,
-    trade_show_id: showId,
+    tradeshow_id: showId,
     value: v.value,
   }));
 
   const { error } = await supabase
     .from('custom_field_values')
     .upsert(upserts, {
-      onConflict: 'field_id,trade_show_id',
+      onConflict: 'field_id,tradeshow_id',
     });
 
   if (error) throw new Error(error.message);
@@ -201,7 +201,7 @@ export async function deleteFieldValue(fieldId: string, showId: string): Promise
     .from('custom_field_values')
     .delete()
     .eq('field_id', fieldId)
-    .eq('trade_show_id', showId);
+    .eq('tradeshow_id', showId);
 
   if (error) throw new Error(error.message);
 }
