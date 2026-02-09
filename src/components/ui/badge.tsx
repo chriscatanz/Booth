@@ -44,7 +44,7 @@ export function Badge({ children, color, className, animated = true }: BadgeProp
 }
 
 // Status-specific badge with pulse animation for active
-export function StatusBadge({ status }: { status: string | null }) {
+export function StatusBadge({ status, size = 'sm' }: { status: string | null; size?: 'sm' | 'lg' }) {
   const colors: Record<string, string> = {
     Planning: '#8250DF',
     Logistics: '#BF8700',
@@ -56,18 +56,22 @@ export function StatusBadge({ status }: { status: string | null }) {
   const color = status ? colors[status] ?? '#656D76' : '#656D76';
   const isActive = status === 'Active';
   
+  const sizeClasses = size === 'lg' 
+    ? 'px-3 py-1 text-sm gap-2' 
+    : 'px-2 py-0.5 text-xs gap-1.5';
+  
   return (
     <motion.span
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       whileHover={{ scale: 1.05 }}
       transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-      className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium"
+      className={`inline-flex items-center rounded-full font-medium ${sizeClasses}`}
       style={{ backgroundColor: `${color}1A`, color }}
     >
       {isActive && (
         <motion.span
-          className="w-1.5 h-1.5 rounded-full"
+          className={size === 'lg' ? 'w-2 h-2 rounded-full' : 'w-1.5 h-1.5 rounded-full'}
           style={{ backgroundColor: color }}
           animate={{ 
             scale: [1, 1.3, 1],
