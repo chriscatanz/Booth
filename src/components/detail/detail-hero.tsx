@@ -155,7 +155,7 @@ export function DetailHero({ show, onStatusChange, canEdit }: DetailHeroProps) {
             )}
 
             {/* Attendees */}
-            {show.totalAttending > 0 && (
+            {(show.totalAttending ?? 0) > 0 && (
               <div className="bg-bg-tertiary/50 rounded-xl px-4 py-3 min-w-[120px]">
                 <div className="flex items-center gap-2 text-text-tertiary text-xs mb-1">
                   <Users size={12} />
