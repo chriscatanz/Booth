@@ -228,11 +228,20 @@ export const useAuthStore = create<AuthState>()(
       },
 
       refreshOrganizations: async () => {
-        const { user } = get();
+        const { user, organization } = get();
         if (!user) return;
 
         const orgs = await authService.fetchUserOrganizations(user.id);
-        set({ organizations: orgs });
+        
+        // Also update the current organization if it exists
+        const updatedCurrentOrg = organization 
+          ? orgs.find(m => m.organizationId === organization.id)?.organization
+          : null;
+        
+        set({ 
+          organizations: orgs,
+          organization: updatedCurrentOrg ?? organization,
+        });
       },
 
       setError: (error: string | null) => set({ error }),
