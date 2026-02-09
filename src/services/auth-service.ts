@@ -122,8 +122,9 @@ export async function getCurrentUser() {
 // ─── Profile Methods ─────────────────────────────────────────────────────────
 
 export async function fetchUserProfile(userId: string): Promise<UserProfile | null> {
+  // Use decrypting view for reads
   const { data, error } = await supabase
-    .from('user_profiles')
+    .from('v_user_profiles')
     .select('*')
     .eq('id', userId)
     .single();
@@ -233,8 +234,9 @@ export async function removeMember(memberId: string): Promise<void> {
 // ─── Invitation Methods ──────────────────────────────────────────────────────
 
 export async function fetchInvitations(orgId: string): Promise<Invitation[]> {
+  // Use decrypting view for reads
   const { data, error } = await supabase
-    .from('invitations')
+    .from('v_invitations')
     .select('*')
     .eq('organization_id', orgId)
     .is('accepted_at', null)

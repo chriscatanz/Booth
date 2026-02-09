@@ -293,8 +293,9 @@ export async function deleteTradeShow(id: number): Promise<void> {
 }
 
 export async function fetchAttendees(tradeshowId: number): Promise<Attendee[]> {
+  // Use decrypting view for reads
   const { data, error } = await supabase
-    .from('attendees')
+    .from('v_attendees')
     .select('*')
     .eq('tradeshow_id', tradeshowId);
   if (error) throw new Error(error.message);
@@ -306,16 +307,27 @@ export async function fetchAllAttendees(): Promise<Attendee[]> {
   
   // If org context available, only fetch attendees for shows in this org
   if (orgId) {
+    // First get tradeshow IDs for this org
+    const { data: shows, error: showsError } = await supabase
+      .from('tradeshows')
+      .select('id')
+      .eq('organization_id', orgId);
+    if (showsError) throw new Error(showsError.message);
+    
+    const showIds = (shows || []).map(s => s.id);
+    if (showIds.length === 0) return [];
+    
+    // Then fetch attendees using decrypting view
     const { data, error } = await supabase
-      .from('attendees')
-      .select('*, tradeshows!inner(organization_id)')
-      .eq('tradeshows.organization_id', orgId);
+      .from('v_attendees')
+      .select('*')
+      .in('tradeshow_id', showIds);
     if (error) throw new Error(error.message);
     return (data || []).map(mapAttendeeFromDB);
   }
   
-  // Fallback: fetch all (single-tenant mode)
-  const { data, error } = await supabase.from('attendees').select('*');
+  // Fallback: fetch all (single-tenant mode) using decrypting view
+  const { data, error } = await supabase.from('v_attendees').select('*');
   if (error) throw new Error(error.message);
   return (data || []).map(mapAttendeeFromDB);
 }
