@@ -325,10 +325,6 @@ function TaskCard({ task, onEdit, onDelete, isEditor }: TaskCardProps) {
   
   const isOverdue = task.dueDate && task.status !== 'done' && isPast(parseISO(task.dueDate));
 
-  const handleDragStart = (e: React.DragEvent) => {
-    e.dataTransfer.setData('taskId', task.id);
-  };
-
   return (
     <motion.div
       layout
@@ -336,7 +332,10 @@ function TaskCard({ task, onEdit, onDelete, isEditor }: TaskCardProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       draggable={isEditor}
-      onDragStart={handleDragStart}
+      onDragStart={(e) => {
+        const event = e as unknown as React.DragEvent;
+        event.dataTransfer?.setData('taskId', task.id);
+      }}
       className={cn(
         'p-3 rounded-lg bg-surface border border-border cursor-pointer hover:border-brand-purple/50 transition-colors',
         isEditor && 'cursor-grab active:cursor-grabbing'
