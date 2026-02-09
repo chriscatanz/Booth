@@ -7,6 +7,7 @@ import { useSettingsStore } from '@/store/settings-store';
 import { useAuthStore } from '@/store/auth-store';
 import { Moon, Sun, RefreshCw, Settings, Download, Menu } from 'lucide-react';
 import { UserMenu } from '@/components/auth/user-menu';
+import { NotificationCenter } from '@/components/notifications/notification-center';
 
 interface ToolbarProps {
   onExport?: () => void;
@@ -79,9 +80,10 @@ export function Toolbar({ onExport, onMenuToggle, showMenuButton, onOpenOrgSetti
         <Settings size={16} />
       </button>
 
-      {/* User Menu */}
+      {/* Notifications & User Menu */}
       {isAuthenticated && (
-        <div className="ml-2 pl-2 border-l border-border">
+        <div className="ml-2 pl-2 border-l border-border flex items-center gap-1">
+          <NotificationCenter />
           <UserMenu 
             onOpenSettings={() => setShowSettings(true)} 
             onOpenOrgSettings={onOpenOrgSettings}

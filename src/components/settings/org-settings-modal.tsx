@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   X, Building2, Users, Shield, Save, Upload,
-  Crown, AlertCircle, Check, Trash2, Settings, Clock, Download, List, Palette, Columns, Eye
+  Crown, AlertCircle, Check, Trash2, Settings, Clock, Download, List, Palette, Columns, Eye, Bell
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MembersModal } from '@/components/auth/members-modal';
@@ -19,12 +19,13 @@ import { CustomListsEditor } from './custom-lists-editor';
 import { CustomFieldsEditor } from './custom-fields-editor';
 import { BrandingEditor } from './branding-editor';
 import { RolePermissionsEditor } from './role-permissions-editor';
+import { NotificationPreferences } from '@/components/notifications/notification-preferences';
 
 interface OrgSettingsModalProps {
   onClose: () => void;
 }
 
-type SettingsTab = 'general' | 'branding' | 'members' | 'permissions' | 'lists' | 'fields' | 'data' | 'audit' | 'danger';
+type SettingsTab = 'general' | 'branding' | 'members' | 'notifications' | 'permissions' | 'lists' | 'fields' | 'data' | 'audit' | 'danger';
 
 export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
   const { organization, user, isOwner, isAdmin, refreshOrganizations } = useAuthStore();
@@ -75,6 +76,7 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
     { id: 'general', label: 'General', icon: <Building2 size={16} /> },
     { id: 'branding', label: 'Branding', icon: <Palette size={16} />, adminOnly: true },
     { id: 'members', label: 'Members', icon: <Users size={16} /> },
+    { id: 'notifications', label: 'Notifications', icon: <Bell size={16} /> },
     { id: 'permissions', label: 'Permissions', icon: <Eye size={16} />, adminOnly: true },
     { id: 'lists', label: 'Custom Lists', icon: <List size={16} />, adminOnly: true },
     { id: 'fields', label: 'Custom Fields', icon: <Columns size={16} />, adminOnly: true },
@@ -238,6 +240,17 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
                 exit={{ opacity: 0 }}
               >
                 <MembersContent />
+              </motion.div>
+            )}
+
+            {activeTab === 'notifications' && (
+              <motion.div
+                key="notifications"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <NotificationPreferences />
               </motion.div>
             )}
 
