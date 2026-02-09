@@ -134,7 +134,7 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6 min-h-[400px]">
           {error && (
             <div className="mb-4 flex items-center gap-2 p-3 rounded-lg bg-error-bg text-error text-sm">
               <AlertCircle size={16} />
@@ -153,9 +153,9 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
             {activeTab === 'general' && (
               <motion.div
                 key="general"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 className="space-y-6"
               >
                 <div>
@@ -222,9 +222,9 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
             {activeTab === 'branding' && isAdmin && (
               <motion.div
                 key="branding"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
               >
                 <BrandingEditor />
               </motion.div>
@@ -233,9 +233,9 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
             {activeTab === 'members' && (
               <motion.div
                 key="members"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
               >
                 <MembersContent />
               </motion.div>
@@ -244,9 +244,9 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
             {activeTab === 'permissions' && isAdmin && (
               <motion.div
                 key="permissions"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
               >
                 <RolePermissionsEditor />
               </motion.div>
@@ -255,9 +255,9 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
             {activeTab === 'lists' && isAdmin && (
               <motion.div
                 key="lists"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
               >
                 <CustomListsEditor />
               </motion.div>
@@ -266,9 +266,9 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
             {activeTab === 'fields' && isAdmin && (
               <motion.div
                 key="fields"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
               >
                 <CustomFieldsEditor />
               </motion.div>
@@ -277,9 +277,9 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
             {activeTab === 'data' && (
               <motion.div
                 key="data"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
               >
                 <DataExport />
               </motion.div>
@@ -288,9 +288,9 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
             {activeTab === 'audit' && isAdmin && (
               <motion.div
                 key="audit"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
               >
                 <AuditLog />
               </motion.div>
@@ -299,9 +299,9 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
             {activeTab === 'danger' && isOwner && (
               <motion.div
                 key="danger"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 className="space-y-6"
               >
                 <div className="p-4 rounded-lg border-2 border-error/20 bg-error/5">
