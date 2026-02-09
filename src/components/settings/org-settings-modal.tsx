@@ -98,7 +98,7 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-        className="relative bg-surface rounded-xl border border-border shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-hidden flex flex-col"
+        className="relative bg-surface rounded-xl border border-border shadow-xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden flex flex-col"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
@@ -115,7 +115,7 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-border px-6">
+        <div className="flex border-b border-border px-6 overflow-x-auto scrollbar-hide">
           {visibleTabs.map((tab) => (
             <button
               key={tab.id}
