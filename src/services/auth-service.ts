@@ -182,15 +182,19 @@ export async function createOrganization(name: string, userId: string): Promise<
 }
 
 export async function updateOrganization(orgId: string, updates: Partial<Organization>): Promise<void> {
+  // Build update object with only defined values
+  const updateData: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  };
+  
+  if (updates.name !== undefined) updateData.name = updates.name;
+  if (updates.logoUrl !== undefined) updateData.logo_url = updates.logoUrl;
+  if (updates.brandColor !== undefined) updateData.brand_color = updates.brandColor;
+  if (updates.settings !== undefined) updateData.settings = updates.settings;
+
   const { error } = await supabase
     .from('organizations')
-    .update({
-      name: updates.name,
-      logo_url: updates.logoUrl,
-      brand_color: updates.brandColor,
-      settings: updates.settings,
-      updated_at: new Date().toISOString(),
-    })
+    .update(updateData)
     .eq('id', orgId);
   if (error) throw new Error(error.message);
 }
