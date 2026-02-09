@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { 
   Calendar, DollarSign, Users, BarChart3, 
   CheckCircle, ArrowRight, Truck, FileText,
@@ -70,6 +71,18 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
             <span className="font-black text-xl text-text-primary">Booth</span>
           </div>
           <div className="flex items-center gap-3">
+            <Link 
+              href="/features"
+              className="text-sm text-text-secondary hover:text-text-primary transition-colors hidden sm:inline"
+            >
+              Features
+            </Link>
+            <a 
+              href="#pricing"
+              className="text-sm text-text-secondary hover:text-text-primary transition-colors hidden sm:inline"
+            >
+              Pricing
+            </a>
             <button 
               onClick={onSignIn}
               className="text-sm text-text-secondary hover:text-text-primary transition-colors"
@@ -207,7 +220,7 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
       <TestimonialsSection />
 
       {/* Pricing */}
-      <div className="bg-bg-secondary">
+      <div id="pricing" className="bg-bg-secondary scroll-mt-16">
         <PricingSection onGetStarted={onGetStarted} />
       </div>
 
@@ -236,9 +249,10 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
             <span className="text-sm font-bold text-text-secondary">Booth</span>
           </div>
           <div className="flex items-center gap-6 text-sm text-text-tertiary">
-            <a href="/terms" className="hover:text-text-secondary transition-colors">Terms</a>
-            <a href="/privacy" className="hover:text-text-secondary transition-colors">Privacy</a>
-            <a href="mailto:support@example.com" className="hover:text-text-secondary transition-colors">Contact</a>
+            <Link href="/features" className="hover:text-text-secondary transition-colors">Features</Link>
+            <a href="#pricing" className="hover:text-text-secondary transition-colors">Pricing</a>
+            <Link href="/terms" className="hover:text-text-secondary transition-colors">Terms</Link>
+            <Link href="/privacy" className="hover:text-text-secondary transition-colors">Privacy</Link>
           </div>
           <p className="text-sm text-text-tertiary">
             © {new Date().getFullYear()} Booth
