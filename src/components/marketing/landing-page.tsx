@@ -1,12 +1,12 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { 
   Calendar, DollarSign, Users, BarChart3, 
   CheckCircle, ArrowRight, Truck, FileText,
-  Shield, Zap
+  Shield, Zap, Package, ChevronDown, Menu, X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PricingSection } from './pricing-section';
@@ -17,7 +17,31 @@ interface LandingPageProps {
   onSignIn: () => void;
 }
 
+const NAV_FEATURES = [
+  { slug: 'calendar', icon: Calendar, title: 'Trade Show Calendar', color: '#0969DA' },
+  { slug: 'budget', icon: DollarSign, title: 'Budget Management', color: '#1A7F37' },
+  { slug: 'team', icon: Users, title: 'Team Collaboration', color: '#8250DF' },
+  { slug: 'logistics', icon: Truck, title: 'Shipping & Logistics', color: '#BF8700' },
+  { slug: 'assets', icon: Package, title: 'Asset Management', color: '#CF222E' },
+  { slug: 'analytics', icon: BarChart3, title: 'ROI & Analytics', color: '#0969DA' },
+];
+
 export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
+  const [featuresOpen, setFeaturesOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setFeaturesOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const features = [
     {
       icon: Calendar,
@@ -63,36 +87,163 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border bg-surface/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-purple to-brand-purple-dark flex items-center justify-center shadow-lg shadow-brand-purple/25">
-              <span className="text-white text-lg font-black">B</span>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-purple to-brand-purple-dark flex items-center justify-center shadow-lg shadow-brand-purple/25">
+                <span className="text-white text-lg font-black">B</span>
+              </div>
+              <span className="font-black text-xl text-text-primary">Booth</span>
             </div>
-            <span className="font-black text-xl text-text-primary">Booth</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link 
-              href="/features"
-              className="text-sm text-text-secondary hover:text-text-primary transition-colors hidden sm:inline"
+
+            {/* Centered Nav - Desktop */}
+            <nav className="hidden md:flex items-center justify-center gap-8 absolute left-1/2 -translate-x-1/2">
+              {/* Features Dropdown */}
+              <div ref={dropdownRef} className="relative">
+                <button
+                  onClick={() => setFeaturesOpen(!featuresOpen)}
+                  className="flex items-center gap-1 text-base font-semibold text-text-secondary hover:text-text-primary transition-colors"
+                >
+                  Features
+                  <ChevronDown 
+                    size={16} 
+                    className={`transition-transform ${featuresOpen ? 'rotate-180' : ''}`} 
+                  />
+                </button>
+                
+                <AnimatePresence>
+                  {featuresOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute top-full left-0 mt-2 w-64 py-2 bg-surface border border-border rounded-xl shadow-xl"
+                    >
+                      <Link
+                        href="/features"
+                        className="block px-4 py-2 text-sm font-semibold text-text-primary hover:bg-bg-secondary transition-colors border-b border-border mb-1"
+                        onClick={() => setFeaturesOpen(false)}
+                      >
+                        All Features
+                      </Link>
+                      {NAV_FEATURES.map((feature) => (
+                        <Link
+                          key={feature.slug}
+                          href={`/features/${feature.slug}`}
+                          className="flex items-center gap-3 px-4 py-2 text-sm text-text-secondary hover:bg-bg-secondary hover:text-text-primary transition-colors"
+                          onClick={() => setFeaturesOpen(false)}
+                        >
+                          <feature.icon size={16} style={{ color: feature.color }} />
+                          {feature.title}
+                        </Link>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <a 
+                href="#pricing"
+                className="text-base font-semibold text-text-secondary hover:text-text-primary transition-colors"
+              >
+                Pricing
+              </a>
+            </nav>
+
+            {/* Right side - Desktop */}
+            <div className="hidden md:flex items-center gap-3">
+              <button 
+                onClick={onSignIn}
+                className="text-base font-semibold text-text-secondary hover:text-text-primary transition-colors"
+              >
+                Sign In
+              </button>
+              <Button variant="primary" size="sm" onClick={onGetStarted}>
+                Start Free Trial
+              </Button>
+            </div>
+
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 text-text-secondary hover:text-text-primary transition-colors"
+              aria-label="Toggle menu"
             >
-              Features
-            </Link>
-            <a 
-              href="#pricing"
-              className="text-sm text-text-secondary hover:text-text-primary transition-colors hidden sm:inline"
-            >
-              Pricing
-            </a>
-            <button 
-              onClick={onSignIn}
-              className="text-sm text-text-secondary hover:text-text-primary transition-colors"
-            >
-              Sign In
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
-            <Button variant="primary" size="sm" onClick={onGetStarted}>
-              Start Free Trial
-            </Button>
           </div>
+
+          {/* Mobile Menu */}
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="md:hidden overflow-hidden"
+              >
+                <nav className="pt-4 pb-2 border-t border-border mt-4">
+                  {/* Features section */}
+                  <div className="mb-2">
+                    <Link
+                      href="/features"
+                      className="block px-2 py-2 text-base font-semibold text-text-primary"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Features
+                    </Link>
+                    <div className="pl-4 space-y-1">
+                      {NAV_FEATURES.map((feature) => (
+                        <Link
+                          key={feature.slug}
+                          href={`/features/${feature.slug}`}
+                          className="flex items-center gap-3 px-2 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <feature.icon size={16} style={{ color: feature.color }} />
+                          {feature.title}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+
+                  <a 
+                    href="#pricing"
+                    className="block px-2 py-2 text-base font-semibold text-text-secondary hover:text-text-primary transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Pricing
+                  </a>
+
+                  <div className="mt-4 pt-4 border-t border-border flex flex-col gap-3">
+                    <button 
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        onSignIn();
+                      }}
+                      className="text-base font-semibold text-text-secondary hover:text-text-primary transition-colors text-left px-2"
+                    >
+                      Sign In
+                    </button>
+                    <Button 
+                      variant="primary" 
+                      size="sm" 
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        onGetStarted();
+                      }}
+                      className="w-full"
+                    >
+                      Start Free Trial
+                    </Button>
+                  </div>
+                </nav>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </header>
 

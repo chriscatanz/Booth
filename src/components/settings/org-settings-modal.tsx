@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   X, Building2, Users, Shield, Save, Upload,
-  Crown, AlertCircle, Check, Trash2, Settings, Clock, Download, List, Palette, Columns
+  Crown, AlertCircle, Check, Trash2, Settings, Clock, Download, List, Palette, Columns, Eye
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MembersModal } from '@/components/auth/members-modal';
@@ -18,12 +18,13 @@ import { DeleteAccountModal } from './delete-account-modal';
 import { CustomListsEditor } from './custom-lists-editor';
 import { CustomFieldsEditor } from './custom-fields-editor';
 import { BrandingEditor } from './branding-editor';
+import { RolePermissionsEditor } from './role-permissions-editor';
 
 interface OrgSettingsModalProps {
   onClose: () => void;
 }
 
-type SettingsTab = 'general' | 'branding' | 'members' | 'lists' | 'fields' | 'data' | 'audit' | 'danger';
+type SettingsTab = 'general' | 'branding' | 'members' | 'permissions' | 'lists' | 'fields' | 'data' | 'audit' | 'danger';
 
 export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
   const { organization, user, isOwner, isAdmin, refreshOrganizations } = useAuthStore();
@@ -74,6 +75,7 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
     { id: 'general', label: 'General', icon: <Building2 size={16} /> },
     { id: 'branding', label: 'Branding', icon: <Palette size={16} />, adminOnly: true },
     { id: 'members', label: 'Members', icon: <Users size={16} /> },
+    { id: 'permissions', label: 'Permissions', icon: <Eye size={16} />, adminOnly: true },
     { id: 'lists', label: 'Custom Lists', icon: <List size={16} />, adminOnly: true },
     { id: 'fields', label: 'Custom Fields', icon: <Columns size={16} />, adminOnly: true },
     { id: 'data', label: 'Data Export', icon: <Download size={16} /> },
@@ -236,6 +238,17 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
                 exit={{ opacity: 0, x: 10 }}
               >
                 <MembersContent />
+              </motion.div>
+            )}
+
+            {activeTab === 'permissions' && isAdmin && (
+              <motion.div
+                key="permissions"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+              >
+                <RolePermissionsEditor />
               </motion.div>
             )}
 

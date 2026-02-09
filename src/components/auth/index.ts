@@ -6,3 +6,4 @@ export { ForgotPasswordForm } from './forgot-password-form';
 export { OrganizationSetup } from './organization-setup';
 export { PermissionGate, usePermission, withPermission } from './permission-gate';
 export { UserMenu } from './user-menu';
+export { DataVisibilityGate, FieldVisibilityGate, MultiCategoryGate } from './data-visibility-gate';
