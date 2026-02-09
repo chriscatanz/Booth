@@ -13,13 +13,16 @@ import {
   Activity,
   Settings,
   Command,
+  DollarSign,
 } from 'lucide-react';
+import { UserMenu } from '@/components/auth/user-menu';
 
 const NAV_ITEMS: { mode: ViewMode; icon: React.ElementType; label: string }[] = [
   { mode: ViewMode.Dashboard, icon: LayoutDashboard, label: 'Dashboard' },
   { mode: ViewMode.Calendar, icon: Calendar, label: 'Calendar' },
   { mode: ViewMode.Tasks, icon: CheckSquare, label: 'Tasks' },
   { mode: ViewMode.Assets, icon: Package, label: 'Assets' },
+  { mode: ViewMode.Budget, icon: DollarSign, label: 'Budget' },
   { mode: ViewMode.Activity, icon: Activity, label: 'Activity' },
 ];
 
@@ -113,15 +116,8 @@ export function TopNav({
           </kbd>
         </motion.button>
 
-        {/* Settings */}
-        <motion.button
-          onClick={onOpenSettings}
-          className="p-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition-colors"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <Settings size={18} />
-        </motion.button>
+        {/* User Menu with Sign Out */}
+        <UserMenu onOpenOrgSettings={onOpenSettings} />
       </div>
     </header>
   );

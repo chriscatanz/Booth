@@ -26,9 +26,10 @@ import { useCustomLists } from '@/hooks/use-custom-lists';
 import { DetailHero, DetailTabs, DetailTabPanel, TabSection, type DetailTab } from '@/components/detail';
 import {
   Save, Trash2, Copy, Truck, Hotel, Users, Award, Plus, X, Package,
-  FileStack, Printer, CalendarPlus, Mail, Repeat, Upload, MoreHorizontal,
+  FileStack, Printer, CalendarPlus, Mail, Repeat, Upload, MoreHorizontal, Download,
 } from 'lucide-react';
-import { downloadICS, openMailto } from '@/services/export-service';
+import { downloadICS, openMailto, downloadCSV } from '@/services/export-service';
+import { ExportField } from '@/types/enums';
 import { TemplateModal } from '@/components/ui/template-modal';
 import { PackingListModal } from '@/components/ui/packing-list-modal';
 import { FileUploadZone } from '@/components/ui/file-upload-zone';
@@ -128,6 +129,15 @@ export default function DetailView() {
                   <>
                     <div className="fixed inset-0 z-10" onClick={() => setShowActionsMenu(false)} />
                     <div className="absolute right-0 top-full mt-1 w-48 bg-surface border border-border rounded-lg shadow-lg py-1 z-20">
+                      <button
+                        onClick={() => { 
+                          downloadCSV([show], Object.values(ExportField), show.name.replace(/[^a-z0-9]/gi, '_')); 
+                          setShowActionsMenu(false); 
+                        }}
+                        className="w-full px-3 py-2 text-left text-sm hover:bg-bg-tertiary flex items-center gap-2"
+                      >
+                        <Download size={14} /> Export CSV
+                      </button>
                       <button
                         onClick={() => { setShowTemplateModal(true); setShowActionsMenu(false); }}
                         className="w-full px-3 py-2 text-left text-sm hover:bg-bg-tertiary flex items-center gap-2"
