@@ -1,6 +1,40 @@
 import { supabase } from '@/lib/supabase';
+import { authenticatedFetch } from '@/lib/api';
 
 const ORG_LOGOS_BUCKET = 'org-logos';
+
+/**
+ * Validate a file server-side before uploading
+ * @param file File to validate
+ * @param context Upload context (logo, document, image)
+ * @returns Validation result
+ */
+async function validateFile(file: File, context: 'logo' | 'document' | 'image'): Promise<{ valid: boolean; error?: string }> {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('context', context);
+
+    const response = await authenticatedFetch('/api/upload/validate', {
+      method: 'POST',
+      body: formData,
+      headers: {}, // Let browser set Content-Type for FormData
+    });
+
+    const result = await response.json();
+    
+    if (!response.ok) {
+      return { valid: false, error: result.error || 'Validation failed' };
+    }
+
+    return { valid: true };
+  } catch (error) {
+    console.error('File validation error:', error);
+    // If validation service is unavailable, allow upload with client-side checks only
+    // This prevents blocking users if the API is down
+    return { valid: true };
+  }
+}
 
 /**
  * Upload an organization logo
@@ -9,6 +43,12 @@ const ORG_LOGOS_BUCKET = 'org-logos';
  * @returns Public URL of the uploaded logo
  */
 export async function uploadOrgLogo(orgId: string, file: File): Promise<string> {
+  // Server-side validation first
+  const validation = await validateFile(file, 'logo');
+  if (!validation.valid) {
+    throw new Error(validation.error || 'File validation failed');
+  }
+
   // Generate unique filename with timestamp to bust cache
   const ext = file.name.split('.').pop() || 'png';
   const filename = `${orgId}/logo-${Date.now()}.${ext}`;

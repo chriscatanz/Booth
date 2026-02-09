@@ -34,7 +34,8 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }: SignUpFormProps) {
       const result = await signUp(email, password, fullName);
       if (result) {
         // Store success flag for display even if component unmounts
-        localStorage.setItem('signup_success_email', email);
+        // Use sessionStorage (cleared on tab close) instead of localStorage for security
+        sessionStorage.setItem('signup_success_email', email);
         setSuccess(true);
       }
     } catch (err) {

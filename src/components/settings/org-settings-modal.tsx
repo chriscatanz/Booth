@@ -11,6 +11,7 @@ import {
   Crown, AlertCircle, Check, Trash2, Settings, Clock, Download, List, Palette, Columns, Eye, Bell
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { authenticatedFetch } from '@/lib/api';
 import { MembersModal } from '@/components/auth/members-modal';
 import { AuditLog } from './audit-log';
 import { DataExport } from './data-export';
@@ -426,11 +427,10 @@ function MembersContent() {
         user.id
       );
 
-      // Send email
+      // Send email (authenticated)
       try {
-        await fetch('/api/invite', {
+        await authenticatedFetch('/api/invite', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             email: inviteEmail,
             inviterName: user.fullName || user.email,

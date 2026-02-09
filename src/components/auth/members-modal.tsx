@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import { OrganizationMember, Invitation, UserRole } from '@/types/auth';
 import * as authService from '@/services/auth-service';
+import { authenticatedFetch } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { 
   X, Users, UserPlus, Mail, Loader2, Trash2, 
@@ -71,11 +72,10 @@ export function MembersModal({ onClose }: MembersModalProps) {
         user.id
       );
       
-      // Send email notification via API
+      // Send email notification via API (authenticated)
       try {
-        await fetch('/api/invite', {
+        await authenticatedFetch('/api/invite', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             email: inviteEmail.trim(),
             inviterName: user.fullName || user.email,

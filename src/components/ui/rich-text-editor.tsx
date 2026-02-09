@@ -1,10 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useEditor, EditorContent, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import Underline from '@tiptap/extension-underline';
+import DOMPurify from 'dompurify';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import {
@@ -229,9 +230,20 @@ export function RichTextEditor({
   );
 }
 
-// Simple display component for rendering HTML content
+// Simple display component for rendering HTML content (with XSS protection)
 export function RichTextDisplay({ content, className }: { content: string | null; className?: string }) {
-  if (!content) return null;
+  // Sanitize HTML to prevent XSS attacks
+  const sanitizedContent = useMemo(() => {
+    if (!content) return null;
+    
+    // Configure DOMPurify to allow only safe formatting tags
+    return DOMPurify.sanitize(content, {
+      ALLOWED_TAGS: ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 's', 'strike', 'ul', 'ol', 'li', 'blockquote', 'hr'],
+      ALLOWED_ATTR: [], // No attributes allowed (prevents onclick, onerror, etc.)
+    });
+  }, [content]);
+
+  if (!sanitizedContent) return null;
 
   return (
     <div 
@@ -245,7 +257,7 @@ export function RichTextDisplay({ content, className }: { content: string | null
         '[&_hr]:my-3 [&_hr]:border-border-subtle',
         className
       )}
-      dangerouslySetInnerHTML={{ __html: content }}
+      dangerouslySetInnerHTML={{ __html: sanitizedContent }}
     />
   );
 }

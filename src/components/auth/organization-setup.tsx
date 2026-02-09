@@ -16,12 +16,12 @@ export function OrganizationSetup() {
   const [acceptingInvite, setAcceptingInvite] = useState<string | null>(null);
   const [signupSuccessEmail, setSignupSuccessEmail] = useState<string | null>(null);
 
-  // Check for signup success message
+  // Check for signup success message (use sessionStorage for security)
   useEffect(() => {
-    const email = localStorage.getItem('signup_success_email');
+    const email = sessionStorage.getItem('signup_success_email');
     if (email) {
       setSignupSuccessEmail(email);
-      localStorage.removeItem('signup_success_email');
+      sessionStorage.removeItem('signup_success_email');
     }
   }, []);
 
