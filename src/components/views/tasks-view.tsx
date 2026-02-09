@@ -56,7 +56,8 @@ export default function TasksView() {
     let filtered = tasks;
     
     if (filterShow !== 'all') {
-      filtered = filtered.filter(t => t.tradeShowId === filterShow);
+      const showId = parseInt(filterShow, 10);
+      filtered = filtered.filter(t => t.tradeShowId === showId);
     }
     if (filterAssignee !== 'all') {
       filtered = filtered.filter(t => t.assigneeId === filterAssignee);
@@ -74,7 +75,7 @@ export default function TasksView() {
     const shows = new Map<string, string>();
     tasks.forEach(t => {
       if (t.tradeShowId && t.tradeShow) {
-        shows.set(t.tradeShowId, t.tradeShow.name);
+        shows.set(t.tradeShowId.toString(), t.tradeShow.name);
       }
     });
     return Array.from(shows.entries());
