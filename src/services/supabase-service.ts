@@ -214,7 +214,8 @@ export async function fetchTradeShows(historical: boolean = false): Promise<Trad
   const today = formatDateForDB(new Date())!;
   const orgId = getOrgId();
 
-  let query = supabase.from('tradeshows').select('*');
+  // Use decrypting view for reads
+  let query = supabase.from('v_tradeshows').select('*');
 
   // Filter by organization if available (multi-tenant mode)
   // If no org, show all (backwards compatibility / single-tenant mode)
@@ -239,8 +240,9 @@ export async function fetchTradeShows(historical: boolean = false): Promise<Trad
 export async function fetchTemplates(): Promise<TradeShow[]> {
   const orgId = getOrgId();
   
+  // Use decrypting view for reads
   let query = supabase
-    .from('tradeshows')
+    .from('v_tradeshows')
     .select('*')
     .eq('is_template', true);
 
@@ -254,8 +256,9 @@ export async function fetchTemplates(): Promise<TradeShow[]> {
 }
 
 export async function fetchTradeShow(id: number): Promise<TradeShow> {
+  // Use decrypting view for reads
   const { data, error } = await supabase
-    .from('tradeshows')
+    .from('v_tradeshows')
     .select('*')
     .eq('id', id)
     .single();
