@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sidebar } from './sidebar';
-import { Toolbar } from './toolbar';
+import { TopNav } from './top-nav';
+import { CommandPalette } from './command-palette';
 import { ViewMode } from '@/types/enums';
 import { useTradeShowStore } from '@/store/trade-show-store';
 import { useSettingsStore } from '@/store/settings-store';
@@ -11,7 +12,7 @@ import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 import { ToastContainer } from '@/components/ui/toast';
 import { LoadingOverlay } from '@/components/ui/loading-spinner';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
-import { AlertCircle, X, Menu } from 'lucide-react';
+import { AlertCircle, X, Menu, PanelLeftClose, PanelLeft } from 'lucide-react';
 
 import DashboardView from '@/components/views/dashboard-view';
 import QuickLookView from '@/components/views/quick-look-view';
@@ -47,7 +48,9 @@ export function AppShell() {
   const [viewMode, setViewMode] = useState<ViewMode>(defaultView);
   const [showExport, setShowExport] = useState(false);
   const [showOrgSettings, setShowOrgSettings] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   
   // Onboarding wizard
@@ -59,7 +62,6 @@ export function AppShell() {
   
   useEffect(() => {
     document.documentElement.style.setProperty('--brand-color', brandColor);
-    // Also set RGB values for transparency variants
     const hex = brandColor.replace('#', '');
     const r = parseInt(hex.substring(0, 2), 16);
     const g = parseInt(hex.substring(2, 4), 16);
@@ -67,7 +69,7 @@ export function AppShell() {
     document.documentElement.style.setProperty('--brand-color-rgb', `${r}, ${g}, ${b}`);
   }, [brandColor]);
   
-  // Check if user needs onboarding (first time)
+  // Check if user needs onboarding
   useEffect(() => {
     if (user && organization) {
       const onboardingKey = `onboarding_complete_${user.id}`;
@@ -98,8 +100,9 @@ export function AppShell() {
   // Check for mobile viewport
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
-      if (window.innerWidth >= 1024) {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (mobile) {
         setSidebarOpen(false);
       }
     };
@@ -112,16 +115,28 @@ export function AppShell() {
   // Close sidebar when selecting a show on mobile
   useEffect(() => {
     if (isMobile && selectedShow) {
-      setSidebarOpen(false);
+      setSidebarMobileOpen(false);
     }
   }, [selectedShow, isMobile]);
 
-  // When switching view modes, clear any selected show so the view actually changes
-  const handleViewModeChange = (mode: ViewMode) => {
+  // Command palette keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowCommandPalette(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const handleViewModeChange = useCallback((mode: ViewMode) => {
     setSelectedShow(null);
     setViewMode(mode);
-    if (isMobile) setSidebarOpen(false);
-  };
+    if (isMobile) setSidebarMobileOpen(false);
+    setShowCommandPalette(false);
+  }, [setSelectedShow, isMobile]);
 
   useKeyboardShortcuts();
 
@@ -136,12 +151,10 @@ export function AppShell() {
   };
 
   const renderContent = () => {
-    // If a show is selected, show detail view
     if (selectedShow) {
       return <DetailView />;
     }
 
-    // Show a loading state only on first load
     if (isLoading && shows.length === 0) {
       return <LoadingOverlay />;
     }
@@ -169,113 +182,176 @@ export function AppShell() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      {/* Mobile sidebar overlay */}
-      <AnimatePresence>
-        {isMobile && sidebarOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-      </AnimatePresence>
+    <div className="flex flex-col h-screen overflow-hidden bg-background">
+      {/* Top Navigation */}
+      <TopNav
+        viewMode={viewMode}
+        onViewModeChange={handleViewModeChange}
+        onOpenSettings={() => setShowOrgSettings(true)}
+        onOpenCommandPalette={() => setShowCommandPalette(true)}
+      />
 
-      {/* Sidebar - hidden on mobile unless open */}
-      <div className={`
-        ${isMobile ? 'fixed inset-y-0 left-0 z-50 transform transition-transform duration-300' : ''}
-        ${isMobile && !sidebarOpen ? '-translate-x-full' : 'translate-x-0'}
-      `}>
-        <Sidebar 
-          viewMode={viewMode} 
-          onViewModeChange={handleViewModeChange}
-          onCloseMobile={() => setSidebarOpen(false)}
-          isMobile={isMobile}
-        />
-      </div>
-
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Toolbar 
-          onExport={() => setShowExport(true)}
-          onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
-          showMenuButton={isMobile}
-          onOpenOrgSettings={() => setShowOrgSettings(true)}
-        />
-
-        {/* Error banner */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Mobile sidebar overlay */}
         <AnimatePresence>
-          {errorMessage && (
-            <motion.div 
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ type: 'spring' as const, stiffness: 300, damping: 30 }}
-              className="flex items-center gap-3 px-4 py-2 bg-error-bg border-b border-error/20 overflow-hidden"
+          {isMobile && sidebarMobileOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+              onClick={() => setSidebarMobileOpen(false)}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Sidebar */}
+        <AnimatePresence mode="wait">
+          {(isMobile ? sidebarMobileOpen : sidebarOpen) && (
+            <motion.div
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: 280, opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              className={`
+                ${isMobile ? 'fixed inset-y-0 left-0 z-50 pt-14' : 'relative'}
+                overflow-hidden
+              `}
             >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: 'spring' as const, stiffness: 400, damping: 15 }}
-              >
-                <AlertCircle size={16} className="text-error shrink-0" />
-              </motion.div>
-              <p className="text-sm text-error flex-1">{errorMessage}</p>
-              <motion.button 
-                onClick={clearError} 
-                className="p-1 rounded hover:bg-error/10"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <X size={14} className="text-error" />
-              </motion.button>
+              <Sidebar 
+                onCloseMobile={() => setSidebarMobileOpen(false)}
+                isMobile={isMobile}
+              />
             </motion.div>
           )}
         </AnimatePresence>
 
-        <main className="flex-1 overflow-y-auto">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={getViewKey()}
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="h-full"
-            >
-              <ErrorBoundary key={viewMode} fallbackMessage="This view encountered an error">
-                {renderContent()}
-              </ErrorBoundary>
-            </motion.div>
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Sidebar toggle + breadcrumb bar */}
+          <div className="h-10 border-b border-border flex items-center px-3 gap-2 shrink-0 bg-surface">
+            {/* Mobile menu button */}
+            {isMobile && (
+              <motion.button
+                onClick={() => setSidebarMobileOpen(!sidebarMobileOpen)}
+                className="p-1.5 rounded-lg hover:bg-bg-tertiary text-text-secondary"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Menu size={18} />
+              </motion.button>
+            )}
+            
+            {/* Desktop sidebar toggle */}
+            {!isMobile && (
+              <motion.button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="p-1.5 rounded-lg hover:bg-bg-tertiary text-text-secondary"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
+              >
+                {sidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeft size={18} />}
+              </motion.button>
+            )}
+
+            {/* Breadcrumb / Context */}
+            <div className="flex items-center gap-2 text-sm text-text-secondary">
+              {selectedShow ? (
+                <>
+                  <button 
+                    onClick={() => setSelectedShow(null)}
+                    className="hover:text-text-primary transition-colors"
+                  >
+                    {viewMode}
+                  </button>
+                  <span className="text-text-tertiary">/</span>
+                  <span className="text-text-primary font-medium truncate max-w-[200px]">
+                    {selectedShow.name}
+                  </span>
+                </>
+              ) : (
+                <span className="text-text-primary font-medium">{viewMode}</span>
+              )}
+            </div>
+
+            {/* Right side actions */}
+            <div className="ml-auto flex items-center gap-2">
+              {/* Export button - only show on relevant views */}
+              {(viewMode === ViewMode.List || viewMode === ViewMode.Dashboard) && !selectedShow && (
+                <button
+                  onClick={() => setShowExport(true)}
+                  className="text-xs text-text-secondary hover:text-text-primary transition-colors"
+                >
+                  Export
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Error banner */}
+          <AnimatePresence>
+            {errorMessage && (
+              <motion.div 
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="flex items-center gap-3 px-4 py-2 bg-error-bg border-b border-error/20"
+              >
+                <AlertCircle size={16} className="text-error shrink-0" />
+                <p className="text-sm text-error flex-1">{errorMessage}</p>
+                <button onClick={clearError} className="p-1 rounded hover:bg-error/10">
+                  <X size={14} className="text-error" />
+                </button>
+              </motion.div>
+            )}
           </AnimatePresence>
-        </main>
+
+          {/* Main content area */}
+          <main className="flex-1 overflow-y-auto">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={getViewKey()}
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="h-full"
+              >
+                <ErrorBoundary key={viewMode} fallbackMessage="This view encountered an error">
+                  {renderContent()}
+                </ErrorBoundary>
+              </motion.div>
+            </AnimatePresence>
+          </main>
+        </div>
       </div>
+
       <ToastContainer />
+      
+      {/* Command Palette */}
+      <AnimatePresence>
+        {showCommandPalette && (
+          <CommandPalette
+            isOpen={showCommandPalette}
+            onClose={() => setShowCommandPalette(false)}
+            onNavigate={handleViewModeChange}
+            onOpenSettings={() => setShowOrgSettings(true)}
+          />
+        )}
+      </AnimatePresence>
       
       {/* Settings Modal */}
       <AnimatePresence>
         {showSettings && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <SettingsView onClose={() => setShowSettings(false)} />
-          </motion.div>
+          <SettingsView onClose={() => setShowSettings(false)} />
         )}
       </AnimatePresence>
       
       {/* Export Modal */}
       <AnimatePresence>
         {showExport && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <ExportFieldSelector shows={shows} onClose={() => setShowExport(false)} />
-          </motion.div>
+          <ExportFieldSelector shows={shows} onClose={() => setShowExport(false)} />
         )}
       </AnimatePresence>
 
