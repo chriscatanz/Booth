@@ -203,16 +203,32 @@ export async function updateOrganization(orgId: string, updates: Partial<Organiz
 // ─── Member Methods ──────────────────────────────────────────────────────────
 
 export async function fetchOrganizationMembers(orgId: string): Promise<OrganizationMember[]> {
-  const { data, error } = await supabase
+  // Fetch members
+  const { data: members, error: membersError } = await supabase
     .from('organization_members')
-    .select(`
-      *,
-      user:user_profiles!user_id (*)
-    `)
+    .select('*')
     .eq('organization_id', orgId)
     .order('role', { ascending: true });
-  if (error) throw new Error(error.message);
-  return (data || []).map(mapMembership);
+  if (membersError) throw new Error(membersError.message);
+  
+  if (!members || members.length === 0) return [];
+  
+  // Fetch user profiles from decrypting view
+  const userIds = members.map(m => m.user_id);
+  const { data: users, error: usersError } = await supabase
+    .from('v_user_profiles')
+    .select('*')
+    .in('id', userIds);
+  if (usersError) throw new Error(usersError.message);
+  
+  // Join client-side
+  const userMap = new Map((users || []).map(u => [u.id, u]));
+  const combined = members.map(m => ({
+    ...m,
+    user: userMap.get(m.user_id) || null,
+  }));
+  
+  return combined.map(mapMembership);
 }
 
 export async function updateMemberRole(memberId: string, role: UserRole): Promise<void> {
