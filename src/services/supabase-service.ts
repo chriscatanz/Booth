@@ -406,6 +406,12 @@ export async function deleteAdditionalFile(id: number): Promise<void> {
 }
 
 export async function uploadFile(fileData: File): Promise<string> {
+  // Server-side validation first
+  const validation = await validateFileUpload(fileData, 'document');
+  if (!validation.valid) {
+    throw new Error(validation.error || 'File validation failed');
+  }
+
   const timestamp = Math.floor(Date.now() / 1000);
   const uniqueName = `${timestamp}-${fileData.name}`;
   const { error } = await supabase.storage
@@ -414,6 +420,45 @@ export async function uploadFile(fileData: File): Promise<string> {
   if (error) throw new Error(error.message);
   const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(uniqueName);
   return urlData.publicUrl;
+}
+
+/**
+ * Validate a file server-side before uploading
+ */
+async function validateFileUpload(
+  file: File, 
+  context: 'logo' | 'document' | 'image'
+): Promise<{ valid: boolean; error?: string }> {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('context', context);
+
+    const headers: Record<string, string> = {};
+    if (session?.access_token) {
+      headers['Authorization'] = `Bearer ${session.access_token}`;
+    }
+
+    const response = await fetch('/api/upload/validate', {
+      method: 'POST',
+      body: formData,
+      headers,
+    });
+
+    const result = await response.json();
+    
+    if (!response.ok) {
+      return { valid: false, error: result.error || 'Validation failed' };
+    }
+
+    return { valid: true };
+  } catch (error) {
+    console.error('File validation error:', error);
+    // If validation service is unavailable, allow upload with warning
+    return { valid: true };
+  }
 }
 
 export async function deleteFile(publicURL: string): Promise<void> {
