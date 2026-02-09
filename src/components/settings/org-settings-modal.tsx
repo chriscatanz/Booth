@@ -34,6 +34,9 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
 
   // General settings form
   const [orgName, setOrgName] = useState(organization?.name || '');
+  const [shippingBufferDays, setShippingBufferDays] = useState<number>(
+    (organization?.settings?.shippingBufferDays as number) || 7
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +49,7 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
   useEffect(() => {
     if (organization) {
       setOrgName(organization.name);
+      setShippingBufferDays((organization.settings?.shippingBufferDays as number) || 7);
     }
   }, [organization]);
 
@@ -57,7 +61,13 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
     setSaveSuccess(false);
 
     try {
-      await authService.updateOrganization(organization.id, { name: orgName.trim() });
+      await authService.updateOrganization(organization.id, { 
+        name: orgName.trim(),
+        settings: {
+          ...organization.settings,
+          shippingBufferDays,
+        },
+      });
       await refreshOrganizations();
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 2000);
@@ -207,13 +217,36 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
                   </div>
                 </div>
 
+                {/* Shipping Settings */}
+                <div className="border-t border-border pt-4">
+                  <h3 className="text-sm font-medium text-text-primary mb-3">Shipping Settings</h3>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className="block text-sm font-medium text-text-secondary mb-1">
+                        Shipping Buffer (days)
+                      </label>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={30}
+                        value={shippingBufferDays}
+                        onChange={(e) => setShippingBufferDays(parseInt(e.target.value) || 7)}
+                        disabled={!isAdmin}
+                      />
+                      <p className="text-xs text-text-tertiary mt-1">
+                        Days before warehouse arrival to show "Ship By" date
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 {isAdmin && (
                   <div className="pt-4 border-t border-border">
                     <Button
                       variant="primary"
                       onClick={handleSaveGeneral}
                       loading={isSaving}
-                      disabled={orgName === organization?.name}
+                      disabled={orgName === organization?.name && shippingBufferDays === ((organization?.settings?.shippingBufferDays as number) || 7)}
                     >
                       <Save size={14} /> Save Changes
                     </Button>

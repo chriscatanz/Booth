@@ -2,6 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { useTradeShowStore } from '@/store/trade-show-store';
+import { useAuthStore } from '@/store/auth-store';
 import { useFilteredShows } from '@/hooks/use-filtered-shows';
 import { ViewMode, AlertType, AlertPriority } from '@/types/enums';
 import { TradeShow } from '@/types';
@@ -33,7 +34,11 @@ interface DashboardViewProps {
 
 export default function DashboardView({ viewMode, onViewModeChange }: DashboardViewProps) {
   const { shows, selectShow, createNewShow, loadShows } = useTradeShowStore();
+  const { organization } = useAuthStore();
   const now = new Date();
+  
+  // Get shipping buffer from org settings (default 7 days)
+  const shippingBufferDays = (organization?.settings?.shippingBufferDays as number) || 7;
 
   const upcomingShows = useMemo(() =>
     shows.filter(s => {
@@ -290,7 +295,7 @@ export default function DashboardView({ viewMode, onViewModeChange }: DashboardV
           <Truck size={16} className="text-brand-cyan" />
           <h2 className="text-sm font-semibold text-text-primary">Shipping Timeline</h2>
         </div>
-        <ShippingTimeline shows={shows} onSelectShow={selectShow} daysToShow={45} />
+        <ShippingTimeline shows={shows} onSelectShow={selectShow} daysToShow={45} shippingBufferDays={shippingBufferDays} />
       </div>
     </div>
   );
