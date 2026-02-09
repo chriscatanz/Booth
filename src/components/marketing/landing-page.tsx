@@ -107,7 +107,7 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
             </div>
           </motion.div>
 
-          {/* App preview placeholder */}
+          {/* App preview */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -120,11 +120,13 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
                 <div className="w-3 h-3 rounded-full bg-warning/60" />
                 <div className="w-3 h-3 rounded-full bg-success/60" />
               </div>
-              <span className="text-xs text-white/40 ml-2">Booth</span>
+              <span className="text-xs text-white/40 ml-2">Booth — Dashboard</span>
             </div>
-            <div className="aspect-video bg-gradient-to-br from-bg-secondary to-bg-tertiary flex items-center justify-center">
-              <p className="text-text-tertiary">App Screenshot Here</p>
-            </div>
+            <img 
+              src="/app-screenshot.png" 
+              alt="Booth dashboard showing trade show management interface with calendar, tasks, and budget tracking"
+              className="w-full"
+            />
           </motion.div>
         </div>
       </section>
