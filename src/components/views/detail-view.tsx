@@ -14,18 +14,19 @@ import { Select } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Toggle } from '@/components/ui/toggle';
 import { DatePicker } from '@/components/ui/date-picker';
-import { FormSection } from '@/components/ui/form-section';
-import { StatusBadge } from '@/components/ui/badge';
 import { HotelMap } from '@/components/ui/hotel-map';
 import { formatCurrency } from '@/lib/utils';
-import { totalEstimatedCost, totalServicesCost, estimatedHotelCost, roiPercentage, costPerLead, costPerQualifiedLead, leadQualificationRate, dealCloseRate, revenuePerDeal, parseJsonStringArray } from '@/types/computed';
+import { 
+  totalEstimatedCost, totalServicesCost, estimatedHotelCost, roiPercentage, 
+  costPerLead, costPerQualifiedLead, leadQualificationRate, dealCloseRate, 
+  revenuePerDeal, parseJsonStringArray 
+} from '@/types/computed';
 import { SHOW_STATUSES } from '@/lib/constants';
 import { useCustomLists } from '@/hooks/use-custom-lists';
+import { DetailHero, DetailTabs, DetailTabPanel, TabSection, type DetailTab } from '@/components/detail';
 import {
-  ArrowLeft, Save, Trash2, Copy, Info, Truck, Hotel,
-  Users, Award, FileText, BarChart3, Plus, X, Package,
-  Ticket, DollarSign, FileStack, Printer, CalendarPlus, Mail,
-  Repeat, Upload, Clock, CheckSquare,
+  Save, Trash2, Copy, Truck, Hotel, Users, Award, Plus, X, Package,
+  FileStack, Printer, CalendarPlus, Mail, Repeat, Upload, MoreHorizontal,
 } from 'lucide-react';
 import { downloadICS, openMailto } from '@/services/export-service';
 import { TemplateModal } from '@/components/ui/template-modal';
@@ -46,14 +47,13 @@ export default function DetailView() {
 
   const toast = useToastStore();
   const { status: autosaveStatus, hasUnsavedChanges } = useAutosave({ debounceMs: 2500 });
+  const [activeTab, setActiveTab] = useState<DetailTab>('overview');
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [showPackingList, setShowPackingList] = useState(false);
+  const [showActionsMenu, setShowActionsMenu] = useState(false);
   
-  // Permission checks
   const canEdit = usePermission('editor');
   const canDelete = usePermission('admin');
-  
-  // Custom lists from org settings
   const { boothOptions, graphicsOptions, packingListOptions, tableclothOptions } = useCustomLists();
 
   if (!selectedShow) return null;
@@ -82,58 +82,90 @@ export default function DetailView() {
     updateSelectedShow({ [field]: JSON.stringify(updated) });
   };
 
+  // Tab counts for badges
+  const tabCounts = {
+    travel: attendees.length,
+    notes: additionalFiles.length,
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="h-full flex flex-col"
+      className="h-full flex flex-col bg-background"
     >
-      {/* Header bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-6 py-4 border-b border-border bg-gradient-to-r from-surface to-bg-secondary shrink-0 gap-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <motion.button 
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setSelectedShow(null)} 
-            className="p-2 rounded-lg hover:bg-bg-tertiary text-text-secondary shrink-0"
-          >
-            <ArrowLeft size={18} />
-          </motion.button>
-          <div className="min-w-0">
-            <h1 className="text-base sm:text-lg font-semibold text-text-primary truncate">{isNew ? 'New Trade Show' : show.name}</h1>
-            <div className="flex items-center gap-2 text-xs text-text-secondary flex-wrap">
-              {!isNew && <StatusBadge status={show.showStatus} />}
-              <span className="hidden sm:inline">{estimated > 0 && `Est. Total: ${formatCurrency(estimated)}`}</span>
-              {!isNew && <AutosaveIndicator status={autosaveStatus} hasUnsavedChanges={hasUnsavedChanges} />}
-            </div>
-          </div>
+      {/* Hero Header */}
+      <DetailHero show={show} canEdit={canEdit} />
+
+      {/* Action Bar */}
+      <div className="flex items-center justify-between px-6 py-3 border-b border-border bg-surface">
+        <div className="flex items-center gap-2">
+          {!isNew && <AutosaveIndicator status={autosaveStatus} hasUnsavedChanges={hasUnsavedChanges} />}
         </div>
-        <div className="flex items-center gap-1 sm:gap-2 justify-end flex-wrap">
+        
+        <div className="flex items-center gap-2">
           {!isNew && (
             <>
+              {/* Quick actions - always visible */}
               <Button variant="ghost" size="sm" onClick={() => downloadICS([show])} title="Add to Calendar">
                 <CalendarPlus size={14} />
               </Button>
               <Button variant="ghost" size="sm" onClick={() => openMailto(show)} title="Email Details">
                 <Mail size={14} />
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => setShowTemplateModal(true)} title="Save as Template">
-                <FileStack size={14} />
-              </Button>
-              <Button variant="ghost" size="sm" onClick={repeatYearly} title="Repeat Next Year">
-                <Repeat size={14} />
-              </Button>
-              <PermissionGate requires="editor" hideOnly>
-                <Button variant="ghost" size="sm" onClick={duplicateShow} title="Duplicate"><Copy size={14} /></Button>
-              </PermissionGate>
-              <PermissionGate requires="admin" hideOnly>
-                <Button variant="destructive" size="sm" onClick={handleDelete} title="Delete"><Trash2 size={14} /></Button>
-              </PermissionGate>
+              
+              {/* More actions dropdown */}
+              <div className="relative">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowActionsMenu(!showActionsMenu)}
+                >
+                  <MoreHorizontal size={14} />
+                </Button>
+                
+                {showActionsMenu && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setShowActionsMenu(false)} />
+                    <div className="absolute right-0 top-full mt-1 w-48 bg-surface border border-border rounded-lg shadow-lg py-1 z-20">
+                      <button
+                        onClick={() => { setShowTemplateModal(true); setShowActionsMenu(false); }}
+                        className="w-full px-3 py-2 text-left text-sm hover:bg-bg-tertiary flex items-center gap-2"
+                      >
+                        <FileStack size={14} /> Save as Template
+                      </button>
+                      <button
+                        onClick={() => { repeatYearly(); setShowActionsMenu(false); }}
+                        className="w-full px-3 py-2 text-left text-sm hover:bg-bg-tertiary flex items-center gap-2"
+                      >
+                        <Repeat size={14} /> Repeat Next Year
+                      </button>
+                      <PermissionGate requires="editor" hideOnly>
+                        <button
+                          onClick={() => { duplicateShow(); setShowActionsMenu(false); }}
+                          className="w-full px-3 py-2 text-left text-sm hover:bg-bg-tertiary flex items-center gap-2"
+                        >
+                          <Copy size={14} /> Duplicate
+                        </button>
+                      </PermissionGate>
+                      <PermissionGate requires="admin" hideOnly>
+                        <button
+                          onClick={() => { handleDelete(); setShowActionsMenu(false); }}
+                          className="w-full px-3 py-2 text-left text-sm text-error hover:bg-error/10 flex items-center gap-2"
+                        >
+                          <Trash2 size={14} /> Delete
+                        </button>
+                      </PermissionGate>
+                    </div>
+                  </>
+                )}
+              </div>
             </>
           )}
+          
           <PermissionGate requires="editor" hideOnly>
             <Button variant="primary" size="md" onClick={handleSave} loading={isSaving}>
-              <Save size={14} /> <span className="hidden sm:inline">Save</span>
+              <Save size={14} /> Save
             </Button>
           </PermissionGate>
         </div>
@@ -146,7 +178,7 @@ export default function DetailView() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="mx-6 mt-3 p-3 rounded-lg bg-error-bg border border-error/20 overflow-hidden"
+            className="mx-6 mt-3 p-3 rounded-lg bg-error-bg border border-error/20"
           >
             <p className="text-sm font-medium text-error mb-1">Please fix the following:</p>
             <ul className="list-disc list-inside text-xs text-error space-y-0.5">
@@ -156,339 +188,352 @@ export default function DetailView() {
         )}
       </AnimatePresence>
 
-      {/* Scrollable form */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+      {/* Tabs */}
+      <DetailTabs activeTab={activeTab} onTabChange={setActiveTab} tabCounts={tabCounts} />
 
-        {/* 1. Basic Information - EXPANDED BY DEFAULT */}
-        <FormSection title="Basic Information" icon={Info} defaultOpen={true}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input label="Show Name *" value={show.name} onChange={e => updateSelectedShow({ name: e.target.value })} placeholder="Enter show name" />
-            <Input label="Location" value={show.location ?? ''} onChange={e => updateSelectedShow({ location: e.target.value || null })} placeholder="City, State" />
-            <DatePicker label="Start Date" value={show.startDate} onChange={v => updateSelectedShow({ startDate: v })} />
-            <DatePicker label="End Date" value={show.endDate} onChange={v => updateSelectedShow({ endDate: v })} />
-            <Select
-              label="Show Status"
-              value={show.showStatus ?? ''}
-              onChange={e => updateSelectedShow({ showStatus: e.target.value || null })}
-              options={SHOW_STATUSES.map(s => ({ value: s, label: s }))}
-              placeholder="Select status"
-            />
-            <Input label="Management Company" value={show.managementCompany ?? ''} onChange={e => updateSelectedShow({ managementCompany: e.target.value || null })} />
-            <Select
-              label="Event Type"
-              value={show.eventType ?? 'in_person'}
-              onChange={e => updateSelectedShow({ eventType: e.target.value as 'in_person' | 'virtual' | 'hybrid' })}
-              options={[
-                { value: 'in_person', label: 'In-Person' },
-                { value: 'virtual', label: 'Virtual' },
-                { value: 'hybrid', label: 'Hybrid' },
-              ]}
-            />
-          </div>
-          
-          {/* Virtual Event Fields - shown for virtual/hybrid */}
-          {(show.eventType === 'virtual' || show.eventType === 'hybrid') && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 p-3 rounded-lg bg-brand-cyan/5 border border-brand-cyan/20">
-              <Input 
-                label="Virtual Platform" 
-                value={show.virtualPlatform ?? ''} 
-                onChange={e => updateSelectedShow({ virtualPlatform: e.target.value || null })} 
-                placeholder="e.g., Zoom, Hopin, ON24"
-              />
-              <Input 
-                label="Platform URL" 
-                value={show.virtualPlatformUrl ?? ''} 
-                onChange={e => updateSelectedShow({ virtualPlatformUrl: e.target.value || null })} 
-                placeholder="https://..."
-              />
-              <Input 
-                label="Virtual Booth URL" 
-                value={show.virtualBoothUrl ?? ''} 
-                onChange={e => updateSelectedShow({ virtualBoothUrl: e.target.value || null })} 
-                placeholder="Your exhibitor/booth page URL"
-                className="sm:col-span-2"
-              />
-            </div>
-          )}
-          
-          <RichTextEditor label="General Notes" value={show.generalNotes} onChange={v => updateSelectedShow({ generalNotes: v || null })} placeholder="Notes about this show..." />
-        </FormSection>
-
-        {/* 2. Booth & Registration */}
-        <FormSection title="Booth & Registration" icon={Ticket} defaultOpen={false}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input label="Booth Number" value={show.boothNumber ?? ''} onChange={e => updateSelectedShow({ boothNumber: e.target.value || null })} />
-            <Input label="Booth Size" value={show.boothSize ?? ''} onChange={e => updateSelectedShow({ boothSize: e.target.value || null })} placeholder="e.g., 10x10" />
-            <Input label="Registration Cost" type="number" value={show.cost?.toString() ?? ''} onChange={e => updateSelectedShow({ cost: e.target.value ? parseFloat(e.target.value) : null })} />
-            <Input label="Attendees Included" type="number" value={show.attendeesIncluded?.toString() ?? ''} onChange={e => updateSelectedShow({ attendeesIncluded: e.target.value ? parseInt(e.target.value) : null })} />
-          </div>
-          <div className="space-y-2 pt-2">
-            <Checkbox label="Registration Confirmed" checked={show.registrationConfirmed ?? false} onChange={v => updateSelectedShow({ registrationConfirmed: v })} />
-            <Checkbox label="Attendee List Received" checked={show.attendeeListReceived ?? false} onChange={v => updateSelectedShow({ attendeeListReceived: v })} />
-          </div>
-        </FormSection>
-
-        {/* 2b. Tasks */}
-        <FormSection title="Tasks" icon={CheckSquare} defaultOpen={false}>
-          <TaskList tradeShowId={show.id} readOnly={!canEdit} />
-        </FormSection>
-
-        {/* 3. Attendees & Travel */}
-        <FormSection title={`Attendees & Travel (${attendees.length})`} icon={Users} defaultOpen={false}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-            <Input label="Total Attending" type="number" value={show.totalAttending?.toString() ?? ''} onChange={e => updateSelectedShow({ totalAttending: e.target.value ? parseInt(e.target.value) : null })} />
-          </div>
-          {attendees.map((att) => (
-            <motion.div 
-              key={att.localId} 
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex gap-2 items-start p-3 bg-bg-tertiary rounded-lg"
-            >
-              <div className="flex-1 grid grid-cols-3 gap-2">
-                <Input label="Name" value={att.name ?? ''} onChange={e => updateAttendee(att.localId, { name: e.target.value || null })} placeholder="Full name" />
-                <Input label="Email" value={att.email ?? ''} onChange={e => updateAttendee(att.localId, { email: e.target.value || null })} placeholder="email@example.com" />
-                <Input label="Flight Cost" type="number" value={att.flightCost?.toString() ?? ''} onChange={e => updateAttendee(att.localId, { flightCost: e.target.value ? parseFloat(e.target.value) : null })} />
-                <DatePicker label="Arrival" value={att.arrivalDate} onChange={v => updateAttendee(att.localId, { arrivalDate: v })} />
-                <DatePicker label="Departure" value={att.departureDate} onChange={v => updateAttendee(att.localId, { departureDate: v })} />
-                <Input label="Flight Confirmation" value={att.flightConfirmation ?? ''} onChange={e => updateAttendee(att.localId, { flightConfirmation: e.target.value || null })} placeholder="Confirmation #" />
+      {/* Tab Content */}
+      <div className="flex-1 overflow-y-auto">
+        {/* OVERVIEW TAB */}
+        <DetailTabPanel id="overview" activeTab={activeTab}>
+          <div className="space-y-6">
+            {/* Basic Information */}
+            <TabSection title="Basic Information">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input label="Show Name *" value={show.name} onChange={e => updateSelectedShow({ name: e.target.value })} placeholder="Enter show name" />
+                <Input label="Location" value={show.location ?? ''} onChange={e => updateSelectedShow({ location: e.target.value || null })} placeholder="City, State" />
+                <DatePicker label="Start Date" value={show.startDate} onChange={v => updateSelectedShow({ startDate: v })} />
+                <DatePicker label="End Date" value={show.endDate} onChange={v => updateSelectedShow({ endDate: v })} />
+                <Select
+                  label="Show Status"
+                  value={show.showStatus ?? ''}
+                  onChange={e => updateSelectedShow({ showStatus: e.target.value || null })}
+                  options={SHOW_STATUSES.map(s => ({ value: s, label: s }))}
+                  placeholder="Select status"
+                />
+                <Input label="Management Company" value={show.managementCompany ?? ''} onChange={e => updateSelectedShow({ managementCompany: e.target.value || null })} />
+                <Select
+                  label="Event Type"
+                  value={show.eventType ?? 'in_person'}
+                  onChange={e => updateSelectedShow({ eventType: e.target.value as 'in_person' | 'virtual' | 'hybrid' })}
+                  options={[
+                    { value: 'in_person', label: 'In-Person' },
+                    { value: 'virtual', label: 'Virtual' },
+                    { value: 'hybrid', label: 'Hybrid' },
+                  ]}
+                />
               </div>
-              <button onClick={() => removeAttendee(att.localId)} className="p-1.5 rounded hover:bg-error/10 text-error mt-5">
-                <X size={16} />
-              </button>
-            </motion.div>
-          ))}
-          <Button variant="outline" size="sm" onClick={addAttendee}><Plus size={14} /> Add Attendee</Button>
-        </FormSection>
-
-        {/* 4. Hotel */}
-        <FormSection title="Hotel" icon={Hotel} defaultOpen={false}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input label="Hotel Name" value={show.hotelName ?? ''} onChange={e => updateSelectedShow({ hotelName: e.target.value || null })} />
-            <Input label="Hotel Address" value={show.hotelAddress ?? ''} onChange={e => updateSelectedShow({ hotelAddress: e.target.value || null })} />
-            <Input label="Cost Per Night" type="number" value={show.hotelCostPerNight?.toString() ?? ''} onChange={e => updateSelectedShow({ hotelCostPerNight: e.target.value ? parseFloat(e.target.value) : null })} />
-            <Input label="Confirmation Number" value={show.hotelConfirmationNumber ?? ''} onChange={e => updateSelectedShow({ hotelConfirmationNumber: e.target.value || null })} placeholder="e.g., 12345ABC" />
-          </div>
-          <Checkbox label="Hotel Confirmed" checked={show.hotelConfirmed ?? false} onChange={v => updateSelectedShow({ hotelConfirmed: v })} />
-          {estimatedHotelCost(show) > 0 && (
-            <p className="text-xs text-text-secondary">Estimated Hotel Cost: {formatCurrency(estimatedHotelCost(show))}</p>
-          )}
-          <HotelMap hotelName={show.hotelName} hotelAddress={show.hotelAddress} showLocation={show.location} />
-        </FormSection>
-
-        {/* 5. Shipping & Logistics */}
-        <FormSection title="Shipping & Logistics" icon={Truck} defaultOpen={false}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input label="Shipping Info" value={show.shippingInfo ?? ''} onChange={e => updateSelectedShow({ shippingInfo: e.target.value || null })} />
-            <Input label="Tracking Number" value={show.trackingNumber ?? ''} onChange={e => updateSelectedShow({ trackingNumber: e.target.value || null })} />
-            <Input label="Shipping Cost" type="number" value={show.shippingCost?.toString() ?? ''} onChange={e => updateSelectedShow({ shippingCost: e.target.value ? parseFloat(e.target.value) : null })} />
-            <DatePicker label="Shipping Cutoff" value={show.shippingCutoff} onChange={v => updateSelectedShow({ shippingCutoff: v })} />
-          </div>
-          <div className="flex gap-4">
-            <Checkbox label="Ship to Site" checked={show.shipToSite ?? false} onChange={v => updateSelectedShow({ shipToSite: v })} />
-            <Checkbox label="Ship to Warehouse" checked={show.shipToWarehouse ?? false} onChange={v => updateSelectedShow({ shipToWarehouse: v })} />
-          </div>
-
-          <div className="mt-3">
-            <p className="text-xs font-medium text-text-secondary mb-2">Booth Items to Ship</p>
-            <div className="flex flex-wrap gap-2">
-              {boothOptions.map(opt => (
-                <Checkbox key={opt} label={opt} checked={parseJsonStringArray(show.boothToShip).includes(opt)} onChange={() => toggleJsonArrayItem('boothToShip', opt)} />
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-3">
-            <p className="text-xs font-medium text-text-secondary mb-2">Graphics to Ship</p>
-            <div className="flex flex-wrap gap-2">
-              {graphicsOptions.map(opt => (
-                <Checkbox key={opt} label={opt} checked={parseJsonStringArray(show.graphicsToShip).includes(opt)} onChange={() => toggleJsonArrayItem('graphicsToShip', opt)} />
-              ))}
-            </div>
-          </div>
-        </FormSection>
-
-        {/* 6. On-Site Services */}
-        <FormSection title="On-Site Services" icon={Package} defaultOpen={false}>
-          <div className="flex gap-4 mb-3">
-            <Checkbox label="Utilities Booked" checked={show.utilitiesBooked ?? false} onChange={v => updateSelectedShow({ utilitiesBooked: v })} />
-            <Checkbox label="Labor Booked" checked={show.laborBooked ?? false} onChange={v => updateSelectedShow({ laborBooked: v })} />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input label="Utilities Details" value={show.utilitiesDetails ?? ''} onChange={e => updateSelectedShow({ utilitiesDetails: e.target.value || null })} />
-            <Input label="Labor Details" value={show.laborDetails ?? ''} onChange={e => updateSelectedShow({ laborDetails: e.target.value || null })} />
-            <Input label="Electrical Cost" type="number" value={show.electricalCost?.toString() ?? ''} onChange={e => updateSelectedShow({ electricalCost: e.target.value ? parseFloat(e.target.value) : null })} />
-            <Input label="Labor Cost" type="number" value={show.laborCost?.toString() ?? ''} onChange={e => updateSelectedShow({ laborCost: e.target.value ? parseFloat(e.target.value) : null })} />
-            <Input label="Internet Cost" type="number" value={show.internetCost?.toString() ?? ''} onChange={e => updateSelectedShow({ internetCost: e.target.value ? parseFloat(e.target.value) : null })} />
-            <Input label="Standard Services Cost" type="number" value={show.standardServicesCost?.toString() ?? ''} onChange={e => updateSelectedShow({ standardServicesCost: e.target.value ? parseFloat(e.target.value) : null })} />
-          </div>
-          {totalServicesCost(show) > 0 && (
-            <p className="text-sm font-medium text-text-secondary pt-2">Total Services: {formatCurrency(totalServicesCost(show))}</p>
-          )}
-        </FormSection>
-
-        {/* 7. Event Details & Contacts */}
-        <FormSection title="Event Details & Contacts" icon={Award} defaultOpen={false}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input label="Show Contact Name" value={show.showContactName ?? ''} onChange={e => updateSelectedShow({ showContactName: e.target.value || null })} />
-            <Input label="Show Contact Email" value={show.showContactEmail ?? ''} onChange={e => updateSelectedShow({ showContactEmail: e.target.value || null })} />
-            <Input label="Show Agenda URL" value={show.showAgendaUrl ?? ''} onChange={e => updateSelectedShow({ showAgendaUrl: e.target.value || null })} placeholder="https://" />
-            <Input label="Event Portal URL" value={show.eventPortalUrl ?? ''} onChange={e => updateSelectedShow({ eventPortalUrl: e.target.value || null })} placeholder="https://" />
-          </div>
-          <div className="space-y-3 pt-2">
-            <Toggle label="Has Speaking Engagement" enabled={show.hasSpeakingEngagement ?? false} onChange={v => updateSelectedShow({ hasSpeakingEngagement: v })} />
-            {show.hasSpeakingEngagement && (
-              <Textarea label="Speaking Details" value={show.speakingDetails ?? ''} onChange={e => updateSelectedShow({ speakingDetails: e.target.value || null })} />
-            )}
-            <Textarea label="Sponsorship Details" value={show.sponsorshipDetails ?? ''} onChange={e => updateSelectedShow({ sponsorshipDetails: e.target.value || null })} />
-            <Toggle label="Has Event App" enabled={show.hasEventApp ?? false} onChange={v => updateSelectedShow({ hasEventApp: v })} />
-            {show.hasEventApp && (
-              <Input label="Event App Notes" value={show.eventAppNotes ?? ''} onChange={e => updateSelectedShow({ eventAppNotes: e.target.value || null })} />
-            )}
-          </div>
-        </FormSection>
-
-        {/* 8. Packing List */}
-        <FormSection title="Packing List" icon={FileText} defaultOpen={false}>
-          <div>
-            <p className="text-xs font-medium text-text-secondary mb-2">Standard Items</p>
-            <div className="flex flex-wrap gap-2">
-              {packingListOptions.map(opt => (
-                <Checkbox key={opt} label={opt} checked={parseJsonStringArray(show.packingListItems).includes(opt)} onChange={() => toggleJsonArrayItem('packingListItems', opt)} />
-              ))}
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-            <div>
-              <Toggle label="Swag Items" enabled={show.swagItemsEnabled ?? false} onChange={v => updateSelectedShow({ swagItemsEnabled: v })} />
-              {show.swagItemsEnabled && <Input label="Swag Description" value={show.swagItemsDescription ?? ''} onChange={e => updateSelectedShow({ swagItemsDescription: e.target.value || null })} className="mt-2" />}
-            </div>
-            <div>
-              <Toggle label="Giveaway Item" enabled={show.giveawayItemEnabled ?? false} onChange={v => updateSelectedShow({ giveawayItemEnabled: v })} />
-              {show.giveawayItemEnabled && <Input label="Giveaway Description" value={show.giveawayItemDescription ?? ''} onChange={e => updateSelectedShow({ giveawayItemDescription: e.target.value || null })} className="mt-2" />}
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-            <Input label="Power Strip Count" type="number" value={show.powerStripCount?.toString() ?? ''} onChange={e => updateSelectedShow({ powerStripCount: e.target.value ? parseInt(e.target.value) : null })} placeholder="1-4" />
-            <Select
-              label="Tablecloth Type"
-              value={show.tableclothType ?? ''}
-              onChange={e => updateSelectedShow({ tableclothType: e.target.value || null })}
-              options={tableclothOptions.map(t => ({ value: t, label: t }))}
-              placeholder="Select type"
-            />
-          </div>
-          <Textarea label="Additional Items" value={show.packingListMisc ?? ''} onChange={e => updateSelectedShow({ packingListMisc: e.target.value || null })} placeholder="Other items to pack..." />
-          
-          <Button variant="outline" size="sm" onClick={() => setShowPackingList(true)} className="mt-3">
-            <Printer size={14} /> Generate Packing List
-          </Button>
-        </FormSection>
-
-        {/* 9. Budget Summary */}
-        <FormSection title="Budget Summary" icon={DollarSign} defaultOpen={false}
-          badge={estimated > 0 ? <span className="text-xs font-medium text-brand-purple">{formatCurrency(estimated)}</span> : undefined}
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-            <div className="flex justify-between p-2 bg-bg-tertiary rounded">
-              <span className="text-text-secondary">Registration</span>
-              <span className="font-medium">{formatCurrency(show.cost ?? 0)}</span>
-            </div>
-            <div className="flex justify-between p-2 bg-bg-tertiary rounded">
-              <span className="text-text-secondary">Shipping</span>
-              <span className="font-medium">{formatCurrency(show.shippingCost ?? 0)}</span>
-            </div>
-            <div className="flex justify-between p-2 bg-bg-tertiary rounded">
-              <span className="text-text-secondary">Services</span>
-              <span className="font-medium">{formatCurrency(totalServicesCost(show))}</span>
-            </div>
-            <div className="flex justify-between p-2 bg-bg-tertiary rounded">
-              <span className="text-text-secondary">Hotel (Est.)</span>
-              <span className="font-medium">{formatCurrency(estimatedHotelCost(show))}</span>
-            </div>
-          </div>
-          <div className="flex justify-between p-3 bg-brand-purple/10 rounded-lg mt-2">
-            <span className="font-semibold text-text-primary">Estimated Total</span>
-            <span className="font-bold text-brand-purple text-lg">{formatCurrency(estimated)}</span>
-          </div>
-        </FormSection>
-
-        {/* 10. Post-Show ROI */}
-        <FormSection title="Post-Show ROI" icon={BarChart3} defaultOpen={false}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input label="Total Leads" type="number" value={show.totalLeads?.toString() ?? ''} onChange={e => updateSelectedShow({ totalLeads: e.target.value ? parseInt(e.target.value) : null })} />
-            <Input label="Qualified Leads" type="number" value={show.qualifiedLeads?.toString() ?? ''} onChange={e => updateSelectedShow({ qualifiedLeads: e.target.value ? parseInt(e.target.value) : null })} />
-            <Input label="Meetings Booked" type="number" value={show.meetingsBooked?.toString() ?? ''} onChange={e => updateSelectedShow({ meetingsBooked: e.target.value ? parseInt(e.target.value) : null })} />
-            <Input label="Deals Won" type="number" value={show.dealsWon?.toString() ?? ''} onChange={e => updateSelectedShow({ dealsWon: e.target.value ? parseInt(e.target.value) : null })} />
-            <Input label="Revenue Attributed" type="number" value={show.revenueAttributed?.toString() ?? ''} onChange={e => updateSelectedShow({ revenueAttributed: e.target.value ? parseFloat(e.target.value) : null })} />
-          </div>
-          
-          {/* Calculated Metrics */}
-          {(show.totalLeads || show.revenueAttributed) && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-              {costPerLead(show) !== null && (
-                <div className="flex justify-between p-2 bg-bg-tertiary rounded">
-                  <span className="text-xs text-text-secondary">Cost per Lead</span>
-                  <span className="text-sm font-medium text-error">{formatCurrency(costPerLead(show)!)}</span>
+              
+              {(show.eventType === 'virtual' || show.eventType === 'hybrid') && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 p-4 rounded-lg bg-brand-cyan/5 border border-brand-cyan/20">
+                  <Input label="Virtual Platform" value={show.virtualPlatform ?? ''} onChange={e => updateSelectedShow({ virtualPlatform: e.target.value || null })} placeholder="e.g., Zoom, Hopin" />
+                  <Input label="Platform URL" value={show.virtualPlatformUrl ?? ''} onChange={e => updateSelectedShow({ virtualPlatformUrl: e.target.value || null })} placeholder="https://..." />
+                  <Input label="Virtual Booth URL" value={show.virtualBoothUrl ?? ''} onChange={e => updateSelectedShow({ virtualBoothUrl: e.target.value || null })} placeholder="Your booth page URL" className="sm:col-span-2" />
                 </div>
               )}
-              {costPerQualifiedLead(show) !== null && (
-                <div className="flex justify-between p-2 bg-bg-tertiary rounded">
-                  <span className="text-xs text-text-secondary">Cost per Qualified Lead</span>
-                  <span className="text-sm font-medium text-error">{formatCurrency(costPerQualifiedLead(show)!)}</span>
-                </div>
-              )}
-              {leadQualificationRate(show) !== null && (
-                <div className="flex justify-between p-2 bg-bg-tertiary rounded">
-                  <span className="text-xs text-text-secondary">Lead Qualification Rate</span>
-                  <span className="text-sm font-medium">{leadQualificationRate(show)!.toFixed(1)}%</span>
-                </div>
-              )}
-              {dealCloseRate(show) !== null && (
-                <div className="flex justify-between p-2 bg-bg-tertiary rounded">
-                  <span className="text-xs text-text-secondary">Deal Close Rate</span>
-                  <span className="text-sm font-medium text-success">{dealCloseRate(show)!.toFixed(1)}%</span>
-                </div>
-              )}
-              {revenuePerDeal(show) !== null && (
-                <div className="flex justify-between p-2 bg-bg-tertiary rounded">
-                  <span className="text-xs text-text-secondary">Revenue per Deal</span>
-                  <span className="text-sm font-medium text-success">{formatCurrency(revenuePerDeal(show)!)}</span>
-                </div>
-              )}
-            </div>
-          )}
-          
-          {roi !== null && (
-            <div className={`p-3 rounded-lg mt-2 ${roi >= 0 ? 'bg-success-bg' : 'bg-error-bg'}`}>
-              <span className={`text-lg font-bold ${roi >= 0 ? 'text-success' : 'text-error'}`}>
-                ROI: {roi >= 0 ? '+' : ''}{roi.toFixed(1)}%
-              </span>
-            </div>
-          )}
-          <RichTextEditor label="Post-Show Notes" value={show.postShowNotes} onChange={v => updateSelectedShow({ postShowNotes: v || null })} placeholder="Takeaways, lessons learned..." />
-        </FormSection>
+              
+              <div className="mt-4">
+                <RichTextEditor label="General Notes" value={show.generalNotes} onChange={v => updateSelectedShow({ generalNotes: v || null })} placeholder="Notes about this show..." />
+              </div>
+            </TabSection>
 
-        {/* Documents & Files */}
-        <FormSection title={`Documents${additionalFiles.length > 0 ? ` (${additionalFiles.length})` : ''}`} icon={Upload} defaultOpen={false}>
-          <FileUploadZone
-            tradeshowId={show.id}
-            files={additionalFiles}
-            onFilesChange={refreshAdditionalFiles}
-            disabled={isNew}
-          />
-          {isNew && (
-            <p className="text-xs text-text-tertiary mt-2">Save the show first to upload files</p>
-          )}
-        </FormSection>
+            {/* Booth & Registration */}
+            <TabSection title="Booth & Registration">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input label="Booth Number" value={show.boothNumber ?? ''} onChange={e => updateSelectedShow({ boothNumber: e.target.value || null })} />
+                <Input label="Booth Size" value={show.boothSize ?? ''} onChange={e => updateSelectedShow({ boothSize: e.target.value || null })} placeholder="e.g., 10x10" />
+                <Input label="Registration Cost" type="number" value={show.cost?.toString() ?? ''} onChange={e => updateSelectedShow({ cost: e.target.value ? parseFloat(e.target.value) : null })} />
+                <Input label="Attendees Included" type="number" value={show.attendeesIncluded?.toString() ?? ''} onChange={e => updateSelectedShow({ attendeesIncluded: e.target.value ? parseInt(e.target.value) : null })} />
+              </div>
+              <div className="flex gap-6 pt-4">
+                <Checkbox label="Registration Confirmed" checked={show.registrationConfirmed ?? false} onChange={v => updateSelectedShow({ registrationConfirmed: v })} />
+                <Checkbox label="Attendee List Received" checked={show.attendeeListReceived ?? false} onChange={v => updateSelectedShow({ attendeeListReceived: v })} />
+              </div>
+            </TabSection>
 
-        {/* Activity Timeline */}
-        <FormSection title="Activity & Notes" icon={Clock} defaultOpen={false}>
-          <ActivityTimeline tradeshowId={show.id} />
-        </FormSection>
+            {/* Event Details & Contacts */}
+            <TabSection title="Event Details & Contacts">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input label="Show Contact Name" value={show.showContactName ?? ''} onChange={e => updateSelectedShow({ showContactName: e.target.value || null })} />
+                <Input label="Show Contact Email" value={show.showContactEmail ?? ''} onChange={e => updateSelectedShow({ showContactEmail: e.target.value || null })} />
+                <Input label="Show Agenda URL" value={show.showAgendaUrl ?? ''} onChange={e => updateSelectedShow({ showAgendaUrl: e.target.value || null })} placeholder="https://" />
+                <Input label="Event Portal URL" value={show.eventPortalUrl ?? ''} onChange={e => updateSelectedShow({ eventPortalUrl: e.target.value || null })} placeholder="https://" />
+              </div>
+              <div className="space-y-4 pt-4">
+                <Toggle label="Has Speaking Engagement" enabled={show.hasSpeakingEngagement ?? false} onChange={v => updateSelectedShow({ hasSpeakingEngagement: v })} />
+                {show.hasSpeakingEngagement && (
+                  <Textarea label="Speaking Details" value={show.speakingDetails ?? ''} onChange={e => updateSelectedShow({ speakingDetails: e.target.value || null })} />
+                )}
+                <Textarea label="Sponsorship Details" value={show.sponsorshipDetails ?? ''} onChange={e => updateSelectedShow({ sponsorshipDetails: e.target.value || null })} />
+              </div>
+            </TabSection>
+          </div>
+        </DetailTabPanel>
+
+        {/* LOGISTICS TAB */}
+        <DetailTabPanel id="logistics" activeTab={activeTab}>
+          <div className="space-y-6">
+            {/* Shipping */}
+            <TabSection title="Shipping" icon={Truck}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input label="Shipping Info" value={show.shippingInfo ?? ''} onChange={e => updateSelectedShow({ shippingInfo: e.target.value || null })} />
+                <Input label="Tracking Number" value={show.trackingNumber ?? ''} onChange={e => updateSelectedShow({ trackingNumber: e.target.value || null })} />
+                <Input label="Shipping Cost" type="number" value={show.shippingCost?.toString() ?? ''} onChange={e => updateSelectedShow({ shippingCost: e.target.value ? parseFloat(e.target.value) : null })} />
+                <DatePicker label="Shipping Cutoff" value={show.shippingCutoff} onChange={v => updateSelectedShow({ shippingCutoff: v })} />
+              </div>
+              <div className="flex gap-6 pt-4">
+                <Checkbox label="Ship to Site" checked={show.shipToSite ?? false} onChange={v => updateSelectedShow({ shipToSite: v })} />
+                <Checkbox label="Ship to Warehouse" checked={show.shipToWarehouse ?? false} onChange={v => updateSelectedShow({ shipToWarehouse: v })} />
+              </div>
+
+              <div className="mt-4">
+                <p className="text-sm font-medium text-text-secondary mb-2">Booth Items to Ship</p>
+                <div className="flex flex-wrap gap-3">
+                  {boothOptions.map(opt => (
+                    <Checkbox key={opt} label={opt} checked={parseJsonStringArray(show.boothToShip).includes(opt)} onChange={() => toggleJsonArrayItem('boothToShip', opt)} />
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <p className="text-sm font-medium text-text-secondary mb-2">Graphics to Ship</p>
+                <div className="flex flex-wrap gap-3">
+                  {graphicsOptions.map(opt => (
+                    <Checkbox key={opt} label={opt} checked={parseJsonStringArray(show.graphicsToShip).includes(opt)} onChange={() => toggleJsonArrayItem('graphicsToShip', opt)} />
+                  ))}
+                </div>
+              </div>
+            </TabSection>
+
+            {/* On-Site Services */}
+            <TabSection title="On-Site Services" icon={Package}>
+              <div className="flex gap-6 mb-4">
+                <Checkbox label="Utilities Booked" checked={show.utilitiesBooked ?? false} onChange={v => updateSelectedShow({ utilitiesBooked: v })} />
+                <Checkbox label="Labor Booked" checked={show.laborBooked ?? false} onChange={v => updateSelectedShow({ laborBooked: v })} />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input label="Utilities Details" value={show.utilitiesDetails ?? ''} onChange={e => updateSelectedShow({ utilitiesDetails: e.target.value || null })} />
+                <Input label="Labor Details" value={show.laborDetails ?? ''} onChange={e => updateSelectedShow({ laborDetails: e.target.value || null })} />
+                <Input label="Electrical Cost" type="number" value={show.electricalCost?.toString() ?? ''} onChange={e => updateSelectedShow({ electricalCost: e.target.value ? parseFloat(e.target.value) : null })} />
+                <Input label="Labor Cost" type="number" value={show.laborCost?.toString() ?? ''} onChange={e => updateSelectedShow({ laborCost: e.target.value ? parseFloat(e.target.value) : null })} />
+                <Input label="Internet Cost" type="number" value={show.internetCost?.toString() ?? ''} onChange={e => updateSelectedShow({ internetCost: e.target.value ? parseFloat(e.target.value) : null })} />
+                <Input label="Standard Services Cost" type="number" value={show.standardServicesCost?.toString() ?? ''} onChange={e => updateSelectedShow({ standardServicesCost: e.target.value ? parseFloat(e.target.value) : null })} />
+              </div>
+              {totalServicesCost(show) > 0 && (
+                <div className="mt-4 p-3 bg-bg-tertiary rounded-lg flex justify-between">
+                  <span className="font-medium text-text-secondary">Total Services</span>
+                  <span className="font-semibold text-text-primary">{formatCurrency(totalServicesCost(show))}</span>
+                </div>
+              )}
+            </TabSection>
+
+            {/* Packing List */}
+            <TabSection title="Packing List">
+              <div>
+                <p className="text-sm font-medium text-text-secondary mb-2">Standard Items</p>
+                <div className="flex flex-wrap gap-3">
+                  {packingListOptions.map(opt => (
+                    <Checkbox key={opt} label={opt} checked={parseJsonStringArray(show.packingListItems).includes(opt)} onChange={() => toggleJsonArrayItem('packingListItems', opt)} />
+                  ))}
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                <div className="space-y-3">
+                  <Toggle label="Swag Items" enabled={show.swagItemsEnabled ?? false} onChange={v => updateSelectedShow({ swagItemsEnabled: v })} />
+                  {show.swagItemsEnabled && <Input label="Swag Description" value={show.swagItemsDescription ?? ''} onChange={e => updateSelectedShow({ swagItemsDescription: e.target.value || null })} />}
+                </div>
+                <div className="space-y-3">
+                  <Toggle label="Giveaway Item" enabled={show.giveawayItemEnabled ?? false} onChange={v => updateSelectedShow({ giveawayItemEnabled: v })} />
+                  {show.giveawayItemEnabled && <Input label="Giveaway Description" value={show.giveawayItemDescription ?? ''} onChange={e => updateSelectedShow({ giveawayItemDescription: e.target.value || null })} />}
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                <Input label="Power Strip Count" type="number" value={show.powerStripCount?.toString() ?? ''} onChange={e => updateSelectedShow({ powerStripCount: e.target.value ? parseInt(e.target.value) : null })} />
+                <Select
+                  label="Tablecloth Type"
+                  value={show.tableclothType ?? ''}
+                  onChange={e => updateSelectedShow({ tableclothType: e.target.value || null })}
+                  options={tableclothOptions.map(t => ({ value: t, label: t }))}
+                  placeholder="Select type"
+                />
+              </div>
+              
+              <Textarea label="Additional Items" value={show.packingListMisc ?? ''} onChange={e => updateSelectedShow({ packingListMisc: e.target.value || null })} placeholder="Other items to pack..." className="mt-4" />
+              
+              <Button variant="outline" size="sm" onClick={() => setShowPackingList(true)} className="mt-4">
+                <Printer size={14} /> Generate Packing List
+              </Button>
+            </TabSection>
+          </div>
+        </DetailTabPanel>
+
+        {/* TRAVEL TAB */}
+        <DetailTabPanel id="travel" activeTab={activeTab}>
+          <div className="space-y-6">
+            {/* Attendees */}
+            <TabSection title={`Attendees (${attendees.length})`} icon={Users}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <Input label="Total Attending" type="number" value={show.totalAttending?.toString() ?? ''} onChange={e => updateSelectedShow({ totalAttending: e.target.value ? parseInt(e.target.value) : null })} />
+              </div>
+              
+              <div className="space-y-3">
+                {attendees.map((att) => (
+                  <motion.div 
+                    key={att.localId} 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex gap-3 items-start p-4 bg-bg-tertiary rounded-lg"
+                  >
+                    <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      <Input label="Name" value={att.name ?? ''} onChange={e => updateAttendee(att.localId, { name: e.target.value || null })} placeholder="Full name" />
+                      <Input label="Email" value={att.email ?? ''} onChange={e => updateAttendee(att.localId, { email: e.target.value || null })} placeholder="email@example.com" />
+                      <Input label="Flight Cost" type="number" value={att.flightCost?.toString() ?? ''} onChange={e => updateAttendee(att.localId, { flightCost: e.target.value ? parseFloat(e.target.value) : null })} />
+                      <DatePicker label="Arrival" value={att.arrivalDate} onChange={v => updateAttendee(att.localId, { arrivalDate: v })} />
+                      <DatePicker label="Departure" value={att.departureDate} onChange={v => updateAttendee(att.localId, { departureDate: v })} />
+                      <Input label="Flight Confirmation" value={att.flightConfirmation ?? ''} onChange={e => updateAttendee(att.localId, { flightConfirmation: e.target.value || null })} />
+                    </div>
+                    <button onClick={() => removeAttendee(att.localId)} className="p-2 rounded-lg hover:bg-error/10 text-error mt-5">
+                      <X size={16} />
+                    </button>
+                  </motion.div>
+                ))}
+              </div>
+              
+              <Button variant="outline" size="sm" onClick={addAttendee} className="mt-3">
+                <Plus size={14} /> Add Attendee
+              </Button>
+            </TabSection>
+
+            {/* Hotel */}
+            <TabSection title="Hotel" icon={Hotel}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input label="Hotel Name" value={show.hotelName ?? ''} onChange={e => updateSelectedShow({ hotelName: e.target.value || null })} />
+                <Input label="Hotel Address" value={show.hotelAddress ?? ''} onChange={e => updateSelectedShow({ hotelAddress: e.target.value || null })} />
+                <Input label="Cost Per Night" type="number" value={show.hotelCostPerNight?.toString() ?? ''} onChange={e => updateSelectedShow({ hotelCostPerNight: e.target.value ? parseFloat(e.target.value) : null })} />
+                <Input label="Confirmation Number" value={show.hotelConfirmationNumber ?? ''} onChange={e => updateSelectedShow({ hotelConfirmationNumber: e.target.value || null })} />
+              </div>
+              <div className="pt-4">
+                <Checkbox label="Hotel Confirmed" checked={show.hotelConfirmed ?? false} onChange={v => updateSelectedShow({ hotelConfirmed: v })} />
+              </div>
+              {estimatedHotelCost(show) > 0 && (
+                <p className="text-sm text-text-secondary mt-3">Estimated Hotel Cost: {formatCurrency(estimatedHotelCost(show))}</p>
+              )}
+              <div className="mt-4">
+                <HotelMap hotelName={show.hotelName} hotelAddress={show.hotelAddress} showLocation={show.location} />
+              </div>
+            </TabSection>
+          </div>
+        </DetailTabPanel>
+
+        {/* BUDGET TAB */}
+        <DetailTabPanel id="budget" activeTab={activeTab}>
+          <div className="space-y-6">
+            {/* Budget Summary */}
+            <TabSection title="Budget Summary">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="p-4 bg-bg-tertiary rounded-lg">
+                  <span className="text-xs text-text-tertiary">Registration</span>
+                  <p className="text-lg font-semibold text-text-primary mt-1">{formatCurrency(show.cost ?? 0)}</p>
+                </div>
+                <div className="p-4 bg-bg-tertiary rounded-lg">
+                  <span className="text-xs text-text-tertiary">Shipping</span>
+                  <p className="text-lg font-semibold text-text-primary mt-1">{formatCurrency(show.shippingCost ?? 0)}</p>
+                </div>
+                <div className="p-4 bg-bg-tertiary rounded-lg">
+                  <span className="text-xs text-text-tertiary">Services</span>
+                  <p className="text-lg font-semibold text-text-primary mt-1">{formatCurrency(totalServicesCost(show))}</p>
+                </div>
+                <div className="p-4 bg-bg-tertiary rounded-lg">
+                  <span className="text-xs text-text-tertiary">Hotel (Est.)</span>
+                  <p className="text-lg font-semibold text-text-primary mt-1">{formatCurrency(estimatedHotelCost(show))}</p>
+                </div>
+              </div>
+              
+              <div className="mt-4 p-4 bg-brand-purple/10 rounded-xl flex justify-between items-center">
+                <span className="font-semibold text-text-primary">Estimated Total</span>
+                <span className="text-2xl font-bold text-brand-purple">{formatCurrency(estimated)}</span>
+              </div>
+            </TabSection>
+
+            {/* Post-Show ROI */}
+            <TabSection title="Post-Show ROI">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input label="Total Leads" type="number" value={show.totalLeads?.toString() ?? ''} onChange={e => updateSelectedShow({ totalLeads: e.target.value ? parseInt(e.target.value) : null })} />
+                <Input label="Qualified Leads" type="number" value={show.qualifiedLeads?.toString() ?? ''} onChange={e => updateSelectedShow({ qualifiedLeads: e.target.value ? parseInt(e.target.value) : null })} />
+                <Input label="Meetings Booked" type="number" value={show.meetingsBooked?.toString() ?? ''} onChange={e => updateSelectedShow({ meetingsBooked: e.target.value ? parseInt(e.target.value) : null })} />
+                <Input label="Deals Won" type="number" value={show.dealsWon?.toString() ?? ''} onChange={e => updateSelectedShow({ dealsWon: e.target.value ? parseInt(e.target.value) : null })} />
+                <Input label="Revenue Attributed" type="number" value={show.revenueAttributed?.toString() ?? ''} onChange={e => updateSelectedShow({ revenueAttributed: e.target.value ? parseFloat(e.target.value) : null })} className="sm:col-span-2" />
+              </div>
+              
+              {(show.totalLeads || show.revenueAttributed) && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
+                  {costPerLead(show) !== null && (
+                    <div className="p-3 bg-bg-tertiary rounded-lg">
+                      <span className="text-xs text-text-tertiary">Cost per Lead</span>
+                      <p className="text-sm font-semibold text-error mt-1">{formatCurrency(costPerLead(show)!)}</p>
+                    </div>
+                  )}
+                  {leadQualificationRate(show) !== null && (
+                    <div className="p-3 bg-bg-tertiary rounded-lg">
+                      <span className="text-xs text-text-tertiary">Qualification Rate</span>
+                      <p className="text-sm font-semibold text-text-primary mt-1">{leadQualificationRate(show)!.toFixed(1)}%</p>
+                    </div>
+                  )}
+                  {dealCloseRate(show) !== null && (
+                    <div className="p-3 bg-bg-tertiary rounded-lg">
+                      <span className="text-xs text-text-tertiary">Deal Close Rate</span>
+                      <p className="text-sm font-semibold text-success mt-1">{dealCloseRate(show)!.toFixed(1)}%</p>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {roi !== null && (
+                <div className={`p-4 rounded-xl mt-4 ${roi >= 0 ? 'bg-success/10' : 'bg-error/10'}`}>
+                  <span className={`text-2xl font-bold ${roi >= 0 ? 'text-success' : 'text-error'}`}>
+                    ROI: {roi >= 0 ? '+' : ''}{roi.toFixed(1)}%
+                  </span>
+                </div>
+              )}
+              
+              <div className="mt-4">
+                <RichTextEditor label="Post-Show Notes" value={show.postShowNotes} onChange={v => updateSelectedShow({ postShowNotes: v || null })} placeholder="Takeaways, lessons learned..." />
+              </div>
+            </TabSection>
+          </div>
+        </DetailTabPanel>
+
+        {/* NOTES & TASKS TAB */}
+        <DetailTabPanel id="notes" activeTab={activeTab}>
+          <div className="space-y-6">
+            {/* Tasks */}
+            <TabSection title="Tasks">
+              <TaskList tradeShowId={show.id} readOnly={!canEdit} />
+            </TabSection>
+
+            {/* Documents */}
+            <TabSection title={`Documents${additionalFiles.length > 0 ? ` (${additionalFiles.length})` : ''}`} icon={Upload}>
+              <FileUploadZone
+                tradeshowId={show.id}
+                files={additionalFiles}
+                onFilesChange={refreshAdditionalFiles}
+                disabled={isNew}
+              />
+              {isNew && (
+                <p className="text-xs text-text-tertiary mt-2">Save the show first to upload files</p>
+              )}
+            </TabSection>
+
+            {/* Activity Timeline */}
+            <TabSection title="Activity & Notes">
+              <ActivityTimeline tradeshowId={show.id} />
+            </TabSection>
+          </div>
+        </DetailTabPanel>
       </div>
 
-      {/* Template Modal */}
+      {/* Modals */}
       <AnimatePresence>
         {showTemplateModal && (
           <TemplateModal
@@ -499,7 +544,6 @@ export default function DetailView() {
         )}
       </AnimatePresence>
 
-      {/* Packing List Modal */}
       <AnimatePresence>
         {showPackingList && (
           <PackingListModal
