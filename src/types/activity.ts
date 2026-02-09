@@ -15,7 +15,7 @@ export interface ActivityItem {
   actorId: string | null;
   
   // Related entities
-  tradeShowId: string | null;
+  tradeShowId: number | null;
   taskId: string | null;
   assetId: string | null;
   
@@ -34,7 +34,7 @@ export interface ActivityItem {
     avatarUrl: string | null;
   };
   tradeShow?: {
-    id: string;
+    id: number;
     name: string;
   };
   

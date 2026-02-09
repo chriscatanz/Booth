@@ -29,14 +29,14 @@ function mapReservation(row: Record<string, unknown>): AssetReservation {
   return {
     id: row.id as string,
     assetId: row.asset_id as string,
-    tradeShowId: row.trade_show_id as string,
+    tradeShowId: row.trade_show_id as number,
     quantityReserved: row.quantity_reserved as number,
     status: row.status as ReservationStatus,
     notes: row.notes as string | null,
     reservedBy: row.reserved_by as string | null,
     reservedAt: row.reserved_at as string,
     tradeShow: tradeShow ? {
-      id: tradeShow.id as string,
+      id: tradeShow.id as number,
       name: tradeShow.name as string,
       startDate: tradeShow.start_date as string,
       endDate: tradeShow.end_date as string,

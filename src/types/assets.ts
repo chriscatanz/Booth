@@ -42,7 +42,7 @@ export interface Asset {
 export interface AssetReservation {
   id: string;
   assetId: string;
-  tradeShowId: string;
+  tradeShowId: number;
   
   quantityReserved: number;
   status: ReservationStatus;
@@ -54,7 +54,7 @@ export interface AssetReservation {
   // Joined data
   asset?: Asset;
   tradeShow?: {
-    id: string;
+    id: number;
     name: string;
     startDate: string;
     endDate: string;

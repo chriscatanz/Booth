@@ -27,7 +27,7 @@ function mapFieldValue(row: Record<string, unknown>): CustomFieldValue {
   return {
     id: row.id as string,
     fieldId: row.field_id as string,
-    tradeShowId: row.trade_show_id as string,
+    tradeShowId: row.trade_show_id as number,
     value: row.value as string | null,
     updatedAt: row.updated_at as string,
     field: field ? mapFieldDefinition(field) : undefined,

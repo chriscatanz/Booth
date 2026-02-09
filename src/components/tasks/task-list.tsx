@@ -15,7 +15,7 @@ import { TaskModal } from './task-modal';
 import { format, isPast, parseISO } from 'date-fns';
 
 interface TaskListProps {
-  tradeShowId: string;
+  tradeShowId: number;
   readOnly?: boolean;
 }
 

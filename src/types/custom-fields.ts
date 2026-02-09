@@ -33,7 +33,7 @@ export interface CustomFieldDefinition {
 export interface CustomFieldValue {
   id: string;
   fieldId: string;
-  tradeShowId: string;
+  tradeShowId: number;
   value: string | null;
   updatedAt: string;
   

@@ -6,7 +6,7 @@ export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 export interface Task {
   id: string;
   organizationId: string;
-  tradeShowId: string | null;
+  tradeShowId: number | null;
   
   // Task details
   title: string;
@@ -35,7 +35,7 @@ export interface Task {
   
   // Joined data
   tradeShow?: {
-    id: string;
+    id: number;
     name: string;
   };
 }
@@ -58,7 +58,7 @@ export interface TaskComment {
 export interface CreateTaskInput {
   title: string;
   description?: string;
-  tradeShowId?: string;
+  tradeShowId?: number;
   assigneeId?: string;
   priority?: TaskPriority;
   dueDate?: string;

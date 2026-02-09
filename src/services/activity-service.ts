@@ -12,7 +12,7 @@ function mapActivity(row: Record<string, unknown>): ActivityItem {
     organizationId: row.organization_id as string,
     type: row.type as ActivityType,
     actorId: row.actor_id as string | null,
-    tradeShowId: row.trade_show_id as string | null,
+    tradeShowId: row.trade_show_id as number | null,
     taskId: row.task_id as string | null,
     assetId: row.asset_id as string | null,
     title: row.title as string,
@@ -26,7 +26,7 @@ function mapActivity(row: Record<string, unknown>): ActivityItem {
       avatarUrl: actor.avatar_url as string | null,
     } : undefined,
     tradeShow: tradeShow ? {
-      id: tradeShow.id as string,
+      id: tradeShow.id as number,
       name: tradeShow.name as string,
     } : undefined,
     reactionCount: row.reaction_count as number | undefined,

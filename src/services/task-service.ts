@@ -10,7 +10,7 @@ function mapTask(row: Record<string, unknown>): Task {
   return {
     id: row.id as string,
     organizationId: row.organization_id as string,
-    tradeShowId: row.trade_show_id as string | null,
+    tradeShowId: row.trade_show_id as number | null,
     title: row.title as string,
     description: row.description as string | null,
     status: row.status as Task['status'],
@@ -29,7 +29,7 @@ function mapTask(row: Record<string, unknown>): Task {
     updatedAt: row.updated_at as string,
     position: row.position as number,
     tradeShow: tradeShow ? {
-      id: tradeShow.id as string,
+      id: tradeShow.id as number,
       name: tradeShow.name as string,
     } : undefined,
   };
@@ -57,7 +57,7 @@ function mapComment(row: Record<string, unknown>): TaskComment {
 // ─── Task CRUD ───────────────────────────────────────────────────────────────
 
 export async function fetchTasks(orgId: string, filters?: {
-  tradeShowId?: string;
+  tradeShowId?: number;
   assigneeId?: string;
   status?: TaskStatus;
 }): Promise<Task[]> {
@@ -89,7 +89,7 @@ export async function fetchTasks(orgId: string, filters?: {
   return (data || []).map(mapTask);
 }
 
-export async function fetchTasksByShow(showId: string): Promise<Task[]> {
+export async function fetchTasksByShow(showId: number): Promise<Task[]> {
   const { data, error } = await supabase
     .from('tasks')
     .select(`

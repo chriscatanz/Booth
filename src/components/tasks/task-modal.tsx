@@ -32,7 +32,7 @@ export function TaskModal({ task, defaultStatus = 'todo', onClose, onSave, onDel
   const [status, setStatus] = useState<TaskStatus>(task?.status || defaultStatus);
   const [priority, setPriority] = useState<TaskPriority>(task?.priority || 'medium');
   const [assigneeId, setAssigneeId] = useState<string>(task?.assigneeId || '');
-  const [tradeShowId, setTradeShowId] = useState<string>(task?.tradeShowId || '');
+  const [tradeShowId, setTradeShowId] = useState<string>(task?.tradeShowId?.toString() || '');
   const [dueDate, setDueDate] = useState(task?.dueDate || '');
   
   const [members, setMembers] = useState<OrganizationMember[]>([]);
@@ -79,7 +79,7 @@ export function TaskModal({ task, defaultStatus = 'todo', onClose, onSave, onDel
         savedTask = await taskService.createTask(organization.id, user.id, {
           title: title.trim(),
           description: description.trim() || undefined,
-          tradeShowId: tradeShowId || undefined,
+          tradeShowId: tradeShowId ? parseInt(tradeShowId, 10) : undefined,
           assigneeId: assigneeId || undefined,
           priority,
           dueDate: dueDate || undefined,
