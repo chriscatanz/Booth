@@ -13,10 +13,11 @@ import { SHOW_STATUSES } from '@/lib/constants';
 import { sidebarItem, staggerContainer } from '@/lib/animations';
 import {
   Search, Plus, Archive, ChevronDown, MapPin, FileStack, X, Calendar,
-  LayoutGrid, List as ListIcon,
+  LayoutGrid, List as ListIcon, Sparkles,
 } from 'lucide-react';
 import { TemplateModal } from '@/components/ui/template-modal';
 import { PermissionGate } from '@/components/auth/permission-gate';
+import { OneClickShow } from '@/components/ai/one-click-show';
 
 type ShowListView = 'list' | 'compact';
 
@@ -40,6 +41,7 @@ export function Sidebar({ onCloseMobile, isMobile }: SidebarProps) {
   const filteredShows = useFilteredShows();
   const locations = uniqueLocations();
   const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [showOneClickModal, setShowOneClickModal] = useState(false);
   const [listView, setListView] = useState<ShowListView>('list');
   const [filtersExpanded, setFiltersExpanded] = useState(false);
 
@@ -173,6 +175,17 @@ export function Sidebar({ onCloseMobile, isMobile }: SidebarProps) {
           >
             <Plus size={14} />
             New Show
+          </motion.button>
+        </PermissionGate>
+        <PermissionGate requires="editor" hideOnly>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowOneClickModal(true)}
+            className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-indigo-500/20 text-purple-400 hover:from-purple-500/30 hover:to-indigo-500/30 transition-colors"
+            title="One Click Show - AI powered"
+          >
+            <Sparkles size={14} />
           </motion.button>
         </PermissionGate>
         <PermissionGate requires="editor" hideOnly>
@@ -341,6 +354,18 @@ export function Sidebar({ onCloseMobile, isMobile }: SidebarProps) {
           />
         )}
       </AnimatePresence>
+
+      {/* One Click Show Modal */}
+      <OneClickShow
+        isOpen={showOneClickModal}
+        onClose={() => setShowOneClickModal(false)}
+        onShowCreated={(showId) => {
+          setShowOneClickModal(false);
+          // Select the newly created show
+          const newShow = filteredShows.find(s => s.id === showId);
+          if (newShow) selectShow(newShow);
+        }}
+      />
     </aside>
   );
 }
