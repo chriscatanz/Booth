@@ -16,7 +16,7 @@ export function middleware(request: NextRequest) {
     "style-src 'self' 'unsafe-inline' https://unpkg.com", // unpkg for Leaflet CSS
     "img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in https://*.openstreetmap.org https://*.tile.openstreetmap.org https://unpkg.com",
     "font-src 'self' data:",
-    "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://nominatim.openstreetmap.org",
+    "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://nominatim.openstreetmap.org https://api.anthropic.com",
     "frame-ancestors 'none'",
     "form-action 'self'",
     "base-uri 'self'",
