@@ -29,15 +29,7 @@ export default function AIView({ onOpenSettings }: AIViewProps) {
 
   // Check if AI is configured
   useEffect(() => {
-    const checkConfig = async () => {
-      try {
-        const configured = await aiService.isAIConfigured();
-        setIsConfigured(configured);
-      } catch {
-        setIsConfigured(false);
-      }
-    };
-    checkConfig();
+    setIsConfigured(aiService.hasApiKey());
   }, []);
 
   const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
