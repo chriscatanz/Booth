@@ -30,7 +30,7 @@ export function AIChatWidget({ isOpen, onClose }: AIChatWidgetProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   
   const organization = useAuthStore((s) => s.organization);
-  const shows = useTradeShowStore((s) => s.shows);
+  const { shows, allAttendees } = useTradeShowStore();
 
   // Load API key status on mount
   useEffect(() => {
@@ -81,10 +81,27 @@ export function AIChatWidget({ isOpen, onClose }: AIChatWidgetProps) {
     setIsLoading(true);
 
     try {
+      // Build attendee context grouped by show
+      const attendeesByShow: Record<string, Array<{ name: string | null; email: string | null; arrivalDate: string | null; departureDate: string | null }>> = {};
+      allAttendees.forEach(a => {
+        const show = shows.find(s => s.id === a.tradeshowId);
+        const showName = show?.name || `Show #${a.tradeshowId}`;
+        if (!attendeesByShow[showName]) {
+          attendeesByShow[showName] = [];
+        }
+        attendeesByShow[showName].push({
+          name: a.name,
+          email: a.email,
+          arrivalDate: a.arrivalDate,
+          departureDate: a.departureDate,
+        });
+      });
+
       // Build show context - pass raw shows array with all fields
       const showContext = shows.length > 0 ? {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         shows: shows as any, // Pass raw shows - they have all fields (boothSize, cost, etc.)
+        attendeesByShow: Object.keys(attendeesByShow).length > 0 ? attendeesByShow : undefined,
       } : undefined;
 
       const response = await aiService.chatWithAssistant({
