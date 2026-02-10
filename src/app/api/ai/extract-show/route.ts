@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import { createClient } from '@/lib/supabase-server';
+import { createClient as createServerClient } from '@/lib/supabase-server';
+import { createClient } from '@supabase/supabase-js';
 
 // Extracted show data structure matching TradeShow fields
 interface ExtractedShowData {
@@ -97,11 +98,38 @@ DOCUMENT:
 
 export async function POST(request: NextRequest) {
   try {
-    // Authenticate user
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // Try SSR-based auth first (for browser requests with cookies)
+    let user = null;
+    let supabase;
+    
+    try {
+      supabase = await createServerClient();
+      const { data, error } = await supabase.auth.getUser();
+      if (!error && data?.user) {
+        user = data.user;
+      }
+    } catch {
+      // SSR client failed, try header-based auth
+    }
 
-    if (authError || !user) {
+    // Fallback to Authorization header
+    if (!user) {
+      const authHeader = request.headers.get('authorization');
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      
+      if (authHeader && supabaseUrl && supabaseAnonKey) {
+        supabase = createClient(supabaseUrl, supabaseAnonKey, {
+          global: { headers: { Authorization: authHeader } },
+        });
+        const { data, error } = await supabase.auth.getUser();
+        if (!error && data?.user) {
+          user = data.user;
+        }
+      }
+    }
+
+    if (!user || !supabase) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
