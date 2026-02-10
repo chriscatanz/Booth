@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { 
   Calendar, DollarSign, Users, BarChart3, 
   Truck, Package, ArrowRight, ArrowLeft,
-  CheckSquare, FileText, ChevronDown, Menu, X
+  CheckSquare, FileText, ChevronDown, Menu, X,
+  Sparkles, FileSpreadsheet, Layers
 } from 'lucide-react';
 
 const FEATURES = [
@@ -59,6 +60,30 @@ const FEATURES = [
     title: 'ROI & Analytics',
     description: 'Finally measure what actually works with real performance data.',
     highlights: ['Cost per lead', 'Revenue attribution', 'Show comparisons'],
+  },
+  {
+    slug: 'ai',
+    icon: Sparkles,
+    color: '#8B5CF6',
+    title: 'AI Assistant',
+    description: 'Generate content, extract data from documents, and chat about your shows.',
+    highlights: ['Content generation', 'Document extraction', 'Show chat'],
+  },
+  {
+    slug: 'import-export',
+    icon: FileSpreadsheet,
+    color: '#059669',
+    title: 'Import & Export',
+    description: 'Migrate from spreadsheets and export reports with full control.',
+    highlights: ['CSV import', 'Custom exports', 'Calendar sync'],
+  },
+  {
+    slug: 'templates',
+    icon: Layers,
+    color: '#F59E0B',
+    title: 'Show Templates',
+    description: 'Save your booth setup once, reuse it for every similar show.',
+    highlights: ['Reusable setups', 'Template library', 'Quick duplication'],
   },
 ];
 

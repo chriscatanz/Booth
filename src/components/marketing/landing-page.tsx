@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { 
   Calendar, DollarSign, Users, BarChart3, 
   CheckCircle, ArrowRight, Truck, FileText,
-  Shield, Zap, Package, ChevronDown, Menu, X
+  Shield, Zap, Package, ChevronDown, Menu, X,
+  Sparkles, FileSpreadsheet, Layers
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PricingSection } from './pricing-section';
@@ -24,6 +25,9 @@ const NAV_FEATURES = [
   { slug: 'logistics', icon: Truck, title: 'Shipping & Logistics', color: '#BF8700' },
   { slug: 'assets', icon: Package, title: 'Asset Management', color: '#CF222E' },
   { slug: 'analytics', icon: BarChart3, title: 'ROI & Analytics', color: '#0969DA' },
+  { slug: 'ai', icon: Sparkles, title: 'AI Assistant', color: '#8B5CF6' },
+  { slug: 'import-export', icon: FileSpreadsheet, title: 'Import & Export', color: '#059669' },
+  { slug: 'templates', icon: Layers, title: 'Show Templates', color: '#F59E0B' },
 ];
 
 export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
@@ -72,6 +76,11 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
       icon: FileText,
       title: 'All Your Documents',
       description: 'Vendor packets, hotel confirmations, booth layouts — attached right to each show.',
+    },
+    {
+      icon: Sparkles,
+      title: 'AI That Actually Helps',
+      description: 'Generate talking points, social posts, follow-up emails, and reports. AI trained on trade show context.',
     },
   ];
 
