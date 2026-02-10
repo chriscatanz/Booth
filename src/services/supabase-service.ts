@@ -269,11 +269,23 @@ export async function fetchTradeShow(id: number): Promise<TradeShow> {
 export async function createTradeShow(show: TradeShow): Promise<TradeShow> {
   // Include org context for new records
   const dbData = mapShowToDB(show, true);
-  const { data, error } = await supabase
+  
+  // Insert without .select() to avoid getting encrypted data back
+  const { data: insertedData, error: insertError } = await supabase
     .from('tradeshows')
     .insert(dbData)
-    .select()
+    .select('id')  // Only get the ID back
     .single();
+  
+  if (insertError) throw new Error(insertError.message);
+  
+  // Fetch the full record from the decrypting view
+  const { data, error } = await supabase
+    .from('v_tradeshows')
+    .select('*')
+    .eq('id', insertedData.id)
+    .single();
+  
   if (error) throw new Error(error.message);
   return mapShowFromDB(data);
 }
