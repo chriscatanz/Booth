@@ -54,12 +54,12 @@ export interface ShowAssistantRequest {
       cost?: number;
     }>;
     currentShow?: Record<string, unknown>;
-    attendees?: Array<{
+    attendeesByShow?: Record<string, Array<{
       name: string | null;
       email: string | null;
       arrivalDate: string | null;
       departureDate: string | null;
-    }>;
+    }>>;
     uploadedDocuments?: string;
   };
 }
@@ -565,11 +565,18 @@ export async function chatWithAssistant(request: ShowAssistantRequest): Promise<
     ? `\n\n**Currently Viewing Show:**\n${JSON.stringify(request.showContext.currentShow, null, 2)}`
     : '';
 
-  const attendeesInfo = request.showContext?.attendees && request.showContext.attendees.length > 0
-    ? `\n\n**Attendees for Current Show:**\n${request.showContext.attendees.map(a => 
-        `- ${a.name || 'Unnamed'}${a.email ? ` (${a.email})` : ''}${a.arrivalDate ? ` - Arrives: ${a.arrivalDate}` : ''}${a.departureDate ? `, Departs: ${a.departureDate}` : ''}`
-      ).join('\n')}`
-    : '';
+  // Build attendees info grouped by show
+  const attendeesByShow = request.showContext?.attendeesByShow;
+  let attendeesInfo = '';
+  if (attendeesByShow && Object.keys(attendeesByShow).length > 0) {
+    const showAttendeesList = Object.entries(attendeesByShow).map(([showName, attendees]) => {
+      const attendeeList = attendees.map(a => 
+        `  - ${a.name || 'Unnamed'}${a.email ? ` (${a.email})` : ''}${a.arrivalDate ? ` - Arrives: ${a.arrivalDate}` : ''}${a.departureDate ? `, Departs: ${a.departureDate}` : ''}`
+      ).join('\n');
+      return `**${showName}:**\n${attendeeList}`;
+    }).join('\n\n');
+    attendeesInfo = `\n\n**Attendees by Show:**\n${showAttendeesList}`;
+  }
 
   // Truncate documents if too long (keep first 20k chars to avoid token limits)
   const docsText = request.showContext?.uploadedDocuments;

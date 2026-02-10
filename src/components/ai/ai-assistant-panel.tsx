@@ -709,7 +709,7 @@ function ShowAssistantChat({ context, uploadedDocuments }: {
   context?: AIAssistantPanelProps['context'];
   uploadedDocuments?: string;
 }) {
-  const { shows, selectedShow, attendees } = useTradeShowStore();
+  const { shows, selectedShow, allAttendees } = useTradeShowStore();
   const [messages, setMessages] = useState<aiService.ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -728,20 +728,27 @@ function ShowAssistantChat({ context, uploadedDocuments }: {
     setIsLoading(true);
 
     try {
-      // Build attendee context for current show
-      const currentShowAttendees = selectedShow 
-        ? attendees.filter(a => a.tradeshowId === selectedShow.id).map(a => ({
-            name: a.name,
-            email: a.email,
-            arrivalDate: a.arrivalDate,
-            departureDate: a.departureDate,
-          }))
-        : [];
+      // Build attendee context for ALL shows (grouped by show)
+      const attendeesByShow: Record<string, Array<{ name: string | null; email: string | null; arrivalDate: string | null; departureDate: string | null }>> = {};
+      
+      allAttendees.forEach(a => {
+        const show = shows.find(s => s.id === a.tradeshowId);
+        const showName = show?.name || `Show #${a.tradeshowId}`;
+        if (!attendeesByShow[showName]) {
+          attendeesByShow[showName] = [];
+        }
+        attendeesByShow[showName].push({
+          name: a.name,
+          email: a.email,
+          arrivalDate: a.arrivalDate,
+          departureDate: a.departureDate,
+        });
+      });
 
       const response = await aiService.chatWithAssistant({
         messages: [...messages, userMessage],
         showContext: {
-          shows: shows.slice(0, 10).map(s => ({
+          shows: shows.map(s => ({
             name: s.name,
             dates: `${s.startDate || 'TBD'} - ${s.endDate || 'TBD'}`,
             location: s.location || 'TBD',
@@ -750,7 +757,7 @@ function ShowAssistantChat({ context, uploadedDocuments }: {
             cost: s.cost || undefined,
           })),
           currentShow: selectedShow ? ({ ...selectedShow } as Record<string, unknown>) : undefined,
-          attendees: currentShowAttendees.length > 0 ? currentShowAttendees : undefined,
+          attendeesByShow: Object.keys(attendeesByShow).length > 0 ? attendeesByShow : undefined,
           uploadedDocuments: uploadedDocuments || undefined,
         },
       });
