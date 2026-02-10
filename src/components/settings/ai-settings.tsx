@@ -21,12 +21,12 @@ export function AISettings() {
   const [isLoading, setIsLoading] = useState(true);
   const [testResult, setTestResult] = useState<{ success: boolean; error?: string } | null>(null);
   
-  const currentOrg = useAuthStore(s => s.currentOrg);
+  const organization = useAuthStore(s => s.organization);
 
   useEffect(() => {
     // Load API key from Supabase on mount
     async function loadKey() {
-      if (!currentOrg?.id) {
+      if (!organization?.id) {
         setIsLoading(false);
         return;
       }
@@ -40,7 +40,7 @@ export function AISettings() {
       }
 
       // Then try loading from DB
-      const key = await aiService.loadApiKeyFromOrg(supabase as Parameters<typeof aiService.loadApiKeyFromOrg>[0], currentOrg.id);
+      const key = await aiService.loadApiKeyFromOrg(supabase as Parameters<typeof aiService.loadApiKeyFromOrg>[0], organization.id);
       if (key) {
         setIsConnected(true);
         setApiKey('••••••••••••••••••••••••••••••••');
@@ -48,10 +48,10 @@ export function AISettings() {
       setIsLoading(false);
     }
     loadKey();
-  }, [currentOrg?.id]);
+  }, [organization?.id]);
 
   const handleSaveKey = async () => {
-    if (!apiKey || apiKey.includes('•') || !currentOrg?.id) return;
+    if (!apiKey || apiKey.includes('•') || !organization?.id) return;
     
     setIsTesting(true);
     setTestResult(null);
@@ -67,7 +67,7 @@ export function AISettings() {
       // Save to Supabase (encrypted)
       const saved = await aiService.saveApiKeyToOrg(
         supabase as Parameters<typeof aiService.saveApiKeyToOrg>[0],
-        currentOrg.id,
+        organization.id,
         apiKey
       );
       
@@ -89,12 +89,12 @@ export function AISettings() {
   };
 
   const handleRemoveKey = async () => {
-    if (!currentOrg?.id) return;
+    if (!organization?.id) return;
     
     // Remove from Supabase
     await aiService.saveApiKeyToOrg(
       supabase as Parameters<typeof aiService.saveApiKeyToOrg>[0],
-      currentOrg.id,
+      organization.id,
       null
     );
     
