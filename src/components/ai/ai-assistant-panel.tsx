@@ -754,33 +754,29 @@ function ShowAssistantChat({ context, uploadedDocuments }: {
         shippingCutoff: s.shippingCutoff,
       })));
 
-      // Build detailed show data - include all fields even if null
-      const detailedShows = shows.map(s => {
-        const show: Record<string, unknown> = {
-          name: s.name,
-          dates: `${s.startDate || 'TBD'} - ${s.endDate || 'TBD'}`,
-          location: s.location || 'TBD',
-          status: s.showStatus || 'Unknown',
-        };
-        // Only include fields that have values to keep context clean
-        if (s.boothNumber) show.boothNumber = s.boothNumber;
-        if (s.boothSize) show.boothSize = s.boothSize;
-        if (s.cost) show.cost = s.cost;
-        if (s.shippingCutoff) show.shippingCutoff = s.shippingCutoff;
-        if (s.shippingInfo) show.shippingInfo = s.shippingInfo;
-        if (s.trackingNumber) show.trackingNumber = s.trackingNumber;
-        if (s.hotelName) show.hotelName = s.hotelName;
-        if (s.hotelConfirmed !== null) show.hotelConfirmed = s.hotelConfirmed;
-        if (s.registrationConfirmed !== null) show.registrationConfirmed = s.registrationConfirmed;
-        if (s.utilitiesBooked !== null) show.utilitiesBooked = s.utilitiesBooked;
-        if (s.laborBooked !== null) show.laborBooked = s.laborBooked;
-        if (s.totalLeads) show.totalLeads = s.totalLeads;
-        if (s.qualifiedLeads) show.qualifiedLeads = s.qualifiedLeads;
-        if (s.generalNotes) show.generalNotes = s.generalNotes;
-        if (s.showContactName) show.showContactName = s.showContactName;
-        if (s.showContactEmail) show.showContactEmail = s.showContactEmail;
-        return show;
-      });
+      // Build detailed show data - include ALL fields for debugging
+      const detailedShows = shows.map(s => ({
+        name: s.name,
+        dates: `${s.startDate || 'TBD'} - ${s.endDate || 'TBD'}`,
+        location: s.location || 'TBD',
+        status: s.showStatus || 'Unknown',
+        boothNumber: s.boothNumber,
+        boothSize: s.boothSize,
+        cost: s.cost,
+        shippingCutoff: s.shippingCutoff,
+        shippingInfo: s.shippingInfo,
+        trackingNumber: s.trackingNumber,
+        hotelName: s.hotelName,
+        hotelConfirmed: s.hotelConfirmed,
+        registrationConfirmed: s.registrationConfirmed,
+        utilitiesBooked: s.utilitiesBooked,
+        laborBooked: s.laborBooked,
+        totalLeads: s.totalLeads,
+        qualifiedLeads: s.qualifiedLeads,
+        generalNotes: s.generalNotes,
+        showContactName: s.showContactName,
+        showContactEmail: s.showContactEmail,
+      }));
 
       console.log('[ShowAssistantChat] Detailed shows sample:', JSON.stringify(detailedShows[0], null, 2));
 
