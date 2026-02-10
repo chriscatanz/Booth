@@ -307,13 +307,30 @@ function ContentGenerator({ context }: { context?: AIAssistantPanelProps['contex
 }
 
 // Document Analyzer Tab
+interface UploadedFile {
+  name: string;
+  text: string;
+  error?: string;
+  isLoading?: boolean;
+}
+
+interface AnalysisProgress {
+  current: number;
+  total: number;
+  stage: string;
+}
+
 function DocumentAnalyzer() {
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [documentText, setDocumentText] = useState('');
   const [analysisType, setAnalysisType] = useState<aiService.DocumentAnalysisRequest['analysisType']>('extract_deadlines');
   const [customQuery, setCustomQuery] = useState('');
   const [result, setResult] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [progress, setProgress] = useState<AnalysisProgress | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const analysisTypes: { id: aiService.DocumentAnalysisRequest['analysisType']; label: string }[] = [
@@ -323,18 +340,103 @@ function DocumentAnalyzer() {
     { id: 'custom', label: 'Ask a Question' },
   ];
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const supportedExtensions = '.pdf,.doc,.docx,.txt,.rtf,.md';
 
-    // For now, only handle text files. PDF would need a parser.
-    if (file.type === 'text/plain' || file.name.endsWith('.txt') || file.name.endsWith('.md')) {
-      const text = await file.text();
-      setDocumentText(text);
-    } else {
-      // For other files, show a message
-      setDocumentText('[PDF parsing coming soon - please paste the text content for now]');
+  // Combine uploaded file texts for analysis
+  useEffect(() => {
+    const combinedText = uploadedFiles
+      .filter(f => f.text && !f.error)
+      .map(f => `--- ${f.name} ---\n${f.text}`)
+      .join('\n\n');
+    setDocumentText(combinedText);
+  }, [uploadedFiles]);
+
+  const parseFiles = async (files: File[]) => {
+    if (files.length === 0) return;
+
+    setIsUploading(true);
+
+    // Add files to state with loading status
+    const newFiles: UploadedFile[] = files.map(f => ({
+      name: f.name,
+      text: '',
+      isLoading: true,
+    }));
+    setUploadedFiles(prev => [...prev, ...newFiles]);
+
+    try {
+      const formData = new FormData();
+      files.forEach(file => formData.append('files', file));
+
+      const response = await fetch('/api/documents/parse', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || 'Failed to parse files');
+      }
+
+      const data = await response.json();
+      
+      // Update files with parsed content
+      setUploadedFiles(prev => {
+        const updated = [...prev];
+        data.documents.forEach((doc: { filename: string; text: string; error?: string }) => {
+          const idx = updated.findIndex(f => f.name === doc.filename && f.isLoading);
+          if (idx !== -1) {
+            updated[idx] = {
+              name: doc.filename,
+              text: doc.text,
+              error: doc.error,
+              isLoading: false,
+            };
+          }
+        });
+        return updated;
+      });
+    } catch (err) {
+      // Mark all new files as failed
+      setUploadedFiles(prev => prev.map(f => 
+        f.isLoading ? { ...f, isLoading: false, error: err instanceof Error ? err.message : 'Parse failed' } : f
+      ));
     }
+
+    setIsUploading(false);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    await parseFiles(files);
+    // Reset input so same file can be uploaded again
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = Array.from(e.dataTransfer.files);
+    await parseFiles(files);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const clearAllFiles = () => {
+    setUploadedFiles([]);
+    setDocumentText('');
   };
 
   const handleAnalyze = async () => {
@@ -342,12 +444,17 @@ function DocumentAnalyzer() {
     
     setIsAnalyzing(true);
     setResult('');
+    setProgress(null);
+    
+    // Check if this is a large document that will be chunked
+    const isLargeDoc = documentText.length > 40000;
     
     try {
       const analysis = await aiService.analyzeDocument({
         documentText,
         analysisType,
         customQuery: analysisType === 'custom' ? customQuery : undefined,
+        onProgress: isLargeDoc ? (p) => setProgress(p) : undefined,
       });
       setResult(analysis);
     } catch (err) {
@@ -355,6 +462,7 @@ function DocumentAnalyzer() {
     }
     
     setIsAnalyzing(false);
+    setProgress(null);
   };
 
   const handleCopy = () => {
@@ -363,47 +471,111 @@ function DocumentAnalyzer() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const getFileIcon = (filename: string) => {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    if (ext === 'pdf') return '📄';
+    if (ext === 'doc' || ext === 'docx') return '📝';
+    if (ext === 'rtf') return '📃';
+    return '📋';
+  };
+
   return (
     <div className="flex flex-col h-full">
       <div className="p-4 border-b border-border space-y-3">
-        {/* Document Input */}
+        {/* Drop Zone & File List */}
         <div>
-          <div className="flex items-center justify-between mb-1">
-            <label className="text-sm font-medium text-text-primary">Document Content</label>
-            <div className="flex gap-2">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".txt,.md,.pdf"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm font-medium text-text-primary">Documents</label>
+            {uploadedFiles.length > 0 && (
               <button
-                onClick={() => fileInputRef.current?.click()}
-                className="text-xs text-brand-purple hover:underline flex items-center gap-1"
+                onClick={clearAllFiles}
+                className="text-xs text-text-tertiary hover:text-error flex items-center gap-1"
               >
-                <FileUp size={12} />
-                Upload
+                <Trash2 size={12} />
+                Clear All
               </button>
-              {documentText && (
-                <button
-                  onClick={() => setDocumentText('')}
-                  className="text-xs text-text-tertiary hover:text-error flex items-center gap-1"
-                >
-                  <Trash2 size={12} />
-                  Clear
-                </button>
-              )}
-            </div>
+            )}
           </div>
-          <textarea
-            value={documentText}
-            onChange={(e) => setDocumentText(e.target.value)}
-            placeholder="Paste exhibitor manual, contract, or other document text here..."
-            className="w-full px-3 py-2 rounded-lg bg-bg-tertiary border border-border text-sm text-text-primary placeholder:text-text-tertiary resize-none focus:outline-none focus:border-brand-purple"
-            rows={4}
-          />
+          
+          {/* Drop Zone */}
+          <div
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onClick={() => fileInputRef.current?.click()}
+            className={cn(
+              'relative border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-all',
+              isDragging
+                ? 'border-brand-purple bg-brand-purple/10'
+                : 'border-border hover:border-brand-purple/50 bg-bg-tertiary'
+            )}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={supportedExtensions}
+              multiple
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+            <FileUp size={24} className={cn('mx-auto mb-2', isDragging ? 'text-brand-purple' : 'text-text-tertiary')} />
+            <p className="text-sm text-text-secondary">
+              {isDragging ? 'Drop files here' : 'Drag & drop files or click to browse'}
+            </p>
+            <p className="text-xs text-text-tertiary mt-1">
+              PDF, DOCX, DOC, TXT, RTF, MD (max 20MB each)
+            </p>
+          </div>
+
+          {/* Uploaded Files List */}
+          {uploadedFiles.length > 0 && (
+            <div className="mt-3 space-y-2 max-h-32 overflow-auto">
+              {uploadedFiles.map((file, idx) => (
+                <div
+                  key={`${file.name}-${idx}`}
+                  className={cn(
+                    'flex items-center justify-between px-3 py-2 rounded-lg text-sm',
+                    file.error ? 'bg-error/10 text-error' : 'bg-bg-tertiary text-text-primary'
+                  )}
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span>{getFileIcon(file.name)}</span>
+                    <span className="truncate">{file.name}</span>
+                    {file.isLoading && <Loader2 size={14} className="animate-spin text-brand-purple" />}
+                    {file.error && <span className="text-xs text-error">({file.error})</span>}
+                    {file.text && !file.error && (
+                      <span className="text-xs text-text-tertiary">
+                        ({(file.text.length / 1000).toFixed(1)}k chars)
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); removeFile(idx); }}
+                    className="p-1 hover:bg-surface rounded"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
+
+        {/* Manual Text Input (collapsible) */}
+        {uploadedFiles.length === 0 && (
+          <div>
+            <label className="block text-xs font-medium text-text-secondary mb-1">
+              Or paste text directly
+            </label>
+            <textarea
+              value={documentText}
+              onChange={(e) => setDocumentText(e.target.value)}
+              placeholder="Paste exhibitor manual, contract, or other document text here..."
+              className="w-full px-3 py-2 rounded-lg bg-bg-tertiary border border-border text-sm text-text-primary placeholder:text-text-tertiary resize-none focus:outline-none focus:border-brand-purple"
+              rows={3}
+            />
+          </div>
+        )}
 
         {/* Analysis Type */}
         <div className="flex gap-2 flex-wrap">
@@ -429,25 +601,56 @@ function DocumentAnalyzer() {
             type="text"
             value={customQuery}
             onChange={(e) => setCustomQuery(e.target.value)}
-            placeholder="What would you like to know about this document?"
+            placeholder="What would you like to know about these documents?"
             className="w-full px-3 py-2 rounded-lg bg-bg-tertiary border border-border text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-brand-purple"
           />
         )}
 
+        {/* Large document indicator */}
+        {documentText.length > 40000 && !isAnalyzing && (
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-brand-purple/10 text-brand-purple text-xs">
+            <Sparkles size={14} />
+            <span>Large document detected ({(documentText.length / 1000).toFixed(0)}k chars) — will process in sections for better accuracy</span>
+          </div>
+        )}
+
+        {/* Progress bar for chunked processing */}
+        {progress && progress.total > 1 && (
+          <div className="space-y-1">
+            <div className="flex justify-between text-xs text-text-secondary">
+              <span>{progress.stage}</span>
+              <span>{Math.round((progress.current / progress.total) * 100)}%</span>
+            </div>
+            <div className="h-1.5 bg-bg-tertiary rounded-full overflow-hidden">
+              <motion.div 
+                className="h-full bg-brand-purple"
+                initial={{ width: 0 }}
+                animate={{ width: `${(progress.current / progress.total) * 100}%` }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+          </div>
+        )}
+
         <Button 
           onClick={handleAnalyze} 
-          disabled={isAnalyzing || !documentText.trim()}
+          disabled={isAnalyzing || isUploading || !documentText.trim()}
           className="w-full"
         >
           {isAnalyzing ? (
             <>
               <Loader2 size={16} className="animate-spin" />
-              Analyzing...
+              {progress ? progress.stage : 'Analyzing...'}
+            </>
+          ) : isUploading ? (
+            <>
+              <Loader2 size={16} className="animate-spin" />
+              Processing files...
             </>
           ) : (
             <>
               <FileText size={16} />
-              Analyze Document
+              Analyze {uploadedFiles.length > 1 ? `${uploadedFiles.length} Documents` : 'Document'}
             </>
           )}
         </Button>
@@ -481,7 +684,8 @@ function DocumentAnalyzer() {
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-center text-text-tertiary">
             <FileText size={32} className="mb-2 opacity-50" />
-            <p className="text-sm">Paste or upload a document to analyze</p>
+            <p className="text-sm">Upload or paste documents to analyze</p>
+            <p className="text-xs mt-1 opacity-75">Supports PDF, Word, RTF, TXT, and Markdown</p>
           </div>
         )}
       </div>

@@ -29,7 +29,13 @@ export interface DocumentAnalysisRequest {
   documentText: string;
   analysisType: 'extract_deadlines' | 'summarize' | 'extract_requirements' | 'custom';
   customQuery?: string;
+  onProgress?: (progress: { current: number; total: number; stage: string }) => void;
 }
+
+// Chunking configuration
+const CHUNK_THRESHOLD = 40000; // ~10k tokens, start chunking above this
+const CHUNK_SIZE = 30000; // ~7.5k tokens per chunk
+const CHUNK_OVERLAP = 500; // Overlap to maintain context
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -254,18 +260,185 @@ Format as a clean checklist with checkboxes (- [ ]).`,
 }
 
 /**
- * Document Intelligence
+ * Split text into overlapping chunks
+ */
+function chunkDocument(text: string): string[] {
+  const chunks: string[] = [];
+  let start = 0;
+  
+  while (start < text.length) {
+    let end = start + CHUNK_SIZE;
+    
+    // Try to break at a paragraph or sentence boundary
+    if (end < text.length) {
+      // Look for paragraph break
+      const paragraphBreak = text.lastIndexOf('\n\n', end);
+      if (paragraphBreak > start + CHUNK_SIZE * 0.7) {
+        end = paragraphBreak;
+      } else {
+        // Look for sentence break
+        const sentenceBreak = text.lastIndexOf('. ', end);
+        if (sentenceBreak > start + CHUNK_SIZE * 0.7) {
+          end = sentenceBreak + 1;
+        }
+      }
+    }
+    
+    chunks.push(text.slice(start, end).trim());
+    start = end - CHUNK_OVERLAP;
+    
+    // Avoid infinite loop on very long unbreakable content
+    if (start <= chunks.length * CHUNK_SIZE * 0.5) {
+      start = end;
+    }
+  }
+  
+  return chunks.filter(c => c.length > 100); // Filter out tiny fragments
+}
+
+/**
+ * Get chunk-specific prompts for each analysis type
+ */
+function getChunkPrompt(analysisType: DocumentAnalysisRequest['analysisType'], chunkText: string, chunkIndex: number, totalChunks: number, customQuery?: string): string {
+  const chunkInfo = `[Analyzing section ${chunkIndex + 1} of ${totalChunks}]`;
+  
+  const prompts: Record<DocumentAnalysisRequest['analysisType'], string> = {
+    extract_deadlines: `${chunkInfo}
+
+Extract ALL deadlines, dates, and time-sensitive requirements from this section of a trade show document.
+
+Document Section:
+${chunkText}
+
+List each deadline with:
+- Date/Deadline
+- What it's for
+- Any penalties mentioned
+
+Only include items actually found in this section.`,
+
+    summarize: `${chunkInfo}
+
+Extract the KEY information from this section of a trade show document.
+
+Document Section:
+${chunkText}
+
+List:
+- Main topics covered
+- Important requirements
+- Key facts/numbers
+- Contacts mentioned
+
+Be concise - focus on what matters most for an exhibitor.`,
+
+    extract_requirements: `${chunkInfo}
+
+Extract all requirements, rules, and specifications from this section.
+
+Document Section:
+${chunkText}
+
+Include any requirements related to:
+- Booth setup
+- Electrical/utilities
+- Shipping/drayage
+- Badges/registration
+- Prohibited items
+- Insurance/liability
+
+Only include items actually in this section.`,
+
+    custom: `${chunkInfo}
+
+Based on this section, find information relevant to: ${customQuery}
+
+Document Section:
+${chunkText}
+
+If this section contains relevant information, summarize it. If not, say "No relevant information in this section."`,
+  };
+  
+  return prompts[analysisType];
+}
+
+/**
+ * Get merge prompt to combine chunk results
+ */
+function getMergePrompt(analysisType: DocumentAnalysisRequest['analysisType'], chunkResults: string[], customQuery?: string): string {
+  const combined = chunkResults.map((r, i) => `--- Section ${i + 1} Results ---\n${r}`).join('\n\n');
+  
+  const prompts: Record<DocumentAnalysisRequest['analysisType'], string> = {
+    extract_deadlines: `I've analyzed a large document in sections. Here are the deadlines found in each section:
+
+${combined}
+
+Now create a FINAL consolidated list of all deadlines:
+1. Remove duplicates (same deadline mentioned in multiple sections)
+2. Sort chronologically from soonest to latest
+3. Format cleanly with date, description, and any penalties
+
+Provide the final, deduplicated, sorted list.`,
+
+    summarize: `I've analyzed a large document in sections. Here are the key points from each:
+
+${combined}
+
+Now create a FINAL executive summary:
+1. One-paragraph overview
+2. Key requirements (deduplicated bullet points)
+3. Important contacts/resources
+4. Notable policies or restrictions
+
+Synthesize into a cohesive summary, removing redundancy.`,
+
+    extract_requirements: `I've analyzed a large document in sections. Here are the requirements from each:
+
+${combined}
+
+Now create a FINAL consolidated requirements list:
+1. Merge and deduplicate requirements
+2. Categorize into: Booth Setup, Electrical/Utility, Shipping/Drayage, Badges/Registration, Prohibited Items, Insurance/Liability
+3. Remove redundant items
+
+Provide the complete, organized requirements list.`,
+
+    custom: `I've searched a large document in sections for: "${customQuery}"
+
+Here's what was found in each section:
+${combined}
+
+Now provide a FINAL consolidated answer:
+1. Combine all relevant findings
+2. Remove redundant information
+3. Give a clear, direct answer
+
+If nothing relevant was found, say so clearly.`,
+  };
+  
+  return prompts[analysisType];
+}
+
+/**
+ * Document Intelligence - with hierarchical chunking for large documents
  */
 export async function analyzeDocument(request: DocumentAnalysisRequest): Promise<string> {
   if (!currentOrgId) {
     throw new Error('Organization not set. Please reload the page.');
   }
 
-  const prompts: Record<DocumentAnalysisRequest['analysisType'], string> = {
-    extract_deadlines: `Analyze this trade show document and extract ALL deadlines, dates, and time-sensitive requirements.
+  const { documentText, analysisType, customQuery, onProgress } = request;
+  const systemPrompt = 'You are an expert at analyzing trade show and exhibitor documents. Be thorough and precise.';
+
+  // Check if document is small enough for direct processing
+  if (documentText.length <= CHUNK_THRESHOLD) {
+    onProgress?.({ current: 1, total: 1, stage: 'Analyzing document...' });
+    
+    const prompts: Record<DocumentAnalysisRequest['analysisType'], string> = {
+      extract_deadlines: `Analyze this trade show document and extract ALL deadlines, dates, and time-sensitive requirements.
 
 Document:
-${request.documentText}
+${documentText}
 
 Format the output as a structured list with:
 - Date/Deadline
@@ -274,10 +447,10 @@ Format the output as a structured list with:
 
 Sort chronologically from soonest to latest.`,
 
-    summarize: `Summarize this trade show document, highlighting the most important information for an exhibitor.
+      summarize: `Summarize this trade show document, highlighting the most important information for an exhibitor.
 
 Document:
-${request.documentText}
+${documentText}
 
 Provide:
 1. One-paragraph executive summary
@@ -285,10 +458,10 @@ Provide:
 3. Important contacts/resources mentioned
 4. Any notable policies or restrictions`,
 
-    extract_requirements: `Extract all requirements, rules, and specifications from this exhibitor document.
+      extract_requirements: `Extract all requirements, rules, and specifications from this exhibitor document.
 
 Document:
-${request.documentText}
+${documentText}
 
 Categorize into:
 1. Booth Setup Requirements
@@ -300,19 +473,56 @@ Categorize into:
 
 Be thorough - exhibitors need to know everything required of them.`,
 
-    custom: `Analyze this document and answer the following question:
+      custom: `Analyze this document and answer the following question:
 
-Question: ${request.customQuery}
+Question: ${customQuery}
 
 Document:
-${request.documentText}
+${documentText}
 
 Provide a clear, direct answer based only on information in the document. If the information isn't in the document, say so.`,
-  };
+    };
 
-  const systemPrompt = 'You are an expert at analyzing trade show and exhibitor documents.';
+    return callAIAPI(prompts[analysisType], systemPrompt, currentOrgId);
+  }
 
-  return callAIAPI(prompts[request.analysisType], systemPrompt, currentOrgId);
+  // Large document - use hierarchical chunking
+  const chunks = chunkDocument(documentText);
+  const totalSteps = chunks.length + 1; // chunks + merge step
+  
+  onProgress?.({ current: 0, total: totalSteps, stage: `Processing ${chunks.length} sections...` });
+
+  // Process chunks in parallel (batch of 3 to avoid rate limits)
+  const chunkResults: string[] = [];
+  const batchSize = 3;
+  
+  for (let i = 0; i < chunks.length; i += batchSize) {
+    const batch = chunks.slice(i, i + batchSize);
+    const batchPromises = batch.map((chunk, batchIndex) => {
+      const chunkIndex = i + batchIndex;
+      const prompt = getChunkPrompt(analysisType, chunk, chunkIndex, chunks.length, customQuery);
+      return callAIAPI(prompt, systemPrompt, currentOrgId!);
+    });
+    
+    const batchResults = await Promise.all(batchPromises);
+    chunkResults.push(...batchResults);
+    
+    onProgress?.({ 
+      current: Math.min(i + batchSize, chunks.length), 
+      total: totalSteps, 
+      stage: `Analyzed ${Math.min(i + batchSize, chunks.length)} of ${chunks.length} sections` 
+    });
+  }
+
+  // Merge results
+  onProgress?.({ current: chunks.length, total: totalSteps, stage: 'Consolidating results...' });
+  
+  const mergePrompt = getMergePrompt(analysisType, chunkResults, customQuery);
+  const finalResult = await callAIAPI(mergePrompt, systemPrompt, currentOrgId);
+  
+  onProgress?.({ current: totalSteps, total: totalSteps, stage: 'Complete' });
+  
+  return finalResult;
 }
 
 /**
