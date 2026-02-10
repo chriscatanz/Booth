@@ -249,6 +249,7 @@ export default function CSVImportModal({ onClose, onImported }: CSVImportModalPr
           departureDate: att.departureDate || null,
           flightCost: att.flightCost || null,
           flightConfirmation: att.flightConfirmation || null,
+          localId: crypto.randomUUID(),
         }));
         await saveAttendees(attendeeRecords, showId);
         attendeesImported += attendeeRecords.length;
