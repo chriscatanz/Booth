@@ -745,32 +745,41 @@ function ShowAssistantChat({ context, uploadedDocuments }: {
         });
       });
 
+      // Build detailed show data - include all fields even if null
+      const detailedShows = shows.map(s => {
+        const show: Record<string, unknown> = {
+          name: s.name,
+          dates: `${s.startDate || 'TBD'} - ${s.endDate || 'TBD'}`,
+          location: s.location || 'TBD',
+          status: s.showStatus || 'Unknown',
+        };
+        // Only include fields that have values to keep context clean
+        if (s.boothNumber) show.boothNumber = s.boothNumber;
+        if (s.boothSize) show.boothSize = s.boothSize;
+        if (s.cost) show.cost = s.cost;
+        if (s.shippingCutoff) show.shippingCutoff = s.shippingCutoff;
+        if (s.shippingInfo) show.shippingInfo = s.shippingInfo;
+        if (s.trackingNumber) show.trackingNumber = s.trackingNumber;
+        if (s.hotelName) show.hotelName = s.hotelName;
+        if (s.hotelConfirmed !== null) show.hotelConfirmed = s.hotelConfirmed;
+        if (s.registrationConfirmed !== null) show.registrationConfirmed = s.registrationConfirmed;
+        if (s.utilitiesBooked !== null) show.utilitiesBooked = s.utilitiesBooked;
+        if (s.laborBooked !== null) show.laborBooked = s.laborBooked;
+        if (s.totalLeads) show.totalLeads = s.totalLeads;
+        if (s.qualifiedLeads) show.qualifiedLeads = s.qualifiedLeads;
+        if (s.generalNotes) show.generalNotes = s.generalNotes;
+        if (s.showContactName) show.showContactName = s.showContactName;
+        if (s.showContactEmail) show.showContactEmail = s.showContactEmail;
+        return show;
+      });
+
+      console.log('[ShowAssistantChat] Detailed shows sample:', JSON.stringify(detailedShows[0], null, 2));
+
       const response = await aiService.chatWithAssistant({
         messages: [...messages, userMessage],
         showContext: {
-          // Include detailed info for ALL shows
-          shows: shows.map(s => ({
-            name: s.name,
-            dates: `${s.startDate || 'TBD'} - ${s.endDate || 'TBD'}`,
-            location: s.location || 'TBD',
-            status: s.showStatus || 'Unknown',
-            boothNumber: s.boothNumber || undefined,
-            boothSize: s.boothSize || undefined,
-            cost: s.cost || undefined,
-            shippingCutoff: s.shippingCutoff || undefined,
-            shippingInfo: s.shippingInfo || undefined,
-            trackingNumber: s.trackingNumber || undefined,
-            hotelName: s.hotelName || undefined,
-            hotelConfirmed: s.hotelConfirmed || undefined,
-            registrationConfirmed: s.registrationConfirmed || undefined,
-            utilitiesBooked: s.utilitiesBooked || undefined,
-            laborBooked: s.laborBooked || undefined,
-            totalLeads: s.totalLeads || undefined,
-            qualifiedLeads: s.qualifiedLeads || undefined,
-            generalNotes: s.generalNotes || undefined,
-            showContactName: s.showContactName || undefined,
-            showContactEmail: s.showContactEmail || undefined,
-          })),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          shows: detailedShows as any,
           currentShow: selectedShow ? ({ ...selectedShow } as Record<string, unknown>) : undefined,
           attendeesByShow: Object.keys(attendeesByShow).length > 0 ? attendeesByShow : undefined,
           uploadedDocuments: uploadedDocuments || undefined,
