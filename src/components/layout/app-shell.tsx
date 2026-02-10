@@ -29,6 +29,7 @@ import { OrgSettingsModal } from '@/components/settings';
 import { WelcomeWizard } from '@/components/onboarding';
 import { useAuthStore } from '@/store/auth-store';
 import { AIAssistantPanel } from '@/components/ai/ai-assistant-panel';
+import { AIChatBubble } from '@/components/ai/ai-chat-bubble';
 
 const pageVariants = {
   initial: { opacity: 0, y: 8 },
@@ -385,6 +386,9 @@ export function AppShell() {
             : undefined,
         } : undefined}
       />
+
+      {/* Floating AI Chat Bubble */}
+      <AIChatBubble />
     </div>
   );
 }
