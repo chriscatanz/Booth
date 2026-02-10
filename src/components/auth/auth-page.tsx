@@ -1,18 +1,23 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LoginForm } from './login-form';
 import { SignUpForm } from './signup-form';
 import { ForgotPasswordForm } from './forgot-password-form';
 import { LandingPage } from '@/components/marketing/landing-page';
+import { useToastStore } from '@/store/toast-store';
 
 type AuthView = 'landing' | 'login' | 'signup' | 'forgot-password';
 
 export function AuthPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const toast = useToastStore();
   const returnTo = searchParams.get('returnTo');
+  const authConfirmed = searchParams.get('auth_confirmed');
+  const authError = searchParams.get('auth_error');
   
   // Skip landing page if coming from invite flow or has pending invite
   // Default to signup since most invited users are new
@@ -22,11 +27,33 @@ export function AuthPage() {
       if (returnTo === 'invite' || hasPendingInvite) {
         return 'signup';
       }
+      // Go directly to login if email was just confirmed
+      if (authConfirmed === 'true') {
+        return 'login';
+      }
     }
     return 'landing';
   };
   
   const [view, setView] = useState<AuthView>(getInitialView);
+  
+  // Handle auth confirmation/error messages
+  useEffect(() => {
+    if (authConfirmed === 'true') {
+      toast.success('Email confirmed! You can now sign in.');
+      // Clean up the URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete('auth_confirmed');
+      router.replace(url.pathname + url.search, { scroll: false });
+    }
+    if (authError) {
+      toast.error(`Authentication error: ${authError}`);
+      // Clean up the URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete('auth_error');
+      router.replace(url.pathname + url.search, { scroll: false });
+    }
+  }, [authConfirmed, authError, toast, router]);
 
   // Show landing page first
   if (view === 'landing') {

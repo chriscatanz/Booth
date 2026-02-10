@@ -70,11 +70,15 @@ function mapInvitation(row: Record<string, unknown>): Invitation {
 // ─── Auth Methods ────────────────────────────────────────────────────────────
 
 export async function signUp(email: string, password: string, fullName?: string) {
+  // Get the current origin for redirect
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: { full_name: fullName },
+      emailRedirectTo: `${origin}/auth/callback`,
     },
   });
   if (error) throw new Error(error.message);
