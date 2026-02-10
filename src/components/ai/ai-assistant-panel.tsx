@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import * as aiService from '@/services/ai-service';
 import { useTradeShowStore } from '@/store/trade-show-store';
 import { useAuthStore } from '@/store/auth-store';
+import { supabase } from '@/lib/supabase';
 
 interface AIAssistantPanelProps {
   isOpen: boolean;
@@ -32,14 +33,32 @@ type Tab = 'content' | 'document' | 'chat';
 export function AIAssistantPanel({ isOpen, onClose, onOpenSettings, initialTab = 'content', context }: AIAssistantPanelProps) {
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [hasApiKey, setHasApiKey] = useState(false);
+  const [isLoadingKey, setIsLoadingKey] = useState(false);
   const organization = useAuthStore((s) => s.organization);
 
   useEffect(() => {
-    // Set org context for AI service
-    if (organization?.id) {
+    // Set org context and load API key status when panel opens
+    async function loadKeyStatus() {
+      if (!organization?.id || !isOpen) return;
+      
       aiService.setCurrentOrg(organization.id);
+      
+      // If key not already loaded, fetch from database
+      if (!aiService.isKeyLoadedFromDb()) {
+        setIsLoadingKey(true);
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await aiService.loadApiKeyFromOrg(supabase as any, organization.id);
+        } catch (e) {
+          console.error('Failed to load AI key status:', e);
+        }
+        setIsLoadingKey(false);
+      }
+      
+      setHasApiKey(aiService.hasApiKey());
     }
-    setHasApiKey(aiService.hasApiKey());
+    
+    loadKeyStatus();
   }, [isOpen, organization?.id]);
 
   useEffect(() => {
