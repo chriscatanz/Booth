@@ -270,14 +270,24 @@ export async function createTradeShow(show: TradeShow): Promise<TradeShow> {
   // Include org context for new records
   const dbData = mapShowToDB(show, true);
   
+  // Remove undefined values (Supabase doesn't like them)
+  const cleanData = Object.fromEntries(
+    Object.entries(dbData).filter(([, v]) => v !== undefined)
+  );
+  
+  console.log('[createTradeShow] Inserting:', JSON.stringify(cleanData, null, 2));
+  
   // Insert without .select() to avoid getting encrypted data back
   const { data: insertedData, error: insertError } = await supabase
     .from('tradeshows')
-    .insert(dbData)
+    .insert(cleanData)
     .select('id')  // Only get the ID back
     .single();
   
-  if (insertError) throw new Error(insertError.message);
+  if (insertError) {
+    console.error('[createTradeShow] Insert error:', insertError);
+    throw new Error(`Insert failed: ${insertError.message} (code: ${insertError.code}, details: ${insertError.details})`);
+  }
   
   // Fetch the full record from the decrypting view
   const { data, error } = await supabase
