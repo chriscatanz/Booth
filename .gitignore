@@ -28,6 +28,13 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# environment files
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)

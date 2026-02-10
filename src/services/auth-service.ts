@@ -297,29 +297,34 @@ export async function fetchInvitationByToken(token: string): Promise<Invitation 
   return mapInvitation(data);
 }
 
-export async function acceptInvitation(token: string, userId: string): Promise<void> {
-  // Get invitation
-  const invitation = await fetchInvitationByToken(token);
-  if (!invitation) throw new Error('Invalid or expired invitation');
+interface AcceptInvitationResult {
+  success: boolean;
+  organization_id: string | null;
+  role: string | null;
+  error: string | null;
+}
 
-  // Add as member
-  const { error: memberError } = await supabase
-    .from('organization_members')
-    .insert({
-      organization_id: invitation.organizationId,
-      user_id: userId,
-      role: invitation.role,
-      invited_by: invitation.invitedBy,
-      joined_at: new Date().toISOString(),
-    });
-  if (memberError) throw new Error(memberError.message);
+export async function acceptInvitation(token: string, userId: string): Promise<{ organizationId: string; role: string }> {
+  // Use atomic database function to prevent race conditions
+  const { data, error } = await supabase
+    .rpc('accept_invitation', {
+      p_token: token,
+      p_user_id: userId
+    })
+    .single<AcceptInvitationResult>();
 
-  // Mark invitation as accepted
-  const { error: updateError } = await supabase
-    .from('invitations')
-    .update({ accepted_at: new Date().toISOString() })
-    .eq('id', invitation.id);
-  if (updateError) throw new Error(updateError.message);
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data || !data.success) {
+    throw new Error(data?.error || 'Failed to accept invitation');
+  }
+
+  return {
+    organizationId: data.organization_id!,
+    role: data.role!
+  };
 }
 
 export async function deleteInvitation(invitationId: string): Promise<void> {

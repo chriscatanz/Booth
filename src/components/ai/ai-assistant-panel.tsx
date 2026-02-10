@@ -11,6 +11,7 @@ import {
 import { cn } from '@/lib/utils';
 import * as aiService from '@/services/ai-service';
 import { useTradeShowStore } from '@/store/trade-show-store';
+import { useAuthStore } from '@/store/auth-store';
 
 interface AIAssistantPanelProps {
   isOpen: boolean;
@@ -31,10 +32,15 @@ type Tab = 'content' | 'document' | 'chat';
 export function AIAssistantPanel({ isOpen, onClose, onOpenSettings, initialTab = 'content', context }: AIAssistantPanelProps) {
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [hasApiKey, setHasApiKey] = useState(false);
+  const organization = useAuthStore((s) => s.organization);
 
   useEffect(() => {
+    // Set org context for AI service
+    if (organization?.id) {
+      aiService.setCurrentOrg(organization.id);
+    }
     setHasApiKey(aiService.hasApiKey());
-  }, [isOpen]);
+  }, [isOpen, organization?.id]);
 
   useEffect(() => {
     if (initialTab) setActiveTab(initialTab);

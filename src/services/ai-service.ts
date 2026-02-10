@@ -1,9 +1,7 @@
 /**
  * AI Service - Claude API integration for Booth
- * Uses user-provided API key (BYOK model)
+ * Uses server-side API routes for security (no client-side API keys)
  */
-
-import Anthropic from '@anthropic-ai/sdk';
 
 // Types
 export interface AISettings {
@@ -60,28 +58,31 @@ export const DEFAULT_AI_SETTINGS: AISettings = {
   enabled: false,
 };
 
-// Store API key in memory (cached from Supabase for performance)
-let cachedApiKey: string | null = null;
+// Track if key has been loaded/verified
 let keyLoadedFromDb = false;
-
-export function setApiKey(key: string | null) {
-  cachedApiKey = key;
-}
-
-export function getApiKey(): string | null {
-  return cachedApiKey;
-}
+let hasValidKey = false;
 
 export function hasApiKey(): boolean {
-  return !!cachedApiKey;
+  return hasValidKey;
 }
 
 export function isKeyLoadedFromDb(): boolean {
   return keyLoadedFromDb;
 }
 
+export function setKeyLoaded(loaded: boolean, valid: boolean = false) {
+  keyLoadedFromDb = loaded;
+  hasValidKey = valid;
+}
+
+// Type for Supabase client (avoid circular import)
+type SupabaseClient = {
+  from: (table: string) => { select: (columns: string) => { eq: (column: string, value: string) => { single: () => Promise<{ data: Record<string, unknown> | null; error: Error | null }> } } };
+  rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: Error | null }>;
+};
+
 /**
- * Load API key from Supabase org settings
+ * Check if API key exists in org settings
  */
 export async function loadApiKeyFromOrg(supabase: SupabaseClient, orgId: string): Promise<string | null> {
   try {
@@ -97,10 +98,13 @@ export async function loadApiKeyFromOrg(supabase: SupabaseClient, orgId: string)
     }
 
     if (data?.ai_api_key && typeof data.ai_api_key === 'string') {
-      cachedApiKey = data.ai_api_key;
       keyLoadedFromDb = true;
-      return data.ai_api_key;
+      hasValidKey = true;
+      // Don't return the actual key - it stays server-side
+      return '[configured]';
     }
+    keyLoadedFromDb = true;
+    hasValidKey = false;
     return null;
   } catch (err) {
     console.error('Error loading AI API key:', err);
@@ -123,8 +127,8 @@ export async function saveApiKeyToOrg(supabase: SupabaseClient, orgId: string, a
       return false;
     }
 
-    cachedApiKey = apiKey;
     keyLoadedFromDb = true;
+    hasValidKey = !!apiKey;
     return true;
   } catch (err) {
     console.error('Error saving AI API key:', err);
@@ -132,28 +136,52 @@ export async function saveApiKeyToOrg(supabase: SupabaseClient, orgId: string, a
   }
 }
 
-// Type for Supabase client (avoid circular import)
-type SupabaseClient = {
-  from: (table: string) => { select: (columns: string) => { eq: (column: string, value: string) => { single: () => Promise<{ data: Record<string, unknown> | null; error: Error | null }> } } };
-  rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: Error | null }>;
-};
-
-// Create Anthropic client
-function getClient(): Anthropic {
-  if (!cachedApiKey) {
-    throw new Error('Claude API key not configured. Add your key in Settings → AI Assistant.');
+/**
+ * Call the secure server-side AI API
+ */
+async function callAIAPI(prompt: string, systemPrompt?: string, orgId?: string): Promise<string> {
+  if (!orgId) {
+    throw new Error('Organization ID required');
   }
-  return new Anthropic({ apiKey: cachedApiKey, dangerouslyAllowBrowser: true });
+
+  const response = await fetch('/api/ai/generate', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      prompt,
+      systemPrompt,
+      orgId,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || 'AI request failed');
+  }
+
+  return data.response;
+}
+
+// Store current org ID for API calls
+let currentOrgId: string | null = null;
+
+export function setCurrentOrg(orgId: string) {
+  currentOrgId = orgId;
 }
 
 /**
  * Content Generation
  */
 export async function generateContent(request: ContentGenerationRequest): Promise<string> {
-  const client = getClient();
-  
+  if (!currentOrgId) {
+    throw new Error('Organization not set. Please reload the page.');
+  }
+
   const prompts: Record<ContentGenerationRequest['type'], string> = {
-    talking_points: `You are a trade show expert helping prepare booth staff. Generate 5-7 compelling talking points for a trade show booth.
+    talking_points: `Generate 5-7 compelling talking points for a trade show booth.
 
 Show: ${request.context.showName || 'Trade Show'}
 Location: ${request.context.showLocation || 'N/A'}
@@ -163,7 +191,7 @@ Target Audience: ${request.context.audience || 'General attendees'}
 
 Generate conversation starters and key value propositions that will resonate with this audience. Be specific and actionable.`,
 
-    social_post: `You are a marketing expert. Generate 3 engaging LinkedIn posts about attending a trade show.
+    social_post: `Generate 3 engaging LinkedIn posts about attending a trade show.
 
 Show: ${request.context.showName || 'Trade Show'}
 Location: ${request.context.showLocation || 'N/A'}
@@ -172,20 +200,20 @@ ${request.context.customPrompt ? `Additional context: ${request.context.customPr
 
 Create posts that are professional but engaging, include relevant hashtags, and encourage booth visits. Vary the tone - one can be more casual, one informative, one with a call-to-action.`,
 
-    follow_up_email: `You are a sales professional writing a follow-up email after meeting someone at a trade show.
+    follow_up_email: `Write a personalized follow-up email after meeting someone at a trade show.
 
 Show: ${request.context.showName || 'Trade Show'}
 Lead Name: ${request.context.leadName || 'Contact'}
 Notes from conversation: ${request.context.leadNotes || 'Met at booth, expressed interest'}
 ${request.context.customPrompt ? `Additional context: ${request.context.customPrompt}` : ''}
 
-Write a personalized, professional follow-up email that:
-1. References the specific conversation
-2. Provides value (not just "checking in")
-3. Has a clear call-to-action
-4. Is concise (under 150 words)`,
+The email should:
+1. Reference the specific conversation
+2. Provide value (not just "checking in")
+3. Have a clear call-to-action
+4. Be concise (under 150 words)`,
 
-    post_show_report: `You are a trade show manager creating an executive summary report.
+    post_show_report: `Create an executive summary report for a trade show.
 
 Show: ${request.context.showName || 'Trade Show'}
 Location: ${request.context.showLocation || 'N/A'}
@@ -193,7 +221,7 @@ Dates: ${request.context.showDates || 'N/A'}
 Metrics: ${JSON.stringify(request.context.metrics || {}, null, 2)}
 ${request.context.customPrompt ? `Additional notes: ${request.context.customPrompt}` : ''}
 
-Create a professional post-show report with:
+Include:
 1. Executive Summary (2-3 sentences)
 2. Key Metrics & Performance
 3. Top Highlights
@@ -202,14 +230,14 @@ Create a professional post-show report with:
 
 Be specific and data-driven where possible.`,
 
-    checklist: `You are a trade show logistics expert. Generate a comprehensive packing/preparation checklist.
+    checklist: `Generate a comprehensive packing/preparation checklist for a trade show.
 
 Show: ${request.context.showName || 'Trade Show'}
 Location: ${request.context.showLocation || 'N/A'}
 Dates: ${request.context.showDates || 'N/A'}
 ${request.context.customPrompt ? `Specific needs: ${request.context.customPrompt}` : ''}
 
-Create a categorized checklist covering:
+Categories to cover:
 1. Booth Materials & Displays
 2. Marketing Collateral
 3. Technology & Equipment
@@ -220,24 +248,19 @@ Create a categorized checklist covering:
 Format as a clean checklist with checkboxes (- [ ]).`,
   };
 
-  const response = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 1500,
-    messages: [
-      { role: 'user', content: prompts[request.type] }
-    ],
-  });
+  const systemPrompt = 'You are a trade show expert helping users prepare for and execute successful trade shows.';
 
-  const textContent = response.content.find(c => c.type === 'text');
-  return textContent?.text || 'Unable to generate content.';
+  return callAIAPI(prompts[request.type], systemPrompt, currentOrgId);
 }
 
 /**
  * Document Intelligence
  */
 export async function analyzeDocument(request: DocumentAnalysisRequest): Promise<string> {
-  const client = getClient();
-  
+  if (!currentOrgId) {
+    throw new Error('Organization not set. Please reload the page.');
+  }
+
   const prompts: Record<DocumentAnalysisRequest['analysisType'], string> = {
     extract_deadlines: `Analyze this trade show document and extract ALL deadlines, dates, and time-sensitive requirements.
 
@@ -287,64 +310,53 @@ ${request.documentText}
 Provide a clear, direct answer based only on information in the document. If the information isn't in the document, say so.`,
   };
 
-  const response = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 2000,
-    messages: [
-      { role: 'user', content: prompts[request.analysisType] }
-    ],
-  });
+  const systemPrompt = 'You are an expert at analyzing trade show and exhibitor documents.';
 
-  const textContent = response.content.find(c => c.type === 'text');
-  return textContent?.text || 'Unable to analyze document.';
+  return callAIAPI(prompts[request.analysisType], systemPrompt, currentOrgId);
 }
 
 /**
  * Show Assistant - Conversational AI
  */
 export async function chatWithAssistant(request: ShowAssistantRequest): Promise<string> {
-  const client = getClient();
-  
-  const systemPrompt = `You are an expert trade show assistant for "Booth" - a trade show management application. You help users plan, execute, and analyze their trade show programs.
+  if (!currentOrgId) {
+    throw new Error('Organization not set. Please reload the page.');
+  }
 
-${request.showContext?.shows ? `
-The user has the following shows in their system:
-${request.showContext.shows.map(s => `- ${s.name} (${s.location}, ${s.dates}) - Status: ${s.status}${s.leads ? `, Leads: ${s.leads}` : ''}${s.cost ? `, Cost: $${s.cost}` : ''}`).join('\n')}
-` : ''}
+  // Build conversation prompt from messages
+  const conversationHistory = request.messages
+    .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
+    .join('\n\n');
 
-${request.showContext?.currentShow ? `
-Currently viewing show: ${JSON.stringify(request.showContext.currentShow, null, 2)}
-` : ''}
+  const contextInfo = request.showContext?.shows 
+    ? `\nThe user has the following shows:\n${request.showContext.shows.map(s => 
+        `- ${s.name} (${s.location}, ${s.dates}) - Status: ${s.status}${s.leads ? `, Leads: ${s.leads}` : ''}${s.cost ? `, Cost: $${s.cost}` : ''}`
+      ).join('\n')}`
+    : '';
+
+  const currentShowInfo = request.showContext?.currentShow
+    ? `\nCurrently viewing show: ${JSON.stringify(request.showContext.currentShow, null, 2)}`
+    : '';
+
+  const prompt = `${conversationHistory}`;
+
+  const systemPrompt = `You are an expert trade show assistant for "Booth" - a trade show management application. You help users plan, execute, and analyze their trade show programs.${contextInfo}${currentShowInfo}
 
 Be helpful, specific, and actionable. If asked about data you don't have, suggest what information would be helpful. Keep responses concise but thorough.`;
 
-  const messages = request.messages.map(m => ({
-    role: m.role as 'user' | 'assistant',
-    content: m.content,
-  }));
-
-  const response = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 1000,
-    system: systemPrompt,
-    messages,
-  });
-
-  const textContent = response.content.find(c => c.type === 'text');
-  return textContent?.text || 'I apologize, I was unable to process that request.';
+  return callAIAPI(prompt, systemPrompt, currentOrgId);
 }
 
 /**
  * Test API connection
  */
 export async function testConnection(): Promise<{ success: boolean; error?: string }> {
+  if (!currentOrgId) {
+    return { success: false, error: 'Organization not set' };
+  }
+
   try {
-    const client = getClient();
-    await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 10,
-      messages: [{ role: 'user', content: 'Hi' }],
-    });
+    await callAIAPI('Hi, this is a connection test. Respond with "Connected!"', undefined, currentOrgId);
     return { success: true };
   } catch (err) {
     return { 
@@ -352,4 +364,14 @@ export async function testConnection(): Promise<{ success: boolean; error?: stri
       error: err instanceof Error ? err.message : 'Connection failed' 
     };
   }
+}
+
+// Legacy exports for compatibility (no-ops, key is server-side only now)
+export function setApiKey(_key: string | null) {
+  // No-op: keys are now stored server-side only
+}
+
+export function getApiKey(): string | null {
+  // Never expose key to client
+  return hasValidKey ? '[configured]' : null;
 }
