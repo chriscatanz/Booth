@@ -66,23 +66,66 @@ export function OneClickShow({ isOpen, onClose, onShowCreated }: OneClickShowPro
     setError(null);
     setFileName(file.name);
 
-    // Handle different file types
-    if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+    // Check if it's a simple text file we can read directly
+    const isTextFile = file.type === 'text/plain' || 
+                       file.name.endsWith('.txt') || 
+                       file.name.endsWith('.md');
+
+    if (isTextFile) {
       const text = await file.text();
       setDocumentText(text);
-    } else if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
-      // For PDF, we'll need to extract text - for now show a message
-      setError('PDF support coming soon. Please copy and paste the text content for now.');
       return;
-    } else {
-      // Try to read as text
+    }
+
+    // For PDF, DOCX, DOC, RTF - use server-side parsing
+    const supportedTypes = ['application/pdf', 'application/msword', 
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/rtf', 'application/rtf'];
+    const supportedExts = ['.pdf', '.doc', '.docx', '.rtf'];
+    
+    const isSupported = supportedTypes.includes(file.type) || 
+                        supportedExts.some(ext => file.name.toLowerCase().endsWith(ext));
+
+    if (isSupported) {
       try {
-        const text = await file.text();
-        setDocumentText(text);
-      } catch {
-        setError('Could not read file. Please paste the content directly.');
-        return;
+        const formData = new FormData();
+        formData.append('files', file);
+
+        const response = await fetch('/api/documents/parse', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData.error || 'Failed to parse file');
+        }
+
+        const data = await response.json();
+        const doc = data.documents?.[0];
+        
+        if (doc?.error) {
+          throw new Error(doc.error);
+        }
+        
+        if (doc?.text) {
+          setDocumentText(doc.text);
+        } else {
+          throw new Error('No text extracted from file');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to parse file');
       }
+      return;
+    }
+
+    // Fallback: try to read as text
+    try {
+      const text = await file.text();
+      setDocumentText(text);
+    } catch {
+      setError('Could not read file. Please paste the content directly.');
     }
   }, []);
 
@@ -265,13 +308,13 @@ export function OneClickShow({ isOpen, onClose, onShowCreated }: OneClickShowPro
                       <input
                         type="file"
                         className="hidden"
-                        accept=".txt,.pdf,.doc,.docx"
+                        accept=".txt,.pdf,.doc,.docx,.rtf,.md"
                         onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
                       />
                     </label>
                   </p>
                   <p className="text-xs text-text-tertiary">
-                    Supports TXT files. PDF support coming soon.
+                    Supports PDF, DOCX, DOC, RTF, TXT, and MD files
                   </p>
                 </div>
 
