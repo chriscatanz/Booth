@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import {
   Sparkles, X, Send, Loader2, Copy, Check, ChevronDown,
   Zap, FileText, MessageSquare, RefreshCw, Wand2,
-  FileUp, Trash2
+  FileUp, Trash2, Mail, ExternalLink
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import * as aiService from '@/services/ai-service';
@@ -257,6 +257,41 @@ function ContentGenerator({ context }: { context?: AIAssistantPanelProps['contex
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Check if current content type is email-related
+  const isEmailContent = ['follow_up_email', 'follow_up_sequence', 'pre_show_outreach'].includes(contentType);
+
+  // Parse email subject and body from generated content
+  const parseEmailFromResult = (emailContent: string): { subject: string; body: string } | null => {
+    // Try to extract subject line from formats like:
+    // "## Email 1: [Subject Line]" or "**Subject:** xyz" or "Subject: xyz"
+    const subjectMatch = emailContent.match(/(?:##\s*(?:Email\s*\d+:?\s*)?|Subject:\s*|\*\*Subject:\*\*\s*)([^\n]+)/i);
+    const subject = subjectMatch ? subjectMatch[1].replace(/\*\*/g, '').trim() : 'Follow-up from our conversation';
+    
+    // Get body - remove markdown headers and clean up
+    let body = emailContent
+      .replace(/^##\s*.+$/gm, '') // Remove ## headers
+      .replace(/\*\*Send:\s*Day\s*\d+\*\*/gi, '') // Remove send timing
+      .replace(/---/g, '') // Remove dividers
+      .replace(/\*\*/g, '') // Remove bold markers
+      .replace(/\n{3,}/g, '\n\n') // Collapse multiple newlines
+      .trim();
+    
+    return { subject, body };
+  };
+
+  // Open email in user's email client
+  const handleOpenInEmail = (recipientEmailAddr?: string) => {
+    const parsed = parseEmailFromResult(result);
+    if (!parsed) return;
+    
+    const mailto = `mailto:${recipientEmailAddr || ''}?subject=${encodeURIComponent(parsed.subject)}&body=${encodeURIComponent(parsed.body)}`;
+    window.open(mailto, '_blank');
+  };
+
+  // State for email recipient input
+  const [showEmailInput, setShowEmailInput] = useState(false);
+  const [recipientEmail, setRecipientEmail] = useState('');
+
   return (
     <div className="flex flex-col h-full">
       {/* Controls Section - collapses when result is expanded */}
@@ -364,6 +399,20 @@ function ContentGenerator({ context }: { context?: AIAssistantPanelProps['contex
               >
                 {copied ? <Check size={16} /> : <Copy size={16} />}
               </button>
+              {isEmailContent && result && (
+                <button
+                  onClick={() => setShowEmailInput(!showEmailInput)}
+                  className={cn(
+                    "p-2 rounded-lg transition-colors",
+                    showEmailInput 
+                      ? "bg-brand-purple text-white" 
+                      : "bg-bg-tertiary hover:bg-surface text-text-tertiary hover:text-text-primary"
+                  )}
+                  title="Open in email client"
+                >
+                  <Mail size={16} />
+                </button>
+              )}
               <Button size="sm" onClick={handleGenerate} disabled={isGenerating}>
                 {isGenerating ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
                 Regenerate
@@ -385,6 +434,39 @@ function ContentGenerator({ context }: { context?: AIAssistantPanelProps['contex
             )}
           </Button>
         )}
+
+        {/* Email Input - shown when email button is clicked */}
+        <AnimatePresence>
+          {showEmailInput && isEmailContent && result && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="pt-3 flex items-center gap-2">
+                <input
+                  type="email"
+                  value={recipientEmail}
+                  onChange={(e) => setRecipientEmail(e.target.value)}
+                  placeholder="recipient@email.com"
+                  className="flex-1 px-3 py-2 rounded-lg bg-bg-tertiary border border-border text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-brand-purple"
+                />
+                <Button 
+                  size="sm" 
+                  onClick={() => handleOpenInEmail(recipientEmail)}
+                  disabled={!recipientEmail.includes('@')}
+                >
+                  <ExternalLink size={14} />
+                  Open in Mail
+                </Button>
+              </div>
+              <p className="text-xs text-text-tertiary mt-1">
+                Opens your default email app with the content pre-filled
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Result - expands to fill available space */}
