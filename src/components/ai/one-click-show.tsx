@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/store/auth-store';
 import { useTradeShowStore } from '@/store/trade-show-store';
+import { supabase } from '@/lib/supabase';
 
 interface ExtractedShowData {
   name: string | null;
@@ -91,9 +92,17 @@ export function OneClickShow({ isOpen, onClose, onShowCreated }: OneClickShowPro
         const formData = new FormData();
         formData.append('files', file);
 
+        // Get auth token for API request
+        const { data: { session } } = await supabase.auth.getSession();
+        const headers: HeadersInit = {};
+        if (session?.access_token) {
+          headers['Authorization'] = `Bearer ${session.access_token}`;
+        }
+
         const response = await fetch('/api/documents/parse', {
           method: 'POST',
           body: formData,
+          headers,
           credentials: 'include',
         });
 

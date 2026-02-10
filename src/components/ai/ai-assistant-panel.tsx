@@ -368,9 +368,17 @@ function DocumentAnalyzer() {
       const formData = new FormData();
       files.forEach(file => formData.append('files', file));
 
+      // Get auth token for API request
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: HeadersInit = {};
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
       const response = await fetch('/api/documents/parse', {
         method: 'POST',
         body: formData,
+        headers,
         credentials: 'include',
       });
 
