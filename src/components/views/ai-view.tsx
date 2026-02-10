@@ -11,6 +11,7 @@ import {
 import { cn } from '@/lib/utils';
 import * as aiService from '@/services/ai-service';
 import { useTradeShowStore } from '@/store/trade-show-store';
+import { TradeShow } from '@/types';
 import { useAuthStore } from '@/store/auth-store';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
@@ -162,7 +163,7 @@ export default function AIView({ onOpenSettings }: AIViewProps) {
 // GENERATE TAB
 // ============================================================================
 
-function GenerateTab({ shows }: { shows: ReturnType<typeof useTradeShowStore>['shows'] }) {
+function GenerateTab({ shows }: { shows: TradeShow[] }) {
   const [selectedShowId, setSelectedShowId] = useState<string>('');
   const [contentType, setContentType] = useState<aiService.ContentGenerationRequest['type']>('talking_points');
   const [customPrompt, setCustomPrompt] = useState('');
