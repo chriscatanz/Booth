@@ -36,11 +36,14 @@ import { FileUploadZone } from '@/components/ui/file-upload-zone';
 import { ActivityTimeline } from '@/components/ui/activity-timeline';
 import { PermissionGate, usePermission } from '@/components/auth/permission-gate';
 import { TaskList } from '@/components/tasks';
+import { AttendeeSearch } from '@/components/ui/attendee-search';
+import { Attendee } from '@/types';
 
 export default function DetailView() {
   const {
     selectedShow, updateSelectedShow, setSelectedShow,
     attendees, addAttendee, removeAttendee, updateAttendee,
+    allAttendees,
     additionalFiles, refreshAdditionalFiles,
     isSaving, saveShow, deleteShow, duplicateShow, repeatYearly,
     validationErrors,
@@ -410,9 +413,27 @@ export default function DetailView() {
                 ))}
               </div>
               
-              <Button variant="outline" size="sm" onClick={addAttendee} className="mt-3">
-                <Plus size={14} /> Add Attendee
-              </Button>
+              {/* Searchable attendee selector */}
+              <div className="mt-4">
+                <AttendeeSearch
+                  allAttendees={allAttendees}
+                  excludeIds={attendees.map(a => a.dbId).filter((id): id is number => id !== null && id !== undefined)}
+                  onSelect={(selected: Partial<Attendee>) => {
+                    // Add new attendee pre-filled with selected data
+                    addAttendee();
+                    // Get the newly added attendee (last one) and update it
+                    const newAttendees = useTradeShowStore.getState().attendees;
+                    const newAtt = newAttendees[newAttendees.length - 1];
+                    if (newAtt) {
+                      updateAttendee(newAtt.localId, {
+                        name: selected.name || null,
+                        email: selected.email || null,
+                      });
+                    }
+                  }}
+                  onAddNew={addAttendee}
+                />
+              </div>
             </TabSection>
 
             {/* Hotel */}
