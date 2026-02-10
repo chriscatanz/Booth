@@ -652,7 +652,7 @@ function DocumentsTab() {
 // CHAT TAB
 // ============================================================================
 
-function ChatTab({ shows }: { shows: ReturnType<typeof useTradeShowStore>['shows'] }) {
+function ChatTab({ shows }: { shows: TradeShow[] }) {
   const [messages, setMessages] = useState<aiService.ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
