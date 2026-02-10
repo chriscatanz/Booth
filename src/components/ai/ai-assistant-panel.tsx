@@ -745,14 +745,11 @@ function ShowAssistantChat({ context, uploadedDocuments }: {
         });
       });
 
-      // Debug: log raw show data from store
-      console.log('[ShowAssistantChat] Raw shows from store:', shows.map(s => ({
-        name: s.name,
-        boothSize: s.boothSize,
-        boothNumber: s.boothNumber,
-        cost: s.cost,
-        shippingCutoff: s.shippingCutoff,
-      })));
+      // Debug: log FIRST raw show object from store with ALL keys
+      const firstShow = shows[0];
+      console.log('[ShowAssistantChat] First show ALL KEYS:', Object.keys(firstShow));
+      console.log('[ShowAssistantChat] First show boothSize value:', firstShow?.boothSize, 'type:', typeof firstShow?.boothSize);
+      console.log('[ShowAssistantChat] First show cost value:', firstShow?.cost, 'type:', typeof firstShow?.cost);
 
       // Build detailed show data - include ALL fields for debugging
       const detailedShows = shows.map(s => ({
