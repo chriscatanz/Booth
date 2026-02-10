@@ -187,12 +187,17 @@ function ContentGenerator({ context }: { context?: AIAssistantPanelProps['contex
   // Get selected show data
   const selectedShow = shows.find(s => String(s.id) === selectedShowId);
 
-  const contentTypes: { id: aiService.ContentGenerationRequest['type']; label: string; description: string }[] = [
-    { id: 'talking_points', label: 'Talking Points', description: 'Booth conversation starters' },
-    { id: 'social_post', label: 'Social Posts', description: 'LinkedIn announcements' },
-    { id: 'follow_up_email', label: 'Follow-up Email', description: 'Post-show lead outreach' },
-    { id: 'post_show_report', label: 'Post-Show Report', description: 'Executive summary' },
-    { id: 'checklist', label: 'Checklist', description: 'Packing & prep list' },
+  const contentTypes: { id: aiService.ContentGenerationRequest['type']; label: string; description: string; category: 'pre' | 'during' | 'post' }[] = [
+    // Pre-Show
+    { id: 'pre_show_outreach', label: 'Pre-Show Outreach', description: '3 emails for prospects, customers & partners', category: 'pre' },
+    { id: 'talking_points', label: 'Talking Points', description: 'Booth conversation starters', category: 'pre' },
+    { id: 'social_post', label: 'Social Posts', description: 'LinkedIn announcements', category: 'pre' },
+    { id: 'checklist', label: 'Packing Checklist', description: 'Comprehensive prep list', category: 'pre' },
+    // Post-Show
+    { id: 'follow_up_email', label: 'Follow-up Email', description: 'Single personalized email', category: 'post' },
+    { id: 'follow_up_sequence', label: 'Follow-up Sequence', description: '3-email nurture campaign', category: 'post' },
+    { id: 'post_show_report', label: 'Post-Show Report', description: 'Executive summary', category: 'post' },
+    { id: 'roi_analysis', label: 'ROI Analysis', description: 'Detailed performance breakdown', category: 'post' },
   ];
 
   const handleGenerate = async () => {
@@ -209,6 +214,25 @@ function ContentGenerator({ context }: { context?: AIAssistantPanelProps['contex
           : undefined,
         boothSize: selectedShow.boothSize || undefined,
         boothNumber: selectedShow.boothNumber || undefined,
+        // Cost data for ROI analysis
+        costs: {
+          boothCost: selectedShow.cost || 0,
+          shippingCost: selectedShow.shippingCost || 0,
+          electricalCost: selectedShow.electricalCost || 0,
+          laborCost: selectedShow.laborCost || 0,
+          internetCost: selectedShow.internetCost || 0,
+          servicesCost: selectedShow.standardServicesCost || 0,
+          hotelCostPerNight: selectedShow.hotelCostPerNight || 0,
+        },
+        // Metrics for ROI analysis
+        metrics: {
+          totalLeads: selectedShow.totalLeads || 0,
+          qualifiedLeads: selectedShow.qualifiedLeads || 0,
+          meetingsBooked: selectedShow.meetingsBooked || 0,
+          dealsWon: selectedShow.dealsWon || 0,
+          revenueAttributed: selectedShow.revenueAttributed || 0,
+          totalAttending: selectedShow.totalAttending || 0,
+        },
       } : context;
 
       const content = await aiService.generateContent({
@@ -265,8 +289,31 @@ function ContentGenerator({ context }: { context?: AIAssistantPanelProps['contex
         {/* Content Type Selection */}
         <div className={cn(isExpanded && result && "hidden")}>
           <label className="block text-sm font-medium text-text-primary mb-2">What would you like to generate?</label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {contentTypes.map((type) => (
+          
+          {/* Pre-Show Section */}
+          <p className="text-xs font-medium text-text-tertiary uppercase tracking-wide mb-2">Pre-Show</p>
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            {contentTypes.filter(t => t.category === 'pre').map((type) => (
+              <button
+                key={type.id}
+                onClick={() => setContentType(type.id)}
+                className={cn(
+                  'p-3 rounded-lg border text-left transition-all',
+                  contentType === type.id
+                    ? 'border-brand-purple bg-brand-purple/10'
+                    : 'border-border hover:border-border-strong bg-bg-tertiary'
+                )}
+              >
+                <p className="text-sm font-medium text-text-primary">{type.label}</p>
+                <p className="text-xs text-text-tertiary">{type.description}</p>
+              </button>
+            ))}
+          </div>
+
+          {/* Post-Show Section */}
+          <p className="text-xs font-medium text-text-tertiary uppercase tracking-wide mb-2">Post-Show</p>
+          <div className="grid grid-cols-2 gap-2">
+            {contentTypes.filter(t => t.category === 'post').map((type) => (
               <button
                 key={type.id}
                 onClick={() => setContentType(type.id)}

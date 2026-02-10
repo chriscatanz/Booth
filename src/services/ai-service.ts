@@ -11,7 +11,7 @@ export interface AISettings {
 }
 
 export interface ContentGenerationRequest {
-  type: 'talking_points' | 'social_post' | 'follow_up_email' | 'post_show_report' | 'checklist';
+  type: 'talking_points' | 'social_post' | 'follow_up_email' | 'post_show_report' | 'checklist' | 'follow_up_sequence' | 'pre_show_outreach' | 'roi_analysis';
   context: {
     showName?: string;
     showLocation?: string;
@@ -22,7 +22,9 @@ export interface ContentGenerationRequest {
     audience?: string;
     leadName?: string;
     leadNotes?: string;
+    leadScore?: 'hot' | 'warm' | 'cold';
     metrics?: Record<string, number>;
+    costs?: Record<string, number>;
     customPrompt?: string;
   };
 }
@@ -302,6 +304,126 @@ Categories to cover:
 6. Emergency/Backup Items
 
 Format as a clean checklist with checkboxes (- [ ]).`,
+
+    follow_up_sequence: `Create a 3-email follow-up sequence for a trade show lead.
+
+Show: ${request.context.showName || 'Trade Show'}
+Lead Name: ${request.context.leadName || 'Contact'}
+Lead Score: ${request.context.leadScore || 'warm'}
+Notes from conversation: ${request.context.leadNotes || 'Met at booth, expressed interest'}${companyContext}
+${request.context.customPrompt ? `Additional context: ${request.context.customPrompt}` : ''}
+
+Generate 3 emails with recommended send timing:
+
+**EMAIL 1 (Day 1 - Same day or next morning):**
+- Thank them for stopping by
+- Reference specific conversation point
+- Provide immediate value (resource, link, answer to question they asked)
+
+**EMAIL 2 (Day 3-4):**
+- Follow up on the value provided
+- Share a relevant case study or success story
+- Soft call-to-action
+
+**EMAIL 3 (Day 7-10):**
+- Final touchpoint
+- Direct ask (demo, call, meeting)
+- Create urgency without being pushy
+
+Each email should:
+- Be under 150 words
+- Have a clear subject line
+- Feel personal, not templated
+- Build on the previous email
+
+Format each email with:
+## Email 1: [Subject Line]
+**Send: Day 1**
+[Body]
+
+---`,
+
+    pre_show_outreach: `Generate pre-show outreach emails for a trade show.
+
+Show: ${request.context.showName || 'Trade Show'}
+Location: ${request.context.showLocation || 'N/A'}
+Dates: ${request.context.showDates || 'N/A'}
+Booth: ${request.context.boothNumber ? `#${request.context.boothNumber}` : 'TBD'}${request.context.boothSize ? ` (${request.context.boothSize})` : ''}${companyContext}
+Target Audience: ${request.context.audience || 'prospects and customers'}
+${request.context.customPrompt ? `Additional context: ${request.context.customPrompt}` : ''}
+
+Generate 3 different outreach emails for different audiences:
+
+**EMAIL 1: For Prospects (people who don't know you)**
+- Introduce who you are and what you do
+- Mention specific value proposition relevant to the event audience
+- Invite to visit the booth with a reason to stop by
+
+**EMAIL 2: For Existing Customers**
+- Thank them for their business
+- Tease any new features/products being showcased
+- Offer to schedule a dedicated meeting time
+
+**EMAIL 3: For Partners/Industry Contacts**
+- Collegial tone
+- Mention shared interests or mutual connections
+- Suggest meeting for coffee/drinks
+
+Each email should:
+- Have a compelling subject line (not generic "Visit us at [show]")
+- Be under 150 words
+- Include booth number and location
+- Have a clear CTA (schedule meeting, reply to confirm, etc.)
+
+Format each with:
+## [Audience]: [Subject Line]
+[Body]
+
+---`,
+
+    roi_analysis: `Provide a detailed ROI analysis for a trade show.
+
+Show: ${request.context.showName || 'Trade Show'}
+Location: ${request.context.showLocation || 'N/A'}
+Dates: ${request.context.showDates || 'N/A'}
+
+**Costs:**
+${JSON.stringify(request.context.costs || request.context.metrics || {}, null, 2)}
+
+**Metrics:**
+${JSON.stringify(request.context.metrics || {}, null, 2)}
+${request.context.customPrompt ? `\nAdditional context: ${request.context.customPrompt}` : ''}
+
+Provide a comprehensive ROI analysis including:
+
+## Executive Summary
+2-3 sentences on overall performance
+
+## Cost Breakdown
+- List all costs with percentages of total
+- Flag any unusual spending (too high/low for category)
+
+## Lead Analysis
+- Total leads captured
+- Cost per lead calculation
+- Comparison to industry benchmarks ($150-300 per trade show lead is typical)
+- Quality assessment if data available
+
+## Projected Pipeline Value
+- Using industry average close rates (5-15% for trade show leads)
+- Conservative, moderate, and optimistic scenarios
+- Expected ROI range
+
+## Key Insights
+- What worked well (based on metrics)
+- Areas for improvement
+- Specific recommendations for next time
+
+## Benchmark Comparison
+- How does this show compare to typical trade show ROI?
+- Is this show worth repeating?
+
+Be specific with numbers. If data is missing, note what additional tracking would help.`,
   };
 
   const systemPrompt = 'You are a trade show expert helping users prepare for and execute successful trade shows.';
