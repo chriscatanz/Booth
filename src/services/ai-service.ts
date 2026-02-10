@@ -150,11 +150,20 @@ async function callAIAPI(prompt: string, systemPrompt?: string, orgId?: string):
     throw new Error('Organization ID required');
   }
 
+  // Get auth token - need to dynamically import to avoid circular deps
+  const { supabase } = await import('@/lib/supabase');
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+  if (session?.access_token) {
+    headers['Authorization'] = `Bearer ${session.access_token}`;
+  }
+
   const response = await fetch('/api/ai/generate', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify({
       prompt,
       systemPrompt,
