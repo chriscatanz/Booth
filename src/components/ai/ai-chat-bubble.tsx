@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, X, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { AIAssistantPanel } from './ai-assistant-panel';
+import { AIChatWidget } from './ai-chat-widget';
 import { useAuthStore } from '@/store/auth-store';
 
 interface AIChatBubbleProps {
@@ -21,6 +21,13 @@ export function AIChatBubble({ className }: AIChatBubbleProps) {
 
   return (
     <>
+      {/* Chat Widget */}
+      <AnimatePresence>
+        {isOpen && (
+          <AIChatWidget isOpen={isOpen} onClose={() => setIsOpen(false)} />
+        )}
+      </AnimatePresence>
+
       {/* Floating Button */}
       <div className={cn('fixed bottom-6 right-6 z-40', className)}>
         <AnimatePresence>
@@ -33,14 +40,14 @@ export function AIChatBubble({ className }: AIChatBubbleProps) {
             >
               <div className="bg-surface border border-border rounded-lg px-3 py-2 shadow-lg">
                 <p className="text-sm font-medium text-text-primary">AI Assistant</p>
-                <p className="text-xs text-text-tertiary">Ask me anything about your shows</p>
+                <p className="text-xs text-text-tertiary">Ask me anything</p>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
         <motion.button
-          onClick={() => setIsOpen(true)}
+          onClick={() => setIsOpen(!isOpen)}
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
           whileHover={{ scale: 1.05 }}
@@ -53,43 +60,49 @@ export function AIChatBubble({ className }: AIChatBubbleProps) {
             'hover:shadow-xl hover:shadow-purple-500/25',
             'transition-shadow duration-200',
             'focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-bg-primary',
-            // Mobile touch target
             'touch-manipulation',
-            // Ensure it's above most content
             'relative'
           )}
-          aria-label="Open AI Assistant"
+          aria-label={isOpen ? 'Close AI Assistant' : 'Open AI Assistant'}
         >
-          {/* Animated icon */}
-          <motion.div
-            initial={false}
-            animate={{ rotate: isOpen ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
+          <AnimatePresence mode="wait">
             {isOpen ? (
-              <X size={24} />
+              <motion.div
+                key="close"
+                initial={{ rotate: -90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: 90, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <X size={24} />
+              </motion.div>
             ) : (
-              <div className="relative">
+              <motion.div
+                key="open"
+                initial={{ rotate: 90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: -90, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="relative"
+              >
                 <MessageSquare size={24} />
                 <Sparkles 
                   size={12} 
                   className="absolute -top-1 -right-1 text-yellow-300" 
                 />
-              </div>
+              </motion.div>
             )}
-          </motion.div>
+          </AnimatePresence>
 
-          {/* Pulse animation ring */}
-          <span className="absolute inset-0 rounded-full animate-ping bg-purple-500/30 pointer-events-none" style={{ animationDuration: '3s' }} />
+          {/* Pulse animation ring - only when closed */}
+          {!isOpen && (
+            <span 
+              className="absolute inset-0 rounded-full animate-ping bg-purple-500/30 pointer-events-none" 
+              style={{ animationDuration: '3s' }} 
+            />
+          )}
         </motion.button>
       </div>
-
-      {/* AI Panel */}
-      <AIAssistantPanel
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        initialTab="chat"
-      />
     </>
   );
 }
