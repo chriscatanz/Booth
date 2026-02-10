@@ -54,6 +54,13 @@ export interface ShowAssistantRequest {
       cost?: number;
     }>;
     currentShow?: Record<string, unknown>;
+    attendees?: Array<{
+      name: string | null;
+      email: string | null;
+      arrivalDate: string | null;
+      departureDate: string | null;
+    }>;
+    uploadedDocuments?: string;
   };
 }
 
@@ -547,21 +554,36 @@ export async function chatWithAssistant(request: ShowAssistantRequest): Promise<
     .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
     .join('\n\n');
 
+  // Build context sections
   const contextInfo = request.showContext?.shows 
-    ? `\nThe user has the following shows:\n${request.showContext.shows.map(s => 
+    ? `\n\n**Your Shows:**\n${request.showContext.shows.map(s => 
         `- ${s.name} (${s.location}, ${s.dates}) - Status: ${s.status}${s.leads ? `, Leads: ${s.leads}` : ''}${s.cost ? `, Cost: $${s.cost}` : ''}`
       ).join('\n')}`
     : '';
 
   const currentShowInfo = request.showContext?.currentShow
-    ? `\nCurrently viewing show: ${JSON.stringify(request.showContext.currentShow, null, 2)}`
+    ? `\n\n**Currently Viewing Show:**\n${JSON.stringify(request.showContext.currentShow, null, 2)}`
+    : '';
+
+  const attendeesInfo = request.showContext?.attendees && request.showContext.attendees.length > 0
+    ? `\n\n**Attendees for Current Show:**\n${request.showContext.attendees.map(a => 
+        `- ${a.name || 'Unnamed'}${a.email ? ` (${a.email})` : ''}${a.arrivalDate ? ` - Arrives: ${a.arrivalDate}` : ''}${a.departureDate ? `, Departs: ${a.departureDate}` : ''}`
+      ).join('\n')}`
+    : '';
+
+  // Truncate documents if too long (keep first 20k chars to avoid token limits)
+  const docsText = request.showContext?.uploadedDocuments;
+  const documentsInfo = docsText
+    ? `\n\n**Uploaded Documents:**\n${docsText.length > 20000 ? docsText.slice(0, 20000) + '\n\n[Document truncated for length...]' : docsText}`
     : '';
 
   const prompt = `${conversationHistory}`;
 
-  const systemPrompt = `You are an expert trade show assistant for "Booth" - a trade show management application. You help users plan, execute, and analyze their trade show programs.${contextInfo}${currentShowInfo}
+  const systemPrompt = `You are an expert trade show assistant for "Booth" - a trade show management application. You help users plan, execute, and analyze their trade show programs.
 
-Be helpful, specific, and actionable. If asked about data you don't have, suggest what information would be helpful. Keep responses concise but thorough.`;
+You have access to the following context about the user's shows, attendees, and any documents they've uploaded:${contextInfo}${currentShowInfo}${attendeesInfo}${documentsInfo}
+
+Be helpful, specific, and actionable. Reference the provided context when answering questions. If asked about data you don't have, suggest what information would be helpful. Keep responses concise but thorough.`;
 
   return callAIAPI(prompt, systemPrompt, currentOrgId);
 }

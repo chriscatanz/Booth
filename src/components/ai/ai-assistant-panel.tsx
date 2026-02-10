@@ -34,6 +34,7 @@ export function AIAssistantPanel({ isOpen, onClose, onOpenSettings, initialTab =
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [hasApiKey, setHasApiKey] = useState(false);
   const [isLoadingKey, setIsLoadingKey] = useState(false);
+  const [sharedDocuments, setSharedDocuments] = useState<string>('');
   const organization = useAuthStore((s) => s.organization);
 
   useEffect(() => {
@@ -138,8 +139,8 @@ export function AIAssistantPanel({ isOpen, onClose, onOpenSettings, initialTab =
             ) : (
               <>
                 {activeTab === 'content' && <ContentGenerator context={context} />}
-                {activeTab === 'document' && <DocumentAnalyzer />}
-                {activeTab === 'chat' && <ShowAssistantChat context={context} />}
+                {activeTab === 'document' && <DocumentAnalyzer onDocumentsChange={setSharedDocuments} />}
+                {activeTab === 'chat' && <ShowAssistantChat context={context} uploadedDocuments={sharedDocuments} />}
               </>
             )}
           </div>
@@ -320,7 +321,7 @@ interface AnalysisProgress {
   stage: string;
 }
 
-function DocumentAnalyzer() {
+function DocumentAnalyzer({ onDocumentsChange }: { onDocumentsChange?: (docs: string) => void }) {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [documentText, setDocumentText] = useState('');
   const [analysisType, setAnalysisType] = useState<aiService.DocumentAnalysisRequest['analysisType']>('extract_deadlines');
@@ -349,7 +350,9 @@ function DocumentAnalyzer() {
       .map(f => `--- ${f.name} ---\n${f.text}`)
       .join('\n\n');
     setDocumentText(combinedText);
-  }, [uploadedFiles]);
+    // Share documents with chat tab
+    onDocumentsChange?.(combinedText);
+  }, [uploadedFiles, onDocumentsChange]);
 
   const parseFiles = async (files: File[]) => {
     if (files.length === 0) return;
@@ -702,8 +705,11 @@ function DocumentAnalyzer() {
 }
 
 // Show Assistant Chat Tab
-function ShowAssistantChat({ context }: { context?: AIAssistantPanelProps['context'] }) {
-  const { shows, selectedShow } = useTradeShowStore();
+function ShowAssistantChat({ context, uploadedDocuments }: { 
+  context?: AIAssistantPanelProps['context'];
+  uploadedDocuments?: string;
+}) {
+  const { shows, selectedShow, attendees } = useTradeShowStore();
   const [messages, setMessages] = useState<aiService.ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -722,6 +728,16 @@ function ShowAssistantChat({ context }: { context?: AIAssistantPanelProps['conte
     setIsLoading(true);
 
     try {
+      // Build attendee context for current show
+      const currentShowAttendees = selectedShow 
+        ? attendees.filter(a => a.tradeshowId === selectedShow.id).map(a => ({
+            name: a.name,
+            email: a.email,
+            arrivalDate: a.arrivalDate,
+            departureDate: a.departureDate,
+          }))
+        : [];
+
       const response = await aiService.chatWithAssistant({
         messages: [...messages, userMessage],
         showContext: {
@@ -734,6 +750,8 @@ function ShowAssistantChat({ context }: { context?: AIAssistantPanelProps['conte
             cost: s.cost || undefined,
           })),
           currentShow: selectedShow ? ({ ...selectedShow } as Record<string, unknown>) : undefined,
+          attendees: currentShowAttendees.length > 0 ? currentShowAttendees : undefined,
+          uploadedDocuments: uploadedDocuments || undefined,
         },
       });
 
