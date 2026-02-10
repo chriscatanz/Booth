@@ -96,7 +96,7 @@ export async function loadApiKeyFromOrg(supabase: SupabaseClient, orgId: string)
       return null;
     }
 
-    if (data?.ai_api_key) {
+    if (data?.ai_api_key && typeof data.ai_api_key === 'string') {
       cachedApiKey = data.ai_api_key;
       keyLoadedFromDb = true;
       return data.ai_api_key;
