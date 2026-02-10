@@ -194,7 +194,22 @@ export function OneClickShow({ isOpen, onClose, onShowCreated }: OneClickShowPro
       // Create a new empty show
       createNewShow();
       
-      // Update it with extracted data
+      // Update it with extracted data - map to actual TradeShow fields
+      // Build notes from deadlines that don't have dedicated fields
+      const deadlineNotes: string[] = [];
+      if (extractedData.earlyBirdDeadline) deadlineNotes.push(`Early Bird Deadline: ${extractedData.earlyBirdDeadline}`);
+      if (extractedData.registrationDeadline) deadlineNotes.push(`Registration Deadline: ${extractedData.registrationDeadline}`);
+      if (extractedData.housingDeadline) deadlineNotes.push(`Housing Deadline: ${extractedData.housingDeadline}`);
+      if (extractedData.serviceKitDeadline) deadlineNotes.push(`Service Kit Deadline: ${extractedData.serviceKitDeadline}`);
+      if (extractedData.shippingDeadline) deadlineNotes.push(`Shipping Deadline: ${extractedData.shippingDeadline}`);
+      
+      const combinedNotes = [
+        extractedData.notes,
+        deadlineNotes.length > 0 ? `\n\n**Extracted Deadlines:**\n${deadlineNotes.join('\n')}` : '',
+        extractedData.warehouseAddress ? `\n\n**Warehouse Address:**\n${extractedData.warehouseAddress}` : '',
+        extractedData.showContactPhone ? `\n\n**Show Contact Phone:** ${extractedData.showContactPhone}` : '',
+      ].filter(Boolean).join('');
+
       const showData: Record<string, unknown> = {
         name: extractedData.name,
         location: extractedData.location,
@@ -206,17 +221,12 @@ export function OneClickShow({ isOpen, onClose, onShowCreated }: OneClickShowPro
         eventType: extractedData.eventType,
         managementCompany: extractedData.managementCompany,
         attendeesIncluded: extractedData.attendeesIncluded,
-        showWebsite: extractedData.showWebsite,
+        eventPortalUrl: extractedData.showWebsite,
         shippingInfo: extractedData.shippingInfo,
-        notes: extractedData.notes,
-        // Deadlines
-        earlyBirdDeadline: extractedData.earlyBirdDeadline,
-        housingDeadline: extractedData.housingDeadline,
-        serviceKitDeadline: extractedData.serviceKitDeadline,
+        generalNotes: combinedNotes || null,
         // Contact info
         showContactName: extractedData.showContactName,
         showContactEmail: extractedData.showContactEmail,
-        showContactPhone: extractedData.showContactPhone,
       };
 
       // Filter out null values
