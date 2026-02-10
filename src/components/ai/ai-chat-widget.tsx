@@ -81,25 +81,10 @@ export function AIChatWidget({ isOpen, onClose }: AIChatWidgetProps) {
     setIsLoading(true);
 
     try {
-      // Build show context
+      // Build show context - pass raw shows array with all fields
       const showContext = shows.length > 0 ? {
-        shows: shows.slice(0, 10).map(s => {
-          // Derive status from dates
-          const now = new Date();
-          const start = s.startDate ? new Date(s.startDate) : null;
-          const end = s.endDate ? new Date(s.endDate) : null;
-          let status = 'upcoming';
-          if (start && end) {
-            if (now > end) status = 'completed';
-            else if (now >= start && now <= end) status = 'active';
-          }
-          return {
-            name: s.name,
-            dates: s.startDate && s.endDate ? `${s.startDate} - ${s.endDate}` : 'TBD',
-            location: s.location || 'TBD',
-            status,
-          };
-        }),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        shows: shows as any, // Pass raw shows - they have all fields (boothSize, cost, etc.)
       } : undefined;
 
       const response = await aiService.chatWithAssistant({
