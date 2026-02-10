@@ -30,8 +30,9 @@ import CSVImportModal from '@/components/import/csv-import-modal';
 import { OrgSettingsModal } from '@/components/settings';
 import { WelcomeWizard } from '@/components/onboarding';
 import { useAuthStore } from '@/store/auth-store';
-import { AIAssistantPanel } from '@/components/ai/ai-assistant-panel';
-import { AIChatBubble } from '@/components/ai/ai-chat-bubble';
+// AI modal/bubble disabled - using full AIView now
+// import { AIAssistantPanel } from '@/components/ai/ai-assistant-panel';
+// import { AIChatBubble } from '@/components/ai/ai-chat-bubble';
 
 const pageVariants = {
   initial: { opacity: 0, y: 8 },
@@ -54,7 +55,7 @@ export function AppShell() {
   const [showImport, setShowImport] = useState(false);
   const [showOrgSettings, setShowOrgSettings] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
-  const [showAIAssistant, setShowAIAssistant] = useState(false);
+  // const [showAIAssistant, setShowAIAssistant] = useState(false); // Disabled - using full AIView
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -197,7 +198,6 @@ export function AppShell() {
         onViewModeChange={handleViewModeChange}
         onOpenSettings={() => setShowOrgSettings(true)}
         onOpenCommandPalette={() => setShowCommandPalette(true)}
-        onOpenAI={() => setShowAIAssistant(true)}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -394,8 +394,8 @@ export function AppShell() {
         )}
       </AnimatePresence>
 
-      {/* AI Assistant Panel */}
-      <AIAssistantPanel
+      {/* AI Assistant - now a full view, modal/bubble disabled */}
+      {/* <AIAssistantPanel
         isOpen={showAIAssistant}
         onClose={() => setShowAIAssistant(false)}
         onOpenSettings={() => setShowOrgSettings(true)}
@@ -406,10 +406,10 @@ export function AppShell() {
             ? `${selectedShow.startDate} - ${selectedShow.endDate}` 
             : undefined,
         } : undefined}
-      />
+      /> */}
 
-      {/* Floating AI Chat Bubble */}
-      <AIChatBubble />
+      {/* Floating AI Chat Bubble - disabled, using full view */}
+      {/* <AIChatBubble /> */}
     </div>
   );
 }

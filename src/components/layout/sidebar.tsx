@@ -89,25 +89,47 @@ export function Sidebar({ onCloseMobile, isMobile }: SidebarProps) {
         </div>
       </div>
 
-      {/* Filters Toggle */}
-      <div className="px-3 pb-2">
+      {/* Filters Toggle + View Toggle */}
+      <div className="px-3 pb-2 flex items-center justify-between">
         <button
           onClick={() => setFiltersExpanded(!filtersExpanded)}
-          className="flex items-center justify-between w-full px-2 py-1.5 rounded-lg text-xs text-text-secondary hover:bg-bg-tertiary transition-colors"
+          className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs text-text-secondary hover:bg-bg-tertiary transition-colors"
         >
-          <span className="flex items-center gap-1.5">
-            <ChevronDown 
-              size={14} 
-              className={cn('transition-transform', filtersExpanded && 'rotate-180')} 
-            />
-            Filters
-            {activeFilterCount > 0 && (
-              <span className="px-1.5 py-0.5 rounded-full bg-brand-purple/20 text-brand-purple text-[10px] font-medium">
-                {activeFilterCount}
-              </span>
-            )}
-          </span>
+          <ChevronDown 
+            size={14} 
+            className={cn('transition-transform', filtersExpanded && 'rotate-180')} 
+          />
+          Filters
+          {activeFilterCount > 0 && (
+            <span className="px-1.5 py-0.5 rounded-full bg-brand-purple/20 text-brand-purple text-[10px] font-medium">
+              {activeFilterCount}
+            </span>
+          )}
         </button>
+        
+        {/* View toggle */}
+        <div className="flex items-center border border-border rounded-lg overflow-hidden">
+          <button
+            onClick={() => setListView('list')}
+            className={cn(
+              'p-1.5 transition-colors',
+              listView === 'list' ? 'bg-bg-tertiary text-text-primary' : 'text-text-tertiary hover:text-text-secondary'
+            )}
+            title="List view"
+          >
+            <ListIcon size={14} />
+          </button>
+          <button
+            onClick={() => setListView('compact')}
+            className={cn(
+              'p-1.5 transition-colors',
+              listView === 'compact' ? 'bg-bg-tertiary text-text-primary' : 'text-text-tertiary hover:text-text-secondary'
+            )}
+            title="Grid view"
+          >
+            <LayoutGrid size={14} />
+          </button>
+        </div>
         
         <AnimatePresence>
           {filtersExpanded && (
@@ -211,28 +233,6 @@ export function Sidebar({ onCloseMobile, isMobile }: SidebarProps) {
         >
           <Archive size={14} />
         </motion.button>
-        
-        {/* View toggle */}
-        <div className="flex items-center border border-border rounded-lg overflow-hidden ml-auto">
-          <button
-            onClick={() => setListView('list')}
-            className={cn(
-              'p-1.5 transition-colors',
-              listView === 'list' ? 'bg-bg-tertiary text-text-primary' : 'text-text-tertiary hover:text-text-secondary'
-            )}
-          >
-            <ListIcon size={14} />
-          </button>
-          <button
-            onClick={() => setListView('compact')}
-            className={cn(
-              'p-1.5 transition-colors',
-              listView === 'compact' ? 'bg-bg-tertiary text-text-primary' : 'text-text-tertiary hover:text-text-secondary'
-            )}
-          >
-            <LayoutGrid size={14} />
-          </button>
-        </div>
       </div>
 
       {/* Show List */}

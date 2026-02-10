@@ -775,6 +775,94 @@ Be helpful, specific, and actionable. Reference the provided context when answer
 }
 
 /**
+ * Extract show details from document text (vendor packets, exhibitor guides, contracts)
+ */
+export async function extractShowFromDocument(documentText: string): Promise<Record<string, unknown>> {
+  if (!currentOrgId) {
+    throw new Error('Organization not set. Please reload the page.');
+  }
+
+  const systemPrompt = `You are a trade show document analyzer. Extract structured data from exhibitor packets, vendor guides, and contracts. Return ONLY valid JSON with no additional text or markdown.`;
+
+  const prompt = `Analyze this trade show document and extract all relevant details. Return a JSON object with the following structure (include only fields that are found in the document):
+
+{
+  "showName": "Name of the trade show",
+  "dates": {
+    "start": "YYYY-MM-DD",
+    "end": "YYYY-MM-DD"
+  },
+  "location": {
+    "venue": "Venue name",
+    "city": "City",
+    "state": "State/Province",
+    "country": "Country"
+  },
+  "booth": {
+    "number": "Booth number/ID",
+    "size": "e.g., 10x10",
+    "type": "e.g., Island, Corner, Inline"
+  },
+  "costs": {
+    "boothRental": 0,
+    "sponsorship": 0,
+    "additionalFees": []
+  },
+  "deadlines": [
+    {
+      "name": "Deadline name",
+      "date": "YYYY-MM-DD",
+      "description": "What's due"
+    }
+  ],
+  "contacts": [
+    {
+      "name": "Contact name",
+      "role": "Role/Title",
+      "email": "email@example.com",
+      "phone": "Phone number"
+    }
+  ],
+  "logistics": {
+    "setupDate": "YYYY-MM-DD",
+    "teardownDate": "YYYY-MM-DD", 
+    "shippingDeadline": "YYYY-MM-DD",
+    "shippingAddress": "Address for materials"
+  },
+  "notes": ["Any other important information"]
+}
+
+Document to analyze:
+${documentText}
+
+Return ONLY the JSON object, no markdown code blocks or explanatory text.`;
+
+  const result = await callAIAPI(prompt, systemPrompt, currentOrgId);
+  
+  // Parse JSON from response (handle potential markdown wrapping)
+  let jsonStr = result.trim();
+  if (jsonStr.startsWith('```json')) {
+    jsonStr = jsonStr.slice(7);
+  } else if (jsonStr.startsWith('```')) {
+    jsonStr = jsonStr.slice(3);
+  }
+  if (jsonStr.endsWith('```')) {
+    jsonStr = jsonStr.slice(0, -3);
+  }
+  jsonStr = jsonStr.trim();
+
+  try {
+    return JSON.parse(jsonStr);
+  } catch {
+    // If JSON parsing fails, return raw text in a structured format
+    return {
+      extractionError: 'Could not parse structured data',
+      rawAnalysis: result
+    };
+  }
+}
+
+/**
  * Test API connection
  */
 export async function testConnection(): Promise<{ success: boolean; error?: string }> {

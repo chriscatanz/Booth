@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import {
   Sparkles, Wand2, FileText, MessageSquare, Send, Loader2, 
   Copy, Check, RefreshCw, Upload, FileUp, Trash2, ChevronDown,
-  Mail, ExternalLink, AlertCircle, Settings, Key
+  Mail, ExternalLink, AlertCircle, Settings
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import * as aiService from '@/services/ai-service';
@@ -27,49 +27,28 @@ export default function AIView({ onOpenSettings }: AIViewProps) {
   const { organization } = useAuthStore();
   const { shows } = useTradeShowStore();
 
-  // Check if AI is configured
+  // Load API key and check if configured
   useEffect(() => {
-    setIsConfigured(aiService.hasApiKey());
-  }, []);
+    async function loadKey() {
+      if (organization?.id) {
+        // Set org context for AI service
+        aiService.setCurrentOrg(organization.id);
+        
+        // Load the API key from database
+        await aiService.loadApiKeyFromOrg(supabase as any, organization.id);
+        
+        // Now check if it's configured
+        setIsConfigured(aiService.hasApiKey());
+      }
+    }
+    loadKey();
+  }, [organization?.id]);
 
   const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
     { id: 'generate', label: 'Generate Content', icon: Wand2 },
     { id: 'documents', label: 'Extract from Documents', icon: FileText },
     { id: 'chat', label: 'Chat Assistant', icon: MessageSquare },
   ];
-
-  // Show setup prompt if not configured
-  if (isConfigured === false) {
-    return (
-      <div className="h-full flex items-center justify-center p-8">
-        <div className="max-w-md text-center">
-          <div className="w-16 h-16 rounded-2xl bg-brand-purple/10 flex items-center justify-center mx-auto mb-6">
-            <Key size={32} className="text-brand-purple" />
-          </div>
-          <h2 className="text-2xl font-bold text-text-primary mb-3">Set Up AI Assistant</h2>
-          <p className="text-text-secondary mb-6">
-            Add your Claude API key to unlock AI-powered content generation, document extraction, and chat assistance.
-          </p>
-          <Button variant="primary" onClick={onOpenSettings}>
-            <Settings size={16} />
-            Open Settings
-          </Button>
-          <p className="text-xs text-text-tertiary mt-4">
-            Go to Settings → AI to add your API key
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Loading state
-  if (isConfigured === null) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <Loader2 size={32} className="text-brand-purple animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="h-full flex flex-col">
@@ -84,6 +63,36 @@ export default function AIView({ onOpenSettings }: AIViewProps) {
               <h1 className="text-xl font-bold text-text-primary">AI Assistant</h1>
               <p className="text-sm text-text-secondary">Generate content, extract data, and get answers</p>
             </div>
+          </div>
+          
+          {/* Status Indicator */}
+          <div className="flex items-center gap-2">
+            {isConfigured === null ? (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-bg-tertiary text-text-secondary border border-border">
+                <Loader2 size={12} className="animate-spin" />
+                Checking...
+              </div>
+            ) : (
+              <div className={cn(
+                'flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium',
+                isConfigured 
+                  ? 'bg-green-500/10 text-green-600 border border-green-500/20'
+                  : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
+              )}>
+                <div className={cn(
+                  'w-2 h-2 rounded-full',
+                  isConfigured ? 'bg-green-500' : 'bg-amber-500'
+                )} />
+                {isConfigured ? 'API Key Configured' : 'No API Key'}
+              </div>
+            )}
+            <button
+              onClick={onOpenSettings}
+              className="p-2 rounded-lg hover:bg-bg-tertiary text-text-secondary hover:text-text-primary transition-colors"
+              title="AI Settings"
+            >
+              <Settings size={18} />
+            </button>
           </div>
         </div>
 
@@ -278,6 +287,20 @@ function GenerateTab({ shows }: { shows: ReturnType<typeof useTradeShowStore>['s
           )}
         </div>
 
+        {/* Additional Instructions */}
+        <div>
+          <label className="block text-xs font-medium text-text-secondary mb-1">
+            Additional instructions (optional)
+          </label>
+          <textarea
+            value={customPrompt}
+            onChange={(e) => setCustomPrompt(e.target.value)}
+            placeholder="E.g., Focus on AI capabilities, mention our new product launch..."
+            className="w-full px-3 py-2 rounded-lg bg-bg-tertiary border border-border text-sm text-text-primary placeholder:text-text-tertiary resize-none"
+            rows={2}
+          />
+        </div>
+
         {/* Content Type Selection */}
         <div>
           <label className="block text-sm font-medium text-text-primary mb-2">Content Type</label>
@@ -319,20 +342,6 @@ function GenerateTab({ shows }: { shows: ReturnType<typeof useTradeShowStore>['s
               </button>
             ))}
           </div>
-        </div>
-
-        {/* Custom Prompt */}
-        <div>
-          <label className="block text-xs font-medium text-text-secondary mb-1">
-            Additional instructions (optional)
-          </label>
-          <textarea
-            value={customPrompt}
-            onChange={(e) => setCustomPrompt(e.target.value)}
-            placeholder="E.g., Focus on AI capabilities, mention our new product launch..."
-            className="w-full px-3 py-2 rounded-lg bg-bg-tertiary border border-border text-sm text-text-primary placeholder:text-text-tertiary resize-none"
-            rows={3}
-          />
         </div>
 
         {/* Generate Button */}

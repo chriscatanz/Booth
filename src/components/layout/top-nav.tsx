@@ -33,7 +33,6 @@ interface TopNavProps {
   onViewModeChange: (mode: ViewMode) => void;
   onOpenSettings: () => void;
   onOpenCommandPalette: () => void;
-  onOpenAI?: () => void;
 }
 
 export function TopNav({ 
@@ -41,7 +40,6 @@ export function TopNav({
   onViewModeChange, 
   onOpenSettings,
   onOpenCommandPalette,
-  onOpenAI,
 }: TopNavProps) {
   const { organization } = useAuthStore();
   const brandColor = organization?.brandColor || '#9333ea';
@@ -106,19 +104,6 @@ export function TopNav({
 
       {/* Right: Actions */}
       <div className="flex items-center gap-2">
-        {/* AI Assistant Button */}
-        {onOpenAI && (
-          <motion.button
-            onClick={onOpenAI}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-500/20 text-brand-purple hover:from-purple-500/20 hover:to-indigo-500/20 text-sm font-medium transition-all"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Sparkles size={14} />
-            <span className="hidden sm:inline">AI</span>
-          </motion.button>
-        )}
-
         {/* Command Palette Trigger */}
         <motion.button
           onClick={onOpenCommandPalette}
