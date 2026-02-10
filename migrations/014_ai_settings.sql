@@ -1,9 +1,10 @@
 -- Migration: AI Settings
 -- Adds encrypted API key storage for AI features at org level
+-- Requires: 012_pii_encryption.sql (for encrypt_pii/decrypt_pii functions)
 
--- Add AI settings column to organizations (encrypted)
+-- Add AI settings column to organizations (encrypted as TEXT/base64)
 ALTER TABLE public.organizations
-ADD COLUMN IF NOT EXISTS ai_api_key_encrypted BYTEA;
+ADD COLUMN IF NOT EXISTS ai_api_key_encrypted TEXT;
 
 -- Create view that decrypts the API key for authorized users
 CREATE OR REPLACE VIEW public.v_organization_ai_settings AS
@@ -11,14 +12,7 @@ SELECT
   o.id,
   o.name,
   o.slug,
-  CASE 
-    WHEN o.ai_api_key_encrypted IS NOT NULL THEN
-      convert_from(
-        decrypt_pii(o.ai_api_key_encrypted),
-        'UTF8'
-      )
-    ELSE NULL
-  END as ai_api_key
+  decrypt_pii(o.ai_api_key_encrypted) as ai_api_key
 FROM public.organizations o
 WHERE o.id IN (
   SELECT organization_id 
@@ -53,7 +47,7 @@ BEGIN
     WHERE id = p_org_id;
   ELSE
     UPDATE public.organizations 
-    SET ai_api_key_encrypted = encrypt_pii(convert_to(p_api_key, 'UTF8'))
+    SET ai_api_key_encrypted = encrypt_pii(p_api_key)
     WHERE id = p_org_id;
   END IF;
 
