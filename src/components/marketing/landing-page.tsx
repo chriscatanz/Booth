@@ -128,26 +128,57 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 8 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute top-full left-0 mt-2 w-64 py-2 bg-surface border border-border rounded-xl shadow-xl"
+                      className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-[720px] p-6 bg-surface border border-border rounded-2xl shadow-2xl"
                     >
-                      <Link
-                        href="/features"
-                        className="block px-4 py-2 text-sm font-semibold text-text-primary hover:bg-bg-secondary transition-colors border-b border-border mb-1"
-                        onClick={() => setFeaturesOpen(false)}
-                      >
-                        All Features
-                      </Link>
-                      {NAV_FEATURES.map((feature) => (
+                      {/* Mega Menu Grid */}
+                      <div className="grid grid-cols-3 gap-2">
+                        {NAV_FEATURES.map((feature) => (
+                          <Link
+                            key={feature.slug}
+                            href={`/features/${feature.slug}`}
+                            className="flex items-start gap-3 p-3 rounded-xl hover:bg-bg-secondary transition-colors group"
+                            onClick={() => setFeaturesOpen(false)}
+                          >
+                            <div 
+                              className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+                              style={{ backgroundColor: `${feature.color}15` }}
+                            >
+                              <feature.icon size={20} style={{ color: feature.color }} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-text-primary group-hover:text-brand-purple transition-colors">
+                                {feature.title}
+                              </p>
+                              <p className="text-xs text-text-tertiary mt-0.5">
+                                {feature.slug === 'calendar' && 'Visual schedule & deadlines'}
+                                {feature.slug === 'budget' && 'Track every dollar'}
+                                {feature.slug === 'team' && 'Collaborate with roles'}
+                                {feature.slug === 'logistics' && 'Shipping & packing'}
+                                {feature.slug === 'assets' && 'Booth kit inventory'}
+                                {feature.slug === 'analytics' && 'ROI & performance'}
+                                {feature.slug === 'ai' && 'Content & insights'}
+                                {feature.slug === 'import-export' && 'CSV & calendar sync'}
+                                {feature.slug === 'templates' && 'Reusable show setups'}
+                              </p>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                      
+                      {/* Footer */}
+                      <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
                         <Link
-                          key={feature.slug}
-                          href={`/features/${feature.slug}`}
-                          className="flex items-center gap-3 px-4 py-2 text-sm text-text-secondary hover:bg-bg-secondary hover:text-text-primary transition-colors"
+                          href="/features"
+                          className="text-sm font-semibold text-brand-purple hover:text-brand-purple-dark transition-colors flex items-center gap-1"
                           onClick={() => setFeaturesOpen(false)}
                         >
-                          <feature.icon size={16} style={{ color: feature.color }} />
-                          {feature.title}
+                          View all features
+                          <ChevronDown size={14} className="-rotate-90" />
                         </Link>
-                      ))}
+                        <p className="text-xs text-text-tertiary">
+                          Built by a trade show manager, for trade show managers
+                        </p>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
