@@ -50,8 +50,22 @@ export interface ShowAssistantRequest {
       dates: string;
       location: string;
       status: string;
-      leads?: number;
+      boothNumber?: string;
+      boothSize?: string;
       cost?: number;
+      shippingCutoff?: string;
+      shippingInfo?: string;
+      trackingNumber?: string;
+      hotelName?: string;
+      hotelConfirmed?: boolean;
+      registrationConfirmed?: boolean;
+      utilitiesBooked?: boolean;
+      laborBooked?: boolean;
+      totalLeads?: number;
+      qualifiedLeads?: number;
+      generalNotes?: string;
+      showContactName?: string;
+      showContactEmail?: string;
     }>;
     currentShow?: Record<string, unknown>;
     attendeesByShow?: Record<string, Array<{
@@ -554,11 +568,26 @@ export async function chatWithAssistant(request: ShowAssistantRequest): Promise<
     .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
     .join('\n\n');
 
-  // Build context sections
+  // Build context sections with detailed show info
   const contextInfo = request.showContext?.shows 
-    ? `\n\n**Your Shows:**\n${request.showContext.shows.map(s => 
-        `- ${s.name} (${s.location}, ${s.dates}) - Status: ${s.status}${s.leads ? `, Leads: ${s.leads}` : ''}${s.cost ? `, Cost: $${s.cost}` : ''}`
-      ).join('\n')}`
+    ? `\n\n**Your Shows:**\n${request.showContext.shows.map(s => {
+        const details: string[] = [];
+        details.push(`**${s.name}**`);
+        details.push(`  Location: ${s.location}, Dates: ${s.dates}, Status: ${s.status}`);
+        if (s.boothNumber || s.boothSize) details.push(`  Booth: ${[s.boothNumber, s.boothSize].filter(Boolean).join(' - ')}`);
+        if (s.cost) details.push(`  Cost: $${s.cost.toLocaleString()}`);
+        if (s.shippingCutoff) details.push(`  Shipping Cutoff: ${s.shippingCutoff}`);
+        if (s.shippingInfo) details.push(`  Shipping Info: ${s.shippingInfo}`);
+        if (s.trackingNumber) details.push(`  Tracking #: ${s.trackingNumber}`);
+        if (s.hotelName) details.push(`  Hotel: ${s.hotelName}${s.hotelConfirmed ? ' (Confirmed)' : ' (Not confirmed)'}`);
+        if (s.registrationConfirmed !== undefined) details.push(`  Registration: ${s.registrationConfirmed ? 'Confirmed' : 'Not confirmed'}`);
+        if (s.utilitiesBooked !== undefined) details.push(`  Utilities: ${s.utilitiesBooked ? 'Booked' : 'Not booked'}`);
+        if (s.laborBooked !== undefined) details.push(`  Labor: ${s.laborBooked ? 'Booked' : 'Not booked'}`);
+        if (s.totalLeads) details.push(`  Leads: ${s.totalLeads}${s.qualifiedLeads ? ` (${s.qualifiedLeads} qualified)` : ''}`);
+        if (s.showContactName || s.showContactEmail) details.push(`  Contact: ${[s.showContactName, s.showContactEmail].filter(Boolean).join(' - ')}`);
+        if (s.generalNotes) details.push(`  Notes: ${s.generalNotes.slice(0, 200)}${s.generalNotes.length > 200 ? '...' : ''}`);
+        return details.join('\n');
+      }).join('\n\n')}`
     : '';
 
   const currentShowInfo = request.showContext?.currentShow
