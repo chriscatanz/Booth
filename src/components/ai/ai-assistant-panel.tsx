@@ -745,6 +745,15 @@ function ShowAssistantChat({ context, uploadedDocuments }: {
         });
       });
 
+      // Debug: log raw show data from store
+      console.log('[ShowAssistantChat] Raw shows from store:', shows.map(s => ({
+        name: s.name,
+        boothSize: s.boothSize,
+        boothNumber: s.boothNumber,
+        cost: s.cost,
+        shippingCutoff: s.shippingCutoff,
+      })));
+
       // Build detailed show data - include all fields even if null
       const detailedShows = shows.map(s => {
         const show: Record<string, unknown> = {
