@@ -18,6 +18,33 @@ const SUPPORTED_TYPES = [
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 
+// PDF parsing using pdf2json
+async function parsePDF(buffer: Buffer): Promise<string> {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const PDFParser = require('pdf2json');
+  
+  return new Promise((resolve, reject) => {
+    const pdfParser = new PDFParser(null, true); // true = don't combine text
+    
+    pdfParser.on('pdfParser_dataError', (errData: { parserError: Error }) => {
+      reject(errData.parserError);
+    });
+    
+    pdfParser.on('pdfParser_dataReady', () => {
+      try {
+        // Get raw text content
+        const text = pdfParser.getRawTextContent();
+        resolve(text);
+      } catch (err) {
+        reject(err);
+      }
+    });
+    
+    // Parse the buffer
+    pdfParser.parseBuffer(buffer);
+  });
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Try SSR-based auth first (for browser requests with cookies)
@@ -139,10 +166,7 @@ async function parseDocument(file: File, mimeType: string): Promise<string> {
 
   // PDF files
   if (mimeType === 'application/pdf') {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const pdfParse = require('pdf-parse');
-    const data = await pdfParse(nodeBuffer);
-    return data.text;
+    return parsePDF(nodeBuffer);
   }
 
   // DOCX files
