@@ -5,7 +5,7 @@ import { useTheme } from '@/theme/theme-provider';
 import { useTradeShowStore } from '@/store/trade-show-store';
 import { useSettingsStore } from '@/store/settings-store';
 import { useAuthStore } from '@/store/auth-store';
-import { Moon, Sun, RefreshCw, Settings, Download, Menu } from 'lucide-react';
+import { Moon, Sun, RefreshCw, Settings, Download, Menu, Sparkles } from 'lucide-react';
 import { UserMenu } from '@/components/auth/user-menu';
 import { NotificationCenter } from '@/components/notifications/notification-center';
 
@@ -14,9 +14,10 @@ interface ToolbarProps {
   onMenuToggle?: () => void;
   showMenuButton?: boolean;
   onOpenOrgSettings?: () => void;
+  onOpenAI?: () => void;
 }
 
-export function Toolbar({ onExport, onMenuToggle, showMenuButton, onOpenOrgSettings }: ToolbarProps) {
+export function Toolbar({ onExport, onMenuToggle, showMenuButton, onOpenOrgSettings, onOpenAI }: ToolbarProps) {
   const { resolved, toggle } = useTheme();
   const loadShows = useTradeShowStore(s => s.loadShows);
   const isLoading = useTradeShowStore(s => s.isLoading);
@@ -71,6 +72,16 @@ export function Toolbar({ onExport, onMenuToggle, showMenuButton, onOpenOrgSetti
       >
         {resolved === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
       </button>
+
+      {onOpenAI && (
+        <button
+          onClick={onOpenAI}
+          className="p-2 rounded-lg hover:bg-bg-tertiary text-brand-purple hover:text-brand-purple-light transition-colors"
+          title="AI Assistant"
+        >
+          <Sparkles size={16} />
+        </button>
+      )}
 
       <button
         onClick={() => setShowSettings(true)}

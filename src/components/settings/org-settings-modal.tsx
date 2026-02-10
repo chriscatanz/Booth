@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   X, Building2, Users, Shield, Save, Upload,
-  Crown, AlertCircle, Check, Trash2, Settings, Clock, Download, List, Palette, Columns, Eye, Bell
+  Crown, AlertCircle, Check, Trash2, Settings, Clock, Download, List, Palette, Columns, Eye, Bell, Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { authenticatedFetch } from '@/lib/api';
@@ -21,12 +21,13 @@ import { CustomFieldsEditor } from './custom-fields-editor';
 import { BrandingEditor } from './branding-editor';
 import { RolePermissionsEditor } from './role-permissions-editor';
 import { NotificationPreferences } from '@/components/notifications/notification-preferences';
+import { AISettings } from './ai-settings';
 
 interface OrgSettingsModalProps {
   onClose: () => void;
 }
 
-type SettingsTab = 'general' | 'branding' | 'members' | 'notifications' | 'permissions' | 'lists' | 'fields' | 'data' | 'audit' | 'danger';
+type SettingsTab = 'general' | 'branding' | 'members' | 'notifications' | 'permissions' | 'lists' | 'fields' | 'ai' | 'data' | 'audit' | 'danger';
 
 export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
   const { organization, user, isOwner, isAdmin, refreshOrganizations } = useAuthStore();
@@ -91,6 +92,7 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
     { id: 'permissions', label: 'Permissions', icon: <Eye size={16} />, adminOnly: true },
     { id: 'lists', label: 'Custom Lists', icon: <List size={16} />, adminOnly: true },
     { id: 'fields', label: 'Custom Fields', icon: <Columns size={16} />, adminOnly: true },
+    { id: 'ai', label: 'AI Assistant', icon: <Sparkles size={16} /> },
     { id: 'data', label: 'Data Export', icon: <Download size={16} /> },
     { id: 'audit', label: 'Audit Log', icon: <Clock size={16} />, adminOnly: true },
     { id: 'danger', label: 'Danger Zone', icon: <AlertCircle size={16} />, adminOnly: true },
@@ -318,6 +320,17 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
                 exit={{ opacity: 0 }}
               >
                 <CustomFieldsEditor />
+              </motion.div>
+            )}
+
+            {activeTab === 'ai' && (
+              <motion.div
+                key="ai"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <AISettings />
               </motion.div>
             )}
 

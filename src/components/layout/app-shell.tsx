@@ -28,6 +28,7 @@ import ExportFieldSelector from '@/components/export/export-field-selector';
 import { OrgSettingsModal } from '@/components/settings';
 import { WelcomeWizard } from '@/components/onboarding';
 import { useAuthStore } from '@/store/auth-store';
+import { AIAssistantPanel } from '@/components/ai/ai-assistant-panel';
 
 const pageVariants = {
   initial: { opacity: 0, y: 8 },
@@ -49,6 +50,7 @@ export function AppShell() {
   const [showExport, setShowExport] = useState(false);
   const [showOrgSettings, setShowOrgSettings] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -189,6 +191,7 @@ export function AppShell() {
         onViewModeChange={handleViewModeChange}
         onOpenSettings={() => setShowOrgSettings(true)}
         onOpenCommandPalette={() => setShowCommandPalette(true)}
+        onOpenAI={() => setShowAIAssistant(true)}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -368,6 +371,19 @@ export function AppShell() {
           <WelcomeWizard onComplete={handleOnboardingComplete} />
         )}
       </AnimatePresence>
+
+      {/* AI Assistant Panel */}
+      <AIAssistantPanel
+        isOpen={showAIAssistant}
+        onClose={() => setShowAIAssistant(false)}
+        context={selectedShow ? {
+          showName: selectedShow.name,
+          showLocation: selectedShow.location || undefined,
+          showDates: selectedShow.startDate && selectedShow.endDate 
+            ? `${selectedShow.startDate} - ${selectedShow.endDate}` 
+            : undefined,
+        } : undefined}
+      />
     </div>
   );
 }

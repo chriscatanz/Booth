@@ -1,0 +1,6 @@
+node_modules
+.next
+.git
+src-tauri
+*.md
+.env*.local

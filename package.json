@@ -12,6 +12,7 @@
     "tauri:build": "tauri build"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.74.0",
     "@supabase/supabase-js": "^2.95.3",
     "@tauri-apps/api": "^2.10.1",
     "@tiptap/extension-placeholder": "^3.19.0",
