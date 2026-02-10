@@ -563,6 +563,12 @@ export async function chatWithAssistant(request: ShowAssistantRequest): Promise<
     throw new Error('Organization not set. Please reload the page.');
   }
 
+  // Debug: log the context being sent
+  console.log('[chatWithAssistant] Shows count:', request.showContext?.shows?.length);
+  console.log('[chatWithAssistant] First show data:', JSON.stringify(request.showContext?.shows?.[0], null, 2));
+  console.log('[chatWithAssistant] Attendees by show:', Object.keys(request.showContext?.attendeesByShow || {}));
+  console.log('[chatWithAssistant] Has documents:', !!request.showContext?.uploadedDocuments);
+  
   // Build conversation prompt from messages
   const conversationHistory = request.messages
     .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
