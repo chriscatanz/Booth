@@ -65,7 +65,7 @@ export function AIAssistantPanel({ isOpen, onClose, initialTab = 'content', cont
           animate={{ scale: 1, y: 0 }}
           exit={{ scale: 0.95, y: 20 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-2xl bg-surface rounded-2xl shadow-2xl border border-border overflow-hidden"
+          className="relative w-full max-w-4xl max-h-[85vh] bg-surface rounded-2xl shadow-2xl border border-border overflow-hidden flex flex-col"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-border">
@@ -253,10 +253,20 @@ function ContentGenerator({ context }: { context?: AIAssistantPanelProps['contex
                 <RefreshCw size={14} className={isGenerating ? 'animate-spin' : ''} />
               </button>
             </div>
-            <div className="prose prose-sm prose-invert max-w-none">
-              <pre className="whitespace-pre-wrap text-sm text-text-primary bg-bg-tertiary p-4 rounded-lg overflow-auto">
-                {result}
-              </pre>
+            <div className="prose prose-sm prose-invert max-w-none bg-bg-tertiary p-4 rounded-lg overflow-auto max-h-[50vh]">
+              <div className="text-sm text-text-primary whitespace-pre-wrap leading-relaxed">
+                {result.split('\n').map((line, i) => {
+                  // Basic markdown-ish rendering
+                  if (line.startsWith('# ')) return <h1 key={i} className="text-lg font-bold mt-4 mb-2 text-text-primary">{line.slice(2)}</h1>;
+                  if (line.startsWith('## ')) return <h2 key={i} className="text-base font-semibold mt-3 mb-2 text-text-primary">{line.slice(3)}</h2>;
+                  if (line.startsWith('### ')) return <h3 key={i} className="text-sm font-semibold mt-2 mb-1 text-text-primary">{line.slice(4)}</h3>;
+                  if (line.startsWith('- ') || line.startsWith('• ')) return <li key={i} className="ml-4 list-disc text-text-primary">{line.slice(2)}</li>;
+                  if (line.match(/^\d+\.\s/)) return <li key={i} className="ml-4 list-decimal text-text-primary">{line.replace(/^\d+\.\s/, '')}</li>;
+                  if (line.startsWith('**') && line.endsWith('**')) return <p key={i} className="font-semibold text-text-primary">{line.slice(2, -2)}</p>;
+                  if (line.trim() === '') return <br key={i} />;
+                  return <p key={i} className="text-text-primary mb-1">{line}</p>;
+                })}
+              </div>
             </div>
           </div>
         ) : (
@@ -427,9 +437,20 @@ function DocumentAnalyzer() {
             >
               {copied ? <Check size={14} /> : <Copy size={14} />}
             </button>
-            <pre className="whitespace-pre-wrap text-sm text-text-primary bg-bg-tertiary p-4 rounded-lg overflow-auto">
-              {result}
-            </pre>
+            <div className="prose prose-sm prose-invert max-w-none bg-bg-tertiary p-4 rounded-lg overflow-auto max-h-[50vh]">
+              <div className="text-sm text-text-primary whitespace-pre-wrap leading-relaxed">
+                {result.split('\n').map((line, i) => {
+                  if (line.startsWith('# ')) return <h1 key={i} className="text-lg font-bold mt-4 mb-2 text-text-primary">{line.slice(2)}</h1>;
+                  if (line.startsWith('## ')) return <h2 key={i} className="text-base font-semibold mt-3 mb-2 text-text-primary">{line.slice(3)}</h2>;
+                  if (line.startsWith('### ')) return <h3 key={i} className="text-sm font-semibold mt-2 mb-1 text-text-primary">{line.slice(4)}</h3>;
+                  if (line.startsWith('- ') || line.startsWith('• ')) return <li key={i} className="ml-4 list-disc text-text-primary">{line.slice(2)}</li>;
+                  if (line.match(/^\d+\.\s/)) return <li key={i} className="ml-4 list-decimal text-text-primary">{line.replace(/^\d+\.\s/, '')}</li>;
+                  if (line.startsWith('**') && line.endsWith('**')) return <p key={i} className="font-semibold text-text-primary">{line.slice(2, -2)}</p>;
+                  if (line.trim() === '') return <br key={i} />;
+                  return <p key={i} className="text-text-primary mb-1">{line}</p>;
+                })}
+              </div>
+            </div>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-center text-text-tertiary">
