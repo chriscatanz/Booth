@@ -210,6 +210,20 @@ export function OneClickShow({ isOpen, onClose, onShowCreated }: OneClickShowPro
         extractedData.showContactPhone ? `\n\n**Show Contact Phone:** ${extractedData.showContactPhone}` : '',
       ].filter(Boolean).join('');
 
+      // Validate eventType - must be one of the allowed values
+      const validEventTypes = ['in_person', 'virtual', 'hybrid'];
+      const eventType = extractedData.eventType && validEventTypes.includes(extractedData.eventType) 
+        ? extractedData.eventType 
+        : 'in_person'; // Default to in_person
+
+      // Validate cost is a number
+      const cost = typeof extractedData.cost === 'number' ? extractedData.cost : null;
+
+      // Validate attendeesIncluded is a number
+      const attendeesIncluded = typeof extractedData.attendeesIncluded === 'number' 
+        ? extractedData.attendeesIncluded 
+        : null;
+
       const showData: Record<string, unknown> = {
         name: extractedData.name,
         location: extractedData.location,
@@ -217,10 +231,10 @@ export function OneClickShow({ isOpen, onClose, onShowCreated }: OneClickShowPro
         endDate: extractedData.endDate,
         boothNumber: extractedData.boothNumber,
         boothSize: extractedData.boothSize,
-        cost: extractedData.cost,
-        eventType: extractedData.eventType,
+        cost,
+        eventType,
         managementCompany: extractedData.managementCompany,
-        attendeesIncluded: extractedData.attendeesIncluded,
+        attendeesIncluded,
         eventPortalUrl: extractedData.showWebsite,
         shippingInfo: extractedData.shippingInfo,
         generalNotes: combinedNotes || null,
