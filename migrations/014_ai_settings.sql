@@ -15,9 +15,10 @@ SELECT
   decrypt_pii(o.ai_api_key_encrypted) as ai_api_key
 FROM public.organizations o
 WHERE o.id IN (
-  SELECT organization_id 
-  FROM public.user_profiles 
-  WHERE email = current_user_email()
+  SELECT om.organization_id 
+  FROM public.organization_members om
+  JOIN public.user_profiles up ON up.id = om.user_id
+  WHERE up.email = current_user_email()
 );
 
 -- Function to update AI API key (encrypts before storing)
@@ -30,12 +31,13 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
-  -- Verify user has access to this org
+  -- Verify user has access to this org and is admin/owner
   IF NOT EXISTS (
-    SELECT 1 FROM public.user_profiles 
-    WHERE organization_id = p_org_id 
-    AND email = current_user_email()
-    AND role = 'admin'
+    SELECT 1 FROM public.organization_members om
+    JOIN public.user_profiles up ON up.id = om.user_id
+    WHERE om.organization_id = p_org_id 
+    AND up.email = current_user_email()
+    AND om.role IN ('admin', 'owner')
   ) THEN
     RAISE EXCEPTION 'Only admins can update AI settings';
   END IF;
