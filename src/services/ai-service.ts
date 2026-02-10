@@ -574,21 +574,23 @@ export async function chatWithAssistant(request: ShowAssistantRequest): Promise<
     .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
     .join('\n\n');
 
-  // Build context sections with detailed show info
-  const contextInfo = request.showContext?.shows 
-    ? `\n\n**Your Shows:**\n${request.showContext.shows.map(s => {
+  // Build context sections with full show data
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const showsData = request.showContext?.shows as any[];
+  const contextInfo = showsData 
+    ? `\n\n**Your Shows:**\n${showsData.map(s => {
         const details: string[] = [];
         details.push(`**${s.name}**`);
-        details.push(`  Location: ${s.location}, Dates: ${s.dates}, Status: ${s.status}`);
+        details.push(`  Location: ${s.location || 'TBD'}, Dates: ${s.startDate || 'TBD'} - ${s.endDate || 'TBD'}, Status: ${s.showStatus || 'Unknown'}`);
         if (s.boothNumber || s.boothSize) details.push(`  Booth: ${[s.boothNumber, s.boothSize].filter(Boolean).join(' - ')}`);
-        if (s.cost) details.push(`  Cost: $${s.cost.toLocaleString()}`);
+        if (s.cost) details.push(`  Cost: $${Number(s.cost).toLocaleString()}`);
         if (s.shippingCutoff) details.push(`  Shipping Cutoff: ${s.shippingCutoff}`);
         if (s.shippingInfo) details.push(`  Shipping Info: ${s.shippingInfo}`);
         if (s.trackingNumber) details.push(`  Tracking #: ${s.trackingNumber}`);
         if (s.hotelName) details.push(`  Hotel: ${s.hotelName}${s.hotelConfirmed ? ' (Confirmed)' : ' (Not confirmed)'}`);
-        if (s.registrationConfirmed !== undefined) details.push(`  Registration: ${s.registrationConfirmed ? 'Confirmed' : 'Not confirmed'}`);
-        if (s.utilitiesBooked !== undefined) details.push(`  Utilities: ${s.utilitiesBooked ? 'Booked' : 'Not booked'}`);
-        if (s.laborBooked !== undefined) details.push(`  Labor: ${s.laborBooked ? 'Booked' : 'Not booked'}`);
+        if (s.registrationConfirmed !== undefined && s.registrationConfirmed !== null) details.push(`  Registration: ${s.registrationConfirmed ? 'Confirmed' : 'Not confirmed'}`);
+        if (s.utilitiesBooked !== undefined && s.utilitiesBooked !== null) details.push(`  Utilities: ${s.utilitiesBooked ? 'Booked' : 'Not booked'}`);
+        if (s.laborBooked !== undefined && s.laborBooked !== null) details.push(`  Labor: ${s.laborBooked ? 'Booked' : 'Not booked'}`);
         if (s.totalLeads) details.push(`  Leads: ${s.totalLeads}${s.qualifiedLeads ? ` (${s.qualifiedLeads} qualified)` : ''}`);
         if (s.showContactName || s.showContactEmail) details.push(`  Contact: ${[s.showContactName, s.showContactEmail].filter(Boolean).join(' - ')}`);
         if (s.generalNotes) details.push(`  Notes: ${s.generalNotes.slice(0, 200)}${s.generalNotes.length > 200 ? '...' : ''}`);

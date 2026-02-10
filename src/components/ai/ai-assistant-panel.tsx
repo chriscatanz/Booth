@@ -745,43 +745,12 @@ function ShowAssistantChat({ context, uploadedDocuments }: {
         });
       });
 
-      // Debug: log FIRST raw show object from store with ALL keys
-      const firstShow = shows[0];
-      console.log('[ShowAssistantChat] First show ALL KEYS:', Object.keys(firstShow));
-      console.log('[ShowAssistantChat] First show boothSize value:', firstShow?.boothSize, 'type:', typeof firstShow?.boothSize);
-      console.log('[ShowAssistantChat] First show cost value:', firstShow?.cost, 'type:', typeof firstShow?.cost);
-
-      // Build detailed show data - include ALL fields for debugging
-      const detailedShows = shows.map(s => ({
-        name: s.name,
-        dates: `${s.startDate || 'TBD'} - ${s.endDate || 'TBD'}`,
-        location: s.location || 'TBD',
-        status: s.showStatus || 'Unknown',
-        boothNumber: s.boothNumber,
-        boothSize: s.boothSize,
-        cost: s.cost,
-        shippingCutoff: s.shippingCutoff,
-        shippingInfo: s.shippingInfo,
-        trackingNumber: s.trackingNumber,
-        hotelName: s.hotelName,
-        hotelConfirmed: s.hotelConfirmed,
-        registrationConfirmed: s.registrationConfirmed,
-        utilitiesBooked: s.utilitiesBooked,
-        laborBooked: s.laborBooked,
-        totalLeads: s.totalLeads,
-        qualifiedLeads: s.qualifiedLeads,
-        generalNotes: s.generalNotes,
-        showContactName: s.showContactName,
-        showContactEmail: s.showContactEmail,
-      }));
-
-      console.log('[ShowAssistantChat] Detailed shows sample:', JSON.stringify(detailedShows[0], null, 2));
-
+      // Pass full show objects directly - they already have all the data
       const response = await aiService.chatWithAssistant({
         messages: [...messages, userMessage],
         showContext: {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          shows: detailedShows as any,
+          shows: shows as any, // Pass raw shows - they have all fields
           currentShow: selectedShow ? ({ ...selectedShow } as Record<string, unknown>) : undefined,
           attendeesByShow: Object.keys(attendeesByShow).length > 0 ? attendeesByShow : undefined,
           uploadedDocuments: uploadedDocuments || undefined,
