@@ -16,6 +16,8 @@ export interface ContentGenerationRequest {
     showName?: string;
     showLocation?: string;
     showDates?: string;
+    boothSize?: string;
+    boothNumber?: string;
     products?: string;
     audience?: string;
     leadName?: string;
@@ -208,6 +210,16 @@ export function setCurrentOrg(orgId: string) {
   currentOrgId = orgId;
 }
 
+// Org branding context cache
+let orgBrandingCache: {
+  companyDescription?: string;
+  productDescription?: string;
+} | null = null;
+
+export function setOrgBranding(branding: { companyDescription?: string; productDescription?: string } | null) {
+  orgBrandingCache = branding;
+}
+
 /**
  * Content Generation
  */
@@ -216,14 +228,22 @@ export async function generateContent(request: ContentGenerationRequest): Promis
     throw new Error('Organization not set. Please reload the page.');
   }
 
+  // Build company context section if available
+  const companyContext = orgBrandingCache?.companyDescription || orgBrandingCache?.productDescription
+    ? `\n\n**About the Company:**
+${orgBrandingCache.companyDescription ? `Company: ${orgBrandingCache.companyDescription}` : ''}
+${orgBrandingCache.productDescription ? `Products/Services: ${orgBrandingCache.productDescription}` : ''}`
+    : '';
+
   const prompts: Record<ContentGenerationRequest['type'], string> = {
     talking_points: `Generate 5-7 compelling talking points for a trade show booth.
 
 Show: ${request.context.showName || 'Trade Show'}
 Location: ${request.context.showLocation || 'N/A'}
 Dates: ${request.context.showDates || 'N/A'}
-Products/Services: ${request.context.products || 'Not specified'}
-Target Audience: ${request.context.audience || 'General attendees'}
+${request.context.boothSize ? `Booth: ${request.context.boothSize}${request.context.boothNumber ? ` (#${request.context.boothNumber})` : ''}` : ''}
+Products/Services: ${request.context.products || orgBrandingCache?.productDescription || 'Not specified'}
+Target Audience: ${request.context.audience || 'General attendees'}${companyContext}
 
 Generate conversation starters and key value propositions that will resonate with this audience. Be specific and actionable.`,
 
@@ -231,7 +251,7 @@ Generate conversation starters and key value propositions that will resonate wit
 
 Show: ${request.context.showName || 'Trade Show'}
 Location: ${request.context.showLocation || 'N/A'}
-Dates: ${request.context.showDates || 'N/A'}
+Dates: ${request.context.showDates || 'N/A'}${companyContext}
 ${request.context.customPrompt ? `Additional context: ${request.context.customPrompt}` : ''}
 
 Create posts that are professional but engaging, include relevant hashtags, and encourage booth visits. Vary the tone - one can be more casual, one informative, one with a call-to-action.`,

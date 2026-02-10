@@ -7,9 +7,10 @@ import * as storageService from '@/services/storage-service';
 import { Button } from '@/components/ui/button';
 import { 
   Upload, Trash2, Check, AlertCircle, Palette, Image as ImageIcon,
-  RefreshCw
+  RefreshCw, Building2, Package, FileText, X, Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
 
 // Preset brand colors
 const PRESET_COLORS = [
@@ -23,27 +24,55 @@ const PRESET_COLORS = [
   { name: 'Indigo', value: '#6366f1' },
 ];
 
+interface BrandDocument {
+  id: string;
+  name: string;
+  url: string;
+  type: 'document' | 'image';
+  size: number;
+  uploadedAt: string;
+}
+
 export function BrandingEditor() {
   const { organization, refreshOrganizations, isAdmin } = useAuthStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const brandDocsInputRef = useRef<HTMLInputElement>(null);
   
   const [logoUrl, setLogoUrl] = useState<string | null>(organization?.logoUrl || null);
   const [brandColor, setBrandColor] = useState(organization?.brandColor || '#9333ea');
   const [customColor, setCustomColor] = useState(organization?.brandColor || '#9333ea');
   
+  // AI Context fields
+  const [companyDescription, setCompanyDescription] = useState<string>(
+    (organization?.settings?.companyDescription as string) || ''
+  );
+  const [productDescription, setProductDescription] = useState<string>(
+    (organization?.settings?.productDescription as string) || ''
+  );
+  const [brandDocuments, setBrandDocuments] = useState<BrandDocument[]>(
+    (organization?.settings?.brandDocuments as BrandDocument[]) || []
+  );
+  
   const [isUploading, setIsUploading] = useState(false);
+  const [isUploadingDoc, setIsUploadingDoc] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   
   // Track if there are unsaved changes
-  const hasChanges = logoUrl !== organization?.logoUrl || brandColor !== organization?.brandColor;
+  const hasChanges = logoUrl !== organization?.logoUrl || 
+    brandColor !== organization?.brandColor ||
+    companyDescription !== (organization?.settings?.companyDescription || '') ||
+    productDescription !== (organization?.settings?.productDescription || '');
 
   useEffect(() => {
     if (organization) {
       setLogoUrl(organization.logoUrl);
       setBrandColor(organization.brandColor || '#9333ea');
       setCustomColor(organization.brandColor || '#9333ea');
+      setCompanyDescription((organization.settings?.companyDescription as string) || '');
+      setProductDescription((organization.settings?.productDescription as string) || '');
+      setBrandDocuments((organization.settings?.brandDocuments as BrandDocument[]) || []);
     }
   }, [organization]);
 
@@ -108,6 +137,12 @@ export function BrandingEditor() {
       await authService.updateOrganization(organization.id, {
         logoUrl,
         brandColor,
+        settings: {
+          ...organization.settings,
+          companyDescription,
+          productDescription,
+          brandDocuments,
+        },
       });
       await refreshOrganizations();
       setSuccess(true);
@@ -117,6 +152,98 @@ export function BrandingEditor() {
     }
 
     setIsSaving(false);
+  };
+
+  const handleBrandDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length || !organization) return;
+
+    setIsUploadingDoc(true);
+    setError(null);
+
+    try {
+      const newDocs: BrandDocument[] = [];
+      
+      for (const file of files) {
+        // Validate file type
+        const validTypes = [
+          'application/pdf', 
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'text/plain',
+          'text/markdown',
+          'image/png',
+          'image/jpeg',
+          'image/gif',
+          'image/webp',
+        ];
+        
+        if (!validTypes.includes(file.type)) {
+          setError(`${file.name}: Unsupported file type. Use PDF, DOC, DOCX, TXT, MD, or images.`);
+          continue;
+        }
+
+        // Validate size (10MB max per file)
+        if (file.size > 10 * 1024 * 1024) {
+          setError(`${file.name}: File too large. Max 10MB per file.`);
+          continue;
+        }
+
+        // Upload to Supabase storage
+        const fileName = `${organization.id}/brand-docs/${Date.now()}-${file.name}`;
+        const { data, error: uploadError } = await supabase.storage
+          .from('org-assets')
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('org-assets')
+          .getPublicUrl(fileName);
+
+        newDocs.push({
+          id: crypto.randomUUID(),
+          name: file.name,
+          url: urlData.publicUrl,
+          type: file.type.startsWith('image/') ? 'image' : 'document',
+          size: file.size,
+          uploadedAt: new Date().toISOString(),
+        });
+      }
+
+      setBrandDocuments(prev => [...prev, ...newDocs]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to upload document');
+    }
+
+    setIsUploadingDoc(false);
+    if (brandDocsInputRef.current) {
+      brandDocsInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveBrandDoc = async (docId: string) => {
+    const doc = brandDocuments.find(d => d.id === docId);
+    if (!doc || !organization) return;
+
+    try {
+      // Try to delete from storage (may fail if URL format changed)
+      const path = doc.url.split('/org-assets/')[1];
+      if (path) {
+        await supabase.storage.from('org-assets').remove([path]);
+      }
+    } catch (e) {
+      // Ignore storage errors, still remove from list
+    }
+
+    setBrandDocuments(prev => prev.filter(d => d.id !== docId));
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   const handleColorSelect = (color: string) => {
@@ -284,8 +411,121 @@ export function BrandingEditor() {
         </div>
       </div>
 
-      {/* Preview Section */}
+      {/* AI Context Section */}
+      <div className="pt-6 border-t border-border">
+        <h3 className="text-sm font-medium text-text-primary mb-1 flex items-center gap-2">
+          <Building2 size={16} className="text-text-tertiary" />
+          Company Description
+        </h3>
+        <p className="text-xs text-text-secondary mb-3">
+          Used by AI to understand your business when generating content.
+        </p>
+        <textarea
+          value={companyDescription}
+          onChange={(e) => setCompanyDescription(e.target.value)}
+          placeholder="Describe your company, what you do, your target market, key differentiators..."
+          className="w-full px-3 py-2 rounded-lg bg-bg-tertiary border border-border text-sm text-text-primary placeholder:text-text-tertiary resize-none focus:outline-none focus:border-brand-purple"
+          rows={3}
+        />
+        <p className="text-xs text-text-tertiary mt-1 text-right">
+          {companyDescription.length} characters
+        </p>
+      </div>
+
       <div>
+        <h3 className="text-sm font-medium text-text-primary mb-1 flex items-center gap-2">
+          <Package size={16} className="text-text-tertiary" />
+          Product/Service Description
+        </h3>
+        <p className="text-xs text-text-secondary mb-3">
+          Describe your products or services so AI can reference them in generated content.
+        </p>
+        <textarea
+          value={productDescription}
+          onChange={(e) => setProductDescription(e.target.value)}
+          placeholder="Describe your main products/services, features, benefits, use cases..."
+          className="w-full px-3 py-2 rounded-lg bg-bg-tertiary border border-border text-sm text-text-primary placeholder:text-text-tertiary resize-none focus:outline-none focus:border-brand-purple"
+          rows={3}
+        />
+        <p className="text-xs text-text-tertiary mt-1 text-right">
+          {productDescription.length} characters
+        </p>
+      </div>
+
+      {/* Brand Documents Section */}
+      <div>
+        <h3 className="text-sm font-medium text-text-primary mb-1 flex items-center gap-2">
+          <FileText size={16} className="text-text-tertiary" />
+          Brand Documents
+        </h3>
+        <p className="text-xs text-text-secondary mb-3">
+          Upload documents or images about your company that AI can reference (brochures, one-pagers, product specs). Large documents will be chunked automatically.
+        </p>
+
+        <input
+          ref={brandDocsInputRef}
+          type="file"
+          accept=".pdf,.doc,.docx,.txt,.md,image/png,image/jpeg,image/gif,image/webp"
+          onChange={handleBrandDocUpload}
+          multiple
+          className="hidden"
+        />
+
+        {/* Document List */}
+        {brandDocuments.length > 0 && (
+          <div className="mb-3 space-y-2">
+            {brandDocuments.map((doc) => (
+              <div
+                key={doc.id}
+                className="flex items-center justify-between px-3 py-2 rounded-lg bg-bg-tertiary border border-border"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  {doc.type === 'image' ? (
+                    <ImageIcon size={16} className="text-text-tertiary shrink-0" />
+                  ) : (
+                    <FileText size={16} className="text-text-tertiary shrink-0" />
+                  )}
+                  <span className="text-sm text-text-primary truncate">{doc.name}</span>
+                  <span className="text-xs text-text-tertiary shrink-0">
+                    ({formatFileSize(doc.size)})
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleRemoveBrandDoc(doc.id)}
+                  className="p-1 rounded hover:bg-surface text-text-tertiary hover:text-error transition-colors"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => brandDocsInputRef.current?.click()}
+          disabled={isUploadingDoc}
+        >
+          {isUploadingDoc ? (
+            <>
+              <Loader2 size={14} className="animate-spin" />
+              Uploading...
+            </>
+          ) : (
+            <>
+              <Upload size={14} />
+              Upload Documents
+            </>
+          )}
+        </Button>
+        <p className="text-xs text-text-tertiary mt-2">
+          Supported: PDF, DOC, DOCX, TXT, MD, PNG, JPG, GIF, WebP. Max 10MB per file.
+        </p>
+      </div>
+
+      {/* Preview Section */}
+      <div className="pt-6 border-t border-border">
         <h3 className="text-sm font-medium text-text-primary mb-3">Preview</h3>
         <div className="p-4 rounded-xl bg-sidebar-bg border border-border">
           <div className="flex items-center gap-3">

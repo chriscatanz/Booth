@@ -44,6 +44,12 @@ export function AIAssistantPanel({ isOpen, onClose, onOpenSettings, initialTab =
       
       aiService.setCurrentOrg(organization.id);
       
+      // Set branding context for AI content generation
+      aiService.setOrgBranding({
+        companyDescription: organization.settings?.companyDescription as string | undefined,
+        productDescription: organization.settings?.productDescription as string | undefined,
+      });
+      
       // If key not already loaded, fetch from database
       if (!aiService.isKeyLoadedFromDb()) {
         setIsLoadingKey(true);
@@ -179,7 +185,7 @@ function ContentGenerator({ context }: { context?: AIAssistantPanelProps['contex
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Get selected show data
-  const selectedShow = shows.find(s => s.id === selectedShowId);
+  const selectedShow = shows.find(s => String(s.id) === selectedShowId);
 
   const contentTypes: { id: aiService.ContentGenerationRequest['type']; label: string; description: string }[] = [
     { id: 'talking_points', label: 'Talking Points', description: 'Booth conversation starters' },
