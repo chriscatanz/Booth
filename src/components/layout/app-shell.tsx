@@ -25,6 +25,7 @@ import ActivityView from '@/components/views/activity-view';
 import DetailView from '@/components/views/detail-view';
 import SettingsView from '@/components/views/settings-view';
 import ExportFieldSelector from '@/components/export/export-field-selector';
+import CSVImportModal from '@/components/import/csv-import-modal';
 import { OrgSettingsModal } from '@/components/settings';
 import { WelcomeWizard } from '@/components/onboarding';
 import { useAuthStore } from '@/store/auth-store';
@@ -49,6 +50,7 @@ export function AppShell() {
   const defaultView = useSettingsStore(s => s.defaultView);
   const [viewMode, setViewMode] = useState<ViewMode>(defaultView);
   const [showExport, setShowExport] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [showOrgSettings, setShowOrgSettings] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
@@ -281,14 +283,23 @@ export function AppShell() {
 
             {/* Right side actions */}
             <div className="ml-auto flex items-center gap-2">
-              {/* Export button - only show on relevant views */}
+              {/* Import/Export buttons - only show on relevant views */}
               {(viewMode === ViewMode.List || viewMode === ViewMode.Dashboard) && !selectedShow && (
-                <button
-                  onClick={() => setShowExport(true)}
-                  className="text-xs text-text-secondary hover:text-text-primary transition-colors"
-                >
-                  Export
-                </button>
+                <>
+                  <button
+                    onClick={() => setShowImport(true)}
+                    className="text-xs text-text-secondary hover:text-text-primary transition-colors"
+                  >
+                    Import
+                  </button>
+                  <span className="text-text-tertiary">|</span>
+                  <button
+                    onClick={() => setShowExport(true)}
+                    className="text-xs text-text-secondary hover:text-text-primary transition-colors"
+                  >
+                    Export
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -356,6 +367,13 @@ export function AppShell() {
       <AnimatePresence>
         {showExport && (
           <ExportFieldSelector shows={shows} onClose={() => setShowExport(false)} />
+        )}
+      </AnimatePresence>
+
+      {/* Import Modal */}
+      <AnimatePresence>
+        {showImport && (
+          <CSVImportModal onClose={() => setShowImport(false)} />
         )}
       </AnimatePresence>
 
