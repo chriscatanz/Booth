@@ -565,7 +565,7 @@ export async function chatWithAssistant(request: ShowAssistantRequest): Promise<
 
   // Debug: log the context being sent
   console.log('[chatWithAssistant] Shows count:', request.showContext?.shows?.length);
-  console.log('[chatWithAssistant] First show data:', JSON.stringify(request.showContext?.shows?.[0], null, 2));
+  console.log('[chatWithAssistant] ALL SHOWS DATA:', JSON.stringify(request.showContext?.shows, null, 2));
   console.log('[chatWithAssistant] Attendees by show:', Object.keys(request.showContext?.attendeesByShow || {}));
   console.log('[chatWithAssistant] Has documents:', !!request.showContext?.uploadedDocuments);
   
