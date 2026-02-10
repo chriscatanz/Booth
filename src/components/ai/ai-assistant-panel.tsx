@@ -169,11 +169,17 @@ function NoApiKeyState({ onOpenSettings }: { onOpenSettings?: () => void }) {
 
 // Content Generator Tab
 function ContentGenerator({ context }: { context?: AIAssistantPanelProps['context'] }) {
+  const { shows } = useTradeShowStore();
+  const [selectedShowId, setSelectedShowId] = useState<string>('');
   const [contentType, setContentType] = useState<aiService.ContentGenerationRequest['type']>('talking_points');
   const [customPrompt, setCustomPrompt] = useState('');
   const [result, setResult] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Get selected show data
+  const selectedShow = shows.find(s => s.id === selectedShowId);
 
   const contentTypes: { id: aiService.ContentGenerationRequest['type']; label: string; description: string }[] = [
     { id: 'talking_points', label: 'Talking Points', description: 'Booth conversation starters' },
@@ -188,14 +194,26 @@ function ContentGenerator({ context }: { context?: AIAssistantPanelProps['contex
     setResult('');
     
     try {
+      // Build context from selected show or passed context
+      const showContext = selectedShow ? {
+        showName: selectedShow.name,
+        showLocation: selectedShow.location || undefined,
+        showDates: selectedShow.startDate && selectedShow.endDate 
+          ? `${selectedShow.startDate} - ${selectedShow.endDate}` 
+          : undefined,
+        boothSize: selectedShow.boothSize || undefined,
+        boothNumber: selectedShow.boothNumber || undefined,
+      } : context;
+
       const content = await aiService.generateContent({
         type: contentType,
         context: {
-          ...context,
+          ...showContext,
           customPrompt,
         },
       });
       setResult(content);
+      setIsExpanded(true); // Auto-expand when content is generated
     } catch (err) {
       setResult(`Error: ${err instanceof Error ? err.message : 'Generation failed'}`);
     }
@@ -211,29 +229,57 @@ function ContentGenerator({ context }: { context?: AIAssistantPanelProps['contex
 
   return (
     <div className="flex flex-col h-full">
-      {/* Type Selection */}
-      <div className="p-4 border-b border-border space-y-3">
-        <label className="block text-sm font-medium text-text-primary">What would you like to generate?</label>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {contentTypes.map((type) => (
-            <button
-              key={type.id}
-              onClick={() => setContentType(type.id)}
-              className={cn(
-                'p-3 rounded-lg border text-left transition-all',
-                contentType === type.id
-                  ? 'border-brand-purple bg-brand-purple/10'
-                  : 'border-border hover:border-border-strong bg-bg-tertiary'
-              )}
-            >
-              <p className="text-sm font-medium text-text-primary">{type.label}</p>
-              <p className="text-xs text-text-tertiary">{type.description}</p>
-            </button>
-          ))}
+      {/* Controls Section - collapses when result is expanded */}
+      <div className={cn(
+        "border-b border-border space-y-3 transition-all",
+        isExpanded && result ? "p-2" : "p-4"
+      )}>
+        {/* Show Selector */}
+        <div className={cn(isExpanded && result && "hidden")}>
+          <label className="block text-sm font-medium text-text-primary mb-2">Select a show (optional)</label>
+          <select
+            value={selectedShowId}
+            onChange={(e) => setSelectedShowId(e.target.value)}
+            className="w-full px-3 py-2 rounded-lg bg-bg-tertiary border border-border text-sm text-text-primary focus:outline-none focus:border-brand-purple"
+          >
+            <option value="">General content (no specific show)</option>
+            {shows.map((show) => (
+              <option key={show.id} value={show.id}>
+                {show.name} {show.location ? `— ${show.location}` : ''} {show.startDate ? `(${show.startDate})` : ''}
+              </option>
+            ))}
+          </select>
+          {selectedShow && (
+            <p className="text-xs text-text-tertiary mt-1">
+              {[selectedShow.boothSize, selectedShow.boothNumber ? `Booth ${selectedShow.boothNumber}` : null].filter(Boolean).join(' • ') || 'Show selected'}
+            </p>
+          )}
+        </div>
+
+        {/* Content Type Selection */}
+        <div className={cn(isExpanded && result && "hidden")}>
+          <label className="block text-sm font-medium text-text-primary mb-2">What would you like to generate?</label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {contentTypes.map((type) => (
+              <button
+                key={type.id}
+                onClick={() => setContentType(type.id)}
+                className={cn(
+                  'p-3 rounded-lg border text-left transition-all',
+                  contentType === type.id
+                    ? 'border-brand-purple bg-brand-purple/10'
+                    : 'border-border hover:border-border-strong bg-bg-tertiary'
+                )}
+              >
+                <p className="text-sm font-medium text-text-primary">{type.label}</p>
+                <p className="text-xs text-text-tertiary">{type.description}</p>
+              </button>
+            ))}
+          </div>
         </div>
         
         {/* Custom Prompt */}
-        <div>
+        <div className={cn(isExpanded && result && "hidden")}>
           <label className="block text-xs font-medium text-text-secondary mb-1">
             Additional instructions (optional)
           </label>
@@ -246,41 +292,56 @@ function ContentGenerator({ context }: { context?: AIAssistantPanelProps['contex
           />
         </div>
         
-        <Button onClick={handleGenerate} disabled={isGenerating} className="w-full">
-          {isGenerating ? (
-            <>
-              <Loader2 size={16} className="animate-spin" />
-              Generating...
-            </>
-          ) : (
-            <>
-              <Wand2 size={16} />
-              Generate
-            </>
-          )}
-        </Button>
-      </div>
-
-      {/* Result */}
-      <div className="flex-1 overflow-auto p-4">
-        {result ? (
-          <div className="relative">
-            <div className="absolute top-2 right-2 flex gap-1">
+        {/* Generate Button / Collapsed Header */}
+        {isExpanded && result ? (
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => setIsExpanded(false)}
+              className="flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary"
+            >
+              <ChevronDown size={16} className="rotate-180" />
+              <span>Show options</span>
+              {selectedShow && <span className="text-text-tertiary">• {selectedShow.name}</span>}
+            </button>
+            <div className="flex items-center gap-2">
               <button
                 onClick={handleCopy}
-                className="p-1.5 rounded-lg bg-bg-tertiary hover:bg-surface text-text-tertiary hover:text-text-primary transition-colors"
+                className="p-2 rounded-lg bg-bg-tertiary hover:bg-surface text-text-tertiary hover:text-text-primary transition-colors"
+                title="Copy to clipboard"
               >
-                {copied ? <Check size={14} /> : <Copy size={14} />}
+                {copied ? <Check size={16} /> : <Copy size={16} />}
               </button>
-              <button
-                onClick={handleGenerate}
-                disabled={isGenerating}
-                className="p-1.5 rounded-lg bg-bg-tertiary hover:bg-surface text-text-tertiary hover:text-text-primary transition-colors"
-              >
-                <RefreshCw size={14} className={isGenerating ? 'animate-spin' : ''} />
-              </button>
+              <Button size="sm" onClick={handleGenerate} disabled={isGenerating}>
+                {isGenerating ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                Regenerate
+              </Button>
             </div>
-            <div className="prose prose-sm prose-invert max-w-none bg-bg-tertiary p-4 rounded-lg overflow-auto max-h-[50vh]">
+          </div>
+        ) : (
+          <Button onClick={handleGenerate} disabled={isGenerating} className="w-full">
+            {isGenerating ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Wand2 size={16} />
+                Generate
+              </>
+            )}
+          </Button>
+        )}
+      </div>
+
+      {/* Result - expands to fill available space */}
+      <div className={cn(
+        "flex-1 overflow-auto p-4",
+        isExpanded && result && "p-3"
+      )}>
+        {result ? (
+          <div className="h-full flex flex-col">
+            <div className="flex-1 prose prose-sm prose-invert max-w-none bg-bg-tertiary p-4 rounded-lg overflow-auto">
               <div className="text-sm text-text-primary whitespace-pre-wrap leading-relaxed">
                 {result.split('\n').map((line, i) => {
                   // Basic markdown-ish rendering
