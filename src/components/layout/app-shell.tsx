@@ -22,6 +22,7 @@ import BudgetView from '@/components/views/budget-view';
 import TasksView from '@/components/views/tasks-view';
 import AssetsView from '@/components/views/assets-view';
 import ActivityView from '@/components/views/activity-view';
+import AIView from '@/components/views/ai-view';
 import DetailView from '@/components/views/detail-view';
 import SettingsView from '@/components/views/settings-view';
 import ExportFieldSelector from '@/components/export/export-field-selector';
@@ -181,6 +182,8 @@ export function AppShell() {
         return <AssetsView />;
       case ViewMode.Activity:
         return <ActivityView />;
+      case ViewMode.AI:
+        return <AIView onOpenSettings={() => setShowSettings(true)} />;
       default:
         return <DashboardView viewMode={viewMode} onViewModeChange={handleViewModeChange} />;
     }

@@ -24,6 +24,7 @@ const NAV_ITEMS: { mode: ViewMode; icon: React.ElementType; label: string }[] = 
   { mode: ViewMode.Tasks, icon: CheckSquare, label: 'Tasks' },
   { mode: ViewMode.Assets, icon: Package, label: 'Assets' },
   { mode: ViewMode.Budget, icon: DollarSign, label: 'Budget' },
+  { mode: ViewMode.AI, icon: Sparkles, label: 'AI' },
   { mode: ViewMode.Activity, icon: Activity, label: 'Activity' },
 ];
 
