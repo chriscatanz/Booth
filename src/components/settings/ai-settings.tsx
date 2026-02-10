@@ -10,30 +10,53 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import * as aiService from '@/services/ai-service';
+import { useAuthStore } from '@/store/auth-store';
+import { supabase } from '@/lib/supabase';
 
 export function AISettings() {
   const [apiKey, setApiKey] = useState('');
   const [showKey, setShowKey] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [testResult, setTestResult] = useState<{ success: boolean; error?: string } | null>(null);
+  
+  const currentOrg = useAuthStore(s => s.currentOrg);
 
   useEffect(() => {
-    // Check if we have a cached key
-    const hasKey = aiService.hasApiKey();
-    setIsConnected(hasKey);
-    if (hasKey) {
-      setApiKey('••••••••••••••••••••••••••••••••');
+    // Load API key from Supabase on mount
+    async function loadKey() {
+      if (!currentOrg?.id) {
+        setIsLoading(false);
+        return;
+      }
+
+      // First check memory cache
+      if (aiService.hasApiKey()) {
+        setIsConnected(true);
+        setApiKey('••••••••••••••••••••••••••••••••');
+        setIsLoading(false);
+        return;
+      }
+
+      // Then try loading from DB
+      const key = await aiService.loadApiKeyFromOrg(supabase as Parameters<typeof aiService.loadApiKeyFromOrg>[0], currentOrg.id);
+      if (key) {
+        setIsConnected(true);
+        setApiKey('••••••••••••••••••••••••••••••••');
+      }
+      setIsLoading(false);
     }
-  }, []);
+    loadKey();
+  }, [currentOrg?.id]);
 
   const handleSaveKey = async () => {
-    if (!apiKey || apiKey.includes('•')) return;
+    if (!apiKey || apiKey.includes('•') || !currentOrg?.id) return;
     
     setIsTesting(true);
     setTestResult(null);
     
-    // Set the key
+    // Set the key temporarily for testing
     aiService.setApiKey(apiKey);
     
     // Test the connection
@@ -41,9 +64,22 @@ export function AISettings() {
     setTestResult(result);
     
     if (result.success) {
-      setIsConnected(true);
-      // Mask the key after successful save
-      setApiKey('••••••••••••••••••••••••••••••••');
+      // Save to Supabase (encrypted)
+      const saved = await aiService.saveApiKeyToOrg(
+        supabase as Parameters<typeof aiService.saveApiKeyToOrg>[0],
+        currentOrg.id,
+        apiKey
+      );
+      
+      if (saved) {
+        setIsConnected(true);
+        // Mask the key after successful save
+        setApiKey('••••••••••••••••••••••••••••••••');
+      } else {
+        setTestResult({ success: false, error: 'Failed to save API key' });
+        aiService.setApiKey(null);
+        setIsConnected(false);
+      }
     } else {
       aiService.setApiKey(null);
       setIsConnected(false);
@@ -52,7 +88,16 @@ export function AISettings() {
     setIsTesting(false);
   };
 
-  const handleRemoveKey = () => {
+  const handleRemoveKey = async () => {
+    if (!currentOrg?.id) return;
+    
+    // Remove from Supabase
+    await aiService.saveApiKeyToOrg(
+      supabase as Parameters<typeof aiService.saveApiKeyToOrg>[0],
+      currentOrg.id,
+      null
+    );
+    
     aiService.setApiKey(null);
     setApiKey('');
     setIsConnected(false);
@@ -76,6 +121,14 @@ export function AISettings() {
       description: 'Chat with AI about your shows, get insights and recommendations',
     },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-brand-purple" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -211,7 +264,7 @@ export function AISettings() {
               console.anthropic.com
               <ExternalLink size={10} />
             </a>
-            . Your key is stored locally and never sent to our servers.
+            . Your key is encrypted and stored securely with your organization.
           </p>
         </div>
       </div>

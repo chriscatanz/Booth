@@ -376,6 +376,7 @@ export function AppShell() {
       <AIAssistantPanel
         isOpen={showAIAssistant}
         onClose={() => setShowAIAssistant(false)}
+        onOpenSettings={() => setShowOrgSettings(true)}
         context={selectedShow ? {
           showName: selectedShow.name,
           showLocation: selectedShow.location || undefined,

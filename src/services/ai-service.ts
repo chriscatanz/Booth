@@ -60,9 +60,9 @@ export const DEFAULT_AI_SETTINGS: AISettings = {
   enabled: false,
 };
 
-// Store API key in memory (not persisted - user re-enters each session for security)
-// Or could store encrypted in localStorage/Supabase Vault
+// Store API key in memory (cached from Supabase for performance)
 let cachedApiKey: string | null = null;
+let keyLoadedFromDb = false;
 
 export function setApiKey(key: string | null) {
   cachedApiKey = key;
@@ -75,6 +75,68 @@ export function getApiKey(): string | null {
 export function hasApiKey(): boolean {
   return !!cachedApiKey;
 }
+
+export function isKeyLoadedFromDb(): boolean {
+  return keyLoadedFromDb;
+}
+
+/**
+ * Load API key from Supabase org settings
+ */
+export async function loadApiKeyFromOrg(supabase: SupabaseClient, orgId: string): Promise<string | null> {
+  try {
+    const { data, error } = await supabase
+      .from('v_organization_ai_settings')
+      .select('ai_api_key')
+      .eq('id', orgId)
+      .single();
+
+    if (error) {
+      console.error('Failed to load AI API key:', error);
+      return null;
+    }
+
+    if (data?.ai_api_key) {
+      cachedApiKey = data.ai_api_key;
+      keyLoadedFromDb = true;
+      return data.ai_api_key;
+    }
+    return null;
+  } catch (err) {
+    console.error('Error loading AI API key:', err);
+    return null;
+  }
+}
+
+/**
+ * Save API key to Supabase org settings (encrypted)
+ */
+export async function saveApiKeyToOrg(supabase: SupabaseClient, orgId: string, apiKey: string | null): Promise<boolean> {
+  try {
+    const { error } = await supabase.rpc('set_ai_api_key', {
+      p_org_id: orgId,
+      p_api_key: apiKey || '',
+    });
+
+    if (error) {
+      console.error('Failed to save AI API key:', error);
+      return false;
+    }
+
+    cachedApiKey = apiKey;
+    keyLoadedFromDb = true;
+    return true;
+  } catch (err) {
+    console.error('Error saving AI API key:', err);
+    return false;
+  }
+}
+
+// Type for Supabase client (avoid circular import)
+type SupabaseClient = {
+  from: (table: string) => { select: (columns: string) => { eq: (column: string, value: string) => { single: () => Promise<{ data: Record<string, unknown> | null; error: Error | null }> } } };
+  rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: Error | null }>;
+};
 
 // Create Anthropic client
 function getClient(): Anthropic {

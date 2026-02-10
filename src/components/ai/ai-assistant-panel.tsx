@@ -15,6 +15,7 @@ import { useTradeShowStore } from '@/store/trade-show-store';
 interface AIAssistantPanelProps {
   isOpen: boolean;
   onClose: () => void;
+  onOpenSettings?: () => void;
   initialTab?: 'content' | 'document' | 'chat';
   context?: {
     showName?: string;
@@ -27,7 +28,7 @@ interface AIAssistantPanelProps {
 
 type Tab = 'content' | 'document' | 'chat';
 
-export function AIAssistantPanel({ isOpen, onClose, initialTab = 'content', context }: AIAssistantPanelProps) {
+export function AIAssistantPanel({ isOpen, onClose, onOpenSettings, initialTab = 'content', context }: AIAssistantPanelProps) {
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [hasApiKey, setHasApiKey] = useState(false);
 
@@ -108,7 +109,7 @@ export function AIAssistantPanel({ isOpen, onClose, initialTab = 'content', cont
           {/* Content */}
           <div className="h-[500px] overflow-hidden">
             {!hasApiKey ? (
-              <NoApiKeyState />
+              <NoApiKeyState onOpenSettings={() => { onClose(); onOpenSettings?.(); }} />
             ) : (
               <>
                 {activeTab === 'content' && <ContentGenerator context={context} />}
@@ -123,7 +124,7 @@ export function AIAssistantPanel({ isOpen, onClose, initialTab = 'content', cont
   );
 }
 
-function NoApiKeyState() {
+function NoApiKeyState({ onOpenSettings }: { onOpenSettings?: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center h-full p-8 text-center">
       <div className="w-16 h-16 rounded-2xl bg-warning/10 flex items-center justify-center mb-4">
@@ -133,7 +134,7 @@ function NoApiKeyState() {
       <p className="text-sm text-text-secondary max-w-sm mb-6">
         To use AI features, add your Claude API key in Settings → AI Assistant.
       </p>
-      <Button variant="outline">
+      <Button variant="outline" onClick={onOpenSettings}>
         Open Settings
       </Button>
     </div>
