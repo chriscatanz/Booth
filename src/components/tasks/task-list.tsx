@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import * as taskService from '@/services/task-service';
-import { Task, TASK_PRIORITY_CONFIG } from '@/types/tasks';
+import { Task, TaskStatus, TASK_PRIORITY_CONFIG } from '@/types/tasks';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { 
