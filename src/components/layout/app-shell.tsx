@@ -20,6 +20,7 @@ import ListView from '@/components/views/list-view';
 import CalendarView from '@/components/views/calendar-view';
 import BudgetView from '@/components/views/budget-view';
 import TasksView from '@/components/views/tasks-view';
+import KitsView from '@/components/views/kits-view';
 import AssetsView from '@/components/views/assets-view';
 import ActivityView from '@/components/views/activity-view';
 import AIView from '@/components/views/ai-view';
@@ -192,6 +193,8 @@ export function AppShell() {
         return <BudgetView />;
       case ViewMode.Tasks:
         return <TasksView />;
+      case ViewMode.Kits:
+        return <KitsView />;
       case ViewMode.Assets:
         return <AssetsView />;
       case ViewMode.Activity:

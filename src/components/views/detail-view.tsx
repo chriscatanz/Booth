@@ -40,6 +40,7 @@ import { useDataVisibility } from '@/hooks/use-data-visibility';
 import { TaskList } from '@/components/tasks';
 import { AttendeeSearch } from '@/components/ui/attendee-search';
 import { Attendee } from '@/types';
+import { KitAssignmentSection } from '@/components/kits/kit-assignment-section';
 
 export default function DetailView() {
   const {
@@ -338,6 +339,17 @@ export default function DetailView() {
                   ))}
                 </div>
               </div>
+
+              {/* Kit Assignments */}
+              {show.id > 0 && (
+                <div className="mt-6 pt-4 border-t border-border">
+                  <KitAssignmentSection
+                    tradeshowId={show.id}
+                    showStartDate={show.startDate}
+                    showEndDate={show.endDate}
+                  />
+                </div>
+              )}
             </TabSection>
 
             {/* On-Site Services */}
