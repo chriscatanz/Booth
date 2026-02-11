@@ -46,6 +46,14 @@ function generateUID(showId: number, orgId: string): string {
 
 export async function GET(request: NextRequest) {
   try {
+    // Check for service role key first
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('Calendar API: SUPABASE_SERVICE_ROLE_KEY not configured');
+      return NextResponse.json({ 
+        error: 'Calendar sync not configured. Please add SUPABASE_SERVICE_ROLE_KEY to environment variables.' 
+      }, { status: 503 });
+    }
+
     const { searchParams } = new URL(request.url);
     const token = searchParams.get('token');
 
