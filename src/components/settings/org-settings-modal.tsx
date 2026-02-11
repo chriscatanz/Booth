@@ -634,7 +634,7 @@ function MembersContent() {
           <h3 className="text-base font-medium text-text-primary">Team Members</h3>
           <p className="text-sm text-text-secondary">{members.length} member{members.length !== 1 ? 's' : ''}</p>
         </div>
-        {isAdmin && !showInviteForm && (
+        {(isOwner || isAdmin) && !showInviteForm && (
           <Button variant="outline" size="sm" onClick={() => setShowInviteForm(true)}>
             Invite Member
           </Button>
@@ -677,7 +677,8 @@ function MembersContent() {
         {members.map((member) => {
           const isCurrentUser = member.userId === user?.id;
           const isOwnerMember = member.role === 'owner';
-          const canManage = isAdmin && !isCurrentUser && !isOwnerMember;
+          // Owners and admins can manage members (but not themselves or other owners)
+          const canManage = (isOwner || isAdmin) && !isCurrentUser && !isOwnerMember;
           
           return (
             <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg bg-bg-tertiary">
@@ -758,7 +759,7 @@ function MembersContent() {
               <div key={inv.id} className="flex items-center gap-3 p-2 rounded-lg bg-bg-tertiary/50 border border-dashed border-border">
                 <span className="text-sm text-text-secondary flex-1">{inv.email}</span>
                 <span className="text-xs text-text-tertiary capitalize">({inv.role})</span>
-                {isAdmin && (
+                {(isOwner || isAdmin) && (
                   <button
                     onClick={() => handleCancelInvitation(inv.id)}
                     className="p-1 text-text-tertiary hover:text-error transition-colors"
