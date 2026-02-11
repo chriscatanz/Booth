@@ -10,19 +10,24 @@
 
 CREATE OR REPLACE FUNCTION decrypt_pii(ciphertext TEXT)
 RETURNS TEXT AS $$
+DECLARE
+  cleaned TEXT;
 BEGIN
   -- Return NULL for NULL/empty input
   IF ciphertext IS NULL OR ciphertext = '' THEN
     RETURN NULL;
   END IF;
   
+  -- Remove any whitespace from base64 string (fixes MIME line-wrap issues)
+  cleaned := regexp_replace(ciphertext, '\s', '', 'g');
+  
   -- Check if this looks like encrypted data (base64 encoded PGP)
   -- PGP encrypted data starts with specific bytes that encode to 'w' when base64'd
   -- Also check for common plaintext indicators like @ (emails) or + with digits (phone)
-  IF ciphertext LIKE '%@%' 
-     OR ciphertext ~ '^\+?[0-9\-\(\) ]+$'
-     OR ciphertext !~ '^[A-Za-z0-9+/]+=*$'
-     OR LENGTH(ciphertext) < 50 THEN
+  IF cleaned LIKE '%@%' 
+     OR cleaned ~ '^\+?[0-9\-\(\) ]+$'
+     OR cleaned !~ '^[A-Za-z0-9+/]+=*$'
+     OR LENGTH(cleaned) < 50 THEN
     -- Looks like plaintext, return as-is
     RETURN ciphertext;
   END IF;
@@ -30,7 +35,7 @@ BEGIN
   -- Attempt decryption
   BEGIN
     RETURN pgp_sym_decrypt(
-      decode(ciphertext, 'base64'),
+      decode(cleaned, 'base64'),
       get_encryption_key()
     );
   EXCEPTION WHEN OTHERS THEN
