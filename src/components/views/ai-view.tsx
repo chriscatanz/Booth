@@ -6,8 +6,11 @@ import { Button } from '@/components/ui/button';
 import {
   Sparkles, Wand2, FileText, MessageSquare, Send, Loader2, 
   Copy, Check, RefreshCw, Upload, FileUp, Trash2, ChevronDown,
-  Mail, ExternalLink, AlertCircle, Settings
+  Mail, ExternalLink, AlertCircle, Settings, Calendar, MapPin,
+  DollarSign, Building, Clock, CheckSquare, Users, Package
 } from 'lucide-react';
+import * as taskService from '@/services/task-service';
+import { useToastStore } from '@/store/toast-store';
 import { cn } from '@/lib/utils';
 import * as aiService from '@/services/ai-service';
 import { useTradeShowStore } from '@/store/trade-show-store';
@@ -472,19 +475,45 @@ function GenerateTab({ shows }: { shows: TradeShow[] }) {
 }
 
 // ============================================================================
-// DOCUMENTS TAB
+// DOCUMENTS TAB - Extract show details and create tasks from vendor packets
 // ============================================================================
+
+interface ExtractedDeadline {
+  name: string;
+  date: string;
+  description?: string;
+}
+
+interface ExtractedShowData {
+  showName?: string;
+  dates?: { start?: string; end?: string };
+  location?: { venue?: string; city?: string; state?: string; country?: string };
+  booth?: { number?: string; size?: string; type?: string };
+  costs?: { boothRental?: number; sponsorship?: number; additionalFees?: string[] };
+  deadlines?: ExtractedDeadline[];
+  contacts?: { name?: string; role?: string; email?: string; phone?: string }[];
+  logistics?: { setupDate?: string; teardownDate?: string; shippingDeadline?: string; shippingAddress?: string };
+  notes?: string;
+}
 
 function DocumentsTab() {
   const [documentText, setDocumentText] = useState('');
   const [fileName, setFileName] = useState<string | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
-  const [extractedData, setExtractedData] = useState<Record<string, unknown> | null>(null);
+  const [extractedData, setExtractedData] = useState<ExtractedShowData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isApplying, setIsApplying] = useState(false);
+  const [isCreatingTasks, setIsCreatingTasks] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const { selectedShow, updateSelectedShow, saveShow } = useTradeShowStore();
+  const { organization, user } = useAuthStore();
+  const toast = useToastStore();
 
   const handleFileUpload = async (file: File) => {
     setError(null);
+    setSuccessMessage(null);
     setFileName(file.name);
 
     const isTextFile = file.type === 'text/plain' || file.name.endsWith('.txt') || file.name.endsWith('.md');
@@ -541,10 +570,11 @@ function DocumentsTab() {
 
     setIsExtracting(true);
     setError(null);
+    setSuccessMessage(null);
 
     try {
       const result = await aiService.extractShowFromDocument(documentText);
-      setExtractedData(result);
+      setExtractedData(result as ExtractedShowData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Extraction failed');
     }
@@ -552,14 +582,137 @@ function DocumentsTab() {
     setIsExtracting(false);
   };
 
+  const handleApplyToShow = async () => {
+    if (!extractedData || !selectedShow) {
+      toast.error('Please select a show first');
+      return;
+    }
+
+    setIsApplying(true);
+    setError(null);
+
+    try {
+      const updates: Record<string, unknown> = {};
+      
+      // Map extracted data to show fields
+      if (extractedData.showName) updates.name = extractedData.showName;
+      if (extractedData.dates?.start) updates.startDate = extractedData.dates.start;
+      if (extractedData.dates?.end) updates.endDate = extractedData.dates.end;
+      
+      // Build location string
+      const loc = extractedData.location;
+      if (loc) {
+        const locationParts = [loc.city, loc.state].filter(Boolean);
+        if (locationParts.length > 0) updates.location = locationParts.join(', ');
+      }
+      
+      // Booth info
+      if (extractedData.booth?.number) updates.boothNumber = extractedData.booth.number;
+      if (extractedData.booth?.size) updates.boothSize = extractedData.booth.size;
+      
+      // Costs
+      if (extractedData.costs?.boothRental) updates.cost = extractedData.costs.boothRental;
+      
+      // Logistics
+      if (extractedData.logistics?.shippingDeadline) updates.shippingCutoff = extractedData.logistics.shippingDeadline;
+      if (extractedData.logistics?.shippingAddress) updates.shippingInfo = extractedData.logistics.shippingAddress;
+      
+      // Contacts (first one)
+      const contact = extractedData.contacts?.[0];
+      if (contact?.name) updates.showContactName = contact.name;
+      if (contact?.email) updates.showContactEmail = contact.email;
+      
+      // Notes
+      if (extractedData.notes) {
+        const existingNotes = selectedShow.generalNotes || '';
+        updates.generalNotes = existingNotes 
+          ? `${existingNotes}\n\n--- Extracted Notes ---\n${extractedData.notes}`
+          : extractedData.notes;
+      }
+
+      // Apply updates
+      updateSelectedShow(updates);
+      await saveShow();
+      
+      setSuccessMessage('Show fields updated successfully!');
+      toast.success('Show fields updated from document');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to apply data');
+      toast.error('Failed to update show');
+    }
+
+    setIsApplying(false);
+  };
+
+  const handleCreateTasks = async () => {
+    if (!extractedData?.deadlines?.length) {
+      toast.error('No deadlines found to create tasks');
+      return;
+    }
+    if (!organization?.id || !user?.id) {
+      toast.error('Organization or user not found');
+      return;
+    }
+
+    setIsCreatingTasks(true);
+    setError(null);
+
+    try {
+      let created = 0;
+      
+      for (const deadline of extractedData.deadlines) {
+        if (!deadline.name || !deadline.date) continue;
+        
+        await taskService.createTask(organization.id, user.id, {
+          title: deadline.name,
+          description: deadline.description || `Deadline extracted from: ${fileName}`,
+          tradeShowId: selectedShow?.id || undefined,
+          dueDate: deadline.date,
+          priority: 'high',
+        });
+        created++;
+      }
+      
+      // Also create tasks from logistics deadlines
+      if (extractedData.logistics?.shippingDeadline) {
+        await taskService.createTask(organization.id, user.id, {
+          title: 'Shipping Deadline',
+          description: `Ship materials by this date. Extracted from: ${fileName}`,
+          tradeShowId: selectedShow?.id || undefined,
+          dueDate: extractedData.logistics.shippingDeadline,
+          priority: 'high',
+        });
+        created++;
+      }
+      
+      setSuccessMessage(`Created ${created} tasks from deadlines!`);
+      toast.success(`Created ${created} tasks`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create tasks');
+      toast.error('Failed to create tasks');
+    }
+
+    setIsCreatingTasks(false);
+  };
+
+  const handleApplyAll = async () => {
+    await handleApplyToShow();
+    if (extractedData?.deadlines?.length) {
+      await handleCreateTasks();
+    }
+  };
+
+  const deadlineCount = (extractedData?.deadlines?.length || 0) + 
+    (extractedData?.logistics?.shippingDeadline ? 1 : 0);
+
   return (
     <div className="h-full flex">
       {/* Left Panel - Upload */}
-      <div className="w-80 border-r border-border p-4 space-y-4">
+      <div className="w-80 border-r border-border p-4 space-y-4 overflow-y-auto">
         <div>
           <h3 className="text-sm font-medium text-text-primary mb-2">Upload Document</h3>
           <p className="text-xs text-text-secondary mb-4">
-            Upload a vendor packet, exhibitor guide, or contract and let AI extract show details.
+            Upload a vendor packet, exhibitor guide, or contract and let AI extract show details and deadlines.
           </p>
         </div>
 
@@ -594,6 +747,13 @@ function DocumentsTab() {
           </div>
         )}
 
+        {successMessage && (
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-success/10 text-success text-sm">
+            <Check size={16} />
+            {successMessage}
+          </div>
+        )}
+
         {documentText && (
           <>
             <div className="p-3 bg-bg-tertiary rounded-lg">
@@ -617,18 +777,191 @@ function DocumentsTab() {
             </Button>
           </>
         )}
+
+        {/* Action Buttons */}
+        {extractedData && (
+          <div className="space-y-2 pt-4 border-t border-border">
+            <Button 
+              onClick={handleApplyAll} 
+              disabled={isApplying || isCreatingTasks || !selectedShow}
+              className="w-full"
+              variant="primary"
+            >
+              {(isApplying || isCreatingTasks) ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  Applying...
+                </>
+              ) : (
+                <>
+                  <Sparkles size={16} />
+                  Apply All to Show
+                </>
+              )}
+            </Button>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <Button 
+                onClick={handleApplyToShow} 
+                disabled={isApplying || !selectedShow}
+                variant="outline"
+                size="sm"
+              >
+                <Package size={14} />
+                Fields
+              </Button>
+              <Button 
+                onClick={handleCreateTasks} 
+                disabled={isCreatingTasks || deadlineCount === 0}
+                variant="outline"
+                size="sm"
+              >
+                <CheckSquare size={14} />
+                Tasks ({deadlineCount})
+              </Button>
+            </div>
+            
+            {!selectedShow && (
+              <p className="text-xs text-warning text-center">
+                Select a show first to apply extracted data
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Right Panel - Results */}
-      <div className="flex-1 p-4 flex flex-col">
+      <div className="flex-1 p-4 flex flex-col overflow-hidden">
         {extractedData ? (
-          <div className="flex-1 overflow-auto">
-            <h3 className="text-sm font-medium text-text-primary mb-3">Extracted Details</h3>
-            <div className="bg-bg-tertiary rounded-lg p-4">
-              <pre className="text-sm text-text-primary whitespace-pre-wrap">
-                {JSON.stringify(extractedData, null, 2)}
-              </pre>
-            </div>
+          <div className="flex-1 overflow-y-auto space-y-4">
+            <h3 className="text-sm font-medium text-text-primary sticky top-0 bg-background py-2">
+              Extracted Details
+            </h3>
+            
+            {/* Show Info */}
+            {extractedData.showName && (
+              <div className="p-4 bg-bg-tertiary rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <Calendar size={16} className="text-brand-purple" />
+                  <span className="text-sm font-medium text-text-primary">Show Info</span>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <p><span className="text-text-secondary">Name:</span> <span className="text-text-primary font-medium">{extractedData.showName}</span></p>
+                  {extractedData.dates?.start && (
+                    <p><span className="text-text-secondary">Dates:</span> <span className="text-text-primary">{extractedData.dates.start} — {extractedData.dates.end || 'TBD'}</span></p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Location */}
+            {extractedData.location && (
+              <div className="p-4 bg-bg-tertiary rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <MapPin size={16} className="text-brand-cyan" />
+                  <span className="text-sm font-medium text-text-primary">Location</span>
+                </div>
+                <div className="space-y-1 text-sm">
+                  {extractedData.location.venue && <p className="text-text-primary">{extractedData.location.venue}</p>}
+                  <p className="text-text-secondary">
+                    {[extractedData.location.city, extractedData.location.state, extractedData.location.country].filter(Boolean).join(', ')}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Booth */}
+            {extractedData.booth && (
+              <div className="p-4 bg-bg-tertiary rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <Building size={16} className="text-success" />
+                  <span className="text-sm font-medium text-text-primary">Booth</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  {extractedData.booth.number && <p><span className="text-text-secondary">Number:</span> <span className="text-text-primary">{extractedData.booth.number}</span></p>}
+                  {extractedData.booth.size && <p><span className="text-text-secondary">Size:</span> <span className="text-text-primary">{extractedData.booth.size}</span></p>}
+                  {extractedData.booth.type && <p><span className="text-text-secondary">Type:</span> <span className="text-text-primary">{extractedData.booth.type}</span></p>}
+                </div>
+              </div>
+            )}
+
+            {/* Costs */}
+            {extractedData.costs && (
+              <div className="p-4 bg-bg-tertiary rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <DollarSign size={16} className="text-warning" />
+                  <span className="text-sm font-medium text-text-primary">Costs</span>
+                </div>
+                <div className="space-y-1 text-sm">
+                  {extractedData.costs.boothRental && <p><span className="text-text-secondary">Booth Rental:</span> <span className="text-text-primary font-medium">${extractedData.costs.boothRental.toLocaleString()}</span></p>}
+                  {extractedData.costs.sponsorship && <p><span className="text-text-secondary">Sponsorship:</span> <span className="text-text-primary">${extractedData.costs.sponsorship.toLocaleString()}</span></p>}
+                </div>
+              </div>
+            )}
+
+            {/* Deadlines - Most Important! */}
+            {(extractedData.deadlines?.length || extractedData.logistics?.shippingDeadline) && (
+              <div className="p-4 bg-brand-purple/10 border border-brand-purple/20 rounded-xl">
+                <div className="flex items-center gap-2 mb-3">
+                  <Clock size={16} className="text-brand-purple" />
+                  <span className="text-sm font-medium text-text-primary">Deadlines</span>
+                  <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-brand-purple text-white">
+                    {deadlineCount} found
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {extractedData.deadlines?.map((d, i) => (
+                    <div key={i} className="flex items-start gap-3 p-2 bg-surface rounded-lg">
+                      <CheckSquare size={14} className="text-brand-purple mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-text-primary">{d.name}</p>
+                        <p className="text-xs text-text-secondary">{d.date}</p>
+                        {d.description && <p className="text-xs text-text-tertiary mt-1">{d.description}</p>}
+                      </div>
+                    </div>
+                  ))}
+                  {extractedData.logistics?.shippingDeadline && (
+                    <div className="flex items-start gap-3 p-2 bg-surface rounded-lg">
+                      <Package size={14} className="text-brand-purple mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-text-primary">Shipping Deadline</p>
+                        <p className="text-xs text-text-secondary">{extractedData.logistics.shippingDeadline}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Contacts */}
+            {extractedData.contacts?.length && (
+              <div className="p-4 bg-bg-tertiary rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <Users size={16} className="text-text-tertiary" />
+                  <span className="text-sm font-medium text-text-primary">Contacts</span>
+                </div>
+                <div className="space-y-2">
+                  {extractedData.contacts.map((c, i) => (
+                    <div key={i} className="text-sm">
+                      <p className="text-text-primary font-medium">{c.name}</p>
+                      {c.role && <p className="text-text-secondary text-xs">{c.role}</p>}
+                      {c.email && <p className="text-text-tertiary text-xs">{c.email}</p>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Notes */}
+            {extractedData.notes && (
+              <div className="p-4 bg-bg-tertiary rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <FileText size={16} className="text-text-tertiary" />
+                  <span className="text-sm font-medium text-text-primary">Notes</span>
+                </div>
+                <p className="text-sm text-text-secondary whitespace-pre-wrap">{extractedData.notes}</p>
+              </div>
+            )}
           </div>
         ) : (
           <div className="flex-1 flex items-center justify-center">
@@ -638,7 +971,7 @@ function DocumentsTab() {
               </div>
               <h3 className="text-lg font-semibold text-text-primary mb-2">Extract from Documents</h3>
               <p className="text-sm text-text-secondary max-w-sm">
-                Upload a vendor packet or exhibitor guide to automatically extract show details like dates, booth info, and deadlines.
+                Upload a vendor packet or exhibitor guide to automatically extract show details and create tasks from deadlines.
               </p>
             </div>
           </div>
