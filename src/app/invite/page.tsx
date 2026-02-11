@@ -258,19 +258,16 @@ function InviteContent() {
           </div>
         ) : (
           <div className="space-y-3">
-            <p className="text-sm text-text-secondary text-center">
-              Create an account to accept this invitation
-            </p>
             <Button
               variant="primary"
               size="lg"
               className="w-full"
               onClick={handleSignIn}
             >
-              <UserPlus size={16} /> Create Account to Accept
+              <LogIn size={16} /> Sign In to Accept
             </Button>
             <p className="text-xs text-text-tertiary text-center">
-              Already have an account? You'll be able to sign in instead.
+              Don't have an account? You can create one after clicking above.
             </p>
           </div>
         )}

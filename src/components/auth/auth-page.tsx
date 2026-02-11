@@ -23,12 +23,12 @@ export function AuthPage() {
   // Don't check localStorage here - let OrganizationSetup handle pending invites after auth
   const getInitialView = (): AuthView => {
     if (typeof window !== 'undefined') {
-      // Only skip landing if explicitly redirected from invite page
-      if (returnTo === 'invite') {
-        return 'signup';
-      }
       // Go directly to login if email was just confirmed
       if (authConfirmed === 'true') {
+        return 'login';
+      }
+      // Show login first for invite flow (not signup) - they can switch if needed
+      if (returnTo === 'invite') {
         return 'login';
       }
     }

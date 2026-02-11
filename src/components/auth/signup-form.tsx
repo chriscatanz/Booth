@@ -52,14 +52,25 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }: SignUpFormProps) {
         className="w-full max-w-md text-center"
       >
         <div className="w-16 h-16 rounded-full bg-success-bg flex items-center justify-center mx-auto mb-4">
-          <CheckCircle size={32} className="text-success" />
+          <Mail size={32} className="text-success" />
         </div>
-        <h1 className="text-2xl font-bold text-text-primary">Check your email</h1>
-        <p className="text-text-secondary mt-2 mb-6">
-          We've sent a confirmation link to <strong>{email}</strong>. Click the link to activate your account.
+        <h1 className="text-2xl font-bold text-text-primary">Verify your email</h1>
+        <p className="text-text-secondary mt-2 mb-2">
+          We've sent a confirmation link to:
         </p>
+        <p className="text-text-primary font-medium mb-4">{email}</p>
+        <div className="bg-bg-tertiary rounded-lg p-4 mb-6 text-left">
+          <p className="text-sm text-text-secondary">
+            <strong className="text-text-primary">Next steps:</strong>
+          </p>
+          <ol className="text-sm text-text-secondary mt-2 space-y-1 list-decimal list-inside">
+            <li>Check your inbox (and spam folder)</li>
+            <li>Click the confirmation link in the email</li>
+            <li>Sign in with your new account</li>
+          </ol>
+        </div>
         <Button variant="outline" onClick={onSwitchToLogin}>
-          Back to Sign In
+          Go to Sign In
         </Button>
       </motion.div>
     );
