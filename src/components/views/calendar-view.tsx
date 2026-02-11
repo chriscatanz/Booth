@@ -135,7 +135,7 @@ export default function CalendarView() {
       });
       await loadShows();
       toast.success(`Moved "${draggedShow.name}" to ${format(targetDate, 'MMM d')}`);
-    } catch (_err) {
+    } catch {
       toast.error('Failed to reschedule show');
     }
 

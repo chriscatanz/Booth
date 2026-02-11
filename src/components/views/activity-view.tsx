@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { useAuthStore } from '@/store/auth-store';
 import * as activityService from '@/services/activity-service';
 import { ActivityItem, ACTIVITY_TYPE_CONFIG, REACTION_EMOJIS } from '@/types/activity';
@@ -38,7 +38,7 @@ export default function ActivityView() {
     }
     
     setIsLoading(false);
-  }, [organization?.id]);
+  }, [organization]);
 
   useEffect(() => {
     loadActivity();
@@ -125,10 +125,13 @@ function ActivityCard({ activity, onReaction }: ActivityCardProps) {
         {/* Avatar */}
         <div className="flex-shrink-0">
           {activity.actor?.avatarUrl ? (
-            <img
+            <Image
               src={activity.actor.avatarUrl}
               alt={activity.actor.fullName || ''}
-              className="w-10 h-10 rounded-full"
+              width={40}
+              height={40}
+              className="rounded-full"
+              unoptimized
             />
           ) : (
             <div className="w-10 h-10 rounded-full bg-brand-purple/20 flex items-center justify-center">

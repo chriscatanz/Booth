@@ -86,7 +86,7 @@ export function TemplateModal({ mode, onClose, onSaved, onLoaded }: TemplateModa
           {mode === 'save' ? (
             <div className="space-y-4">
               <p className="text-sm text-text-secondary">
-                Save this show's setup as a reusable template. Dates, confirmations, and post-show data will be cleared.
+                Save this show&apos;s setup as a reusable template. Dates, confirmations, and post-show data will be cleared.
               </p>
               <Input
                 label="Template Name"

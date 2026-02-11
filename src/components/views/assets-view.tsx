@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { useAuthStore } from '@/store/auth-store';
 import * as assetService from '@/services/asset-service';
-import { Asset, AssetReservation, ASSET_TYPE_CONFIG, ASSET_CATEGORIES, RESERVATION_STATUS_CONFIG } from '@/types/assets';
+import { Asset, AssetReservation, ASSET_TYPE_CONFIG, RESERVATION_STATUS_CONFIG } from '@/types/assets';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+// Input available for future use
 import { cn } from '@/lib/utils';
 import {
   Plus, Package, Box, AlertTriangle, Search,
@@ -19,7 +20,7 @@ export default function AssetsView() {
   const { organization, isEditor } = useAuthStore();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   
   // Filters
   const [searchText, setSearchText] = useState('');
@@ -44,7 +45,7 @@ export default function AssetsView() {
     }
     
     setIsLoading(false);
-  }, [organization?.id]);
+  }, [organization]);
 
   useEffect(() => {
     loadAssets();
@@ -285,7 +286,7 @@ function AssetCard({ asset, onClick, onEdit, onDelete, isEditor, isSelected }: A
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           {asset.imageUrl ? (
-            <img src={asset.imageUrl} alt={asset.name} className="w-12 h-12 rounded-lg object-cover" />
+            <Image src={asset.imageUrl} alt={asset.name} width={48} height={48} className="rounded-lg object-cover" unoptimized />
           ) : (
             <div className="w-12 h-12 rounded-lg bg-bg-tertiary flex items-center justify-center">
               {asset.type === 'capital' ? <Box size={20} className="text-text-tertiary" /> : <Package size={20} className="text-text-tertiary" />}
@@ -374,7 +375,7 @@ function AssetDetailPanel({ asset, onClose, onEdit, isEditor }: AssetDetailPanel
         <div>
           <div className="flex items-center gap-3 mb-4">
             {asset.imageUrl ? (
-              <img src={asset.imageUrl} alt={asset.name} className="w-16 h-16 rounded-lg object-cover" />
+              <Image src={asset.imageUrl} alt={asset.name} width={64} height={64} className="rounded-lg object-cover" unoptimized />
             ) : (
               <div className="w-16 h-16 rounded-lg bg-bg-tertiary flex items-center justify-center">
                 {asset.type === 'capital' ? <Box size={24} className="text-text-tertiary" /> : <Package size={24} className="text-text-tertiary" />}

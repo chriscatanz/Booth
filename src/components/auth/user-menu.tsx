@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { useAuthStore } from '@/store/auth-store';
 import { 
   LogOut, Building2, ChevronDown, Settings, 
@@ -63,10 +64,13 @@ export function UserMenu({ onOpenSettings, onOpenOrgSettings }: UserMenuProps) {
         className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-bg-tertiary transition-colors"
       >
         {user?.avatarUrl ? (
-          <img 
+          <Image 
             src={user.avatarUrl} 
             alt={user.fullName || 'User'} 
-            className="w-7 h-7 rounded-full object-cover"
+            width={28}
+            height={28}
+            className="rounded-full object-cover"
+            unoptimized
           />
         ) : (
           <div className="w-7 h-7 rounded-full bg-brand-purple flex items-center justify-center text-white text-xs font-medium">

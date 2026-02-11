@@ -46,7 +46,7 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
 
   // Danger zone
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
-  const [, setIsDeleting] = useState(false);
+  // Removed unused isDeleting state
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
 
   useEffect(() => {

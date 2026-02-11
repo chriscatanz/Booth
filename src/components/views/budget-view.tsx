@@ -25,8 +25,8 @@ export default function BudgetView() {
   const [timeframe, setTimeframe] = useState<BudgetTimeframe>(BudgetTimeframe.Year);
   const [customStart, setCustomStart] = useState('');
   const [customEnd, setCustomEnd] = useState('');
-  // Note: `now` intentionally recreated on each render for fresh date comparisons
-  const now = new Date();
+  // Stable reference for current time (refreshes on component mount)
+  const [now] = useState(() => new Date());
 
   const filteredShows = useMemo(() => {
     switch (timeframe) {
@@ -127,7 +127,7 @@ export default function BudgetView() {
           </div>
           <h2 className="text-xl font-semibold text-text-primary mb-2">Access Restricted</h2>
           <p className="text-text-secondary max-w-md">
-            You don't have permission to view budget reports. Contact your organization admin if you need access.
+            You don&apos;t have permission to view budget reports. Contact your organization admin if you need access.
           </p>
         </div>
       }

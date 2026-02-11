@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import NextImage from 'next/image';
 import { useAuthStore } from '@/store/auth-store';
 import * as authService from '@/services/auth-service';
 import * as storageService from '@/services/storage-service';
@@ -295,10 +296,13 @@ export function BrandingEditor() {
           {/* Logo Preview */}
           <div className="w-24 h-24 rounded-xl border-2 border-dashed border-border bg-bg-tertiary flex items-center justify-center overflow-hidden">
             {logoUrl ? (
-              <img
+              <NextImage
                 src={logoUrl}
                 alt="Organization logo"
-                className="w-full h-full object-contain"
+                width={96}
+                height={96}
+                className="object-contain"
+                unoptimized
               />
             ) : (
               <ImageIcon size={32} className="text-text-tertiary" />
@@ -530,7 +534,7 @@ export function BrandingEditor() {
         <div className="p-4 rounded-xl bg-sidebar-bg border border-border">
           <div className="flex items-center gap-3">
             {logoUrl ? (
-              <img src={logoUrl} alt="Logo" className="w-10 h-10 rounded-lg object-contain" />
+              <NextImage src={logoUrl} alt="Logo" width={40} height={40} className="rounded-lg object-contain" unoptimized />
             ) : (
               <div
                 className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold"

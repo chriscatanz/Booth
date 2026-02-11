@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { 
   Calendar, DollarSign, Users, BarChart3, 
   CheckCircle, ArrowRight, Truck, FileText,
@@ -391,10 +392,13 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
               </div>
               <span className="text-xs text-white/40 ml-2">Booth — Dashboard</span>
             </div>
-            <img 
+            <Image 
               src="/app-screenshot.png" 
               alt="Booth dashboard showing trade show management interface with calendar, tasks, and budget tracking"
+              width={1200}
+              height={800}
               className="w-full"
+              priority
             />
           </motion.div>
         </div>

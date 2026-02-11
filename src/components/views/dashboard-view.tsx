@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTradeShowStore } from '@/store/trade-show-store';
 import { useAuthStore } from '@/store/auth-store';
-import { useFilteredShows } from '@/hooks/use-filtered-shows';
+// useFilteredShows available for future use
 import { DataVisibilityGate } from '@/components/auth/data-visibility-gate';
 import { ViewMode, AlertType, AlertPriority } from '@/types/enums';
 import { TradeShow } from '@/types';
@@ -32,11 +32,11 @@ interface DashboardViewProps {
   onViewModeChange: (mode: ViewMode) => void;
 }
 
-export default function DashboardView({ viewMode, onViewModeChange }: DashboardViewProps) {
+export default function DashboardView({ onViewModeChange }: DashboardViewProps) {
   const { shows, selectShow, createNewShow, loadShows } = useTradeShowStore();
   const { organization } = useAuthStore();
-  // Note: `now` intentionally recreated on each render for fresh date comparisons
-  const now = new Date();
+  // Stable reference for current time (refreshes on component mount)
+  const [now] = useState(() => new Date());
   
   // Get shipping buffer from org settings (default 7 days)
   const shippingBufferDays = (organization?.settings?.shippingBufferDays as number) || 7;

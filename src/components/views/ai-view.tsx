@@ -38,7 +38,7 @@ export default function AIView({ onOpenSettings }: AIViewProps) {
         aiService.setCurrentOrg(organization.id);
         
         // Load the API key from database
-        await aiService.loadApiKeyFromOrg(supabase as any, organization.id);
+        await aiService.loadApiKeyFromOrg(supabase as unknown as Parameters<typeof aiService.loadApiKeyFromOrg>[0], organization.id);
         
         // Now check if it's configured
         setIsConfigured(aiService.hasApiKey());
@@ -563,7 +563,7 @@ function DocumentsTab() {
           throw new Error('Could not extract text from document');
         }
         setDocumentText(extractedText);
-      } catch (_err) {
+      } catch {
         setError('Failed to parse document. Try a different file format.');
         setFileName(null);
       }

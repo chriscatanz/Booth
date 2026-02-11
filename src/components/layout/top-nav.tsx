@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { ViewMode } from '@/types/enums';
 import { useAuthStore } from '@/store/auth-store';
 import { useDataVisibility } from '@/hooks/use-data-visibility';
@@ -68,10 +69,13 @@ export function TopNav({
       {/* Left: Logo & Brand */}
       <div className="flex items-center gap-3">
         {organization?.logoUrl ? (
-          <img 
+          <Image 
             src={organization.logoUrl} 
             alt={organization.name || 'Logo'} 
-            className="w-8 h-8 rounded-lg object-contain bg-bg-tertiary"
+            width={32}
+            height={32}
+            className="rounded-lg object-contain bg-bg-tertiary"
+            unoptimized
           />
         ) : (
           <div 
