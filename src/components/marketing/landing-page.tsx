@@ -7,7 +7,7 @@ import {
   Calendar, DollarSign, Users, BarChart3, 
   CheckCircle, ArrowRight, Truck, FileText,
   Shield, Zap, Package, ChevronDown, Menu, X,
-  Sparkles, FileSpreadsheet, Layers
+  Sparkles, FileSpreadsheet, Layers, RefreshCw, Bell, Box
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PricingSection } from './pricing-section';
@@ -20,14 +20,16 @@ interface LandingPageProps {
 
 const NAV_FEATURES = [
   { slug: 'calendar', icon: Calendar, title: 'Trade Show Calendar', color: '#0969DA' },
+  { slug: 'calendar-sync', icon: RefreshCw, title: 'Calendar Sync', color: '#06B6D4' },
   { slug: 'budget', icon: DollarSign, title: 'Budget Management', color: '#1A7F37' },
   { slug: 'team', icon: Users, title: 'Team Collaboration', color: '#8250DF' },
   { slug: 'logistics', icon: Truck, title: 'Shipping & Logistics', color: '#BF8700' },
-  { slug: 'assets', icon: Package, title: 'Asset Management', color: '#CF222E' },
+  { slug: 'kits', icon: Box, title: 'Booth Kits', color: '#CF222E' },
   { slug: 'analytics', icon: BarChart3, title: 'ROI & Analytics', color: '#0969DA' },
   { slug: 'ai', icon: Sparkles, title: 'AI Assistant', color: '#8B5CF6' },
+  { slug: 'notifications', icon: Bell, title: 'Notifications', color: '#F59E0B' },
   { slug: 'import-export', icon: FileSpreadsheet, title: 'Import & Export', color: '#059669' },
-  { slug: 'templates', icon: Layers, title: 'Show Templates', color: '#F59E0B' },
+  { slug: 'templates', icon: Layers, title: 'Show Templates', color: '#EA580C' },
 ];
 
 export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
@@ -53,34 +55,44 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
       description: 'Track dates, venues, booth details, and deadlines across your entire trade show calendar.',
     },
     {
+      icon: Sparkles,
+      title: 'One Click Show Creation',
+      description: 'Upload a prospectus or contract and AI extracts all the details. Create a show in seconds.',
+    },
+    {
+      icon: Box,
+      title: 'Booth Kit Management',
+      description: 'Track your booth inventory across shows. AI auto-assigns kits based on dates and logistics.',
+    },
+    {
       icon: DollarSign,
       title: 'Budget Tracking That Works',
       description: 'Know exactly what each show costs — booth fees, travel, shipping, services, everything.',
     },
     {
-      icon: BarChart3,
-      title: 'Actual ROI Metrics',
-      description: 'Cost per lead, qualified lead rates, revenue attribution. Finally measure what matters.',
+      icon: Truck,
+      title: 'Visual Shipping Timeline',
+      description: 'See ship-by dates and warehouse deadlines at a glance. Never miss a cutoff again.',
+    },
+    {
+      icon: RefreshCw,
+      title: 'Calendar Sync',
+      description: 'Subscribe from Google Calendar, Outlook, or Apple Calendar. Shows update automatically.',
+    },
+    {
+      icon: Bell,
+      title: 'Smart Notifications',
+      description: 'Email and in-app alerts for shipping deadlines, upcoming shows, and task reminders.',
     },
     {
       icon: Users,
       title: 'Team Collaboration',
-      description: 'Share access with your team. No more "where\'s that spreadsheet?" conversations.',
+      description: 'Share access with your team. Role-based permissions keep sensitive data secure.',
     },
     {
-      icon: Truck,
-      title: 'Shipping & Logistics',
-      description: 'Tracking numbers, cutoff dates, packing lists. Never show up missing a power strip again.',
-    },
-    {
-      icon: FileText,
-      title: 'All Your Documents',
-      description: 'Vendor packets, hotel confirmations, booth layouts — attached right to each show.',
-    },
-    {
-      icon: Sparkles,
-      title: 'AI That Actually Helps',
-      description: 'Generate talking points, social posts, follow-up emails, and reports. AI trained on trade show context.',
+      icon: BarChart3,
+      title: 'Actual ROI Metrics',
+      description: 'Cost per lead, qualified lead rates, revenue attribution. Finally measure what matters.',
     },
   ];
 
@@ -151,13 +163,15 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
                               </p>
                               <p className="text-xs text-text-tertiary mt-0.5">
                                 {feature.slug === 'calendar' && 'Visual schedule & deadlines'}
+                                {feature.slug === 'calendar-sync' && 'Google, Outlook & Apple'}
                                 {feature.slug === 'budget' && 'Track every dollar'}
                                 {feature.slug === 'team' && 'Collaborate with roles'}
-                                {feature.slug === 'logistics' && 'Shipping & packing'}
-                                {feature.slug === 'assets' && 'Booth kit inventory'}
+                                {feature.slug === 'logistics' && 'Shipping timeline & packing'}
+                                {feature.slug === 'kits' && 'Inventory & auto-assign'}
                                 {feature.slug === 'analytics' && 'ROI & performance'}
-                                {feature.slug === 'ai' && 'Content & insights'}
-                                {feature.slug === 'import-export' && 'CSV & calendar sync'}
+                                {feature.slug === 'ai' && 'One Click Show & chat'}
+                                {feature.slug === 'notifications' && 'Email & in-app alerts'}
+                                {feature.slug === 'import-export' && 'CSV import & export'}
                                 {feature.slug === 'templates' && 'Reusable show setups'}
                               </p>
                             </div>

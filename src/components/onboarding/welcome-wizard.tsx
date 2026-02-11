@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { 
   Sparkles, Calendar, Users, BarChart3, 
   ArrowRight, Check, Rocket, Wand2, Upload,
-  FileStack, ListTodo, Image
+  FileStack, ListTodo, Image, RefreshCw, Box, Bell
 } from 'lucide-react';
 
 interface WelcomeWizardProps {
@@ -37,6 +37,26 @@ export function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
       ),
     },
     {
+      icon: Wand2,
+      title: 'One Click Show Creation',
+      subtitle: 'AI extracts show details for you',
+      content: (
+        <ul className="space-y-3">
+          {[
+            'Upload a prospectus, contract, or vendor packet',
+            'AI extracts dates, booth info, deadlines & costs',
+            'Review and create your show in seconds',
+            'No more manual data entry',
+          ].map((item, i) => (
+            <li key={i} className="flex items-start gap-3">
+              <Check size={16} className="text-success mt-0.5 shrink-0" />
+              <span className="text-text-secondary">{item}</span>
+            </li>
+          ))}
+        </ul>
+      ),
+    },
+    {
       icon: Calendar,
       title: 'Track All Your Shows',
       subtitle: 'One calendar for everything',
@@ -44,8 +64,68 @@ export function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
         <ul className="space-y-3">
           {[
             'Add shows with dates, venues, and booth details',
-            'Track shipping deadlines and logistics',
+            'Visual shipping timeline with deadlines',
             'Never miss a cutoff date again',
+          ].map((item, i) => (
+            <li key={i} className="flex items-start gap-3">
+              <Check size={16} className="text-success mt-0.5 shrink-0" />
+              <span className="text-text-secondary">{item}</span>
+            </li>
+          ))}
+        </ul>
+      ),
+    },
+    {
+      icon: RefreshCw,
+      title: 'Sync to Your Calendar',
+      subtitle: 'Google, Outlook & Apple Calendar',
+      content: (
+        <ul className="space-y-3">
+          {[
+            'One-click subscribe from any calendar app',
+            'Shows appear as events automatically',
+            'Updates sync within hours',
+            'Share the feed URL with your team',
+          ].map((item, i) => (
+            <li key={i} className="flex items-start gap-3">
+              <Check size={16} className="text-success mt-0.5 shrink-0" />
+              <span className="text-text-secondary">{item}</span>
+            </li>
+          ))}
+        </ul>
+      ),
+    },
+    {
+      icon: Box,
+      title: 'Booth Kit Management',
+      subtitle: 'Track your booth inventory',
+      content: (
+        <ul className="space-y-3">
+          {[
+            'Manage multiple booth kits and sizes',
+            'AI auto-assigns kits based on dates',
+            'Track kit status: warehouse, in transit, at show',
+            'Avoid double-booking with conflict detection',
+          ].map((item, i) => (
+            <li key={i} className="flex items-start gap-3">
+              <Check size={16} className="text-success mt-0.5 shrink-0" />
+              <span className="text-text-secondary">{item}</span>
+            </li>
+          ))}
+        </ul>
+      ),
+    },
+    {
+      icon: Bell,
+      title: 'Smart Notifications',
+      subtitle: 'Never miss a deadline',
+      content: (
+        <ul className="space-y-3">
+          {[
+            'Email alerts for shipping deadlines',
+            'In-app notifications for tasks',
+            'Reminders for upcoming shows',
+            'Customize timing and channels',
           ].map((item, i) => (
             <li key={i} className="flex items-start gap-3">
               <Check size={16} className="text-success mt-0.5 shrink-0" />
@@ -81,7 +161,7 @@ export function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
       content: (
         <ul className="space-y-3">
           {[
-            'Invite team members to view or edit',
+            'Invite team members with role-based access',
             'Track attendees and travel details',
             'Keep notes and documents in one place',
           ].map((item, i) => (
@@ -94,34 +174,15 @@ export function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
       ),
     },
     {
-      icon: Wand2,
-      title: 'AI-Powered Content',
-      subtitle: 'Let AI do the heavy lifting',
-      content: (
-        <ul className="space-y-3">
-          {[
-            'Generate talking points and social posts',
-            'Create follow-up email sequences',
-            'Extract show details from vendor packets',
-            'Chat with an AI assistant about your shows',
-          ].map((item, i) => (
-            <li key={i} className="flex items-start gap-3">
-              <Check size={16} className="text-success mt-0.5 shrink-0" />
-              <span className="text-text-secondary">{item}</span>
-            </li>
-          ))}
-        </ul>
-      ),
-    },
-    {
       icon: ListTodo,
-      title: 'Tasks & Deadlines',
-      subtitle: 'Never miss a deadline',
+      title: 'Tasks & Kanban Board',
+      subtitle: 'Visual task management',
       content: (
         <ul className="space-y-3">
           {[
-            'Create tasks with due dates and assignees',
-            'Get notified before shipping deadlines',
+            'Drag-and-drop task board',
+            'Assign tasks to team members',
+            'Filter by show, assignee, or status',
             'Track progress across all shows',
           ].map((item, i) => (
             <li key={i} className="flex items-start gap-3">
@@ -142,25 +203,6 @@ export function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
             'Import shows from CSV or spreadsheets',
             'Export data for reports and analysis',
             'Bulk import attendees and contacts',
-          ].map((item, i) => (
-            <li key={i} className="flex items-start gap-3">
-              <Check size={16} className="text-success mt-0.5 shrink-0" />
-              <span className="text-text-secondary">{item}</span>
-            </li>
-          ))}
-        </ul>
-      ),
-    },
-    {
-      icon: FileStack,
-      title: 'Templates & Assets',
-      subtitle: 'Work smarter, not harder',
-      content: (
-        <ul className="space-y-3">
-          {[
-            'Save shows as templates for next year',
-            'Store booth photos and marketing assets',
-            'Quickly create shows from templates',
           ].map((item, i) => (
             <li key={i} className="flex items-start gap-3">
               <Check size={16} className="text-success mt-0.5 shrink-0" />
