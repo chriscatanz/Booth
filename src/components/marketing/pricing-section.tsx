@@ -63,7 +63,6 @@ const tiers: PricingTier[] = [
       'Document storage (25GB)',
       'Advanced analytics',
       'Custom fields',
-      'API access',
       'Phone support',
       'Dedicated success manager',
     ],
