@@ -51,16 +51,19 @@ export function AuthGuard({ children }: AuthGuardProps) {
     }
   }, [isAuthenticated, user, pendingInviteToken, router, isRedirectingToInvite]);
 
-  // Show loading while checking auth or redirecting to invite
-  if (isLoading || isRedirectingToInvite) {
+  // Show loading only when redirecting to invite
+  // Don't show loading spinner for initial auth check - just show AuthPage
+  // This prevents interrupting signup success screen
+  if (isRedirectingToInvite) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingOverlay message={isRedirectingToInvite ? "Redirecting to invitation..." : "Loading..."} />
+        <LoadingOverlay message="Redirecting to invitation..." />
       </div>
     );
   }
 
-  // Not authenticated - show login
+  // Not authenticated (or still loading initial auth) - show auth page
+  // AuthPage handles its own loading states for login/signup flows
   if (!isAuthenticated || !user) {
     return <AuthPage />;
   }
