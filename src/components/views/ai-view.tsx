@@ -16,6 +16,7 @@ import * as aiService from '@/services/ai-service';
 import { useTradeShowStore } from '@/store/trade-show-store';
 import { TradeShow } from '@/types';
 import { useAuthStore } from '@/store/auth-store';
+import { useToastStore } from '@/store/toast-store';
 import { supabase } from '@/lib/supabase';
 
 type Tab = 'generate' | 'documents' | 'chat';
