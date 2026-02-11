@@ -19,12 +19,12 @@ export function AuthPage() {
   const authConfirmed = searchParams.get('auth_confirmed');
   const authError = searchParams.get('auth_error');
   
-  // Skip landing page if coming from invite flow or has pending invite
-  // Default to signup since most invited users are new
+  // Skip landing page if explicitly coming from invite flow
+  // Don't check localStorage here - let OrganizationSetup handle pending invites after auth
   const getInitialView = (): AuthView => {
     if (typeof window !== 'undefined') {
-      const hasPendingInvite = localStorage.getItem('pending_invite_token');
-      if (returnTo === 'invite' || hasPendingInvite) {
+      // Only skip landing if explicitly redirected from invite page
+      if (returnTo === 'invite') {
         return 'signup';
       }
       // Go directly to login if email was just confirmed
