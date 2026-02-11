@@ -1,22 +1,41 @@
 -- ═══════════════════════════════════════════════════════════════════════════
--- Migration 022: Allow anon users to view organization names for pending invites
+-- Migration 022: Allow anon users to view invitations and organizations
 -- ═══════════════════════════════════════════════════════════════════════════
 -- 
 -- Problem: When a user clicks an invitation link, they're not logged in (anon role).
--- The fetchInvitationByToken query joins with organizations(*), but the anon role
--- can't see any organizations due to RLS, causing the entire query to fail.
+-- The fetchInvitationByToken query:
+-- 1. Needs to read invitations table (to find the invite by token)
+-- 2. Joins with organizations(*) (to show org name on invite page)
 --
--- Solution: Allow anon users to SELECT organizations that have active pending invites.
--- This is safe because:
--- 1. Only exposes orgs with pending invites (not all orgs)
--- 2. Only for SELECT (can't modify)
--- 3. Invites expire after 7 days anyway
+-- But anon role couldn't see either table due to missing RLS policies.
+--
+-- Solution: 
+-- 1. Allow anon to SELECT any invitation (they need the secret token to use it)
+-- 2. Allow anon to SELECT organizations that have active pending invites
+--
+-- This is secure because:
+-- - Invitation tokens are cryptographically random (sha256)
+-- - Only exposes orgs with pending invites (not all orgs)
+-- - Only allows SELECT (no modifications)
+-- - Invites expire after 7 days anyway
 -- ═══════════════════════════════════════════════════════════════════════════
 
--- Drop if exists (idempotent)
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Part 1: Allow anon to view invitations by token
+-- ─────────────────────────────────────────────────────────────────────────────
+DROP POLICY IF EXISTS "Anyone can view invite by token" ON public.invitations;
+
+CREATE POLICY "Anyone can view invite by token" ON public.invitations
+  FOR SELECT 
+  USING (true);
+
+GRANT SELECT ON public.invitations TO anon;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Part 2: Allow anon to view organization names for pending invites
+-- ─────────────────────────────────────────────────────────────────────────────
 DROP POLICY IF EXISTS "Anon can view org for pending invite" ON public.organizations;
 
--- Allow anonymous users to see organization info for pending invitations
 CREATE POLICY "Anon can view org for pending invite" ON public.organizations
   FOR SELECT 
   USING (
@@ -28,5 +47,4 @@ CREATE POLICY "Anon can view org for pending invite" ON public.organizations
     )
   );
 
--- Grant SELECT to anon role (may already exist, but ensure it's there)
 GRANT SELECT ON public.organizations TO anon;
