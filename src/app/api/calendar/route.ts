@@ -189,18 +189,31 @@ export async function POST(request: NextRequest) {
       .eq('organization_id', organizationId)
       .single();
 
+    // Also fetch all memberships for this user to debug
+    const { data: allMemberships } = await getSupabase()
+      .from('user_organizations')
+      .select('organization_id, role')
+      .eq('user_id', user.id);
+
     console.log('Calendar API - membership check:', { 
       userId: user.id, 
       organizationId, 
       membership, 
       membershipError,
-      role: membership?.role 
+      allMemberships
     });
 
     if (!membership || !['owner', 'admin'].includes(membership.role)) {
       return NextResponse.json({ 
         error: 'Admin access required',
-        debug: { role: membership?.role, hasRecord: !!membership }
+        debug: { 
+          role: membership?.role, 
+          hasRecord: !!membership,
+          userId: user.id,
+          orgId: organizationId,
+          userMemberships: allMemberships,
+          membershipError: membershipError?.message
+        }
       }, { status: 403 });
     }
 
