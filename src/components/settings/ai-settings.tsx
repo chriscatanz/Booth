@@ -57,6 +57,9 @@ export function AISettings() {
     setIsTesting(true);
     setTestResult(null);
     
+    // Set the current org for API calls
+    aiService.setCurrentOrg(organization.id);
+    
     // Set the key temporarily for testing
     aiService.setApiKey(apiKey);
     
