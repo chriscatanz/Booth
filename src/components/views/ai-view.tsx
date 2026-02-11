@@ -506,8 +506,12 @@ function DocumentsTab() {
   const [isCreatingTasks, setIsCreatingTasks] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [targetShowId, setTargetShowId] = useState<string>('');
   
-  const { shows, selectedShow, setSelectedShow, updateSelectedShow, saveShow } = useTradeShowStore();
+  const { shows, loadShows } = useTradeShowStore();
+  
+  // Use local selection instead of global selectedShow to avoid navigation
+  const selectedShow = shows.find(s => String(s.id) === targetShowId) || null;
   const { organization, user } = useAuthStore();
   const toast = useToastStore();
 
@@ -597,12 +601,13 @@ function DocumentsTab() {
     setError(null);
 
     try {
+      // Use snake_case for database columns
       const updates: Record<string, unknown> = {};
       
-      // Map extracted data to show fields
+      // Map extracted data to show fields (snake_case for DB)
       if (extractedData.showName) updates.name = extractedData.showName;
-      if (extractedData.dates?.start) updates.startDate = extractedData.dates.start;
-      if (extractedData.dates?.end) updates.endDate = extractedData.dates.end;
+      if (extractedData.dates?.start) updates.start_date = extractedData.dates.start;
+      if (extractedData.dates?.end) updates.end_date = extractedData.dates.end;
       
       // Build location string
       const loc = extractedData.location;
@@ -612,32 +617,39 @@ function DocumentsTab() {
       }
       
       // Booth info
-      if (extractedData.booth?.number) updates.boothNumber = extractedData.booth.number;
-      if (extractedData.booth?.size) updates.boothSize = extractedData.booth.size;
+      if (extractedData.booth?.number) updates.booth_number = extractedData.booth.number;
+      if (extractedData.booth?.size) updates.booth_size = extractedData.booth.size;
       
       // Costs
       if (extractedData.costs?.boothRental) updates.cost = extractedData.costs.boothRental;
       
       // Logistics
-      if (extractedData.logistics?.shippingDeadline) updates.shippingCutoff = extractedData.logistics.shippingDeadline;
-      if (extractedData.logistics?.shippingAddress) updates.shippingInfo = extractedData.logistics.shippingAddress;
+      if (extractedData.logistics?.shippingDeadline) updates.shipping_cutoff = extractedData.logistics.shippingDeadline;
+      if (extractedData.logistics?.shippingAddress) updates.shipping_info = extractedData.logistics.shippingAddress;
       
       // Contacts (first one)
       const contact = extractedData.contacts?.[0];
-      if (contact?.name) updates.showContactName = contact.name;
-      if (contact?.email) updates.showContactEmail = contact.email;
+      if (contact?.name) updates.show_contact_name = contact.name;
+      if (contact?.email) updates.show_contact_email = contact.email;
       
       // Notes
       if (extractedData.notes) {
         const existingNotes = selectedShow.generalNotes || '';
-        updates.generalNotes = existingNotes 
+        updates.general_notes = existingNotes 
           ? `${existingNotes}\n\n--- Extracted Notes ---\n${extractedData.notes}`
           : extractedData.notes;
       }
 
-      // Apply updates
-      updateSelectedShow(updates);
-      await saveShow();
+      // Apply updates directly via Supabase
+      const { error: updateError } = await supabase
+        .from('tradeshows')
+        .update(updates)
+        .eq('id', selectedShow.id);
+      
+      if (updateError) throw updateError;
+      
+      // Refresh shows list
+      await loadShows();
       
       setSuccessMessage('Show fields updated successfully!');
       toast.success('Show fields updated from document');
@@ -792,11 +804,8 @@ function DocumentsTab() {
                 Apply to Show
               </label>
               <select
-                value={selectedShow?.id?.toString() || ''}
-                onChange={(e) => {
-                  const show = shows.find(s => String(s.id) === e.target.value);
-                  setSelectedShow(show || null);
-                }}
+                value={targetShowId}
+                onChange={(e) => setTargetShowId(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-text-primary text-sm focus:ring-2 focus:ring-brand-primary focus:border-transparent"
               >
                 <option value="">Select a show...</option>
