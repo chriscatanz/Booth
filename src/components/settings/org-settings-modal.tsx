@@ -727,7 +727,7 @@ function MembersContent() {
                         ))}
                         <div className="border-t border-border my-1" />
                         <button
-                          onClick={() => handleRemoveMember(member.id, member.user?.fullName || member.user?.email)}
+                          onClick={() => handleRemoveMember(member.id, member.user?.fullName || member.user?.email || 'member')}
                           className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left text-error hover:bg-error-bg transition-colors"
                         >
                           <Trash2 size={14} />
