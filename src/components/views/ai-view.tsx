@@ -10,6 +10,7 @@ import {
   DollarSign, Building, Clock, CheckSquare, Users, Package, Plus
 } from 'lucide-react';
 import * as taskService from '@/services/task-service';
+import * as cacheService from '@/services/cache-service';
 import { useToastStore } from '@/store/toast-store';
 import { cn } from '@/lib/utils';
 import * as aiService from '@/services/ai-service';
@@ -642,7 +643,9 @@ function DocumentsTab() {
         setTargetShowId(String(newShow.id));
       }
 
-      // Refresh shows list
+      // Clear cache and refresh shows list so sidebar updates
+      cacheService.clearCache('shows_upcoming');
+      cacheService.clearCache('shows_historical');
       await loadShows();
 
       setSuccessMessage(`Created new show: ${newShow?.name || 'Unknown'}`);
@@ -717,7 +720,9 @@ function DocumentsTab() {
       
       if (updateError) throw updateError;
       
-      // Refresh shows list
+      // Clear cache and refresh shows list so sidebar updates
+      cacheService.clearCache('shows_upcoming');
+      cacheService.clearCache('shows_historical');
       await loadShows();
       
       setSuccessMessage('Show fields updated successfully!');
