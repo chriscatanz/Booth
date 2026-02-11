@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { 
   Calendar, DollarSign, Users, BarChart3, 
   Truck, Package, ArrowRight, ArrowLeft,
-  CheckSquare, FileText, ChevronDown, Menu, X,
+  ChevronDown, Menu, X,
   Sparkles, FileSpreadsheet, Layers
 } from 'lucide-react';
 

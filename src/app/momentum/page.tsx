@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence, Reorder } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Plus, Trash2, Trophy, Sparkles, GripVertical,
+  Plus, Sparkles, GripVertical,
   Lightbulb, Target, Clock, CheckCircle, PartyPopper,
   X, ChevronRight, Calendar, Flame, Star
 } from 'lucide-react';

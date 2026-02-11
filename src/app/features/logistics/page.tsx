@@ -4,8 +4,8 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { FeaturePageLayout } from '@/components/marketing/feature-page-layout';
 import { 
-  Truck, Package, Clock, ClipboardList, 
-  MapPin, AlertCircle, Boxes, Calendar
+  Truck, Package, ClipboardList, 
+  MapPin, AlertCircle, Calendar
 } from 'lucide-react';
 
 export default function LogisticsFeaturePage() {

@@ -35,7 +35,7 @@ export default function CCPAPage() {
             </div>
             <p className="text-text-secondary">
               Under the California Consumer Privacy Act (CCPA) and the California Privacy Rights Act (CPRA), 
-              California residents have the right to opt out of the "sale" or "sharing" of their personal information. 
+              California residents have the right to opt out of the &ldquo;sale&rdquo; or &ldquo;sharing&rdquo; of their personal information. 
               While Booth does not engage in such practices, we provide this disclosure to ensure transparency 
               and compliance with California law.
             </p>

@@ -66,7 +66,7 @@ function InviteContent() {
 
         setInvitation(invite);
         setStatus('valid');
-      } catch (err) {
+      } catch {
         setStatus('error');
         setError('Failed to verify invitation');
       }
@@ -174,7 +174,7 @@ function InviteContent() {
             Welcome to {invitation?.organization?.name}!
           </h1>
           <p className="text-text-secondary mb-4">
-            You've joined as {invitation?.role}. Redirecting to the app...
+            You&apos;ve joined as {invitation?.role}. Redirecting to the app...
           </p>
           <div className="flex justify-center">
             <div className="w-6 h-6 border-2 border-brand-purple border-t-transparent rounded-full animate-spin" />
@@ -196,7 +196,7 @@ function InviteContent() {
           <div className="w-16 h-16 rounded-2xl bg-brand-purple/20 flex items-center justify-center mx-auto mb-4">
             <UserPlus size={32} className="text-brand-purple" />
           </div>
-          <h1 className="text-2xl font-bold text-text-primary">You're Invited!</h1>
+          <h1 className="text-2xl font-bold text-text-primary">You&apos;re Invited!</h1>
         </div>
 
         <div className="bg-surface rounded-xl border border-border p-6 mb-6">
@@ -215,7 +215,7 @@ function InviteContent() {
           </div>
 
           <div className="text-sm text-text-secondary space-y-2">
-            <p>As {invitation?.role === 'admin' ? 'an' : 'a'} <strong>{invitation?.role}</strong>, you'll be able to:</p>
+            <p>As {invitation?.role === 'admin' ? 'an' : 'a'} <strong>{invitation?.role}</strong>, you&apos;ll be able to:</p>
             <ul className="list-disc list-inside space-y-1 ml-2">
               {invitation?.role === 'viewer' && (
                 <>

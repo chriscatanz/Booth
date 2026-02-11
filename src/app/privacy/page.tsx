@@ -22,7 +22,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-xl font-semibold text-text-primary">1. Introduction</h2>
             <p>
-              Booth ("we", "our", or "us") respects your privacy and is committed to 
+              Booth (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;) respects your privacy and is committed to 
               protecting your personal data. This Privacy Policy explains how we collect, use, and 
               safeguard your information when you use our service.
             </p>

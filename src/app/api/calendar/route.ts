@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
     const now = formatICSDateTime(new Date());
     const calendarName = `${org.name} Trade Shows`;
 
-    let ics = [
+    const ics = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
       'PRODID:-//Booth//Trade Show Manager//EN',

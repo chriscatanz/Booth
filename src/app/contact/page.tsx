@@ -64,7 +64,7 @@ export default function ContactPage() {
             </h1>
             <p className="text-lg text-text-secondary">
               Have questions about Booth? Want to share feedback or request a feature? 
-              We'd love to hear from you.
+              We&apos;d love to hear from you.
             </p>
           </motion.div>
         </div>

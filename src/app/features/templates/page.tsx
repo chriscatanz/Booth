@@ -4,7 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { FeaturePageLayout } from '@/components/marketing/feature-page-layout';
 import { 
-  Layers, Copy, FolderOpen, RefreshCw,
+  Layers, Copy, FolderOpen,
   Zap, Settings, Repeat
 } from 'lucide-react';
 
