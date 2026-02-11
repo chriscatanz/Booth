@@ -882,8 +882,8 @@ export async function testConnection(): Promise<{ success: boolean; error?: stri
 }
 
 // Legacy exports for compatibility (no-ops, key is server-side only now)
-export function setApiKey(_key: string | null) {
-  // No-op: keys are now stored server-side only
+export function setApiKey(key: string | null) {
+  void key; // No-op: keys are now stored server-side only
 }
 
 export function getApiKey(): string | null {

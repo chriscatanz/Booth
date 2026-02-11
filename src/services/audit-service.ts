@@ -134,7 +134,7 @@ export async function fetchAuditLog(
     return { entries: [], total: 0 };
   }
 
-  const entries: AuditEntry[] = (data || []).map((row: any) => ({
+  const entries: AuditEntry[] = (data || []).map((row: Record<string, unknown>) => ({
     id: row.id,
     organizationId: row.organization_id,
     userId: row.user_id,

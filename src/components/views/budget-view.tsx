@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTradeShowStore } from '@/store/trade-show-store';
 import { DataVisibilityGate } from '@/components/auth/data-visibility-gate';
 import { ShieldX } from 'lucide-react';
@@ -25,8 +25,8 @@ export default function BudgetView() {
   const [timeframe, setTimeframe] = useState<BudgetTimeframe>(BudgetTimeframe.Year);
   const [customStart, setCustomStart] = useState('');
   const [customEnd, setCustomEnd] = useState('');
-  const nowRef = useRef(new Date());
-  const now = nowRef.current;
+  // Note: `now` intentionally recreated on each render for fresh date comparisons
+  const now = new Date();
 
   const filteredShows = useMemo(() => {
     switch (timeframe) {

@@ -28,13 +28,14 @@ export function useAutosave({ debounceMs = 2000, enabled = true }: UseAutosaveOp
   // Serialize for comparison (excluding timestamps)
   const serializeShow = useCallback(() => {
     if (!selectedShow) return null;
-    const { createdAt: _createdAt, updatedAt: _updatedAt, ...rest } = selectedShow;
+    const { createdAt, updatedAt, ...rest } = selectedShow;
+    void createdAt; void updatedAt; // intentionally unused
     return JSON.stringify(rest);
   }, [selectedShow]);
 
   const serializeAttendees = useCallback(() => {
     // Exclude localId since it gets regenerated on fetch from DB
-    return JSON.stringify(attendees.map(({ localId: _localId, ...rest }) => rest));
+    return JSON.stringify(attendees.map(({ localId, ...rest }) => { void localId; return rest; }));
   }, [attendees]);
 
   // Clear timeout on unmount

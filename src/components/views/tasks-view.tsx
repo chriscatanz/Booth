@@ -45,7 +45,7 @@ export default function TasksView() {
     }
     
     setIsLoading(false);
-  }, [organization?.id]);
+  }, [organization]);
 
   useEffect(() => {
     loadTasks();

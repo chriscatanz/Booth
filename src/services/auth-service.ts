@@ -167,7 +167,8 @@ export async function fetchUserOrganizations(userId: string): Promise<Organizati
   return (data || []).map(mapMembership);
 }
 
-export async function createOrganization(name: string, _userId: string): Promise<Organization> {
+export async function createOrganization(name: string, userId: string): Promise<Organization> {
+  void userId; // userId is passed but RPC handles ownership via auth
   // Use RPC function to bypass RLS for atomic org creation
   const { data: orgId, error: rpcError } = await supabase
     .rpc('create_organization_for_user', { org_name: name });
