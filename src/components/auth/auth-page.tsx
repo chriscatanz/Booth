@@ -16,6 +16,7 @@ export function AuthPage() {
   const router = useRouter();
   const toast = useToastStore();
   const returnTo = searchParams.get('returnTo');
+  const mode = searchParams.get('mode'); // 'signup' or 'login'
   const authConfirmed = searchParams.get('auth_confirmed');
   const authError = searchParams.get('auth_error');
   
@@ -27,9 +28,9 @@ export function AuthPage() {
       if (authConfirmed === 'true') {
         return 'login';
       }
-      // Show login first for invite flow (not signup) - they can switch if needed
+      // Respect explicit mode parameter from invite flow
       if (returnTo === 'invite') {
-        return 'login';
+        return mode === 'login' ? 'login' : 'signup';
       }
     }
     return 'landing';

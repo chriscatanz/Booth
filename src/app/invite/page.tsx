@@ -103,12 +103,21 @@ function InviteContent() {
     }
   };
 
-  const handleSignIn = () => {
-    // Store token in session storage so we can use it after login
+  const handleSignUp = () => {
+    // Store token in localStorage so we can use it after signup/login
     if (token) {
       localStorage.setItem('pending_invite_token', token);
     }
-    router.push('/?returnTo=invite');
+    // Route to signup for new users (they can switch to login if they have an account)
+    router.push('/?returnTo=invite&mode=signup');
+  };
+
+  const handleSignIn = () => {
+    // Store token in localStorage for existing users
+    if (token) {
+      localStorage.setItem('pending_invite_token', token);
+    }
+    router.push('/?returnTo=invite&mode=login');
   };
 
   // Loading state
@@ -262,13 +271,26 @@ function InviteContent() {
               variant="primary"
               size="lg"
               className="w-full"
+              onClick={handleSignUp}
+            >
+              <UserPlus size={16} /> Create Account to Accept
+            </Button>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border"></div>
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="px-2 bg-background text-text-tertiary">or</span>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full"
               onClick={handleSignIn}
             >
-              <LogIn size={16} /> Sign In to Accept
+              <LogIn size={16} /> Already have an account? Sign in
             </Button>
-            <p className="text-xs text-text-tertiary text-center">
-              Don't have an account? You can create one after clicking above.
-            </p>
           </div>
         )}
 
