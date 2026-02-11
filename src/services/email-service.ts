@@ -181,7 +181,8 @@ function sendViaConsole(options: EmailOptions): void {
 
 // Main send function
 export async function sendEmail(options: EmailOptions): Promise<void> {
-  const provider = process.env.NEXT_PUBLIC_EMAIL_PROVIDER || 'console';
+  // Check both server-side and public env vars
+  const provider = process.env.EMAIL_PROVIDER || process.env.NEXT_PUBLIC_EMAIL_PROVIDER || 'console';
   
   switch (provider) {
     case 'resend':
