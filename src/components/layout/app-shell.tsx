@@ -32,9 +32,9 @@ import { WelcomeWizard } from '@/components/onboarding';
 import { useAuthStore } from '@/store/auth-store';
 import { useSubscriptionStore } from '@/store/subscription-store';
 import { SubscriptionBanner } from '@/components/subscription/subscription-banner';
-// AI modal/bubble disabled - using full AIView now
+// AI modal disabled - using full AIView now, but keep floating bubble for quick access
 // import { AIAssistantPanel } from '@/components/ai/ai-assistant-panel';
-// import { AIChatBubble } from '@/components/ai/ai-chat-bubble';
+import { AIChatBubble } from '@/components/ai/ai-chat-bubble';
 
 const pageVariants = {
   initial: { opacity: 0, y: 8 },
@@ -431,7 +431,8 @@ export function AppShell() {
       /> */}
 
       {/* Floating AI Chat Bubble - disabled, using full view */}
-      {/* <AIChatBubble /> */}
+      {/* Floating AI Chat Bubble - quick access to AI view */}
+      <AIChatBubble />
     </div>
   );
 }
