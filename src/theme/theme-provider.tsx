@@ -24,15 +24,6 @@ function getInitialMode(): ThemeMode {
   return stored || 'light';
 }
 
-// Helper to resolve theme mode to actual light/dark
-function resolveThemeMode(m: ThemeMode): ResolvedTheme {
-  if (m === 'system') {
-    if (typeof window === 'undefined') return 'light';
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-  return m;
-}
-
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Use lazy initialization to read from localStorage on first render
   const [mode, setModeState] = useState<ThemeMode>(getInitialMode);

@@ -249,7 +249,7 @@ function GenerateTab({ shows }: { shows: TradeShow[] }) {
     const subjectMatch = emailContent.match(/(?:##\s*(?:Email\s*\d+:?\s*)?|Subject:\s*|\*\*Subject:\*\*\s*)([^\n]+)/i);
     const subject = subjectMatch ? subjectMatch[1].replace(/\*\*/g, '').trim() : 'Follow-up from our conversation';
     
-    let body = emailContent
+    const body = emailContent
       .replace(/^##\s*.+$/gm, '')
       .replace(/\*\*Send:\s*Day\s*\d+\*\*/gi, '')
       .replace(/---/g, '')

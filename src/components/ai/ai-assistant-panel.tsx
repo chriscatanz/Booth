@@ -270,7 +270,7 @@ function ContentGenerator({ context }: { context?: AIAssistantPanelProps['contex
     const subject = subjectMatch ? subjectMatch[1].replace(/\*\*/g, '').trim() : 'Follow-up from our conversation';
     
     // Get body - remove markdown headers and clean up
-    let body = emailContent
+    const body = emailContent
       .replace(/^##\s*.+$/gm, '') // Remove ## headers
       .replace(/\*\*Send:\s*Day\s*\d+\*\*/gi, '') // Remove send timing
       .replace(/---/g, '') // Remove dividers

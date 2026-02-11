@@ -96,7 +96,7 @@ export const useAuthStore = create<AuthState>()(
           
           // Get previously selected org from persisted state or pick first
           const currentOrgId = get().organization?.id;
-          let selectedMembership = orgs.find(m => m.organizationId === currentOrgId) || orgs[0];
+          const selectedMembership = orgs.find(m => m.organizationId === currentOrgId) || orgs[0];
           
           const role = selectedMembership?.role;
 
