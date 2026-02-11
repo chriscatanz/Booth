@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { ViewMode } from '@/types/enums';
 import { useAuthStore } from '@/store/auth-store';
+import { useDataVisibility } from '@/hooks/use-data-visibility';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
@@ -17,13 +18,21 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { UserMenu } from '@/components/auth/user-menu';
+import { DataCategory } from '@/types/data-visibility';
 
-const NAV_ITEMS: { mode: ViewMode; icon: React.ElementType; label: string }[] = [
+interface NavItem {
+  mode: ViewMode;
+  icon: React.ElementType;
+  label: string;
+  requiresCategory?: DataCategory;
+}
+
+const NAV_ITEMS: NavItem[] = [
   { mode: ViewMode.Dashboard, icon: LayoutDashboard, label: 'Dashboard' },
   { mode: ViewMode.Calendar, icon: Calendar, label: 'Calendar' },
-  { mode: ViewMode.Tasks, icon: CheckSquare, label: 'Tasks' },
-  { mode: ViewMode.Assets, icon: Package, label: 'Assets' },
-  { mode: ViewMode.Budget, icon: DollarSign, label: 'Budget' },
+  { mode: ViewMode.Tasks, icon: CheckSquare, label: 'Tasks', requiresCategory: 'tasks' },
+  { mode: ViewMode.Assets, icon: Package, label: 'Assets', requiresCategory: 'documents' },
+  { mode: ViewMode.Budget, icon: DollarSign, label: 'Budget', requiresCategory: 'budget' },
   { mode: ViewMode.AI, icon: Sparkles, label: 'AI' },
   { mode: ViewMode.Activity, icon: Activity, label: 'Activity' },
 ];
@@ -42,7 +51,16 @@ export function TopNav({
   onOpenCommandPalette,
 }: TopNavProps) {
   const { organization } = useAuthStore();
+  const { canSeeCategory } = useDataVisibility();
   const brandColor = organization?.brandColor || '#9333ea';
+
+  // Filter nav items based on data visibility
+  const visibleNavItems = useMemo(() => 
+    NAV_ITEMS.filter(item => 
+      !item.requiresCategory || canSeeCategory(item.requiresCategory)
+    ),
+    [canSeeCategory]
+  );
 
   return (
     <header className="h-14 border-b border-border bg-surface flex items-center justify-between px-4 shrink-0">
@@ -71,7 +89,7 @@ export function TopNav({
 
       {/* Center: Navigation */}
       <nav className="flex items-center gap-1">
-        {NAV_ITEMS.map(({ mode, icon: Icon, label }) => {
+        {visibleNavItems.map(({ mode, icon: Icon, label }) => {
           const isActive = viewMode === mode;
           return (
             <motion.button

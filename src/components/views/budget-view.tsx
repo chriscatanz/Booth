@@ -2,6 +2,8 @@
 
 import React, { useState, useMemo } from 'react';
 import { useTradeShowStore } from '@/store/trade-show-store';
+import { DataVisibilityGate } from '@/components/auth/data-visibility-gate';
+import { ShieldX } from 'lucide-react';
 import { BudgetTimeframe } from '@/types/enums';
 import { StatCard } from '@/components/ui/stat-card';
 import { formatCurrency, formatCurrencyShort } from '@/lib/utils';
@@ -115,6 +117,20 @@ export default function BudgetView() {
   [filteredShows, allAttendees]);
 
   return (
+    <DataVisibilityGate 
+      category="budget" 
+      fallback={
+        <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-center p-8">
+          <div className="w-16 h-16 rounded-full bg-error-bg flex items-center justify-center mb-4">
+            <ShieldX size={32} className="text-error" />
+          </div>
+          <h2 className="text-xl font-semibold text-text-primary mb-2">Access Restricted</h2>
+          <p className="text-text-secondary max-w-md">
+            You don't have permission to view budget reports. Contact your organization admin if you need access.
+          </p>
+        </div>
+      }
+    >
     <div className="p-4 sm:p-6 space-y-6 max-w-[1400px]">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -237,5 +253,6 @@ export default function BudgetView() {
         )}
       </div>
     </div>
+    </DataVisibilityGate>
   );
 }

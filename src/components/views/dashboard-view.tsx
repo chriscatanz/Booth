@@ -4,6 +4,7 @@ import React, { useMemo } from 'react';
 import { useTradeShowStore } from '@/store/trade-show-store';
 import { useAuthStore } from '@/store/auth-store';
 import { useFilteredShows } from '@/hooks/use-filtered-shows';
+import { DataVisibilityGate } from '@/components/auth/data-visibility-gate';
 import { ViewMode, AlertType, AlertPriority } from '@/types/enums';
 import { TradeShow } from '@/types';
 import { StatCard } from '@/components/ui/stat-card';
@@ -148,7 +149,9 @@ export default function DashboardView({ viewMode, onViewModeChange }: DashboardV
         <StatCard title="Total Shows" value={`${shows.length}`} subtitle="All time" icon={Calendar} color="#A62B9F" />
         <StatCard title="Upcoming" value={`${upcomingShows.length}`} subtitle={`${showsNext30.length} in next 30 days`} icon={Clock} color="#59C8FA" />
         <StatCard title="This Month" value={`${showsThisMonth.length}`} subtitle={format(now, 'MMMM')} icon={CalendarDays} color="#1A7F37" />
-        <StatCard title="Total Budget" value={formatCurrency(totalBudget)} subtitle={`${formatCurrency(upcomingBudget)} upcoming`} icon={DollarSign} color="#BF8700" />
+        <DataVisibilityGate category="budget" fallback={<div />}>
+          <StatCard title="Total Budget" value={formatCurrency(totalBudget)} subtitle={`${formatCurrency(upcomingBudget)} upcoming`} icon={DollarSign} color="#BF8700" />
+        </DataVisibilityGate>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
@@ -271,19 +274,29 @@ export default function DashboardView({ viewMode, onViewModeChange }: DashboardV
               <h2 className="text-sm font-semibold text-text-primary">Quick Actions</h2>
             </div>
             <div className="space-y-1">
-              {[
-                { title: 'New Trade Show', icon: Plus, color: '#A62B9F', action: createNewShow },
-                { title: 'View Calendar', icon: Calendar, color: '#59C8FA', action: () => onViewModeChange(ViewMode.Calendar) },
-                { title: 'Budget Reports', icon: BarChart3, color: '#BF8700', action: () => onViewModeChange(ViewMode.Budget) },
-              ].map(item => (
-                <button key={item.title} onClick={item.action} className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-bg-tertiary transition-colors">
-                  <div className="p-1.5 rounded" style={{ backgroundColor: `${item.color}1A`, color: item.color }}>
-                    <item.icon size={16} />
+              <button onClick={createNewShow} className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-bg-tertiary transition-colors">
+                <div className="p-1.5 rounded" style={{ backgroundColor: '#A62B9F1A', color: '#A62B9F' }}>
+                  <Plus size={16} />
+                </div>
+                <span className="text-sm font-medium text-text-primary">New Trade Show</span>
+                <ChevronRight size={14} className="ml-auto text-border-strong" />
+              </button>
+              <button onClick={() => onViewModeChange(ViewMode.Calendar)} className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-bg-tertiary transition-colors">
+                <div className="p-1.5 rounded" style={{ backgroundColor: '#59C8FA1A', color: '#59C8FA' }}>
+                  <Calendar size={16} />
+                </div>
+                <span className="text-sm font-medium text-text-primary">View Calendar</span>
+                <ChevronRight size={14} className="ml-auto text-border-strong" />
+              </button>
+              <DataVisibilityGate category="budget">
+                <button onClick={() => onViewModeChange(ViewMode.Budget)} className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-bg-tertiary transition-colors">
+                  <div className="p-1.5 rounded" style={{ backgroundColor: '#BF87001A', color: '#BF8700' }}>
+                    <BarChart3 size={16} />
                   </div>
-                  <span className="text-sm font-medium text-text-primary">{item.title}</span>
+                  <span className="text-sm font-medium text-text-primary">Budget Reports</span>
                   <ChevronRight size={14} className="ml-auto text-border-strong" />
                 </button>
-              ))}
+              </DataVisibilityGate>
             </div>
           </div>
         </div>
