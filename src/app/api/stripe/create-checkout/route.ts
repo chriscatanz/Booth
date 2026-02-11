@@ -2,22 +2,29 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-01-28.clover',
-});
+// Lazy initialization to avoid build-time errors
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error('STRIPE_SECRET_KEY not configured');
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2026-01-28.clover',
+  });
+}
 
-// Initialize Supabase admin client
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
-// Price IDs from Stripe
-const PRICE_IDS: Record<string, string> = {
-  starter: process.env.STRIPE_STARTER_PRICE_ID!,
-  pro: process.env.STRIPE_PRO_PRICE_ID!,
-};
+function getPriceIds() {
+  return {
+    starter: process.env.STRIPE_STARTER_PRICE_ID || '',
+    pro: process.env.STRIPE_PRO_PRICE_ID || '',
+  };
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,12 +37,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!PRICE_IDS[tier]) {
+    const PRICE_IDS = getPriceIds();
+    if (!PRICE_IDS[tier as keyof typeof PRICE_IDS]) {
       return NextResponse.json(
         { error: 'Invalid tier' },
         { status: 400 }
       );
     }
+
+    const supabaseAdmin = getSupabaseAdmin();
+    const stripe = getStripe();
 
     // Get org and subscription info
     const { data: subscription, error: subError } = await supabaseAdmin
@@ -51,20 +62,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get org owner email
-    const { data: owner, error: ownerError } = await supabaseAdmin
-      .from('user_profiles')
-      .select('email')
+    // Get org owner email from organization_members
+    const { data: ownerMember, error: ownerError } = await supabaseAdmin
+      .from('organization_members')
+      .select('user_id')
       .eq('organization_id', orgId)
       .eq('role', 'owner')
       .single();
 
-    if (ownerError || !owner) {
+    if (ownerError || !ownerMember) {
       return NextResponse.json(
         { error: 'Organization owner not found' },
         { status: 404 }
       );
     }
+
+    // Get owner's email from user_profiles
+    const { data: owner } = await supabaseAdmin
+      .from('user_profiles')
+      .select('email')
+      .eq('id', ownerMember.user_id)
+      .single();
 
     let customerId = subscription.stripe_customer_id;
 
@@ -92,7 +110,7 @@ export async function POST(request: NextRequest) {
       payment_method_types: ['card'],
       line_items: [
         {
-          price: PRICE_IDS[tier],
+          price: PRICE_IDS[tier as keyof typeof PRICE_IDS],
           quantity: 1,
         },
       ],

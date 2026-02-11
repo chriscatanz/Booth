@@ -2,24 +2,35 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-01-28.clover',
-});
+// Lazy initialization to avoid build-time errors
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error('STRIPE_SECRET_KEY not configured');
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2026-01-28.clover',
+  });
+}
 
-// Initialize Supabase admin client
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+function getWebhookSecret() {
+  return process.env.STRIPE_WEBHOOK_SECRET || '';
+}
 
-// Map Stripe price IDs to tiers
-const PRICE_TO_TIER: Record<string, 'starter' | 'pro'> = {
-  [process.env.STRIPE_STARTER_PRICE_ID!]: 'starter',
-  [process.env.STRIPE_PRO_PRICE_ID!]: 'pro',
-};
+function getPriceToTier() {
+  const starterPrice = process.env.STRIPE_STARTER_PRICE_ID || '';
+  const proPrice = process.env.STRIPE_PRO_PRICE_ID || '';
+  return {
+    [starterPrice]: 'starter' as const,
+    [proPrice]: 'pro' as const,
+  };
+}
 
 // Tier limits
 const TIER_LIMITS: Record<string, { userLimit: number | null; showLimit: number | null }> = {
@@ -30,6 +41,9 @@ const TIER_LIMITS: Record<string, { userLimit: number | null; showLimit: number 
 export async function POST(request: NextRequest) {
   const body = await request.text();
   const signature = request.headers.get('stripe-signature')!;
+
+  const stripe = getStripe();
+  const webhookSecret = getWebhookSecret();
 
   let event: Stripe.Event;
 
@@ -87,6 +101,7 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
+  const supabaseAdmin = getSupabaseAdmin();
   const orgId = session.metadata?.org_id;
   const tier = session.metadata?.tier as 'starter' | 'pro';
 
@@ -111,6 +126,8 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 }
 
 async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
+  const supabaseAdmin = getSupabaseAdmin();
+  const PRICE_TO_TIER = getPriceToTier();
   const orgId = subscription.metadata?.org_id;
   
   if (!orgId) {
@@ -161,6 +178,7 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
+  const supabaseAdmin = getSupabaseAdmin();
   const targetOrgId = subscription.metadata?.org_id || 
     (await getOrgIdByCustomer(subscription.customer as string));
   
@@ -181,6 +199,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
+  const supabaseAdmin = getSupabaseAdmin();
   const customerId = invoice.customer as string;
   const targetOrgId = await getOrgIdByCustomer(customerId);
   
@@ -200,6 +219,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
 }
 
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
+  const supabaseAdmin = getSupabaseAdmin();
   const customerId = invoice.customer as string;
   const targetOrgId = await getOrgIdByCustomer(customerId);
   
@@ -219,6 +239,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
 }
 
 async function getOrgIdByCustomer(customerId: string): Promise<string | null> {
+  const supabaseAdmin = getSupabaseAdmin();
   const { data } = await supabaseAdmin
     .from('subscriptions')
     .select('org_id')
