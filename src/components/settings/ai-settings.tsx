@@ -60,15 +60,8 @@ export function AISettings() {
     // Set the current org for API calls
     aiService.setCurrentOrg(organization.id);
     
-    // Set the key temporarily for testing
-    aiService.setApiKey(apiKey);
-    
-    // Test the connection
-    const result = await aiService.testConnection();
-    setTestResult(result);
-    
-    if (result.success) {
-      // Save to Supabase (encrypted)
+    try {
+      // Save to Supabase first (encrypted) - server needs the key to test
       const saved = await aiService.saveApiKeyToOrg(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         supabase as any,
@@ -76,17 +69,30 @@ export function AISettings() {
         apiKey
       );
       
-      if (saved) {
+      if (!saved) {
+        setTestResult({ success: false, error: 'Failed to save API key to database' });
+        setIsTesting(false);
+        return;
+      }
+      
+      // Now test the connection (server will read key from DB)
+      const result = await aiService.testConnection();
+      setTestResult(result);
+      
+      if (result.success) {
         setIsConnected(true);
-        // Mask the key after successful save
+        // Mask the key after successful test
         setApiKey('••••••••••••••••••••••••••••••••');
       } else {
-        setTestResult({ success: false, error: 'Failed to save API key' });
-        aiService.setApiKey(null);
+        // Key saved but test failed - might be invalid key
+        // Keep it saved so user can try again or check the key
         setIsConnected(false);
       }
-    } else {
-      aiService.setApiKey(null);
+    } catch (err) {
+      setTestResult({ 
+        success: false, 
+        error: err instanceof Error ? err.message : 'Failed to save API key' 
+      });
       setIsConnected(false);
     }
     
