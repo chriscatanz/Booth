@@ -14,6 +14,7 @@ interface EmailOptions {
   subject: string;
   html: string;
   text?: string;
+  fromType?: 'default' | 'notification';
 }
 
 interface InviteEmailData {
@@ -120,6 +121,11 @@ async function sendViaResend(options: EmailOptions): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) throw new Error('RESEND_API_KEY not configured');
   
+  // Select FROM address based on email type
+  const fromAddress = options.fromType === 'notification' 
+    ? (process.env.EMAIL_FROM_NOTIFICATIONS || process.env.EMAIL_FROM || 'Booth <notifications@getbooth.io>')
+    : (process.env.EMAIL_FROM || 'Booth <hello@getbooth.io>');
+  
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -127,7 +133,7 @@ async function sendViaResend(options: EmailOptions): Promise<void> {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: process.env.EMAIL_FROM || 'Booth <noreply@yourdomain.com>',
+      from: fromAddress,
       to: options.to,
       subject: options.subject,
       html: options.html,
@@ -424,5 +430,5 @@ export async function sendNotificationEmail(
   data: NotificationEmailData
 ): Promise<void> {
   const { subject, html, text } = generateNotificationEmail(data);
-  await sendEmail({ to: email, subject, html, text });
+  await sendEmail({ to: email, subject, html, text, fromType: 'notification' });
 }
