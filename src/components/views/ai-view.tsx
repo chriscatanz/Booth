@@ -507,7 +507,7 @@ function DocumentsTab() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const { selectedShow, updateSelectedShow, saveShow } = useTradeShowStore();
+  const { shows, selectedShow, setSelectedShow, updateSelectedShow, saveShow } = useTradeShowStore();
   const { organization, user } = useAuthStore();
   const toast = useToastStore();
 
@@ -785,7 +785,29 @@ function DocumentsTab() {
 
         {/* Action Buttons */}
         {extractedData && (
-          <div className="space-y-2 pt-4 border-t border-border">
+          <div className="space-y-3 pt-4 border-t border-border">
+            {/* Show Selector */}
+            <div>
+              <label className="block text-xs font-medium text-text-secondary mb-1.5">
+                Apply to Show
+              </label>
+              <select
+                value={selectedShow?.id?.toString() || ''}
+                onChange={(e) => {
+                  const show = shows.find(s => String(s.id) === e.target.value);
+                  setSelectedShow(show || null);
+                }}
+                className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-text-primary text-sm focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+              >
+                <option value="">Select a show...</option>
+                {shows.map((show) => (
+                  <option key={show.id} value={show.id}>
+                    {show.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <Button 
               onClick={handleApplyAll} 
               disabled={isApplying || isCreatingTasks || !selectedShow}
@@ -828,7 +850,7 @@ function DocumentsTab() {
             
             {!selectedShow && (
               <p className="text-xs text-warning text-center">
-                Select a show first to apply extracted data
+                Select a show above to apply extracted data
               </p>
             )}
           </div>
