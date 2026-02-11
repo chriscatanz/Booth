@@ -143,7 +143,7 @@ export function KitAssignmentSection({
                   setSelectedKitId('');
                   setConflicts([]);
                 }}
-                className="p-1 hover:bg-bg-secondary rounded"
+                className="p-1 hover:bg-surface rounded"
               >
                 <X className="h-4 w-4 text-text-secondary" />
               </button>
@@ -162,7 +162,7 @@ export function KitAssignmentSection({
             />
 
             {conflicts.length > 0 && (
-              <div className="bg-warning-bg border border-warning/20 rounded-lg p-3">
+              <div className="bg-warning/10 border border-warning/20 rounded-lg p-3">
                 <div className="flex items-center gap-2 text-warning mb-1">
                   <AlertTriangle className="h-4 w-4" />
                   <span className="text-sm font-medium">Scheduling Conflicts</span>
@@ -265,7 +265,7 @@ function AssignmentCard({
       {/* Header */}
       <div
         onClick={onToggleExpand}
-        className="flex items-center justify-between p-3 cursor-pointer hover:bg-bg-secondary/50 transition-colors"
+        className="flex items-center justify-between p-3 cursor-pointer hover:bg-surface transition-colors"
       >
         <div className="flex items-center gap-3">
           <Package className="h-4 w-4 text-text-secondary" />
@@ -323,7 +323,7 @@ function AssignmentCard({
                           'px-2 py-1 text-xs rounded transition-colors',
                           assignment.status === status
                             ? 'bg-brand-primary text-white'
-                            : 'bg-bg-secondary text-text-secondary hover:bg-bg-tertiary'
+                            : 'bg-surface text-text-secondary hover:bg-bg-tertiary'
                         )}
                       >
                         {ASSIGNMENT_STATUS_LABELS[status]}
@@ -371,10 +371,10 @@ function AssignmentCard({
 
               {/* AI Info */}
               {assignment.aiRecommended && (
-                <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-2 text-xs">
-                  <span className="text-purple-400 font-medium">AI Recommended</span>
+                <div className="bg-brand-purple/10 border border-brand-purple/20 rounded-lg p-2 text-xs">
+                  <span className="text-brand-purple font-medium">AI Recommended</span>
                   {assignment.aiRecommendationReason && (
-                    <p className="text-purple-300 mt-0.5">
+                    <p className="text-brand-purple/80 mt-0.5">
                       {assignment.aiRecommendationReason}
                     </p>
                   )}

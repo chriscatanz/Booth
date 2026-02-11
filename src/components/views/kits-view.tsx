@@ -90,7 +90,7 @@ export default function KitsView() {
   if (loading && !availability.length) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500" />
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-brand-primary" />
       </div>
     );
   }
@@ -100,13 +100,13 @@ export default function KitsView() {
       {/* Main List */}
       <div className={cn(
         "flex-1 p-6 overflow-y-auto",
-        selectedKit && "border-r border-zinc-800"
+        selectedKit && "border-r border-border"
       )}>
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-white">Booth Kits</h1>
-            <p className="text-zinc-400 text-sm mt-1">
+            <h1 className="text-2xl font-bold text-text-primary">Booth Kits</h1>
+            <p className="text-text-secondary text-sm mt-1">
               Manage your booth inventory and track assignments
             </p>
           </div>
@@ -131,22 +131,22 @@ export default function KitsView() {
         {/* Filters */}
         <div className="flex gap-3 mb-6">
           <div className="relative flex-1 max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary" />
             <Input
               placeholder="Search kits..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              className="pl-10 bg-zinc-900 border-zinc-800"
+              className="pl-10"
             />
           </div>
-          <div className="flex gap-1 bg-zinc-900 rounded-lg p-1">
+          <div className="flex gap-1 bg-bg-tertiary rounded-lg p-1">
             <button
               onClick={() => setFilterType('all')}
               className={cn(
                 "px-3 py-1.5 text-sm rounded-md transition-colors",
                 filterType === 'all' 
-                  ? "bg-zinc-700 text-white" 
-                  : "text-zinc-400 hover:text-white"
+                  ? "bg-surface text-text-primary shadow-sm" 
+                  : "text-text-secondary hover:text-text-primary"
               )}
             >
               All
@@ -158,8 +158,8 @@ export default function KitsView() {
                 className={cn(
                   "px-3 py-1.5 text-sm rounded-md transition-colors",
                   filterType === type 
-                    ? "bg-zinc-700 text-white" 
-                    : "text-zinc-400 hover:text-white"
+                    ? "bg-surface text-text-primary shadow-sm" 
+                    : "text-text-secondary hover:text-text-primary"
                 )}
               >
                 {label.split(' ')[0]}
@@ -170,53 +170,53 @@ export default function KitsView() {
 
         {/* Stats Summary */}
         <div className="grid grid-cols-4 gap-4 mb-6">
-          <div className="bg-zinc-900 rounded-lg p-4 border border-zinc-800">
+          <div className="bg-surface rounded-lg p-4 border border-border">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-500/10 rounded-lg">
-                <CheckCircle className="h-5 w-5 text-green-500" />
+              <div className="p-2 bg-success/10 rounded-lg">
+                <CheckCircle className="h-5 w-5 text-success" />
               </div>
               <div>
-                <p className="text-sm text-zinc-400">Available</p>
-                <p className="text-2xl font-semibold text-white">
+                <p className="text-sm text-text-secondary">Available</p>
+                <p className="text-2xl font-semibold text-text-primary">
                   {availability.filter(k => k.status === 'available').length}
                 </p>
               </div>
             </div>
           </div>
-          <div className="bg-zinc-900 rounded-lg p-4 border border-zinc-800">
+          <div className="bg-surface rounded-lg p-4 border border-border">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-500/10 rounded-lg">
-                <Calendar className="h-5 w-5 text-blue-500" />
+              <div className="p-2 bg-info/10 rounded-lg">
+                <Calendar className="h-5 w-5 text-info" />
               </div>
               <div>
-                <p className="text-sm text-zinc-400">Assigned</p>
-                <p className="text-2xl font-semibold text-white">
+                <p className="text-sm text-text-secondary">Assigned</p>
+                <p className="text-2xl font-semibold text-text-primary">
                   {availability.filter(k => k.status === 'assigned').length}
                 </p>
               </div>
             </div>
           </div>
-          <div className="bg-zinc-900 rounded-lg p-4 border border-zinc-800">
+          <div className="bg-surface rounded-lg p-4 border border-border">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-amber-500/10 rounded-lg">
-                <Truck className="h-5 w-5 text-amber-500" />
+              <div className="p-2 bg-warning/10 rounded-lg">
+                <Truck className="h-5 w-5 text-warning" />
               </div>
               <div>
-                <p className="text-sm text-zinc-400">In Transit</p>
-                <p className="text-2xl font-semibold text-white">
+                <p className="text-sm text-text-secondary">In Transit</p>
+                <p className="text-2xl font-semibold text-text-primary">
                   {availability.filter(k => k.status === 'in_transit').length}
                 </p>
               </div>
             </div>
           </div>
-          <div className="bg-zinc-900 rounded-lg p-4 border border-zinc-800">
+          <div className="bg-surface rounded-lg p-4 border border-border">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-500/10 rounded-lg">
-                <MapPin className="h-5 w-5 text-purple-500" />
+              <div className="p-2 bg-brand-purple/10 rounded-lg">
+                <MapPin className="h-5 w-5 text-brand-purple" />
               </div>
               <div>
-                <p className="text-sm text-zinc-400">At Shows</p>
-                <p className="text-2xl font-semibold text-white">
+                <p className="text-sm text-text-secondary">At Shows</p>
+                <p className="text-2xl font-semibold text-text-primary">
                   {availability.filter(k => k.status === 'at_show').length}
                 </p>
               </div>
@@ -226,9 +226,9 @@ export default function KitsView() {
 
         {/* Kits Grid */}
         {filteredKits.length === 0 ? (
-          <div className="text-center py-12 bg-zinc-900 rounded-lg border border-zinc-800">
-            <Package className="h-12 w-12 text-zinc-600 mx-auto mb-3" />
-            <p className="text-zinc-400 mb-2">No booth kits found</p>
+          <div className="text-center py-12 bg-surface rounded-lg border border-border">
+            <Package className="h-12 w-12 text-text-tertiary mx-auto mb-3" />
+            <p className="text-text-secondary mb-2">No booth kits found</p>
             {isEditor && (
               <Button variant="outline" onClick={() => setShowCreateModal(true)} className="mt-2">
                 <Plus className="h-4 w-4 mr-2" />
@@ -247,20 +247,20 @@ export default function KitsView() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   className={cn(
-                    "bg-zinc-900 rounded-lg border border-zinc-800 p-4 cursor-pointer hover:border-zinc-700 transition-colors",
-                    selectedKit?.id === kit.id && "border-blue-500 ring-1 ring-blue-500"
+                    "bg-surface rounded-lg border border-border p-4 cursor-pointer hover:border-brand-primary/50 transition-colors",
+                    selectedKit?.id === kit.id && "border-brand-primary ring-1 ring-brand-primary"
                   )}
                   onClick={() => setSelectedKit(kit)}
                 >
                   {/* Header */}
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-zinc-800 rounded-lg">
-                        <Box className="h-5 w-5 text-zinc-400" />
+                      <div className="p-2 bg-bg-tertiary rounded-lg">
+                        <Box className="h-5 w-5 text-text-secondary" />
                       </div>
                       <div>
-                        <h3 className="font-medium text-white">{kit.name}</h3>
-                        <p className="text-sm text-zinc-500">
+                        <h3 className="font-medium text-text-primary">{kit.name}</h3>
+                        <p className="text-sm text-text-tertiary">
                           {KIT_TYPE_LABELS[kit.kitType]}
                         </p>
                       </div>
@@ -277,30 +277,30 @@ export default function KitsView() {
                   </div>
 
                   {/* Location */}
-                  <div className="flex items-center gap-2 text-sm text-zinc-400 mb-3">
+                  <div className="flex items-center gap-2 text-sm text-text-secondary mb-3">
                     <MapPin className="h-3.5 w-3.5" />
                     <span>{kit.currentLocation || 'Unknown'}</span>
                   </div>
 
                   {/* Next Assignment */}
                   {kit.nextAssignmentShowName ? (
-                    <div className="bg-zinc-800/50 rounded-lg p-3">
-                      <p className="text-xs text-zinc-500 mb-1">Next Assignment</p>
-                      <p className="text-sm text-white font-medium truncate">
+                    <div className="bg-bg-tertiary rounded-lg p-3">
+                      <p className="text-xs text-text-tertiary mb-1">Next Assignment</p>
+                      <p className="text-sm text-text-primary font-medium truncate">
                         {kit.nextAssignmentShowName}
                       </p>
                       {kit.nextAssignmentDate && (
-                        <p className="text-xs text-zinc-400 mt-1">
+                        <p className="text-xs text-text-secondary mt-1">
                           {format(parseISO(kit.nextAssignmentDate), 'MMM d, yyyy')}
-                          <span className="text-zinc-600 ml-1">
+                          <span className="text-text-tertiary ml-1">
                             ({differenceInDays(parseISO(kit.nextAssignmentDate), new Date())} days)
                           </span>
                         </p>
                       )}
                     </div>
                   ) : (
-                    <div className="bg-zinc-800/50 rounded-lg p-3">
-                      <p className="text-sm text-zinc-500">No upcoming assignments</p>
+                    <div className="bg-bg-tertiary rounded-lg p-3">
+                      <p className="text-sm text-text-tertiary">No upcoming assignments</p>
                     </div>
                   )}
                 </motion.div>
@@ -317,7 +317,7 @@ export default function KitsView() {
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: 400, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
-            className="h-full bg-zinc-950 overflow-hidden flex flex-col"
+            className="h-full bg-background overflow-hidden flex flex-col border-l border-border"
           >
             <KitDetailPanel
               kit={selectedKit}
@@ -386,30 +386,30 @@ function KitDetailPanel({
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-zinc-800">
-        <h2 className="text-lg font-semibold text-white">{kit.name}</h2>
+      <div className="flex items-center justify-between p-4 border-b border-border">
+        <h2 className="text-lg font-semibold text-text-primary">{kit.name}</h2>
         <div className="flex items-center gap-2">
           {isEditor && (
             <>
               <button
                 onClick={() => onEdit(kit)}
-                className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+                className="p-2 hover:bg-bg-tertiary rounded-lg transition-colors"
               >
-                <Edit className="h-4 w-4 text-zinc-400" />
+                <Edit className="h-4 w-4 text-text-secondary" />
               </button>
               <button
                 onClick={onDelete}
-                className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+                className="p-2 hover:bg-bg-tertiary rounded-lg transition-colors"
               >
-                <Trash2 className="h-4 w-4 text-red-400" />
+                <Trash2 className="h-4 w-4 text-error" />
               </button>
             </>
           )}
           <button
             onClick={onClose}
-            className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+            className="p-2 hover:bg-bg-tertiary rounded-lg transition-colors"
           >
-            <X className="h-4 w-4 text-zinc-400" />
+            <X className="h-4 w-4 text-text-secondary" />
           </button>
         </div>
       </div>
@@ -432,24 +432,24 @@ function KitDetailPanel({
         {/* Info */}
         <div className="space-y-3">
           <div className="flex justify-between text-sm">
-            <span className="text-zinc-400">Type</span>
-            <span className="text-white">{KIT_TYPE_LABELS[kit.kitType]}</span>
+            <span className="text-text-secondary">Type</span>
+            <span className="text-text-primary">{KIT_TYPE_LABELS[kit.kitType]}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-zinc-400">Current Location</span>
-            <span className="text-white">{kit.currentLocation || 'Unknown'}</span>
+            <span className="text-text-secondary">Current Location</span>
+            <span className="text-text-primary">{kit.currentLocation || 'Unknown'}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-zinc-400">Ship Time</span>
-            <span className="text-white">{kit.defaultShipDays} days</span>
+            <span className="text-text-secondary">Ship Time</span>
+            <span className="text-text-primary">{kit.defaultShipDays} days</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-zinc-400">Return Time</span>
-            <span className="text-white">{kit.defaultReturnDays} days</span>
+            <span className="text-text-secondary">Return Time</span>
+            <span className="text-text-primary">{kit.defaultReturnDays} days</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-zinc-400">Available From</span>
-            <span className="text-white">
+            <span className="text-text-secondary">Available From</span>
+            <span className="text-text-primary">
               {format(parseISO(kit.availableFrom), 'MMM d, yyyy')}
             </span>
           </div>
@@ -458,20 +458,20 @@ function KitDetailPanel({
         {/* Description */}
         {fullKit?.description && (
           <div>
-            <h3 className="text-sm font-medium text-zinc-400 mb-2">Description</h3>
-            <p className="text-sm text-white">{fullKit.description}</p>
+            <h3 className="text-sm font-medium text-text-secondary mb-2">Description</h3>
+            <p className="text-sm text-text-primary">{fullKit.description}</p>
           </div>
         )}
 
         {/* Contents */}
         {fullKit?.contents && fullKit.contents.length > 0 && (
           <div>
-            <h3 className="text-sm font-medium text-zinc-400 mb-2">Contents</h3>
+            <h3 className="text-sm font-medium text-text-secondary mb-2">Contents</h3>
             <ul className="space-y-1">
               {fullKit.contents.map((item, idx) => (
                 <li key={idx} className="flex justify-between text-sm">
-                  <span className="text-white">{item.item}</span>
-                  <span className="text-zinc-400">×{item.qty}</span>
+                  <span className="text-text-primary">{item.item}</span>
+                  <span className="text-text-secondary">×{item.qty}</span>
                 </li>
               ))}
             </ul>
@@ -480,20 +480,20 @@ function KitDetailPanel({
 
         {/* Assignments */}
         <div>
-          <h3 className="text-sm font-medium text-zinc-400 mb-3">
+          <h3 className="text-sm font-medium text-text-secondary mb-3">
             Upcoming Assignments ({assignments.length})
           </h3>
           {assignments.length === 0 ? (
-            <p className="text-sm text-zinc-500">No upcoming assignments</p>
+            <p className="text-sm text-text-tertiary">No upcoming assignments</p>
           ) : (
             <div className="space-y-2">
               {assignments.map((assignment) => (
                 <div
                   key={assignment.id}
-                  className="bg-zinc-800/50 rounded-lg p-3"
+                  className="bg-bg-tertiary rounded-lg p-3"
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <p className="text-sm font-medium text-white truncate">
+                    <p className="text-sm font-medium text-text-primary truncate">
                       {assignment.tradeshow?.name || 'Unknown Show'}
                     </p>
                     <span
@@ -507,7 +507,7 @@ function KitDetailPanel({
                     </span>
                   </div>
                   {assignment.tradeshow?.startDate && (
-                    <p className="text-xs text-zinc-400">
+                    <p className="text-xs text-text-secondary">
                       {format(parseISO(assignment.tradeshow.startDate), 'MMM d')}
                       {assignment.tradeshow.endDate && (
                         <> – {format(parseISO(assignment.tradeshow.endDate), 'MMM d, yyyy')}</>
@@ -515,13 +515,13 @@ function KitDetailPanel({
                     </p>
                   )}
                   {assignment.tradeshow?.location && (
-                    <p className="text-xs text-zinc-500 mt-1 flex items-center gap-1">
+                    <p className="text-xs text-text-tertiary mt-1 flex items-center gap-1">
                       <MapPin className="h-3 w-3" />
                       {assignment.tradeshow.location}
                     </p>
                   )}
                   {assignment.aiRecommended && (
-                    <p className="text-xs text-purple-400 mt-1 flex items-center gap-1">
+                    <p className="text-xs text-brand-purple mt-1 flex items-center gap-1">
                       <Sparkles className="h-3 w-3" />
                       AI Assigned
                     </p>
@@ -535,8 +535,8 @@ function KitDetailPanel({
         {/* Notes */}
         {fullKit?.notes && (
           <div>
-            <h3 className="text-sm font-medium text-zinc-400 mb-2">Notes</h3>
-            <p className="text-sm text-zinc-300">{fullKit.notes}</p>
+            <h3 className="text-sm font-medium text-text-secondary mb-2">Notes</h3>
+            <p className="text-sm text-text-primary">{fullKit.notes}</p>
           </div>
         )}
       </div>

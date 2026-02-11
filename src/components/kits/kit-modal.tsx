@@ -95,23 +95,23 @@ export function KitModal({ kit, onClose, onSave }: KitModalProps) {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="relative bg-zinc-900 border border-zinc-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
+        className="relative bg-surface border border-border rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-zinc-800 rounded-lg">
-              <Package className="h-5 w-5 text-zinc-400" />
+            <div className="p-2 bg-bg-tertiary rounded-lg">
+              <Package className="h-5 w-5 text-text-secondary" />
             </div>
-            <h2 className="text-lg font-semibold text-white">
+            <h2 className="text-lg font-semibold text-text-primary">
               {isEditing ? 'Edit Kit' : 'Add Booth Kit'}
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+            className="p-2 hover:bg-bg-tertiary rounded-lg transition-colors"
           >
-            <X className="h-5 w-5 text-zinc-400" />
+            <X className="h-5 w-5 text-text-secondary" />
           </button>
         </div>
 
@@ -120,32 +120,30 @@ export function KitModal({ kit, onClose, onSave }: KitModalProps) {
           {/* Basic Info */}
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 sm:col-span-1">
-              <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">
                 Kit Name *
               </label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g., Kit A - Flagship"
-                className="bg-zinc-800 border-zinc-700"
               />
             </div>
             <div className="col-span-2 sm:col-span-1">
-              <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">
                 Code (optional)
               </label>
               <Input
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 placeholder="e.g., KIT-A"
-                className="bg-zinc-800 border-zinc-700"
               />
             </div>
           </div>
 
           {/* Kit Type */}
           <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-2">
+            <label className="block text-sm font-medium text-text-secondary mb-2">
               Kit Type
             </label>
             <div className="grid grid-cols-4 gap-2">
@@ -156,8 +154,8 @@ export function KitModal({ kit, onClose, onSave }: KitModalProps) {
                   className={cn(
                     "px-3 py-2 text-sm rounded-lg border transition-colors",
                     kitType === type
-                      ? "bg-blue-500/20 border-blue-500 text-blue-400"
-                      : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600"
+                      ? "bg-brand-primary/20 border-brand-primary text-brand-primary"
+                      : "bg-bg-tertiary border-border text-text-secondary hover:border-text-tertiary"
                   )}
                 >
                   {label.split(' ')[0]}
@@ -168,7 +166,7 @@ export function KitModal({ kit, onClose, onSave }: KitModalProps) {
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+            <label className="block text-sm font-medium text-text-secondary mb-1.5">
               Description
             </label>
             <textarea
@@ -176,14 +174,14 @@ export function KitModal({ kit, onClose, onSave }: KitModalProps) {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe the kit configuration..."
               rows={2}
-              className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder:text-zinc-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full px-3 py-2 bg-bg-tertiary border border-border rounded-lg text-text-primary placeholder:text-text-tertiary focus:ring-2 focus:ring-brand-primary focus:border-transparent resize-none"
             />
           </div>
 
           {/* Contents */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-zinc-400">
+              <label className="text-sm font-medium text-text-secondary">
                 Contents
               </label>
               <Button
@@ -197,7 +195,7 @@ export function KitModal({ kit, onClose, onSave }: KitModalProps) {
               </Button>
             </div>
             {contents.length === 0 ? (
-              <p className="text-sm text-zinc-500 text-center py-4 bg-zinc-800/50 rounded-lg">
+              <p className="text-sm text-text-tertiary text-center py-4 bg-bg-tertiary rounded-lg">
                 No items added yet
               </p>
             ) : (
@@ -208,20 +206,20 @@ export function KitModal({ kit, onClose, onSave }: KitModalProps) {
                       value={item.item}
                       onChange={(e) => handleUpdateContent(index, 'item', e.target.value)}
                       placeholder="Item name"
-                      className="flex-1 bg-zinc-800 border-zinc-700"
+                      className="flex-1"
                     />
                     <Input
                       type="number"
                       value={item.qty}
                       onChange={(e) => handleUpdateContent(index, 'qty', e.target.value)}
                       min={1}
-                      className="w-20 bg-zinc-800 border-zinc-700"
+                      className="w-20"
                     />
                     <button
                       onClick={() => handleRemoveContent(index)}
-                      className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+                      className="p-2 hover:bg-bg-tertiary rounded-lg transition-colors"
                     >
-                      <Trash2 className="h-4 w-4 text-red-400" />
+                      <Trash2 className="h-4 w-4 text-error" />
                     </button>
                   </div>
                 ))}
@@ -232,18 +230,17 @@ export function KitModal({ kit, onClose, onSave }: KitModalProps) {
           {/* Physical Details */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">
                 Dimensions
               </label>
               <Input
                 value={dimensions}
                 onChange={(e) => setDimensions(e.target.value)}
                 placeholder="e.g., 10ft x 10ft"
-                className="bg-zinc-800 border-zinc-700"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">
                 Weight (lbs)
               </label>
               <Input
@@ -251,7 +248,6 @@ export function KitModal({ kit, onClose, onSave }: KitModalProps) {
                 value={weightLbs}
                 onChange={(e) => setWeightLbs(e.target.value)}
                 placeholder="Total packed weight"
-                className="bg-zinc-800 border-zinc-700"
               />
             </div>
           </div>
@@ -259,18 +255,17 @@ export function KitModal({ kit, onClose, onSave }: KitModalProps) {
           {/* Shipping Defaults */}
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">
                 Home Location
               </label>
               <Input
                 value={homeLocation}
                 onChange={(e) => setHomeLocation(e.target.value)}
                 placeholder="Warehouse"
-                className="bg-zinc-800 border-zinc-700"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">
                 Ship Days
               </label>
               <Input
@@ -278,11 +273,10 @@ export function KitModal({ kit, onClose, onSave }: KitModalProps) {
                 value={defaultShipDays}
                 onChange={(e) => setDefaultShipDays(e.target.value)}
                 min={1}
-                className="bg-zinc-800 border-zinc-700"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">
                 Return Days
               </label>
               <Input
@@ -290,7 +284,6 @@ export function KitModal({ kit, onClose, onSave }: KitModalProps) {
                 value={defaultReturnDays}
                 onChange={(e) => setDefaultReturnDays(e.target.value)}
                 min={1}
-                className="bg-zinc-800 border-zinc-700"
               />
             </div>
           </div>
@@ -298,7 +291,7 @@ export function KitModal({ kit, onClose, onSave }: KitModalProps) {
           {/* Value & Notes */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">
                 Replacement Value ($)
               </label>
               <Input
@@ -306,25 +299,23 @@ export function KitModal({ kit, onClose, onSave }: KitModalProps) {
                 value={replacementValue}
                 onChange={(e) => setReplacementValue(e.target.value)}
                 placeholder="Insurance value"
-                className="bg-zinc-800 border-zinc-700"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">
                 Notes
               </label>
               <Input
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Additional notes"
-                className="bg-zinc-800 border-zinc-700"
               />
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-zinc-800">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
