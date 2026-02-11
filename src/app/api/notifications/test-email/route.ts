@@ -30,13 +30,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
     }
 
-    // Get user's email from profile
+    // Get user's email from decrypted view (PII is encrypted)
     const { data: profile } = await supabase
-      .from('user_profiles')
+      .from('v_user_profiles')
       .select('email, full_name')
       .eq('id', user.id)
       .single();
 
+    // Fallback to auth user email if profile email not found
     const email = profile?.email || user.email;
     if (!email) {
       return NextResponse.json({ error: 'No email found for user' }, { status: 400 });

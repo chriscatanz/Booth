@@ -107,9 +107,9 @@ export async function POST(request: NextRequest) {
           continue;
         }
 
-        // Get user's email
+        // Get user's email from decrypted view (PII is encrypted)
         const { data: user } = await supabase
-          .from('user_profiles')
+          .from('v_user_profiles')
           .select('email')
           .eq('id', notification.user_id)
           .single();
