@@ -32,15 +32,22 @@ export function OrganizationSetup() {
       
       setLoadingInvites(true);
       try {
-        // This would need a special endpoint to fetch invites by email
-        // For now, we'll check URL params for invite token
+        // Check URL params first
         const params = new URLSearchParams(window.location.search);
-        const token = params.get('invite');
+        let token = params.get('invite');
+        
+        // Also check localStorage (set by invite page before auth redirect)
+        if (!token) {
+          token = localStorage.getItem('pending_invite_token');
+        }
+        
         if (token) {
           const invite = await authService.fetchInvitationByToken(token);
           if (invite) {
             setPendingInvites([invite]);
           }
+          // Clean up localStorage after reading
+          localStorage.removeItem('pending_invite_token');
         }
       } catch (err) {
         console.error('Failed to check invites:', err);
