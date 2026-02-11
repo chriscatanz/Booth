@@ -134,21 +134,22 @@ export async function fetchAuditLog(
     return { entries: [], total: 0 };
   }
 
-  const entries: AuditEntry[] = (data || []).map((row: Record<string, unknown>) => ({
-    id: row.id,
-    organizationId: row.organization_id,
-    userId: row.user_id,
-    action: row.action,
-    resourceType: row.resource_type,
-    resourceId: row.resource_id,
-    resourceName: row.resource_name,
-    metadata: row.metadata ? JSON.parse(row.metadata) : null,
-    ipAddress: row.ip_address,
-    userAgent: row.user_agent,
-    createdAt: row.created_at,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const entries: AuditEntry[] = (data || []).map((row: any) => ({
+    id: row.id as string,
+    organizationId: row.organization_id as string,
+    userId: row.user_id as string,
+    action: row.action as AuditAction,
+    resourceType: row.resource_type as string,
+    resourceId: row.resource_id as string | null,
+    resourceName: row.resource_name as string | null,
+    metadata: row.metadata ? JSON.parse(row.metadata as string) : null,
+    ipAddress: row.ip_address as string | null,
+    userAgent: row.user_agent as string | null,
+    createdAt: row.created_at as string,
     user: row.user_profiles ? {
-      email: row.user_profiles.email,
-      fullName: row.user_profiles.full_name,
+      email: row.user_profiles.email as string,
+      fullName: row.user_profiles.full_name as string | null,
     } : undefined,
   }));
 
