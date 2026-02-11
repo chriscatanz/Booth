@@ -295,14 +295,35 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
+            {/* AI Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-cyan-500/10 border border-purple-500/20 mb-6">
+              <Sparkles size={16} className="text-brand-purple" />
+              <span className="text-sm font-medium text-text-primary">Now with AI-powered content generation</span>
+            </div>
+
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-text-primary leading-tight">
               Your trade show program,
               <span className="bg-gradient-to-r from-brand-purple to-brand-cyan bg-clip-text text-transparent"> finally organized</span>
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-text-secondary max-w-2xl mx-auto">
-              Booth is the command center for your entire trade show calendar. 
-              Track every show, manage budgets, and measure what actually works.
+              The AI-powered command center for your entire trade show calendar. 
+              Track shows, manage budgets, generate content, and measure ROI — all in one place.
             </p>
+
+            {/* AI Feature Pills */}
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+              {[
+                { icon: Sparkles, label: 'AI Talking Points' },
+                { icon: FileText, label: 'Auto Follow-ups' },
+                { icon: Zap, label: 'Smart Reports' },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-bg-tertiary border border-border text-sm text-text-secondary">
+                  <item.icon size={14} className="text-brand-purple" />
+                  {item.label}
+                </div>
+              ))}
+            </div>
+
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button variant="primary" size="lg" onClick={onGetStarted}>
                 Start 7-Day Free Trial <ArrowRight size={16} className="ml-1" />
@@ -369,8 +390,120 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
         </div>
       </section>
 
-      {/* Benefits */}
+      {/* AI Section */}
       <section className="py-16 sm:py-24 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left - Content */}
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-purple/10 border border-brand-purple/20 mb-4">
+                <Sparkles size={14} className="text-brand-purple" />
+                <span className="text-sm font-medium text-brand-purple">AI-Powered</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-text-primary mb-4">
+                Let AI handle the busywork
+              </h2>
+              <p className="text-lg text-text-secondary mb-8">
+                Booth's AI assistant understands trade shows. Generate content in seconds that would take hours to write manually.
+              </p>
+              
+              <div className="space-y-4">
+                {[
+                  {
+                    title: 'Talking Points & Social Posts',
+                    description: 'Generate booth conversation starters and LinkedIn announcements tailored to each show.',
+                  },
+                  {
+                    title: 'Follow-up Email Sequences',
+                    description: 'Create personalized 3-email nurture campaigns for every lead, automatically.',
+                  },
+                  {
+                    title: 'Post-Show Reports',
+                    description: 'Summarize your show performance with AI-generated insights and recommendations.',
+                  },
+                  {
+                    title: 'Document Extraction',
+                    description: 'Upload vendor packets and let AI extract dates, deadlines, and booth details.',
+                  },
+                ].map((item, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    viewport={{ once: true }}
+                    className="flex items-start gap-3"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-brand-purple/20 flex items-center justify-center shrink-0 mt-0.5">
+                      <CheckCircle size={14} className="text-brand-purple" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-text-primary">{item.title}</h3>
+                      <p className="text-sm text-text-secondary">{item.description}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              <div className="mt-8">
+                <Link 
+                  href="/features/ai"
+                  className="inline-flex items-center gap-2 text-brand-purple hover:text-brand-purple-dark font-semibold transition-colors"
+                >
+                  Learn more about AI features <ArrowRight size={16} />
+                </Link>
+              </div>
+            </div>
+
+            {/* Right - Visual */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="bg-gradient-to-br from-purple-500/20 to-cyan-500/20 rounded-2xl p-8 border border-purple-500/20">
+                {/* Mock AI Chat Interface */}
+                <div className="bg-surface rounded-xl border border-border overflow-hidden shadow-xl">
+                  <div className="px-4 py-3 border-b border-border flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-purple to-brand-purple-dark flex items-center justify-center">
+                      <Sparkles size={16} className="text-white" />
+                    </div>
+                    <span className="font-medium text-text-primary">AI Assistant</span>
+                  </div>
+                  <div className="p-4 space-y-4">
+                    {/* User message */}
+                    <div className="flex justify-end">
+                      <div className="bg-brand-purple text-white px-4 py-2 rounded-2xl rounded-br-md max-w-[80%]">
+                        <p className="text-sm">Generate talking points for our booth at NRF 2026</p>
+                      </div>
+                    </div>
+                    {/* AI response */}
+                    <div className="flex justify-start">
+                      <div className="bg-bg-tertiary px-4 py-3 rounded-2xl rounded-bl-md max-w-[90%]">
+                        <p className="text-sm text-text-primary font-medium mb-2">Here are 5 conversation starters for NRF 2026:</p>
+                        <ul className="text-sm text-text-secondary space-y-1">
+                          <li>• "How are you handling the shift to unified commerce?"</li>
+                          <li>• "What's your biggest challenge with inventory visibility?"</li>
+                          <li>• "Have you explored AI for customer personalization?"</li>
+                        </ul>
+                        <p className="text-xs text-text-tertiary mt-2">+ 2 more...</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Decorative elements */}
+                <div className="absolute -top-4 -right-4 w-24 h-24 bg-brand-purple/20 rounded-full blur-2xl" />
+                <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-brand-cyan/20 rounded-full blur-2xl" />
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-bg-secondary">
         <div className="max-w-4xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>

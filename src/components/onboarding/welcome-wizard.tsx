@@ -7,7 +7,8 @@ import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
 import { 
   Sparkles, Calendar, Users, BarChart3, 
-  ArrowRight, Check, Rocket
+  ArrowRight, Check, Rocket, Wand2, Upload,
+  FileStack, ListTodo, Image
 } from 'lucide-react';
 
 interface WelcomeWizardProps {
@@ -83,6 +84,83 @@ export function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
             'Invite team members to view or edit',
             'Track attendees and travel details',
             'Keep notes and documents in one place',
+          ].map((item, i) => (
+            <li key={i} className="flex items-start gap-3">
+              <Check size={16} className="text-success mt-0.5 shrink-0" />
+              <span className="text-text-secondary">{item}</span>
+            </li>
+          ))}
+        </ul>
+      ),
+    },
+    {
+      icon: Wand2,
+      title: 'AI-Powered Content',
+      subtitle: 'Let AI do the heavy lifting',
+      content: (
+        <ul className="space-y-3">
+          {[
+            'Generate talking points and social posts',
+            'Create follow-up email sequences',
+            'Extract show details from vendor packets',
+            'Chat with an AI assistant about your shows',
+          ].map((item, i) => (
+            <li key={i} className="flex items-start gap-3">
+              <Check size={16} className="text-success mt-0.5 shrink-0" />
+              <span className="text-text-secondary">{item}</span>
+            </li>
+          ))}
+        </ul>
+      ),
+    },
+    {
+      icon: ListTodo,
+      title: 'Tasks & Deadlines',
+      subtitle: 'Never miss a deadline',
+      content: (
+        <ul className="space-y-3">
+          {[
+            'Create tasks with due dates and assignees',
+            'Get notified before shipping deadlines',
+            'Track progress across all shows',
+          ].map((item, i) => (
+            <li key={i} className="flex items-start gap-3">
+              <Check size={16} className="text-success mt-0.5 shrink-0" />
+              <span className="text-text-secondary">{item}</span>
+            </li>
+          ))}
+        </ul>
+      ),
+    },
+    {
+      icon: Upload,
+      title: 'Import & Export',
+      subtitle: 'Your data, your way',
+      content: (
+        <ul className="space-y-3">
+          {[
+            'Import shows from CSV or spreadsheets',
+            'Export data for reports and analysis',
+            'Bulk import attendees and contacts',
+          ].map((item, i) => (
+            <li key={i} className="flex items-start gap-3">
+              <Check size={16} className="text-success mt-0.5 shrink-0" />
+              <span className="text-text-secondary">{item}</span>
+            </li>
+          ))}
+        </ul>
+      ),
+    },
+    {
+      icon: FileStack,
+      title: 'Templates & Assets',
+      subtitle: 'Work smarter, not harder',
+      content: (
+        <ul className="space-y-3">
+          {[
+            'Save shows as templates for next year',
+            'Store booth photos and marketing assets',
+            'Quickly create shows from templates',
           ].map((item, i) => (
             <li key={i} className="flex items-start gap-3">
               <Check size={16} className="text-success mt-0.5 shrink-0" />
