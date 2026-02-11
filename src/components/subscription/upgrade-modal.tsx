@@ -61,10 +61,10 @@ export function UpgradeModal({ isOpen, onClose, orgId, currentTier }: UpgradeMod
       `${window.location.origin}/?subscription=cancelled`
     );
 
-    if ('url' in result && result.url) {
+    if ('url' in result) {
       window.location.href = result.url;
     } else {
-      console.error('Failed to create checkout:', result.error);
+      console.error('Failed to create checkout:', 'error' in result ? result.error : 'Unknown error');
       setIsLoading(null);
     }
   };
