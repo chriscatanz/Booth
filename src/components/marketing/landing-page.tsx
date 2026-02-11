@@ -577,6 +577,8 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
             <a href="#pricing" className="hover:text-text-secondary transition-colors">Pricing</a>
             <Link href="/terms" className="hover:text-text-secondary transition-colors">Terms</Link>
             <Link href="/privacy" className="hover:text-text-secondary transition-colors">Privacy</Link>
+            <Link href="/security" className="hover:text-text-secondary transition-colors">Security</Link>
+            <Link href="/ccpa" className="hover:text-text-secondary transition-colors">Do Not Sell My Info</Link>
           </div>
           <p className="text-sm text-text-tertiary">
             © {new Date().getFullYear()} Booth
