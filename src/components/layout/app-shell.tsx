@@ -30,6 +30,8 @@ import CSVImportModal from '@/components/import/csv-import-modal';
 import { OrgSettingsModal } from '@/components/settings';
 import { WelcomeWizard } from '@/components/onboarding';
 import { useAuthStore } from '@/store/auth-store';
+import { useSubscriptionStore } from '@/store/subscription-store';
+import { SubscriptionBanner } from '@/components/subscription/subscription-banner';
 // AI modal/bubble disabled - using full AIView now
 // import { AIAssistantPanel } from '@/components/ai/ai-assistant-panel';
 // import { AIChatBubble } from '@/components/ai/ai-chat-bubble';
@@ -62,6 +64,10 @@ export function AppShell() {
   
   // Onboarding wizard
   const { user, organization } = useAuthStore();
+  
+  // Subscription status
+  const { status: subscriptionStatus, loadSubscription } = useSubscriptionStore();
+  const [bannerDismissed, setBannerDismissed] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   
   // Apply brand color as CSS variable
@@ -86,6 +92,13 @@ export function AppShell() {
       }
     }
   }, [user, organization]);
+  
+  // Load subscription status
+  useEffect(() => {
+    if (organization?.id) {
+      loadSubscription(organization.id);
+    }
+  }, [organization?.id, loadSubscription]);
 
   const handleOnboardingComplete = () => {
     if (user) {
@@ -199,6 +212,15 @@ export function AppShell() {
         onOpenSettings={() => setShowOrgSettings(true)}
         onOpenCommandPalette={() => setShowCommandPalette(true)}
       />
+      
+      {/* Subscription Banner */}
+      {subscriptionStatus && organization && !bannerDismissed && (
+        <SubscriptionBanner 
+          status={subscriptionStatus} 
+          orgId={organization.id}
+          onDismiss={() => setBannerDismissed(true)}
+        />
+      )}
 
       <div className="flex flex-1 overflow-hidden">
         {/* Mobile sidebar overlay */}
