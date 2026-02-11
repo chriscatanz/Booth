@@ -16,7 +16,8 @@ interface CalendarSettings {
 }
 
 export function CalendarIntegration() {
-  const { organization, isAdmin, refreshOrganizations } = useAuthStore();
+  const { organization, isAdmin, isOwner, refreshOrganizations } = useAuthStore();
+  const canManage = isAdmin || isOwner;
   const [calendarUrl, setCalendarUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
@@ -153,7 +154,7 @@ export function CalendarIntegration() {
           <p className="text-xs text-text-secondary mb-4">
             Enable calendar sync to get a URL you can subscribe to in your favorite calendar app.
           </p>
-          {isAdmin ? (
+          {canManage ? (
             <Button variant="primary" onClick={handleEnable} loading={isLoading}>
               <Calendar size={14} /> Enable Calendar Sync
             </Button>
@@ -259,7 +260,7 @@ export function CalendarIntegration() {
           </div>
 
           {/* Admin actions */}
-          {isAdmin && (
+          {canManage && (
             <div className="pt-4 border-t border-border flex gap-3">
               <Button
                 variant="outline"
@@ -279,7 +280,7 @@ export function CalendarIntegration() {
             </div>
           )}
 
-          {isAdmin && (
+          {canManage && (
             <p className="text-xs text-text-tertiary">
               ⚠️ Regenerating the URL will break existing subscriptions. Share the new URL with your team.
             </p>
