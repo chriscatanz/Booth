@@ -190,6 +190,13 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
               >
                 Pricing
               </a>
+
+              <Link 
+                href="/about"
+                className="text-base font-semibold text-text-secondary hover:text-text-primary transition-colors"
+              >
+                About
+              </Link>
             </nav>
 
             {/* Right side - Desktop */}
@@ -257,6 +264,14 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
                   >
                     Pricing
                   </a>
+
+                  <Link 
+                    href="/about"
+                    className="block px-2 py-2 text-base font-semibold text-text-secondary hover:text-text-primary transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    About
+                  </Link>
 
                   <div className="mt-4 pt-4 border-t border-border flex flex-col gap-3">
                     <button 
