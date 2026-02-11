@@ -427,7 +427,6 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
                         variant="destructive"
                         onClick={handleDeleteOrg}
                         disabled={deleteConfirmName !== organization?.name}
-                        loading={isDeleting}
                       >
                         <Trash2 size={14} /> Delete Organization
                       </Button>
