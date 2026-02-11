@@ -195,6 +195,7 @@ export function FeaturePageLayout({
             <Link href="/#pricing" className="hover:text-text-secondary transition-colors">Pricing</Link>
             <Link href="/terms" className="hover:text-text-secondary transition-colors">Terms</Link>
             <Link href="/privacy" className="hover:text-text-secondary transition-colors">Privacy</Link>
+            <Link href="/ccpa" className="hover:text-text-secondary transition-colors">Do Not Sell My Info</Link>
           </div>
           <p className="text-sm text-text-tertiary">
             © {new Date().getFullYear()} Booth

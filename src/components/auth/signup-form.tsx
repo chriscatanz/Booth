@@ -19,6 +19,7 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }: SignUpFormProps) {
   const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,12 +142,33 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }: SignUpFormProps) {
           <PasswordStrength password={password} />
         </div>
 
+        {/* Terms & Privacy Consent */}
+        <label className="flex items-start gap-3 cursor-pointer group">
+          <input
+            type="checkbox"
+            checked={agreedToTerms}
+            onChange={(e) => setAgreedToTerms(e.target.checked)}
+            className="mt-1 w-4 h-4 rounded border-border bg-bg-tertiary accent-brand-purple"
+          />
+          <span className="text-sm text-text-secondary group-hover:text-text-primary transition-colors">
+            I agree to the{' '}
+            <a href="/terms" target="_blank" className="text-brand-purple hover:underline">
+              Terms of Service
+            </a>{' '}
+            and{' '}
+            <a href="/privacy" target="_blank" className="text-brand-purple hover:underline">
+              Privacy Policy
+            </a>
+          </span>
+        </label>
+
         <Button
           type="submit"
           variant="primary"
           size="lg"
           className="w-full"
           loading={isLoading}
+          disabled={!agreedToTerms}
         >
           Create Account
         </Button>

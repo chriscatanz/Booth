@@ -77,10 +77,30 @@ export default function PrivacyPage() {
             <h2 className="text-xl font-semibold text-text-primary">4. Data Sharing</h2>
             <p>We do not sell your personal data. We may share your information with:</p>
             <ul className="list-disc list-inside space-y-1 ml-4">
-              <li><strong>Service providers:</strong> Third parties that help us operate the Service (hosting, email, analytics)</li>
+              <li><strong>Infrastructure providers:</strong> Supabase (database hosting), Vercel (application hosting)</li>
+              <li><strong>Email services:</strong> Resend or SendGrid (transactional emails)</li>
+              <li><strong>Payment processors:</strong> Stripe (subscription billing) - only if you subscribe</li>
+              <li><strong>AI providers:</strong> Anthropic (Claude AI) - only when you use AI features, and only the data you choose to include in prompts</li>
               <li><strong>Team members:</strong> Other users in your organization, as permitted by your role</li>
               <li><strong>Legal requirements:</strong> When required by law or to protect our rights</li>
               <li><strong>Business transfers:</strong> In connection with a merger, acquisition, or sale of assets</li>
+            </ul>
+            <p className="mt-2 text-sm text-text-tertiary">
+              Note: We do not use third-party analytics or advertising trackers.
+            </p>
+          </section>
+          
+          <section>
+            <h2 className="text-xl font-semibold text-text-primary">4a. AI Features</h2>
+            <p>
+              Booth offers optional AI-powered features (content generation, document analysis) using 
+              Anthropic's Claude AI. When you use these features:
+            </p>
+            <ul className="list-disc list-inside space-y-1 ml-4 mt-2">
+              <li>Only the specific data you include in your request is sent to Anthropic</li>
+              <li>Your data is processed according to <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-purple hover:underline">Anthropic's Privacy Policy</a></li>
+              <li>You control whether to use AI features - they are not required</li>
+              <li>AI features require you to provide your own API key (BYOK model)</li>
             </ul>
           </section>
 
@@ -160,8 +180,8 @@ export default function PrivacyPage() {
             <p>
               If you have questions about this Privacy Policy or our data practices, please 
               contact us at{' '}
-              <a href="mailto:privacy@example.com" className="text-brand-purple hover:underline">
-                privacy@example.com
+              <a href="mailto:privacy@getbooth.io" className="text-brand-purple hover:underline">
+                privacy@getbooth.io
               </a>.
             </p>
           </section>

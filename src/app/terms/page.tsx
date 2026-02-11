@@ -115,8 +115,8 @@ export default function TermsPage() {
             <h2 className="text-xl font-semibold text-text-primary">11. Contact</h2>
             <p>
               If you have any questions about these Terms, please contact us at{' '}
-              <a href="mailto:legal@example.com" className="text-brand-purple hover:underline">
-                legal@example.com
+              <a href="mailto:legal@getbooth.io" className="text-brand-purple hover:underline">
+                legal@getbooth.io
               </a>.
             </p>
           </section>
