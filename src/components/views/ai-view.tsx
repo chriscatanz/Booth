@@ -554,7 +554,12 @@ function DocumentsTab() {
         }
 
         const data = await response.json();
-        setDocumentText(data.text || '');
+        // API returns { documents: [{ filename, text }] }
+        const extractedText = data.documents?.[0]?.text || data.text || '';
+        if (!extractedText) {
+          throw new Error('Could not extract text from document');
+        }
+        setDocumentText(extractedText);
       } catch (err) {
         setError('Failed to parse document. Try a different file format.');
         setFileName(null);
