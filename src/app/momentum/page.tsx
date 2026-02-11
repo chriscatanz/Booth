@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, Sparkles, GripVertical,
   Lightbulb, Target, Clock, CheckCircle, PartyPopper,
-  X, ChevronRight, Calendar, Flame, Star
+  X, Flame
 } from 'lucide-react';
 
 // Types
@@ -228,6 +228,7 @@ export default function MomentumPage() {
   };
 
   const totalDone = columns.done.tasks.length;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const totalActive = Object.values(columns)
     .filter(c => c.id !== 'done')
     .reduce((sum, c) => sum + c.tasks.length, 0);

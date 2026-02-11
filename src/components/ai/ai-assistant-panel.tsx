@@ -33,6 +33,7 @@ type Tab = 'content' | 'document' | 'chat';
 export function AIAssistantPanel({ isOpen, onClose, onOpenSettings, initialTab = 'content', context }: AIAssistantPanelProps) {
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [hasApiKey, setHasApiKey] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoadingKey, setIsLoadingKey] = useState(false);
   const [sharedDocuments, setSharedDocuments] = useState<string>('');
   const organization = useAuthStore((s) => s.organization);
@@ -66,6 +67,7 @@ export function AIAssistantPanel({ isOpen, onClose, onOpenSettings, initialTab =
     }
     
     loadKeyStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, organization?.id]);
 
   useEffect(() => {

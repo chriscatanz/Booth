@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { 
   ArrowLeft, Shield, Lock, Eye, Server, 
-  FileCheck, Users, Database, RefreshCw,
+  Users, Database, RefreshCw,
   CheckCircle2, ExternalLink
 } from 'lucide-react';
 
@@ -18,7 +18,7 @@ const securityFeatures = [
   {
     icon: Shield,
     title: 'Row-Level Security',
-    description: 'Database-enforced access controls ensure users only see data they\'re authorized to access. Your data is isolated from other organizations at the database level.',
+    description: "Database-enforced access controls ensure users only see data they're authorized to access. Your data is isolated from other organizations at the database level.",
   },
   {
     icon: Eye,
@@ -70,7 +70,7 @@ const complianceItems = [
   },
   {
     title: 'CCPA Compliant',
-    description: 'California residents can exercise their privacy rights. We don\'t sell your data.',
+    description: "California residents can exercise their privacy rights. We don't sell your data.",
   },
   {
     title: 'Data Portability',
@@ -305,7 +305,7 @@ export default function SecurityPage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="shrink-0 text-success mt-0.5" size={16} />
-                  <span>We use Anthropic's Claude, which doesn't train on API inputs</span>
+                  <span>We use Anthropic&apos;s Claude, which doesn&apos;t train on API inputs</span>
                 </li>
               </ul>
             </div>
@@ -326,7 +326,7 @@ export default function SecurityPage() {
           </h2>
           <p className="text-text-secondary mb-6">
             We take security seriously. If you have questions, concerns, or need to report a vulnerability, 
-            we're here to help.
+            we&apos;re here to help.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a 

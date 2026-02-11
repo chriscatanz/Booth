@@ -55,6 +55,7 @@ export function OneClickShow({ isOpen, onClose, onShowCreated }: OneClickShowPro
   const [fileName, setFileName] = useState<string | null>(null);
   const [extractedData, setExtractedData] = useState<ExtractedShowData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [createdShowId, setCreatedShowId] = useState<number | null>(null);
 
   const organization = useAuthStore((s) => s.organization);

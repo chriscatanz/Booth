@@ -94,11 +94,11 @@ export default function PrivacyPage() {
             <h2 className="text-xl font-semibold text-text-primary">4a. AI Features</h2>
             <p>
               Booth offers optional AI-powered features (content generation, document analysis) using 
-              Anthropic's Claude AI. When you use these features:
+              Anthropic&apos;s Claude AI. When you use these features:
             </p>
             <ul className="list-disc list-inside space-y-1 ml-4 mt-2">
               <li>Only the specific data you include in your request is sent to Anthropic</li>
-              <li>Your data is processed according to <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-purple hover:underline">Anthropic's Privacy Policy</a></li>
+              <li>Your data is processed according to <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-purple hover:underline">Anthropic&apos;s Privacy Policy</a></li>
               <li>You control whether to use AI features - they are not required</li>
               <li>AI features require you to provide your own API key (BYOK model)</li>
             </ul>
@@ -149,7 +149,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-text-primary">9. Children's Privacy</h2>
+            <h2 className="text-xl font-semibold text-text-primary">9. Children&apos;s Privacy</h2>
             <p>
               The Service is not intended for children under 16. We do not knowingly collect 
               personal data from children under 16. If you believe we have collected such data, 
