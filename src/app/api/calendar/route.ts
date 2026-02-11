@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
 
     // Check user is admin of this org
     const { data: membership, error: membershipError } = await getSupabase()
-      .from('user_organizations')
+      .from('organization_members')
       .select('role')
       .eq('user_id', user.id)
       .eq('organization_id', organizationId)
@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
 
     // Also fetch all memberships for this user to debug
     const { data: allMemberships } = await getSupabase()
-      .from('user_organizations')
+      .from('organization_members')
       .select('organization_id, role')
       .eq('user_id', user.id);
 
@@ -288,7 +288,7 @@ export async function DELETE(request: NextRequest) {
 
     // Check user is admin
     const { data: membership } = await getSupabase()
-      .from('user_organizations')
+      .from('organization_members')
       .select('role')
       .eq('user_id', user.id)
       .eq('organization_id', organizationId)
