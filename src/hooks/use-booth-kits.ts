@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/components/auth/auth-provider';
+import { useAuthStore } from '@/store/auth-store';
 import {
   BoothKit,
   KitAssignment,
@@ -19,7 +19,7 @@ import * as boothKitService from '@/services/booth-kit-service';
 // ─── Booth Kits Hook ─────────────────────────────────────────────────────────
 
 export function useBoothKits() {
-  const { user, organization } = useAuth();
+  const { user, organization } = useAuthStore();
   const [kits, setKits] = useState<BoothKit[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -76,7 +76,7 @@ export function useBoothKits() {
 // ─── Kit Availability Hook ───────────────────────────────────────────────────
 
 export function useKitAvailability() {
-  const { organization } = useAuth();
+  const { organization } = useAuthStore();
   const [availability, setAvailability] = useState<KitAvailability[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -115,7 +115,7 @@ export function useKitAssignments(filters?: {
   kitId?: string;
   tradeshowId?: number;
 }) {
-  const { user, organization } = useAuth();
+  const { user, organization } = useAuthStore();
   const [assignments, setAssignments] = useState<KitAssignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -177,7 +177,7 @@ export function useKitAssignments(filters?: {
 // ─── Show-Specific Assignments Hook ──────────────────────────────────────────
 
 export function useShowKitAssignments(tradeshowId: number | null) {
-  const { user, organization } = useAuth();
+  const { user, organization } = useAuthStore();
   const [assignments, setAssignments] = useState<KitAssignment[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -246,7 +246,7 @@ export function useShowKitAssignments(tradeshowId: number | null) {
 // ─── Auto-Assignment Hook ────────────────────────────────────────────────────
 
 export function useAutoAssign() {
-  const { user, organization } = useAuth();
+  const { user, organization } = useAuthStore();
   const [suggestions, setSuggestions] = useState<AutoAssignResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [applying, setApplying] = useState(false);
