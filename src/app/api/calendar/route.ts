@@ -281,7 +281,8 @@ export async function DELETE(request: NextRequest) {
       .eq('id', organizationId)
       .single();
 
-    const { calendarToken, calendarEnabled, ...restSettings } = (org?.settings || {}) as Record<string, unknown>;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { calendarToken: _token, calendarEnabled: _enabled, ...restSettings } = (org?.settings || {}) as Record<string, unknown>;
 
     await getSupabase()
       .from('organizations')

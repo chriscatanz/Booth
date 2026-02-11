@@ -51,25 +51,25 @@ export default function AboutPage() {
             </h2>
             <div className="space-y-4 text-text-secondary">
               <p>
-                Booth wasn't born in a startup incubator. It was born in the chaos of managing 
+                Booth wasn&apos;t born in a startup incubator. It was born in the chaos of managing 
                 20+ trade shows a year — spreadsheets everywhere, details falling through cracks, 
                 and the constant feeling that there had to be a better way.
               </p>
               <p>
-                As a Sr. Marketing Manager responsible for our company's entire trade show program, 
+                As a Sr. Marketing Manager responsible for our company&apos;s entire trade show program, 
                 I lived in a world of shipping deadlines, booth logistics, budget tracking, and 
                 team coordination. I tried every tool out there — project management apps, 
                 spreadsheets, even custom databases. Nothing quite fit.
               </p>
               <p>
-                So I started building. What began as a simple personal tracker evolved over 
+                So I started building. What began as a simple personal tracker evolved over
                 <strong> two years</strong> of real-world use, refined show after show, until it 
                 became something I realized other trade show managers desperately needed too.
               </p>
               <p>
-                That's Booth — a tool shaped by hundreds of actual shows, built to solve the 
+                That&apos;s Booth — a tool shaped by hundreds of actual shows, built to solve the 
                 problems I faced every day. No theoretical features, no bloat. Just the stuff 
-                that actually matters when you're running a trade show program.
+                that actually matters when you&apos;re running a trade show program.
               </p>
             </div>
           </div>
@@ -113,14 +113,14 @@ export default function AboutPage() {
             <div>
               <h3 className="font-semibold text-text-primary mb-2">The Spreadsheet Problem</h3>
               <p className="text-sm">
-                Every trade show manager has "the spreadsheet" — a monster file tracking everything 
-                from booth numbers to hotel confirmations. It works until it doesn't.
+                Every trade show manager has &quot;the spreadsheet&quot; — a monster file tracking everything 
+                from booth numbers to hotel confirmations. It works until it doesn&apos;t.
               </p>
             </div>
             <div>
               <h3 className="font-semibold text-text-primary mb-2">The Tool Gap</h3>
               <p className="text-sm">
-                Generic project management tools don't understand trade shows. CRM systems don't 
+                Generic project management tools don&apos;t understand trade shows. CRM systems don&apos;t 
                 track shipping. Event platforms focus on attendees, not exhibitors.
               </p>
             </div>
@@ -163,13 +163,13 @@ export default function AboutPage() {
               <div className="space-y-4 text-text-secondary">
                 <p>
                   Chris is a Sr. Manager of Growth and Client Success with over a decade of experience 
-                  in B2B marketing, specializing in trade show strategy and execution. He's personally 
+                  in B2B marketing, specializing in trade show strategy and execution. He&apos;s personally 
                   managed hundreds of trade shows across his career — from 10x10 inline booths to 
                   large island exhibits.
                 </p>
                 <p>
                   Beyond trade shows, Chris brings expertise in conversational AI, marketing automation, 
-                  and customer success. He's passionate about helping marketing teams work smarter, 
+                  and customer success. He&apos;s passionate about helping marketing teams work smarter, 
                   not harder — which is exactly why he built Booth.
                 </p>
               </div>

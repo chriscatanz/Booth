@@ -4,7 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { FeaturePageLayout } from '@/components/marketing/feature-page-layout';
 import { 
-  FileSpreadsheet, Upload, Download, Calendar,
+  FileSpreadsheet, Upload, Calendar,
   FileJson, CheckSquare, Users, Filter
 } from 'lucide-react';
 

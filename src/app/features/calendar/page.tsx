@@ -4,7 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { FeaturePageLayout } from '@/components/marketing/feature-page-layout';
 import { 
-  Calendar, Clock, Bell, Eye, Filter, 
+  Calendar, Clock, Eye, Filter, 
   CalendarDays, Map, AlertTriangle
 } from 'lucide-react';
 

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { 
-  ArrowLeft, Mail, Send, CheckCircle2, Loader2,
+  ArrowLeft, Send, CheckCircle2, Loader2,
   MessageSquare, HelpCircle, Lightbulb
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';

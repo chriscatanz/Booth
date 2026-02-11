@@ -4,7 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { FeaturePageLayout } from '@/components/marketing/feature-page-layout';
 import { 
-  Sparkles, MessageSquare, FileText, Palette,
+  Sparkles, MessageSquare, Palette,
   Target, Key, Zap, Upload
 } from 'lucide-react';
 

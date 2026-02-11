@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FeaturePageLayout } from '@/components/marketing/feature-page-layout';
 import { 
   BarChart3, TrendingUp, Target, DollarSign, 
-  Users, Award, PieChart, LineChart
+  Award, LineChart
 } from 'lucide-react';
 
 export default function AnalyticsFeaturePage() {

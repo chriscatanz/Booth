@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FeaturePageLayout } from '@/components/marketing/feature-page-layout';
 import { 
   DollarSign, PieChart, TrendingUp, Receipt, 
-  Calculator, FileSpreadsheet, Target, Wallet
+  Calculator, FileSpreadsheet, Target
 } from 'lucide-react';
 
 export default function BudgetFeaturePage() {

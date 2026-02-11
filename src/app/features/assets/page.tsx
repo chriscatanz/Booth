@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FeaturePageLayout } from '@/components/marketing/feature-page-layout';
 import { 
   Package, Boxes, Calendar, AlertTriangle, 
-  ClipboardCheck, DollarSign, Image, Archive
+  ClipboardCheck, DollarSign, Archive
 } from 'lucide-react';
 
 export default function AssetsFeaturePage() {
