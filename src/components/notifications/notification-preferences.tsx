@@ -204,8 +204,6 @@ export function NotificationPreferences() {
             description="Send notifications to your email"
             enabled={localPrefs.emailEnabled}
             onChange={(v) => setLocalPrefs(p => ({ ...p, emailEnabled: v }))}
-            badge="Coming Soon"
-            disabled
           />
         </div>
       </div>

@@ -289,3 +289,139 @@ export async function sendInvitationEmail(
   
   await sendEmail({ to: email, subject, html, text });
 }
+
+// ─── Notification Emails ─────────────────────────────────────────────────────
+
+interface NotificationEmailData {
+  type: 'task_due' | 'shipping_cutoff' | 'show_upcoming' | 'general';
+  title: string;
+  message?: string | null;
+  priority: 'low' | 'normal' | 'high' | 'urgent';
+  actionUrl?: string | null;
+  showName?: string;
+  showDate?: string;
+  showLocation?: string;
+  taskName?: string;
+  dueDate?: string;
+}
+
+const priorityColors: Record<string, string> = {
+  low: '#6b7280',
+  normal: '#6366f1',
+  high: '#f59e0b',
+  urgent: '#ef4444',
+};
+
+const typeIcons: Record<string, string> = {
+  task_due: '✅',
+  shipping_cutoff: '📦',
+  show_upcoming: '📅',
+  general: '🔔',
+};
+
+export function generateNotificationEmail(data: NotificationEmailData): { subject: string; html: string; text: string } {
+  const icon = typeIcons[data.type] || '🔔';
+  const priorityColor = priorityColors[data.priority] || priorityColors.normal;
+  const actionUrl = data.actionUrl || getBaseUrl();
+  
+  // Build subject based on priority
+  const priorityPrefix = data.priority === 'urgent' ? '🚨 URGENT: ' : 
+                         data.priority === 'high' ? '⚠️ ' : '';
+  const subject = `${priorityPrefix}${data.title}`;
+  
+  // Build context section based on type
+  let contextHtml = '';
+  let contextText = '';
+  
+  if (data.type === 'task_due' && data.taskName) {
+    contextHtml = `
+      <div style="background: #f3f4f6; padding: 16px; border-radius: 8px; margin: 20px 0;">
+        <p style="margin: 0 0 8px; font-size: 12px; color: #6b7280; text-transform: uppercase;">Task Details</p>
+        <p style="margin: 0; font-weight: 600; color: #111;">${data.taskName}</p>
+        ${data.dueDate ? `<p style="margin: 8px 0 0; color: #ef4444; font-size: 14px;">Due: ${data.dueDate}</p>` : ''}
+        ${data.showName ? `<p style="margin: 4px 0 0; color: #6b7280; font-size: 14px;">Show: ${data.showName}</p>` : ''}
+      </div>
+    `;
+    contextText = `\nTask: ${data.taskName}${data.dueDate ? `\nDue: ${data.dueDate}` : ''}${data.showName ? `\nShow: ${data.showName}` : ''}\n`;
+  } else if (data.type === 'shipping_cutoff' && data.showName) {
+    contextHtml = `
+      <div style="background: #fef3c7; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+        <p style="margin: 0 0 8px; font-size: 12px; color: #92400e; text-transform: uppercase;">Shipping Deadline</p>
+        <p style="margin: 0; font-weight: 600; color: #111;">${data.showName}</p>
+        ${data.dueDate ? `<p style="margin: 8px 0 0; color: #b45309; font-size: 14px;">Ship by: ${data.dueDate}</p>` : ''}
+        ${data.showLocation ? `<p style="margin: 4px 0 0; color: #6b7280; font-size: 14px;">📍 ${data.showLocation}</p>` : ''}
+      </div>
+    `;
+    contextText = `\nShow: ${data.showName}${data.dueDate ? `\nShip by: ${data.dueDate}` : ''}${data.showLocation ? `\nLocation: ${data.showLocation}` : ''}\n`;
+  } else if (data.type === 'show_upcoming' && data.showName) {
+    contextHtml = `
+      <div style="background: #ede9fe; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #6366f1;">
+        <p style="margin: 0 0 8px; font-size: 12px; color: #5b21b6; text-transform: uppercase;">Upcoming Show</p>
+        <p style="margin: 0; font-weight: 600; color: #111;">${data.showName}</p>
+        ${data.showDate ? `<p style="margin: 8px 0 0; color: #6366f1; font-size: 14px;">📅 ${data.showDate}</p>` : ''}
+        ${data.showLocation ? `<p style="margin: 4px 0 0; color: #6b7280; font-size: 14px;">📍 ${data.showLocation}</p>` : ''}
+      </div>
+    `;
+    contextText = `\nShow: ${data.showName}${data.showDate ? `\nDate: ${data.showDate}` : ''}${data.showLocation ? `\nLocation: ${data.showLocation}` : ''}\n`;
+  }
+  
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${data.title}</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: linear-gradient(135deg, ${priorityColor} 0%, ${priorityColor}dd 100%); padding: 24px; border-radius: 12px 12px 0 0; text-align: center;">
+    <span style="font-size: 32px;">${icon}</span>
+    <h1 style="color: white; margin: 12px 0 0; font-size: 20px;">${data.title}</h1>
+  </div>
+  
+  <div style="background: #f9fafb; padding: 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
+    ${data.message ? `<p style="color: #374151; margin-top: 0;">${data.message}</p>` : ''}
+    
+    ${contextHtml}
+    
+    <div style="text-align: center; margin: 24px 0;">
+      <a href="${actionUrl}" style="display: inline-block; background: ${priorityColor}; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+        View in Booth
+      </a>
+    </div>
+    
+    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+    
+    <p style="color: #9ca3af; font-size: 12px; margin-bottom: 0; text-align: center;">
+      You're receiving this because you have email notifications enabled in Booth.
+      <br>
+      <a href="${getBaseUrl()}" style="color: #6366f1;">Manage notification settings</a>
+    </p>
+  </div>
+</body>
+</html>
+  `.trim();
+  
+  const text = `
+${data.title}
+${'═'.repeat(data.title.length)}
+
+${data.message || ''}
+${contextText}
+View in Booth: ${actionUrl}
+
+---
+You're receiving this because you have email notifications enabled in Booth.
+  `.trim();
+  
+  return { subject, html, text };
+}
+
+// Send notification email
+export async function sendNotificationEmail(
+  email: string,
+  data: NotificationEmailData
+): Promise<void> {
+  const { subject, html, text } = generateNotificationEmail(data);
+  await sendEmail({ to: email, subject, html, text });
+}

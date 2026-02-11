@@ -181,40 +181,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Organization ID required' }, { status: 400 });
     }
 
-    // Check user is admin of this org
-    const { data: membership, error: membershipError } = await getSupabase()
+    // Check user is admin/owner of this org
+    const { data: membership } = await getSupabase()
       .from('organization_members')
       .select('role')
       .eq('user_id', user.id)
       .eq('organization_id', organizationId)
       .single();
 
-    // Also fetch all memberships for this user to debug
-    const { data: allMemberships } = await getSupabase()
-      .from('organization_members')
-      .select('organization_id, role')
-      .eq('user_id', user.id);
-
-    console.log('Calendar API - membership check:', { 
-      userId: user.id, 
-      organizationId, 
-      membership, 
-      membershipError,
-      allMemberships
-    });
-
     if (!membership || !['owner', 'admin'].includes(membership.role)) {
-      return NextResponse.json({ 
-        error: 'Admin access required',
-        debug: { 
-          role: membership?.role, 
-          hasRecord: !!membership,
-          userId: user.id,
-          orgId: organizationId,
-          userMemberships: allMemberships,
-          membershipError: membershipError?.message
-        }
-      }, { status: 403 });
+      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
     // Get current org settings
