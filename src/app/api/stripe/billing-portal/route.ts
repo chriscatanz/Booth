@@ -1,64 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
-import { createClient } from '@supabase/supabase-js';
+import { NextResponse } from 'next/server';
 
-// Lazy initialization to avoid build-time errors
-function getStripe() {
-  if (!process.env.STRIPE_SECRET_KEY) {
-    throw new Error('STRIPE_SECRET_KEY not configured');
-  }
-  return new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: '2026-01-28.clover',
-  });
-}
-
-function getSupabaseAdmin() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+// Stripe billing portal - disabled until Stripe is configured
+export async function POST() {
+  return NextResponse.json(
+    { error: 'Stripe billing not yet configured' },
+    { status: 503 }
   );
-}
-
-export async function POST(request: NextRequest) {
-  try {
-    const { orgId, returnUrl } = await request.json();
-
-    if (!orgId || !returnUrl) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
-
-    const supabaseAdmin = getSupabaseAdmin();
-    const stripe = getStripe();
-
-    // Get subscription to find Stripe customer ID
-    const { data: subscription, error } = await supabaseAdmin
-      .from('subscriptions')
-      .select('stripe_customer_id')
-      .eq('org_id', orgId)
-      .single();
-
-    if (error || !subscription?.stripe_customer_id) {
-      return NextResponse.json(
-        { error: 'No billing account found. Please subscribe first.' },
-        { status: 404 }
-      );
-    }
-
-    // Create billing portal session
-    const session = await stripe.billingPortal.sessions.create({
-      customer: subscription.stripe_customer_id,
-      return_url: returnUrl,
-    });
-
-    return NextResponse.json({ url: session.url });
-  } catch (error) {
-    console.error('Error creating billing portal session:', error);
-    return NextResponse.json(
-      { error: 'Failed to create billing portal session' },
-      { status: 500 }
-    );
-  }
 }
