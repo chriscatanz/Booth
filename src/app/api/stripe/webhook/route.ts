@@ -152,8 +152,8 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
       stripe_price_id: priceId,
       user_limit: limits.userLimit,
       show_limit: limits.showLimit,
-      current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-      current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+      current_period_start: new Date((subscription as any).current_period_start * 1000).toISOString(),
+      current_period_end: new Date((subscription as any).current_period_end * 1000).toISOString(),
       trial_ends_at: null, // Clear trial when subscription starts
       updated_at: new Date().toISOString(),
     })
