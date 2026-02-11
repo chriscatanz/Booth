@@ -50,7 +50,7 @@ CREATE POLICY "Users can view own org subscription"
   ON subscriptions FOR SELECT
   USING (
     org_id IN (
-      SELECT organization_id FROM user_profiles WHERE id = auth.uid()
+      SELECT organization_id FROM organization_members WHERE user_id = auth.uid()
     )
   );
 
@@ -59,7 +59,7 @@ CREATE POLICY "Owners can update subscription"
   ON subscriptions FOR UPDATE
   USING (
     org_id IN (
-      SELECT organization_id FROM user_profiles WHERE id = auth.uid() AND role = 'owner'
+      SELECT organization_id FROM organization_members WHERE user_id = auth.uid() AND role = 'owner'
     )
   );
 
@@ -119,7 +119,7 @@ BEGIN
   
   -- Count current users
   SELECT COUNT(*) INTO v_current_count
-  FROM user_profiles
+  FROM organization_members
   WHERE organization_id = p_org_id;
   
   RETURN v_current_count < v_user_limit;
@@ -183,7 +183,7 @@ BEGIN
   END IF;
   
   -- Get current counts
-  SELECT COUNT(*) INTO v_user_count FROM user_profiles WHERE organization_id = p_org_id;
+  SELECT COUNT(*) INTO v_user_count FROM organization_members WHERE organization_id = p_org_id;
   SELECT COUNT(*) INTO v_show_count FROM tradeshows WHERE organization_id = p_org_id AND is_template = FALSE;
   
   RETURN json_build_object(
