@@ -63,7 +63,6 @@ export function StatCard({
   value,
   label,
   sublabel,
-  trend,
   className,
 }: {
   icon: React.ElementType;

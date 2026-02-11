@@ -12,7 +12,7 @@ export function OrganizationSetup() {
   const { user, createOrganization, isLoading, error, clearError, signOut, initialize } = useAuthStore();
   const [orgName, setOrgName] = useState('');
   const [pendingInvites, setPendingInvites] = useState<Invitation[]>([]);
-  const [_loadingInvites, setLoadingInvites] = useState(true);
+  const [, setLoadingInvites] = useState(true);
   const [acceptingInvite, setAcceptingInvite] = useState<string | null>(null);
   const [signupSuccessEmail, setSignupSuccessEmail] = useState<string | null>(null);
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import * as taskService from '@/services/task-service';
@@ -29,11 +29,7 @@ export function TaskList({ tradeShowId, readOnly = false }: TaskListProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-  useEffect(() => {
-    loadTasks();
-  }, [tradeShowId]);
-
-  async function loadTasks() {
+  const loadTasks = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     
@@ -45,7 +41,11 @@ export function TaskList({ tradeShowId, readOnly = false }: TaskListProps) {
     }
     
     setIsLoading(false);
-  }
+  }, [tradeShowId]);
+
+  useEffect(() => {
+    loadTasks();
+  }, [loadTasks]);
 
   const handleTaskCreated = (task: Task) => {
     setTasks(prev => [task, ...prev]);

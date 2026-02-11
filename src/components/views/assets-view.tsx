@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import * as assetService from '@/services/asset-service';
@@ -30,11 +30,7 @@ export default function AssetsView() {
   const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
   const [selectedAsset, setSelectedAsset] = useState<(Asset & { reservations: AssetReservation[] }) | null>(null);
 
-  useEffect(() => {
-    loadAssets();
-  }, [organization?.id]);
-
-  async function loadAssets() {
+  const loadAssets = useCallback(async () => {
     if (!organization?.id) return;
     
     setIsLoading(true);
@@ -48,7 +44,11 @@ export default function AssetsView() {
     }
     
     setIsLoading(false);
-  }
+  }, [organization?.id]);
+
+  useEffect(() => {
+    loadAssets();
+  }, [loadAssets]);
 
   async function handleSelectAsset(asset: Asset) {
     try {

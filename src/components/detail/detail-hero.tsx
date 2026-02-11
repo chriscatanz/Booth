@@ -18,7 +18,7 @@ interface DetailHeroProps {
   canEdit?: boolean;
 }
 
-export function DetailHero({ show, onStatusChange, canEdit }: DetailHeroProps) {
+export function DetailHero({ show }: DetailHeroProps) {
   const days = daysUntilShow(show);
   const estimated = totalEstimatedCost(show);
   const roi = roiPercentage(show);

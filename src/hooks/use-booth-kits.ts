@@ -134,7 +134,7 @@ export function useKitAssignments(filters?: {
     } finally {
       setLoading(false);
     }
-  }, [orgId, filters?.kitId, filters?.tradeshowId]);
+  }, [orgId, filters]);
 
   useEffect(() => {
     loadAssignments();

@@ -9,7 +9,7 @@ import * as authService from '@/services/auth-service';
 import { Task, TaskStatus, TaskPriority, TASK_STATUS_CONFIG, TASK_PRIORITY_CONFIG } from '@/types/tasks';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+// cn is available but unused currently
 import {
   X, Save, Trash2, AlertCircle, Calendar, User, Flag, Briefcase
 } from 'lucide-react';

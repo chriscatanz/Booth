@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { pageVariants, pageTransition, staggerContainer, staggerItem } from '@/lib/animations';
+import { pageVariants, pageTransition, staggerItem } from '@/lib/animations';
 
 // Wrapper for page-level transitions
 export function PageTransition({ 

@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, X, FileText, Loader2, Trash2, ExternalLink } from 'lucide-react';
+import { Upload, Loader2, Trash2, ExternalLink } from 'lucide-react';
 import { AdditionalFile } from '@/types';
 import { cn } from '@/lib/utils';
 import * as api from '@/services/supabase-service';

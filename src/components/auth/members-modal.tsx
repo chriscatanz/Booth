@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import { OrganizationMember, Invitation, UserRole } from '@/types/auth';
@@ -30,20 +30,18 @@ export function MembersModal({ onClose }: MembersModalProps) {
   const [isInviting, setIsInviting] = useState(false);
   const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadData();
-  }, [organization?.id]);
+  const orgId = organization?.id;
 
-  async function loadData() {
-    if (!organization?.id) return;
+  const loadData = useCallback(async () => {
+    if (!orgId) return;
     
     setIsLoading(true);
     setError(null);
     
     try {
       const [membersData, invitesData] = await Promise.all([
-        authService.fetchOrganizationMembers(organization.id),
-        authService.fetchInvitations(organization.id),
+        authService.fetchOrganizationMembers(orgId),
+        authService.fetchInvitations(orgId),
       ]);
       setMembers(membersData);
       setInvitations(invitesData);
@@ -53,7 +51,11 @@ export function MembersModal({ onClose }: MembersModalProps) {
     }
     
     setIsLoading(false);
-  }
+  }, [orgId]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault();
@@ -107,7 +109,7 @@ export function MembersModal({ onClose }: MembersModalProps) {
     try {
       await authService.removeMember(memberId);
       setMembers(members.filter(m => m.id !== memberId));
-    } catch (_err) {
+    } catch {
       setError('Failed to remove member');
     }
   }
@@ -116,7 +118,7 @@ export function MembersModal({ onClose }: MembersModalProps) {
     try {
       await authService.deleteInvitation(inviteId);
       setInvitations(invitations.filter(i => i.id !== inviteId));
-    } catch (_err) {
+    } catch {
       setError('Failed to revoke invitation');
     }
   }
@@ -127,7 +129,7 @@ export function MembersModal({ onClose }: MembersModalProps) {
       setMembers(members.map(m => 
         m.id === memberId ? { ...m, role: newRole } : m
       ));
-    } catch (_err) {
+    } catch {
       setError('Failed to update role');
     }
   }

@@ -175,7 +175,7 @@ export function AttendeeSearch({
 
             {filteredAttendees.length === 0 && search && (
               <div className="px-4 py-6 text-center text-text-tertiary text-sm">
-                No previous attendees match "{search}"
+                No previous attendees match &quot;{search}&quot;
               </div>
             )}
           </motion.div>

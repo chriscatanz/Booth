@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import * as customFieldsService from '@/services/custom-fields-service';
 import { CustomFieldDefinition, CustomFieldType, FIELD_TYPE_CONFIG, generateFieldKey } from '@/types/custom-fields';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+// cn unused but kept for future use
 import {
   Plus, Trash2, GripVertical, AlertCircle, Save, X,
   Type, Hash, Calendar, CheckSquare, ChevronDown, Link, Mail, Phone, AlignLeft
@@ -30,11 +30,7 @@ export function CustomFieldsEditor() {
   const [newFieldRequired, setNewFieldRequired] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    loadFields();
-  }, [organization?.id]);
-
-  async function loadFields() {
+  const loadFields = useCallback(async () => {
     if (!organization?.id) return;
     
     setIsLoading(true);
@@ -45,7 +41,11 @@ export function CustomFieldsEditor() {
       setError(err instanceof Error ? err.message : 'Failed to load fields');
     }
     setIsLoading(false);
-  }
+  }, [organization]);
+
+  useEffect(() => {
+    loadFields();
+  }, [loadFields]);
 
   const handleCreateField = async () => {
     if (!organization?.id || !newFieldName.trim()) return;

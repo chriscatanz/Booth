@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { 
   Info, Truck, Plane, DollarSign, FileText,
-  CheckSquare,
 } from 'lucide-react';
 
 export type DetailTab = 'overview' | 'logistics' | 'travel' | 'budget' | 'notes';

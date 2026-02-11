@@ -94,7 +94,7 @@ export function PricingSection({ onGetStarted }: PricingSectionProps) {
             transition={{ delay: 0.1 }}
             className="mt-4 text-text-secondary max-w-2xl mx-auto"
           >
-            Start free, upgrade when you're ready. No credit card required.
+            Start free, upgrade when you&apos;re ready. No credit card required.
           </motion.p>
         </div>
 

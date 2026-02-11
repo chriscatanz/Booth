@@ -7,7 +7,7 @@ import * as storageService from '@/services/storage-service';
 import { Button } from '@/components/ui/button';
 import { 
   Upload, Trash2, Check, AlertCircle, Palette, Image as ImageIcon,
-  RefreshCw, Building2, Package, FileText, X, Loader2
+  Building2, Package, FileText, X, Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
@@ -191,7 +191,7 @@ export function BrandingEditor() {
 
         // Upload to Supabase storage
         const fileName = `${organization.id}/brand-docs/${Date.now()}-${file.name}`;
-        const { data, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('org-assets')
           .upload(fileName, file);
 
@@ -233,7 +233,7 @@ export function BrandingEditor() {
       if (path) {
         await supabase.storage.from('org-assets').remove([path]);
       }
-    } catch (e) {
+    } catch {
       // Ignore storage errors, still remove from list
     }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ActivityEntry } from '@/types';
 import { Clock, MessageSquare, FileUp, RefreshCw, PlusCircle, Send, Loader2 } from 'lucide-react';
@@ -19,18 +19,18 @@ export function ActivityTimeline({ tradeshowId, readOnly = false }: ActivityTime
   const [newNote, setNewNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const loadActivities = async () => {
+  const loadActivities = useCallback(async () => {
     setIsLoading(true);
     const data = await api.fetchActivities(tradeshowId);
     setActivities(data);
     setIsLoading(false);
-  };
+  }, [tradeshowId]);
 
   useEffect(() => {
     if (tradeshowId > 0) {
       loadActivities();
     }
-  }, [tradeshowId]);
+  }, [tradeshowId, loadActivities]);
 
   const handleAddNote = async () => {
     if (!newNote.trim() || isSubmitting) return;

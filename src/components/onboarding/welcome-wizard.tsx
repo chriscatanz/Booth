@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { 
   Sparkles, Calendar, Users, BarChart3, 
   ArrowRight, Check, Rocket, Wand2, Upload,
-  FileStack, ListTodo, Image, RefreshCw, Box, Bell
+  ListTodo, RefreshCw, Box, Bell
 } from 'lucide-react';
 
 interface WelcomeWizardProps {
@@ -31,7 +31,7 @@ export function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
             Booth helps you organize your entire trade show program in one place.
           </p>
           <p>
-            Let's take a quick tour of what you can do.
+            Let&apos;s take a quick tour of what you can do.
           </p>
         </div>
       ),
@@ -219,7 +219,7 @@ export function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
       content: (
         <div className="space-y-4 text-text-secondary">
           <p>
-            You're all set. Click below to create your first show and start organizing.
+            You&apos;re all set. Click below to create your first show and start organizing.
           </p>
           <p>
             Need help? Check out the settings menu for tips and support options.

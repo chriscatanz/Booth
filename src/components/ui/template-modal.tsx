@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useTradeShowStore } from '@/store/trade-show-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { X, FileStack, Plus, Trash2, Check } from 'lucide-react';
+import { X, FileStack, Trash2, Check } from 'lucide-react';
 
 interface TemplateModalProps {
   mode: 'save' | 'load';

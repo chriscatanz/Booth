@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import * as activityService from '@/services/activity-service';
@@ -24,11 +24,7 @@ export default function ActivityView() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadActivity();
-  }, [organization?.id]);
-
-  async function loadActivity() {
+  const loadActivity = useCallback(async () => {
     if (!organization?.id) return;
     
     setIsLoading(true);
@@ -42,7 +38,11 @@ export default function ActivityView() {
     }
     
     setIsLoading(false);
-  }
+  }, [organization?.id]);
+
+  useEffect(() => {
+    loadActivity();
+  }, [loadActivity]);
 
   const handleReaction = async (activityId: string, emoji: string) => {
     if (!user?.id) return;

@@ -15,7 +15,6 @@ import {
   DATA_CATEGORY_INFO,
   ALL_DATA_CATEGORIES,
   DEFAULT_ROLE_PERMISSIONS,
-  RoleDataPermissions,
 } from '@/types/data-visibility';
 
 const CATEGORY_ICONS: Record<DataCategory, React.ElementType> = {
@@ -36,8 +35,8 @@ interface RolePermissionsEditorProps {
 }
 
 export function RolePermissionsEditor({ className }: RolePermissionsEditorProps) {
-  const { organization } = useAuthStore();
-  const { permissions, isLoading, error, updatePermissions, resetToDefaults, refresh } = useDataVisibility();
+  useAuthStore(); // Keep for potential future use
+  const { permissions, isLoading, error, updatePermissions, resetToDefaults } = useDataVisibility();
   
   const [selectedRole, setSelectedRole] = useState<'editor' | 'viewer'>('editor');
   const [localCategories, setLocalCategories] = useState<DataCategory[]>([]);
@@ -54,7 +53,7 @@ export function RolePermissionsEditor({ className }: RolePermissionsEditorProps)
   useEffect(() => {
     setLocalCategories(currentCategories);
     setHasChanges(false);
-  }, [selectedRole, currentCategories.join(',')]);
+  }, [selectedRole, currentCategories]);
 
   // Check if local state differs from saved state
   useEffect(() => {

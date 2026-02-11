@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import * as taskService from '@/services/task-service';
@@ -31,11 +31,7 @@ export default function TasksView() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [selectedColumn, setSelectedColumn] = useState<TaskStatus>('todo');
 
-  useEffect(() => {
-    loadTasks();
-  }, [organization?.id]);
-
-  async function loadTasks() {
+  const loadTasks = useCallback(async () => {
     if (!organization?.id) return;
     
     setIsLoading(true);
@@ -49,7 +45,11 @@ export default function TasksView() {
     }
     
     setIsLoading(false);
-  }
+  }, [organization?.id]);
+
+  useEffect(() => {
+    loadTasks();
+  }, [loadTasks]);
 
   // Group tasks by status
   const tasksByStatus = useMemo(() => {

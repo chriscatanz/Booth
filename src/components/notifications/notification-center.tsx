@@ -3,12 +3,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Bell, X, Check, CheckCheck, Truck, Calendar, 
+  Bell, X, CheckCheck, Truck, Calendar, 
   CheckSquare, AlertCircle, Clock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNotifications } from '@/hooks/use-notifications';
-import { Notification, NotificationType, NOTIFICATION_PRIORITY_COLORS } from '@/types/notifications';
+import { Notification, NotificationType } from '@/types/notifications';
 import { formatDistanceToNow } from 'date-fns';
 
 const TYPE_ICONS: Record<NotificationType, React.ElementType> = {
@@ -102,7 +102,7 @@ export function NotificationCenter() {
                 <div className="p-8 text-center">
                   <Bell size={32} className="mx-auto text-text-tertiary mb-2" />
                   <p className="text-sm text-text-secondary">No notifications</p>
-                  <p className="text-xs text-text-tertiary mt-1">You're all caught up!</p>
+                  <p className="text-xs text-text-tertiary mt-1">You&apos;re all caught up!</p>
                 </div>
               ) : (
                 <div className="divide-y divide-border">

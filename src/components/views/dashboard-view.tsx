@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { useTradeShowStore } from '@/store/trade-show-store';
 import { useAuthStore } from '@/store/auth-store';
 import { useFilteredShows } from '@/hooks/use-filtered-shows';
@@ -35,7 +35,8 @@ interface DashboardViewProps {
 export default function DashboardView({ viewMode, onViewModeChange }: DashboardViewProps) {
   const { shows, selectShow, createNewShow, loadShows } = useTradeShowStore();
   const { organization } = useAuthStore();
-  const now = new Date();
+  const nowRef = useRef(new Date());
+  const now = nowRef.current;
   
   // Get shipping buffer from org settings (default 7 days)
   const shippingBufferDays = (organization?.settings?.shippingBufferDays as number) || 7;

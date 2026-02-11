@@ -2,8 +2,8 @@
 
 import React, { useMemo } from 'react';
 import { TradeShow } from '@/types';
-import { parseISO, isValid, differenceInDays, format, addDays, startOfDay, subDays, max } from 'date-fns';
-import { Package, AlertTriangle, Check, Truck, Warehouse, CalendarDays } from 'lucide-react';
+import { parseISO, isValid, differenceInDays, format, addDays, startOfDay, subDays } from 'date-fns';
+import { AlertTriangle, Check, Truck, Warehouse, CalendarDays } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ShippingTimelineProps {

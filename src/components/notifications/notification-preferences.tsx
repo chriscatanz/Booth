@@ -88,7 +88,7 @@ export function NotificationPreferences() {
       } else {
         setTestResult({ success: false, message: data.error || 'Failed to send test email' });
       }
-    } catch (_err) {
+    } catch {
       setTestResult({ success: false, message: 'Network error — please try again' });
     }
     

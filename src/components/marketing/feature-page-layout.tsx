@@ -172,7 +172,7 @@ export function FeaturePageLayout({
             Ready to get organized?
           </h2>
           <p className="text-text-secondary mb-8">
-            Join other marketing teams who've ditched the spreadsheet chaos.
+            Join other marketing teams who&apos;ve ditched the spreadsheet chaos.
           </p>
           <Button variant="primary" size="lg" onClick={onGetStarted}>
             {ctaText} <ArrowRight size={16} className="ml-1" />

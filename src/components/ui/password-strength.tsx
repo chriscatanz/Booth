@@ -43,7 +43,7 @@ export function validatePassword(password: string): { valid: boolean; score: num
 }
 
 export function PasswordStrength({ password, showRequirements = true }: PasswordStrengthProps) {
-  const { score, valid } = useMemo(() => validatePassword(password), [password]);
+  const { score } = useMemo(() => validatePassword(password), [password]);
 
   const getStrengthLabel = () => {
     if (password.length === 0) return '';

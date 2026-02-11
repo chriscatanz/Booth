@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, Zap, Users, Sparkles, Shield } from 'lucide-react';
+import { X, Check, Zap, Sparkles, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { createCheckoutSession, TIER_CONFIG } from '@/services/subscription-service';
+import { createCheckoutSession } from '@/services/subscription-service';
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -90,7 +90,7 @@ export function UpgradeModal({ isOpen, onClose, orgId, currentTier }: UpgradeMod
             <div className="px-6 py-4 border-b border-border flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-bold text-text-primary">Upgrade Your Plan</h2>
-                <p className="text-sm text-text-secondary">Choose the plan that's right for your team</p>
+                <p className="text-sm text-text-secondary">Choose the plan that&apos;s right for your team</p>
               </div>
               <button
                 onClick={onClose}

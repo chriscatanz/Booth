@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { 
   AuditEntry, 
@@ -11,7 +11,7 @@ import {
   ResourceType,
 } from '@/services/audit-service';
 import { 
-  Clock, User, FileText, Users, Settings, 
+  FileText, Users, Settings, 
   LogIn, LogOut, Mail, Shield, Trash2, 
   PlusCircle, Edit, Eye, Download, ChevronLeft, 
   ChevronRight, Filter, RefreshCw
@@ -33,7 +33,7 @@ export function AuditLog({ className }: AuditLogProps) {
   const [filterResource, setFilterResource] = useState<ResourceType | ''>('');
   const pageSize = 20;
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setIsLoading(true);
     const result = await fetchAuditLog({
       limit: pageSize,
@@ -44,11 +44,11 @@ export function AuditLog({ className }: AuditLogProps) {
     setEntries(result.entries);
     setTotal(result.total);
     setIsLoading(false);
-  };
+  }, [page, filterAction, filterResource, pageSize]);
 
   useEffect(() => {
     loadData();
-  }, [page, filterAction, filterResource]);
+  }, [loadData]);
 
   const totalPages = Math.ceil(total / pageSize);
 

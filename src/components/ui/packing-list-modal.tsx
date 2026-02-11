@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { TradeShow, Attendee } from '@/types';
 import { parseJsonStringArray } from '@/types/computed';
 import { formatDate, formatDateRange } from '@/lib/date-utils';
-import { X, Printer, Download, Package, Check } from 'lucide-react';
+import { X, Printer, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface PackingListModalProps {

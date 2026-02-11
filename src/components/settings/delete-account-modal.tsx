@@ -91,7 +91,7 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
               </p>
               <ul className="mt-2 space-y-1 text-sm text-text-secondary">
                 <li>• Remove all your personal data</li>
-                <li>• Delete your organization if you're the only owner</li>
+                <li>• Delete your organization if you&apos;re the only owner</li>
                 <li>• Remove you from all organizations you belong to</li>
                 <li>• Cancel any active subscriptions</li>
               </ul>

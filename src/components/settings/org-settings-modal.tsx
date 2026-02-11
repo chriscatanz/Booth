@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import * as authService from '@/services/auth-service';
+import { OrganizationMember, Invitation } from '@/types/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -31,7 +32,7 @@ interface OrgSettingsModalProps {
 type SettingsTab = 'general' | 'branding' | 'members' | 'notifications' | 'calendar' | 'permissions' | 'lists' | 'fields' | 'ai' | 'data' | 'audit' | 'danger';
 
 export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
-  const { organization, user, isOwner, isAdmin, refreshOrganizations } = useAuthStore();
+  const { organization, isOwner, isAdmin, refreshOrganizations } = useAuthStore();
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
 
   // General settings form
@@ -45,7 +46,7 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
 
   // Danger zone
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [, setIsDeleting] = useState(false);
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
 
   useEffect(() => {
@@ -439,7 +440,7 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
                       Delete My Account
                     </h3>
                     <p className="text-sm text-text-secondary mb-4">
-                      Permanently delete your account and all associated data. If you're the only
+                      Permanently delete your account and all associated data. If you&apos;re the only
                       owner of this organization, it will be deleted as well.
                     </p>
                     <Button
@@ -468,8 +469,8 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
 // Inline members content (reuses logic from MembersModal but embedded)
 function MembersContent() {
   const { organization, user, isOwner, isAdmin } = useAuthStore();
-  const [members, setMembers] = useState<any[]>([]);
-  const [invitations, setInvitations] = useState<any[]>([]);
+  const [members, setMembers] = useState<OrganizationMember[]>([]);
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
@@ -480,22 +481,7 @@ function MembersContent() {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [updatingMemberId, setUpdatingMemberId] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadData();
-  }, [organization?.id]);
-
-  // Close menu when clicking outside
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (openMenuId && !(e.target as Element).closest('.member-menu')) {
-        setOpenMenuId(null);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [openMenuId]);
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     if (!organization?.id) return;
     setIsLoading(true);
     try {
@@ -510,7 +496,22 @@ function MembersContent() {
       setError(err instanceof Error ? err.message : 'Failed to load members');
     }
     setIsLoading(false);
-  }
+  }, [organization]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (openMenuId && !(e.target as Element).closest('.member-menu')) {
+        setOpenMenuId(null);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [openMenuId]);
 
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault();
@@ -653,7 +654,7 @@ function MembersContent() {
             />
             <select
               value={inviteRole}
-              onChange={(e) => setInviteRole(e.target.value as any)}
+              onChange={(e) => setInviteRole(e.target.value as 'admin' | 'editor' | 'viewer')}
               className="px-3 py-2 rounded-lg bg-surface border border-border text-sm text-text-primary"
             >
               <option value="viewer">Viewer</option>

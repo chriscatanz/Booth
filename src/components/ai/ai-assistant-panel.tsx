@@ -903,7 +903,7 @@ function DocumentAnalyzer({ onDocumentsChange }: { onDocumentsChange?: (docs: st
 }
 
 // Show Assistant Chat Tab
-function ShowAssistantChat({ context, uploadedDocuments }: { 
+function ShowAssistantChat({ uploadedDocuments }: { 
   context?: AIAssistantPanelProps['context'];
   uploadedDocuments?: string;
 }) {
