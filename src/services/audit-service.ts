@@ -140,7 +140,7 @@ export async function fetchAuditLog(
     organizationId: row.organization_id as string,
     userId: row.user_id as string,
     action: row.action as AuditAction,
-    resourceType: row.resource_type as string,
+    resourceType: row.resource_type as ResourceType,
     resourceId: row.resource_id as string | null,
     resourceName: row.resource_name as string | null,
     metadata: row.metadata ? JSON.parse(row.metadata as string) : null,
