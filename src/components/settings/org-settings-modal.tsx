@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   X, Building2, Users, Shield, Save, Upload,
-  Crown, AlertCircle, Check, Trash2, Settings, Clock, Download, List, Palette, Columns, Eye, Bell, Sparkles, Calendar
+  Crown, AlertCircle, Check, Trash2, Settings, Clock, Download, List, Palette, Columns, Eye, Bell, Sparkles, Calendar,
+  MoreVertical, ChevronDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { authenticatedFetch } from '@/lib/api';
@@ -476,10 +477,24 @@ function MembersContent() {
   const [inviteRole, setInviteRole] = useState<'admin' | 'editor' | 'viewer'>('editor');
   const [isInviting, setIsInviting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [updatingMemberId, setUpdatingMemberId] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
   }, [organization?.id]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (openMenuId && !(e.target as Element).closest('.member-menu')) {
+        setOpenMenuId(null);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [openMenuId]);
 
   async function loadData() {
     if (!organization?.id) return;
@@ -535,11 +550,63 @@ function MembersContent() {
     setIsInviting(false);
   }
 
+  async function handleChangeRole(memberId: string, newRole: 'admin' | 'editor' | 'viewer') {
+    setUpdatingMemberId(memberId);
+    setError(null);
+    try {
+      await authService.updateMemberRole(memberId, newRole);
+      // Update local state
+      setMembers(prev => prev.map(m => 
+        m.id === memberId ? { ...m, role: newRole } : m
+      ));
+      setSuccessMessage('Role updated successfully');
+      setTimeout(() => setSuccessMessage(null), 2000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update role');
+    }
+    setUpdatingMemberId(null);
+    setOpenMenuId(null);
+  }
+
+  async function handleRemoveMember(memberId: string, memberName: string) {
+    if (!confirm(`Remove ${memberName} from the organization? They will lose access immediately.`)) {
+      return;
+    }
+    setUpdatingMemberId(memberId);
+    setError(null);
+    try {
+      await authService.removeMember(memberId);
+      setMembers(prev => prev.filter(m => m.id !== memberId));
+      setSuccessMessage('Member removed');
+      setTimeout(() => setSuccessMessage(null), 2000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to remove member');
+    }
+    setUpdatingMemberId(null);
+    setOpenMenuId(null);
+  }
+
+  async function handleCancelInvitation(invitationId: string) {
+    try {
+      await authService.deleteInvitation(invitationId);
+      setInvitations(prev => prev.filter(i => i.id !== invitationId));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to cancel invitation');
+    }
+  }
+
   const roleIcons: Record<string, React.ReactNode> = {
     owner: <Crown size={14} className="text-warning" />,
     admin: <Shield size={14} className="text-brand-purple" />,
     editor: <Users size={14} className="text-success" />,
-    viewer: <Users size={14} className="text-text-tertiary" />,
+    viewer: <Eye size={14} className="text-text-tertiary" />,
+  };
+
+  const roleLabels: Record<string, string> = {
+    owner: 'Owner',
+    admin: 'Admin',
+    editor: 'Editor',
+    viewer: 'Viewer',
   };
 
   if (isLoading) {
@@ -552,6 +619,13 @@ function MembersContent() {
         <div className="flex items-center gap-2 p-3 rounded-lg bg-error-bg text-error text-sm">
           <AlertCircle size={16} />
           {error}
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-success-bg text-success text-sm">
+          <Check size={16} />
+          {successMessage}
         </div>
       )}
 
@@ -600,24 +674,78 @@ function MembersContent() {
       )}
 
       <div className="space-y-2">
-        {members.map((member) => (
-          <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg bg-bg-tertiary">
-            <div className="w-9 h-9 rounded-full bg-brand-purple/20 flex items-center justify-center text-brand-purple text-sm font-medium">
-              {member.user?.fullName?.[0]?.toUpperCase() || '?'}
+        {members.map((member) => {
+          const isCurrentUser = member.userId === user?.id;
+          const isOwnerMember = member.role === 'owner';
+          const canManage = isAdmin && !isCurrentUser && !isOwnerMember;
+          
+          return (
+            <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg bg-bg-tertiary">
+              <div className="w-9 h-9 rounded-full bg-brand-purple/20 flex items-center justify-center text-brand-purple text-sm font-medium">
+                {member.user?.fullName?.[0]?.toUpperCase() || '?'}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-text-primary truncate">
+                  {member.user?.fullName || member.user?.email}
+                  {isCurrentUser && <span className="ml-1 text-text-tertiary">(you)</span>}
+                </p>
+                <p className="text-xs text-text-secondary truncate">{member.user?.email}</p>
+              </div>
+              
+              {/* Role display / selector */}
+              <div className="flex items-center gap-2 relative member-menu">
+                {canManage ? (
+                  <>
+                    <button
+                      onClick={() => setOpenMenuId(openMenuId === member.id ? null : member.id)}
+                      disabled={updatingMemberId === member.id}
+                      className="flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-bg-secondary transition-colors text-sm"
+                    >
+                      {roleIcons[member.role]}
+                      <span className="text-text-secondary">{roleLabels[member.role]}</span>
+                      <ChevronDown size={14} className="text-text-tertiary" />
+                    </button>
+                    
+                    {/* Dropdown menu */}
+                    {openMenuId === member.id && (
+                      <div className="absolute right-0 top-full mt-1 w-40 bg-surface border border-border rounded-lg shadow-lg py-1 z-10">
+                        <div className="px-2 py-1 text-xs text-text-tertiary font-medium">Change role</div>
+                        {(['admin', 'editor', 'viewer'] as const).map((role) => (
+                          <button
+                            key={role}
+                            onClick={() => handleChangeRole(member.id, role)}
+                            disabled={member.role === role}
+                            className={cn(
+                              'w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left hover:bg-bg-tertiary transition-colors',
+                              member.role === role && 'bg-bg-tertiary text-brand-purple'
+                            )}
+                          >
+                            {roleIcons[role]}
+                            <span>{roleLabels[role]}</span>
+                            {member.role === role && <Check size={14} className="ml-auto text-brand-purple" />}
+                          </button>
+                        ))}
+                        <div className="border-t border-border my-1" />
+                        <button
+                          onClick={() => handleRemoveMember(member.id, member.user?.fullName || member.user?.email)}
+                          className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left text-error hover:bg-error-bg transition-colors"
+                        >
+                          <Trash2 size={14} />
+                          <span>Remove</span>
+                        </button>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="flex items-center gap-1.5 px-2 py-1">
+                    {roleIcons[member.role]}
+                    <span className="text-xs text-text-secondary">{roleLabels[member.role]}</span>
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-text-primary truncate">
-                {member.user?.fullName || member.user?.email}
-                {member.userId === user?.id && <span className="ml-1 text-text-tertiary">(you)</span>}
-              </p>
-              <p className="text-xs text-text-secondary truncate">{member.user?.email}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              {roleIcons[member.role]}
-              <span className="text-xs text-text-secondary capitalize">{member.role}</span>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {invitations.length > 0 && (
@@ -628,8 +756,17 @@ function MembersContent() {
           <div className="space-y-2">
             {invitations.map((inv) => (
               <div key={inv.id} className="flex items-center gap-3 p-2 rounded-lg bg-bg-tertiary/50 border border-dashed border-border">
-                <span className="text-sm text-text-secondary">{inv.email}</span>
+                <span className="text-sm text-text-secondary flex-1">{inv.email}</span>
                 <span className="text-xs text-text-tertiary capitalize">({inv.role})</span>
+                {isAdmin && (
+                  <button
+                    onClick={() => handleCancelInvitation(inv.id)}
+                    className="p-1 text-text-tertiary hover:text-error transition-colors"
+                    title="Cancel invitation"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
               </div>
             ))}
           </div>
