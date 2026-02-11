@@ -8,16 +8,18 @@ interface ToggleProps {
   enabled: boolean;
   onChange: (enabled: boolean) => void;
   className?: string;
+  disabled?: boolean;
 }
 
-export function Toggle({ label, enabled, onChange, className }: ToggleProps) {
+export function Toggle({ label, enabled, onChange, className, disabled }: ToggleProps) {
   return (
     <button
       type="button"
       role="switch"
       aria-checked={enabled}
-      onClick={() => onChange(!enabled)}
-      className={cn('flex items-center gap-3 min-h-[44px] py-2', className)}
+      onClick={() => !disabled && onChange(!enabled)}
+      disabled={disabled}
+      className={cn('flex items-center gap-3 min-h-[44px] py-2', disabled && 'opacity-50 cursor-not-allowed', className)}
     >
       <div
         className={cn(

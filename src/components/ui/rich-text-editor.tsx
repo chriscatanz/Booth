@@ -28,6 +28,7 @@ interface RichTextEditorProps {
   placeholder?: string;
   className?: string;
   minHeight?: string;
+  readOnly?: boolean;
 }
 
 interface ToolbarButtonProps {
@@ -166,21 +167,24 @@ export function RichTextEditor({
   placeholder = 'Start typing...',
   className,
   minHeight = '120px',
+  readOnly = false,
 }: RichTextEditorProps) {
   const editor = useEditor({
     immediatelyRender: false,
+    editable: !readOnly,
     extensions: [
       StarterKit.configure({
         heading: false, // Keep it simple for notes
       }),
       Placeholder.configure({
-        placeholder,
+        placeholder: readOnly ? '' : placeholder,
         emptyEditorClass: 'is-editor-empty',
       }),
       Underline,
     ],
     content: value || '',
     onUpdate: ({ editor }) => {
+      if (readOnly) return;
       const html = editor.getHTML();
       // Return empty string if editor only has empty paragraph
       onChange(html === '<p></p>' ? '' : html);
@@ -195,7 +199,8 @@ export function RichTextEditor({
           '[&_ul]:list-disc [&_ul]:pl-5',
           '[&_ol]:list-decimal [&_ol]:pl-5',
           '[&_li]:my-0.5',
-          '[&_hr]:my-3 [&_hr]:border-border-subtle'
+          '[&_hr]:my-3 [&_hr]:border-border-subtle',
+          readOnly && 'cursor-default'
         ),
         style: `min-height: ${minHeight}`,
       },
@@ -216,16 +221,22 @@ export function RichTextEditor({
           {label}
         </label>
       )}
-      <div className="rounded-lg border border-border bg-bg-secondary overflow-hidden focus-within:ring-2 focus-within:ring-brand-purple/40 focus-within:border-brand-purple transition-all">
-        <MenuBar editor={editor} />
+      <div className={cn(
+        'rounded-lg border border-border bg-bg-secondary overflow-hidden transition-all',
+        !readOnly && 'focus-within:ring-2 focus-within:ring-brand-purple/40 focus-within:border-brand-purple',
+        readOnly && 'opacity-70'
+      )}>
+        {!readOnly && <MenuBar editor={editor} />}
         <EditorContent 
           editor={editor} 
           className="text-sm text-text-primary [&_.is-editor-empty:first-child::before]:text-text-tertiary [&_.is-editor-empty:first-child::before]:content-[attr(data-placeholder)] [&_.is-editor-empty:first-child::before]:float-left [&_.is-editor-empty:first-child::before]:h-0 [&_.is-editor-empty:first-child::before]:pointer-events-none"
         />
       </div>
-      <p className="text-[10px] text-text-tertiary">
-        Supports <strong>bold</strong>, <em>italic</em>, lists, and more. Use keyboard shortcuts like Ctrl+B.
-      </p>
+      {!readOnly && (
+        <p className="text-[10px] text-text-tertiary">
+          Supports <strong>bold</strong>, <em>italic</em>, lists, and more. Use keyboard shortcuts like Ctrl+B.
+        </p>
+      )}
     </div>
   );
 }

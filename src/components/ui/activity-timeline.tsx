@@ -10,9 +10,10 @@ import { Button } from './button';
 
 interface ActivityTimelineProps {
   tradeshowId: number;
+  readOnly?: boolean;
 }
 
-export function ActivityTimeline({ tradeshowId }: ActivityTimelineProps) {
+export function ActivityTimeline({ tradeshowId, readOnly = false }: ActivityTimelineProps) {
   const [activities, setActivities] = useState<ActivityEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [newNote, setNewNote] = useState('');
@@ -87,25 +88,27 @@ export function ActivityTimeline({ tradeshowId }: ActivityTimelineProps) {
 
   return (
     <div className="space-y-4">
-      {/* Add note input */}
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={newNote}
-          onChange={(e) => setNewNote(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleAddNote()}
-          placeholder="Add a note..."
-          className="flex-1 px-3 py-2 text-sm rounded-lg bg-bg-tertiary border border-border focus:outline-none focus:ring-2 focus:ring-brand-purple/50 text-text-primary placeholder:text-text-tertiary"
-        />
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={handleAddNote}
-          disabled={!newNote.trim() || isSubmitting}
-        >
-          {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-        </Button>
-      </div>
+      {/* Add note input - hidden in read-only mode */}
+      {!readOnly && (
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newNote}
+            onChange={(e) => setNewNote(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAddNote()}
+            placeholder="Add a note..."
+            className="flex-1 px-3 py-2 text-sm rounded-lg bg-bg-tertiary border border-border focus:outline-none focus:ring-2 focus:ring-brand-purple/50 text-text-primary placeholder:text-text-tertiary"
+          />
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleAddNote}
+            disabled={!newNote.trim() || isSubmitting}
+          >
+            {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+          </Button>
+        </div>
+      )}
 
       {/* Timeline */}
       {isLoading ? (
