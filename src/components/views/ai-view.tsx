@@ -7,7 +7,7 @@ import {
   Sparkles, Wand2, FileText, MessageSquare, Send, Loader2, 
   Copy, Check, RefreshCw, Upload, FileUp, Trash2, ChevronDown,
   Mail, ExternalLink, AlertCircle, Settings, Calendar, MapPin,
-  DollarSign, Building, Clock, CheckSquare, Users, Package
+  DollarSign, Building, Clock, CheckSquare, Users, Package, Plus
 } from 'lucide-react';
 import * as taskService from '@/services/task-service';
 import { useToastStore } from '@/store/toast-store';
@@ -591,6 +591,75 @@ function DocumentsTab() {
     setIsExtracting(false);
   };
 
+  const handleCreateNewShow = async () => {
+    if (!extractedData) return;
+    if (!organization?.id) {
+      toast.error('Organization not found');
+      return;
+    }
+
+    setIsApplying(true);
+    setError(null);
+
+    try {
+      // Build the new show data
+      const newShowData: Record<string, unknown> = {
+        organization_id: organization.id,
+        name: extractedData.showName || `New Show from ${fileName}`,
+      };
+
+      if (extractedData.dates?.start) newShowData.start_date = extractedData.dates.start;
+      if (extractedData.dates?.end) newShowData.end_date = extractedData.dates.end;
+      
+      const loc = extractedData.location;
+      if (loc) {
+        const locationParts = [loc.city, loc.state].filter(Boolean);
+        if (locationParts.length > 0) newShowData.location = locationParts.join(', ');
+      }
+      
+      if (extractedData.booth?.number) newShowData.booth_number = extractedData.booth.number;
+      if (extractedData.booth?.size) newShowData.booth_size = extractedData.booth.size;
+      if (extractedData.costs?.boothRental) newShowData.cost = extractedData.costs.boothRental;
+      if (extractedData.logistics?.shippingDeadline) newShowData.shipping_cutoff = extractedData.logistics.shippingDeadline;
+      if (extractedData.logistics?.shippingAddress) newShowData.shipping_info = extractedData.logistics.shippingAddress;
+      
+      const contact = extractedData.contacts?.[0];
+      if (contact?.name) newShowData.show_contact_name = contact.name;
+      if (contact?.email) newShowData.show_contact_email = contact.email;
+      if (extractedData.notes) newShowData.general_notes = extractedData.notes;
+
+      // Create the show
+      const { data: newShow, error: createError } = await supabase
+        .from('tradeshows')
+        .insert(newShowData)
+        .select()
+        .single();
+
+      if (createError) throw createError;
+
+      // Set the new show as target for task creation
+      if (newShow) {
+        setTargetShowId(String(newShow.id));
+      }
+
+      // Refresh shows list
+      await loadShows();
+
+      setSuccessMessage(`Created new show: ${newShow?.name || 'Unknown'}`);
+      toast.success('New show created from document!');
+
+      // Auto-create tasks if there are deadlines
+      if (extractedData.deadlines?.length && newShow) {
+        await handleCreateTasksForShow(newShow.id);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create show');
+      toast.error('Failed to create show');
+    }
+
+    setIsApplying(false);
+  };
+
   const handleApplyToShow = async () => {
     if (!extractedData || !selectedShow) {
       toast.error('Please select a show first');
@@ -661,8 +730,47 @@ function DocumentsTab() {
     setIsApplying(false);
   };
 
+  // Helper to create tasks for a specific show ID
+  const handleCreateTasksForShow = async (showId?: number) => {
+    if (!extractedData?.deadlines?.length && !extractedData?.logistics?.shippingDeadline) {
+      return 0;
+    }
+    if (!organization?.id || !user?.id) {
+      return 0;
+    }
+
+    let created = 0;
+    
+    for (const deadline of extractedData.deadlines || []) {
+      if (!deadline.name || !deadline.date) continue;
+      
+      await taskService.createTask(organization.id, user.id, {
+        title: deadline.name,
+        description: deadline.description || `Deadline extracted from: ${fileName}`,
+        tradeShowId: showId,
+        dueDate: deadline.date,
+        priority: 'high',
+      });
+      created++;
+    }
+    
+    // Also create tasks from logistics deadlines
+    if (extractedData.logistics?.shippingDeadline) {
+      await taskService.createTask(organization.id, user.id, {
+        title: 'Shipping Deadline',
+        description: `Ship materials by this date. Extracted from: ${fileName}`,
+        tradeShowId: showId,
+        dueDate: extractedData.logistics.shippingDeadline,
+        priority: 'high',
+      });
+      created++;
+    }
+    
+    return created;
+  };
+
   const handleCreateTasks = async () => {
-    if (!extractedData?.deadlines?.length) {
+    if (!extractedData?.deadlines?.length && !extractedData?.logistics?.shippingDeadline) {
       toast.error('No deadlines found to create tasks');
       return;
     }
@@ -675,32 +783,7 @@ function DocumentsTab() {
     setError(null);
 
     try {
-      let created = 0;
-      
-      for (const deadline of extractedData.deadlines) {
-        if (!deadline.name || !deadline.date) continue;
-        
-        await taskService.createTask(organization.id, user.id, {
-          title: deadline.name,
-          description: deadline.description || `Deadline extracted from: ${fileName}`,
-          tradeShowId: selectedShow?.id || undefined,
-          dueDate: deadline.date,
-          priority: 'high',
-        });
-        created++;
-      }
-      
-      // Also create tasks from logistics deadlines
-      if (extractedData.logistics?.shippingDeadline) {
-        await taskService.createTask(organization.id, user.id, {
-          title: 'Shipping Deadline',
-          description: `Ship materials by this date. Extracted from: ${fileName}`,
-          tradeShowId: selectedShow?.id || undefined,
-          dueDate: extractedData.logistics.shippingDeadline,
-          priority: 'high',
-        });
-        created++;
-      }
+      const created = await handleCreateTasksForShow(selectedShow?.id);
       
       setSuccessMessage(`Created ${created} tasks from deadlines!`);
       toast.success(`Created ${created} tasks`);
@@ -798,10 +881,39 @@ function DocumentsTab() {
         {/* Action Buttons */}
         {extractedData && (
           <div className="space-y-3 pt-4 border-t border-border">
-            {/* Show Selector */}
+            {/* Create New Show */}
+            <Button 
+              onClick={handleCreateNewShow} 
+              disabled={isApplying || isCreatingTasks}
+              className="w-full"
+              variant="primary"
+            >
+              {isApplying ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus size={16} />
+                  Create New Show
+                </>
+              )}
+            </Button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border"></div>
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-surface px-2 text-text-tertiary">or update existing</span>
+              </div>
+            </div>
+
+            {/* Show Selector for Update */}
             <div>
               <label className="block text-xs font-medium text-text-secondary mb-1.5">
-                Apply to Show
+                Update Existing Show
               </label>
               <select
                 value={targetShowId}
@@ -817,51 +929,43 @@ function DocumentsTab() {
               </select>
             </div>
 
-            <Button 
-              onClick={handleApplyAll} 
-              disabled={isApplying || isCreatingTasks || !selectedShow}
-              className="w-full"
-              variant="primary"
-            >
-              {(isApplying || isCreatingTasks) ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  Applying...
-                </>
-              ) : (
-                <>
-                  <Sparkles size={16} />
-                  Apply All to Show
-                </>
-              )}
-            </Button>
-            
-            <div className="grid grid-cols-2 gap-2">
+            {selectedShow && (
               <Button 
-                onClick={handleApplyToShow} 
-                disabled={isApplying || !selectedShow}
+                onClick={handleApplyAll} 
+                disabled={isApplying || isCreatingTasks}
+                className="w-full"
                 variant="outline"
-                size="sm"
               >
-                <Package size={14} />
-                Fields
+                {(isApplying || isCreatingTasks) ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={16} />
+                    Update "{selectedShow.name}"
+                  </>
+                )}
               </Button>
+            )}
+            
+            {/* Tasks - can create without a show */}
+            <div className="pt-2 border-t border-border">
               <Button 
                 onClick={handleCreateTasks} 
                 disabled={isCreatingTasks || deadlineCount === 0}
                 variant="outline"
                 size="sm"
+                className="w-full"
               >
                 <CheckSquare size={14} />
-                Tasks ({deadlineCount})
+                Create {deadlineCount} Task{deadlineCount !== 1 ? 's' : ''} from Deadlines
               </Button>
-            </div>
-            
-            {!selectedShow && (
-              <p className="text-xs text-warning text-center">
-                Select a show above to apply extracted data
+              <p className="text-xs text-text-tertiary text-center mt-1">
+                {selectedShow ? `Will link to "${selectedShow.name}"` : 'Tasks will be created without a show link'}
               </p>
-            )}
+            </div>
           </div>
         )}
       </div>
