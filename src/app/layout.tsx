@@ -5,6 +5,7 @@ import { Providers } from './providers';
 import { PWARegister } from '@/components/pwa-register';
 import { PWAInstallPrompt } from '@/components/pwa-install-prompt';
 import { CookieConsent } from '@/components/legal/cookie-consent';
+import { Analytics } from '@vercel/analytics/next';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -100,6 +101,7 @@ export default function RootLayout({
         <PWARegister />
         <PWAInstallPrompt />
         <CookieConsent />
+        <Analytics />
       </body>
     </html>
   );
