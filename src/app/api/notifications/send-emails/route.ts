@@ -119,9 +119,9 @@ export async function POST(request: NextRequest) {
           continue;
         }
 
-        // Build email data
-        const show = notification.tradeshows as { name: string; location: string; start_date: string } | null;
-        const task = notification.tasks as { title: string; due_date: string } | null;
+        // Build email data - Supabase joins return objects (not arrays) for single relations
+        const show = notification.tradeshows as unknown as { name: string; location: string; start_date: string } | null;
+        const task = notification.tasks as unknown as { title: string; due_date: string } | null;
 
         await sendNotificationEmail(user.email, {
           type: notification.type as 'task_due' | 'shipping_cutoff' | 'show_upcoming' | 'general',
