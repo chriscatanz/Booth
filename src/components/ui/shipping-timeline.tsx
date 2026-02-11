@@ -2,8 +2,8 @@
 
 import React, { useMemo } from 'react';
 import { TradeShow } from '@/types';
-import { parseISO, isValid, differenceInDays, format, addDays, startOfDay, subDays } from 'date-fns';
-import { Package, AlertTriangle, Check, Truck, Warehouse } from 'lucide-react';
+import { parseISO, isValid, differenceInDays, format, addDays, startOfDay, subDays, max } from 'date-fns';
+import { Package, AlertTriangle, Check, Truck, Warehouse, CalendarDays } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ShippingTimelineProps {
@@ -16,27 +16,65 @@ interface ShippingTimelineProps {
 export function ShippingTimeline({ shows, onSelectShow, daysToShow = 45, shippingBufferDays = 7 }: ShippingTimelineProps) {
   const today = startOfDay(new Date());
 
-  // Filter shows with shipping cutoffs in the next N days
+  // Filter shows that are upcoming (with or without shipping cutoffs)
   const relevantShows = useMemo(() => {
     return shows
       .filter(show => {
-        if (!show.shippingCutoff) return false;
-        const cutoff = parseISO(show.shippingCutoff);
-        if (!isValid(cutoff)) return false;
-        const daysUntil = differenceInDays(cutoff, today);
-        return daysUntil >= -7 && daysUntil <= daysToShow; // Show recent past too
+        // Must have a start date
+        if (!show.startDate) return false;
+        const startDate = parseISO(show.startDate);
+        if (!isValid(startDate)) return false;
+        
+        // Check if show is within range (based on start date or shipping cutoff)
+        const daysUntilStart = differenceInDays(startDate, today);
+        
+        if (show.shippingCutoff) {
+          const cutoff = parseISO(show.shippingCutoff);
+          if (isValid(cutoff)) {
+            const daysUntilCutoff = differenceInDays(cutoff, today);
+            // Show if cutoff is recent past or upcoming
+            if (daysUntilCutoff >= -7 && daysUntilCutoff <= daysToShow + 14) return true;
+          }
+        }
+        
+        // Also show if start date is upcoming
+        return daysUntilStart >= -7 && daysUntilStart <= daysToShow + 14;
       })
-      .sort((a, b) => (a.shippingCutoff ?? '').localeCompare(b.shippingCutoff ?? ''));
+      .sort((a, b) => {
+        // Sort by shipping cutoff if available, otherwise by start date
+        const aDate = a.shippingCutoff || a.startDate || '';
+        const bDate = b.shippingCutoff || b.startDate || '';
+        return aDate.localeCompare(bDate);
+      });
   }, [shows, today, daysToShow]);
+
+  // Calculate the actual days needed based on all events
+  const actualDaysToShow = useMemo(() => {
+    let maxDays = daysToShow;
+    
+    relevantShows.forEach(show => {
+      if (show.startDate) {
+        const startDate = parseISO(show.startDate);
+        if (isValid(startDate)) {
+          const daysUntil = differenceInDays(startDate, today);
+          if (daysUntil > maxDays && daysUntil <= daysToShow + 30) {
+            maxDays = daysUntil + 2; // Add padding after show start
+          }
+        }
+      }
+    });
+    
+    return maxDays;
+  }, [relevantShows, today, daysToShow]);
 
   // Generate day columns
   const days = useMemo(() => {
     const result: Date[] = [];
-    for (let i = 0; i <= daysToShow; i++) {
+    for (let i = 0; i <= actualDaysToShow; i++) {
       result.push(addDays(today, i));
     }
     return result;
-  }, [today, daysToShow]);
+  }, [today, actualDaysToShow]);
 
   // Week markers
   const weekMarkers = useMemo(() => {
@@ -50,7 +88,7 @@ export function ShippingTimeline({ shows, onSelectShow, daysToShow = 45, shippin
     return (
       <div className="flex flex-col items-center justify-center py-8 text-text-secondary">
         <Truck size={32} className="mb-2 text-text-tertiary" />
-        <p className="text-sm">No shipping deadlines in the next {daysToShow} days</p>
+        <p className="text-sm">No upcoming shows in the next {daysToShow} days</p>
       </div>
     );
   }
@@ -100,17 +138,18 @@ export function ShippingTimeline({ shows, onSelectShow, daysToShow = 45, shippin
 
       {/* Show rows */}
       {relevantShows.map(show => {
-        const cutoff = parseISO(show.shippingCutoff!); // Warehouse arrival date
-        const shipBy = subDays(cutoff, shippingBufferDays); // When to actually ship
+        const hasCutoff = show.shippingCutoff && isValid(parseISO(show.shippingCutoff));
+        const cutoff = hasCutoff ? parseISO(show.shippingCutoff!) : null;
+        const shipBy = cutoff ? subDays(cutoff, shippingBufferDays) : null;
         const showStart = show.startDate ? parseISO(show.startDate) : null;
         
-        const daysUntilCutoff = differenceInDays(cutoff, today);
-        const daysUntilShipBy = differenceInDays(shipBy, today);
+        const daysUntilCutoff = cutoff ? differenceInDays(cutoff, today) : null;
+        const daysUntilShipBy = shipBy ? differenceInDays(shipBy, today) : null;
         const daysUntilShow = showStart && isValid(showStart) ? differenceInDays(showStart, today) : null;
 
-        const isShipByPast = daysUntilShipBy < 0;
-        const isShipByUrgent = daysUntilShipBy >= 0 && daysUntilShipBy <= 3;
-        const isShipByWarning = daysUntilShipBy > 3 && daysUntilShipBy <= 7;
+        const isShipByPast = daysUntilShipBy !== null && daysUntilShipBy < 0;
+        const isShipByUrgent = daysUntilShipBy !== null && daysUntilShipBy >= 0 && daysUntilShipBy <= 3;
+        const isShipByWarning = daysUntilShipBy !== null && daysUntilShipBy > 3 && daysUntilShipBy <= 7;
 
         return (
           <div key={show.id} className="flex min-w-max hover:bg-bg-tertiary/50 transition-colors">
@@ -136,7 +175,7 @@ export function ShippingTimeline({ shows, onSelectShow, daysToShow = 45, shippin
               })}
 
               {/* Show start marker */}
-              {daysUntilShow !== null && daysUntilShow >= 0 && daysUntilShow <= daysToShow && (
+              {daysUntilShow !== null && daysUntilShow >= 0 && daysUntilShow <= actualDaysToShow && (
                 <div
                   className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-brand-cyan flex items-center justify-center z-10"
                   style={{ left: daysUntilShow * 24 + 4 }}
@@ -147,7 +186,7 @@ export function ShippingTimeline({ shows, onSelectShow, daysToShow = 45, shippin
               )}
 
               {/* Ship By marker (when to actually send it) */}
-              {daysUntilShipBy >= 0 && daysUntilShipBy <= daysToShow && (
+              {daysUntilShipBy !== null && shipBy && daysUntilShipBy >= 0 && daysUntilShipBy <= actualDaysToShow && (
                 <div
                   className={cn(
                     'absolute top-1/2 -translate-y-1/2 w-5 h-5 rounded flex items-center justify-center z-10',
@@ -163,7 +202,7 @@ export function ShippingTimeline({ shows, onSelectShow, daysToShow = 45, shippin
               )}
 
               {/* Warehouse Arrival marker (the cutoff date) */}
-              {daysUntilCutoff >= 0 && daysUntilCutoff <= daysToShow && (
+              {daysUntilCutoff !== null && cutoff && daysUntilCutoff >= 0 && daysUntilCutoff <= actualDaysToShow && (
                 <div
                   className="absolute top-1/2 -translate-y-1/2 w-5 h-5 rounded flex items-center justify-center z-10 bg-brand-purple"
                   style={{ left: daysUntilCutoff * 24 + 2 }}
@@ -174,7 +213,7 @@ export function ShippingTimeline({ shows, onSelectShow, daysToShow = 45, shippin
               )}
 
               {/* Past ship-by indicator */}
-              {isShipByPast && daysUntilCutoff >= 0 && (
+              {isShipByPast && shipBy && daysUntilCutoff !== null && daysUntilCutoff >= 0 && (
                 <div
                   className="absolute top-1/2 -translate-y-1/2 left-1 flex items-center gap-1 text-warning"
                   title={`Ship by was ${format(shipBy, 'MMM d')} - ship ASAP!`}
@@ -185,7 +224,7 @@ export function ShippingTimeline({ shows, onSelectShow, daysToShow = 45, shippin
               )}
 
               {/* Past cutoff indicator */}
-              {daysUntilCutoff < 0 && (
+              {daysUntilCutoff !== null && cutoff && daysUntilCutoff < 0 && (
                 <div
                   className="absolute top-1/2 -translate-y-1/2 left-1 flex items-center gap-1 text-error"
                   title={`Warehouse deadline was ${format(cutoff, 'MMM d')}`}
@@ -195,8 +234,19 @@ export function ShippingTimeline({ shows, onSelectShow, daysToShow = 45, shippin
                 </div>
               )}
 
+              {/* No shipping info indicator - just show date */}
+              {!hasCutoff && daysUntilShow !== null && daysUntilShow >= 0 && (
+                <div
+                  className="absolute top-1/2 -translate-y-1/2 left-1 flex items-center gap-1 text-text-tertiary"
+                  title="No shipping deadline set"
+                >
+                  <CalendarDays size={14} />
+                  <span className="text-[10px]">No shipping info</span>
+                </div>
+              )}
+
               {/* Line connecting ship-by to arrival to show */}
-              {daysUntilShipBy >= 0 && daysUntilCutoff <= daysToShow && daysUntilCutoff > daysUntilShipBy && (
+              {daysUntilShipBy !== null && daysUntilCutoff !== null && daysUntilShipBy >= 0 && daysUntilCutoff <= actualDaysToShow && daysUntilCutoff > daysUntilShipBy && (
                 <div
                   className="absolute top-1/2 h-0.5 bg-border-strong/30"
                   style={{
@@ -205,7 +255,7 @@ export function ShippingTimeline({ shows, onSelectShow, daysToShow = 45, shippin
                   }}
                 />
               )}
-              {daysUntilCutoff >= 0 && daysUntilShow !== null && daysUntilShow > daysUntilCutoff && daysUntilShow <= daysToShow && (
+              {daysUntilCutoff !== null && daysUntilCutoff >= 0 && daysUntilShow !== null && daysUntilShow > daysUntilCutoff && daysUntilShow <= actualDaysToShow && (
                 <div
                   className="absolute top-1/2 h-0.5 bg-border-strong/30"
                   style={{
