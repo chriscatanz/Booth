@@ -5,10 +5,11 @@ import { useNotificationPreferences } from '@/hooks/use-notifications';
 import { Button } from '@/components/ui/button';
 import { 
   Bell, Mail, Truck, Calendar, CheckSquare, 
-  AlertCircle, Check, Save
+  AlertCircle, Check, Save, Send
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DEFAULT_NOTIFICATION_PREFERENCES } from '@/types/notifications';
+import { authenticatedFetch } from '@/lib/api';
 
 export function NotificationPreferences() {
   const { preferences, isLoading, error, updatePreferences } = useNotificationPreferences();
@@ -17,6 +18,8 @@ export function NotificationPreferences() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [isSendingTest, setIsSendingTest] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
   // Initialize local state from fetched preferences
   useEffect(() => {
@@ -67,6 +70,30 @@ export function NotificationPreferences() {
     }
     
     setIsSaving(false);
+  };
+
+  const handleSendTestEmail = async () => {
+    setIsSendingTest(true);
+    setTestResult(null);
+    
+    try {
+      const response = await authenticatedFetch('/api/notifications/test-email', {
+        method: 'POST',
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setTestResult({ success: true, message: data.message || 'Test email sent!' });
+      } else {
+        setTestResult({ success: false, message: data.error || 'Failed to send test email' });
+      }
+    } catch (err) {
+      setTestResult({ success: false, message: 'Network error — please try again' });
+    }
+    
+    setIsSendingTest(false);
+    setTimeout(() => setTestResult(null), 5000);
   };
 
   if (isLoading) {
@@ -205,6 +232,33 @@ export function NotificationPreferences() {
             enabled={localPrefs.emailEnabled}
             onChange={(v) => setLocalPrefs(p => ({ ...p, emailEnabled: v }))}
           />
+        </div>
+
+        {/* Test Email Button */}
+        <div className="mt-4 p-4 rounded-lg bg-bg-tertiary border border-border">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-text-primary">Test Email Delivery</p>
+              <p className="text-xs text-text-tertiary">Send a test email to verify your setup</p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSendTestEmail}
+              loading={isSendingTest}
+            >
+              <Send size={14} /> Send Test
+            </Button>
+          </div>
+          {testResult && (
+            <div className={cn(
+              'mt-3 flex items-center gap-2 p-2 rounded text-sm',
+              testResult.success ? 'bg-success-bg text-success' : 'bg-error-bg text-error'
+            )}>
+              {testResult.success ? <Check size={14} /> : <AlertCircle size={14} />}
+              {testResult.message}
+            </div>
+          )}
         </div>
       </div>
 
