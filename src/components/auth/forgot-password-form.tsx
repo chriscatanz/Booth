@@ -36,7 +36,7 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
         </div>
         <h1 className="text-2xl font-bold text-text-primary">Check your email</h1>
         <p className="text-text-secondary mt-2 mb-6">
-          We've sent password reset instructions to <strong>{email}</strong>.
+          We&apos;ve sent password reset instructions to <strong>{email}</strong>.
         </p>
         <Button variant="outline" onClick={onBack}>
           Back to Sign In

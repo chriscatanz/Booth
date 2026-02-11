@@ -103,9 +103,8 @@ export function AISettings() {
     if (!organization?.id) return;
     
     // Remove from Supabase
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await aiService.saveApiKeyToOrg(
-      supabase as any,
+      supabase as unknown as Parameters<typeof aiService.saveApiKeyToOrg>[0],
       organization.id,
       null
     );
@@ -317,7 +316,7 @@ export function AISettings() {
       <div className="p-3 rounded-lg bg-bg-tertiary border border-border text-xs text-text-secondary">
         <p className="font-medium text-text-primary mb-1">About Usage & Costs</p>
         <p>
-          AI features use your Claude API key directly. You're billed by Anthropic based on your usage. 
+          AI features use your Claude API key directly. You&apos;re billed by Anthropic based on your usage. 
           Typical trade show tasks cost $0.01-0.05 per request. Monitor your usage at{' '}
           <a 
             href="https://console.anthropic.com/settings/usage" 

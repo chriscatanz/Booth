@@ -12,7 +12,7 @@ import {
 } from '@/lib/constants';
 import { 
   Plus, X, GripVertical, Save, Check, RotateCcw,
-  Package, Image, CheckSquare, Shirt
+  Package, Image as ImageIcon, CheckSquare, Shirt
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -35,7 +35,7 @@ const LIST_CONFIGS: ListConfig[] = [
   { 
     key: 'graphicsOptions', 
     label: 'Graphics Options', 
-    icon: <Image size={16} />,
+    icon: <ImageIcon size={16} />,
     description: 'Items available in the "Graphics to Ship" checklist'
   },
   { 

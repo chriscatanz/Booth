@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
-import { Building2, AlertCircle, Loader2, LogOut, Mail, CheckCircle } from 'lucide-react';
+import { Building2, AlertCircle, LogOut, Mail, CheckCircle } from 'lucide-react';
 import * as authService from '@/services/auth-service';
 import { Invitation } from '@/types/auth';
 
@@ -12,7 +12,7 @@ export function OrganizationSetup() {
   const { user, createOrganization, isLoading, error, clearError, signOut, initialize } = useAuthStore();
   const [orgName, setOrgName] = useState('');
   const [pendingInvites, setPendingInvites] = useState<Invitation[]>([]);
-  const [loadingInvites, setLoadingInvites] = useState(true);
+  const [_loadingInvites, setLoadingInvites] = useState(true);
   const [acceptingInvite, setAcceptingInvite] = useState<string | null>(null);
   const [signupSuccessEmail, setSignupSuccessEmail] = useState<string | null>(null);
 

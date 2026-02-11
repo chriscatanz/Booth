@@ -6,7 +6,6 @@
  */
 
 import { TradeShow, Attendee } from '@/types';
-import { formatDateRange } from '@/lib/date-utils';
 import { totalEstimatedCost, costPerLead } from '@/types/computed';
 
 // CSV escape helper

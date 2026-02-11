@@ -1,24 +1,22 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import {
   Sparkles, Wand2, FileText, MessageSquare, Send, Loader2, 
-  Copy, Check, RefreshCw, Upload, FileUp, Trash2, ChevronDown,
+  Copy, Check, RefreshCw, Upload,
   Mail, ExternalLink, AlertCircle, Settings, Calendar, MapPin,
   DollarSign, Building, Clock, CheckSquare, Users, Package, Plus
 } from 'lucide-react';
 import * as taskService from '@/services/task-service';
 import * as cacheService from '@/services/cache-service';
-import { useToastStore } from '@/store/toast-store';
 import { cn } from '@/lib/utils';
 import * as aiService from '@/services/ai-service';
 import { useTradeShowStore } from '@/store/trade-show-store';
 import { TradeShow } from '@/types';
 import { useAuthStore } from '@/store/auth-store';
 import { supabase } from '@/lib/supabase';
-import Link from 'next/link';
 
 type Tab = 'generate' | 'documents' | 'chat';
 
@@ -565,7 +563,7 @@ function DocumentsTab() {
           throw new Error('Could not extract text from document');
         }
         setDocumentText(extractedText);
-      } catch (err) {
+      } catch (_err) {
         setError('Failed to parse document. Try a different file format.');
         setFileName(null);
       }
@@ -949,7 +947,7 @@ function DocumentsTab() {
                 ) : (
                   <>
                     <Sparkles size={16} />
-                    Update "{selectedShow.name}"
+                    Update &quot;{selectedShow.name}&quot;
                   </>
                 )}
               </Button>

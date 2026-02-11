@@ -1,7 +1,6 @@
 import { useAuthStore } from '@/store/auth-store';
 import { 
   CustomLists, 
-  DEFAULT_CUSTOM_LISTS,
   DEFAULT_BOOTH_OPTIONS,
   DEFAULT_GRAPHICS_OPTIONS,
   DEFAULT_PACKING_LIST_OPTIONS,

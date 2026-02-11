@@ -1,14 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth-store';
 import { useDataVisibility } from '@/hooks/use-data-visibility';
 import { Button } from '@/components/ui/button';
 import {
-  Shield, Users, Eye, Info, DollarSign, Truck, Plane,
+  Users, Eye, Info, DollarSign, Truck, Plane,
   UserCheck, BarChart3, FileText, CheckSquare, Folder,
-  AlertCircle, Check, RotateCcw, Save, ChevronDown
+  AlertCircle, Check, RotateCcw, Save
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -18,7 +17,6 @@ import {
   DEFAULT_ROLE_PERMISSIONS,
   RoleDataPermissions,
 } from '@/types/data-visibility';
-import { UserRole } from '@/types/auth';
 
 const CATEGORY_ICONS: Record<DataCategory, React.ElementType> = {
   basic: Info,

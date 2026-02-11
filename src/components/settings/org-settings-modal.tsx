@@ -1,19 +1,18 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import * as authService from '@/services/auth-service';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  X, Building2, Users, Shield, Save, Upload,
+  X, Building2, Users, Shield, Save,
   Crown, AlertCircle, Check, Trash2, Settings, Clock, Download, List, Palette, Columns, Eye, Bell, Sparkles, Calendar,
-  MoreVertical, ChevronDown
+  ChevronDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { authenticatedFetch } from '@/lib/api';
-import { MembersModal } from '@/components/auth/members-modal';
 import { AuditLog } from './audit-log';
 import { DataExport } from './data-export';
 import { DeleteAccountModal } from './delete-account-modal';
@@ -252,7 +251,7 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
                           className="max-w-32"
                         />
                         <p className="text-xs text-text-tertiary mt-1">
-                          Days before warehouse arrival to show "Ship By" date
+                          Days before warehouse arrival to show &quot;Ship By&quot; date
                         </p>
                       </div>
                     </div>

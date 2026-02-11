@@ -1,9 +1,7 @@
 'use client';
 
-import React from 'react';
 import { motion } from 'framer-motion';
 import { Star, Quote } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface Testimonial {
   quote: string;
@@ -55,7 +53,7 @@ export function TestimonialsSection() {
             transition={{ delay: 0.1 }}
             className="mt-4 text-text-secondary max-w-2xl mx-auto"
           >
-            Booth was built by someone who's been in the trenches. Here's what people are saying.
+            Booth was built by someone who&apos;s been in the trenches. Here&apos;s what people are saying.
           </motion.p>
         </div>
 
@@ -78,7 +76,7 @@ export function TestimonialsSection() {
               </div>
 
               <p className="text-text-primary mb-6 leading-relaxed">
-                "{testimonial.quote}"
+                &quot;{testimonial.quote}&quot;
               </p>
 
               <div className="flex items-center gap-3">

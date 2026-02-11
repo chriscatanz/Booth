@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
-import { Mail, Lock, User, AlertCircle, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import { Mail, Lock, User, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { PasswordStrength, validatePassword } from '@/components/ui/password-strength';
 
 interface SignUpFormProps {
@@ -12,7 +12,7 @@ interface SignUpFormProps {
   onSuccess: () => void;
 }
 
-export function SignUpForm({ onSwitchToLogin, onSuccess }: SignUpFormProps) {
+export function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
   const { signUp, isLoading, error, clearError } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -56,7 +56,7 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }: SignUpFormProps) {
         </div>
         <h1 className="text-2xl font-bold text-text-primary">Verify your email</h1>
         <p className="text-text-secondary mt-2 mb-2">
-          We've sent a confirmation link to:
+          We&apos;ve sent a confirmation link to:
         </p>
         <p className="text-text-primary font-medium mb-4">{email}</p>
         <div className="bg-bg-tertiary rounded-lg p-4 mb-6 text-left">

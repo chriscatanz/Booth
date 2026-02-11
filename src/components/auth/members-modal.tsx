@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import { OrganizationMember, Invitation, UserRole } from '@/types/auth';
@@ -11,14 +11,13 @@ import {
   X, Users, UserPlus, Mail, Loader2, Trash2, 
   Crown, Shield, Edit3, Eye, AlertCircle, Check, Copy
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface MembersModalProps {
   onClose: () => void;
 }
 
 export function MembersModal({ onClose }: MembersModalProps) {
-  const { organization, user, membership, isOwner } = useAuthStore();
+  const { organization, user, isOwner } = useAuthStore();
   const [members, setMembers] = useState<OrganizationMember[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -108,7 +107,7 @@ export function MembersModal({ onClose }: MembersModalProps) {
     try {
       await authService.removeMember(memberId);
       setMembers(members.filter(m => m.id !== memberId));
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to remove member');
     }
   }
@@ -117,7 +116,7 @@ export function MembersModal({ onClose }: MembersModalProps) {
     try {
       await authService.deleteInvitation(inviteId);
       setInvitations(invitations.filter(i => i.id !== inviteId));
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to revoke invitation');
     }
   }
@@ -128,7 +127,7 @@ export function MembersModal({ onClose }: MembersModalProps) {
       setMembers(members.map(m => 
         m.id === memberId ? { ...m, role: newRole } : m
       ));
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to update role');
     }
   }

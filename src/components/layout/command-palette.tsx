@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { useTradeShowStore } from '@/store/trade-show-store';
 import { ViewMode } from '@/types/enums';
 import { cn } from '@/lib/utils';
 import {
   Search, Calendar, CheckSquare, Package, Activity, LayoutDashboard,
-  Plus, Settings, Archive, FileText, MapPin, ArrowRight,
+  Plus, Settings, Archive, MapPin, ArrowRight,
 } from 'lucide-react';
 
 interface CommandItem {

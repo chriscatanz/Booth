@@ -1,15 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState } from 'react';
 import { useTradeShowStore } from '@/store/trade-show-store';
 import { 
   downloadShowsCSV, 
   downloadAttendeesCSV, 
   downloadAllDataJSON 
 } from '@/services/data-export-service';
-import { Button } from '@/components/ui/button';
-import { Download, FileSpreadsheet, FileJson, Check, Loader2 } from 'lucide-react';
+import { FileSpreadsheet, FileJson, Check, Loader2 } from 'lucide-react';
 
 export function DataExport() {
   const { shows, allAttendees } = useTradeShowStore();

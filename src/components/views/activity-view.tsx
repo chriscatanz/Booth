@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import * as activityService from '@/services/activity-service';
-import { ActivityItem, ActivityType, ACTIVITY_TYPE_CONFIG, REACTION_EMOJIS } from '@/types/activity';
-import { Button } from '@/components/ui/button';
+import { ActivityItem, ACTIVITY_TYPE_CONFIG, REACTION_EMOJIS } from '@/types/activity';
 import { cn } from '@/lib/utils';
 import {
   Activity, MessageSquare, ThumbsUp, Plus, Edit, Trash2,
@@ -115,7 +114,7 @@ interface ActivityCardProps {
   currentUserId?: string;
 }
 
-function ActivityCard({ activity, onReaction, currentUserId }: ActivityCardProps) {
+function ActivityCard({ activity, onReaction }: ActivityCardProps) {
   const [showReactions, setShowReactions] = useState(false);
   const config = ACTIVITY_TYPE_CONFIG[activity.type];
   const Icon = ICON_MAP[config.icon] || Activity;

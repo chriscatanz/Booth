@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { ViewMode } from '@/types/enums';
 import { useAuthStore } from '@/store/auth-store';
@@ -13,7 +13,6 @@ import {
   Package,
   Box,
   Activity,
-  Settings,
   Command,
   DollarSign,
   Sparkles,

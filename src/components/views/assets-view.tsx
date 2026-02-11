@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import * as assetService from '@/services/asset-service';
@@ -9,14 +9,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import {
-  Plus, Package, Box, AlertTriangle, Search, Filter,
-  MoreHorizontal, Edit, Trash2, Calendar, X, ChevronRight
+  Plus, Package, Box, AlertTriangle, Search,
+  MoreHorizontal, Edit, Trash2, Calendar, X
 } from 'lucide-react';
 import { AssetModal } from '@/components/assets/asset-modal';
 import { format, parseISO } from 'date-fns';
 
 export default function AssetsView() {
-  const { organization, user, isEditor } = useAuthStore();
+  const { organization, isEditor } = useAuthStore();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -1,15 +1,15 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence, Reorder } from 'framer-motion';
+import { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import * as taskService from '@/services/task-service';
 import { Task, TaskStatus, TASK_STATUS_CONFIG, TASK_PRIORITY_CONFIG } from '@/types/tasks';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
-  Plus, CheckSquare, Clock, User, Calendar, AlertCircle,
-  MoreHorizontal, Trash2, Edit, ChevronDown, Filter, X
+  Plus, CheckSquare, Clock, AlertCircle,
+  MoreHorizontal, Trash2, Edit, Filter, X
 } from 'lucide-react';
 import { TaskModal } from '@/components/tasks/task-modal';
 import { format, isPast, parseISO } from 'date-fns';
@@ -17,7 +17,7 @@ import { format, isPast, parseISO } from 'date-fns';
 const COLUMNS: TaskStatus[] = ['todo', 'in_progress', 'done'];
 
 export default function TasksView() {
-  const { organization, user, isEditor } = useAuthStore();
+  const { organization, isEditor } = useAuthStore();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

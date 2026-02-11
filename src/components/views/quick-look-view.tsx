@@ -1,6 +1,5 @@
 ﻿'use client';
 
-import React from 'react';
 import { motion } from 'framer-motion';
 import { useFilteredShows } from '@/hooks/use-filtered-shows';
 import { useTradeShowStore } from '@/store/trade-show-store';
@@ -9,7 +8,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { formatCurrency } from '@/lib/utils';
 import { formatDateRange } from '@/lib/date-utils';
 import { totalEstimatedCost, daysUntilShow } from '@/types/computed';
-import { LayoutGrid, MapPin, Calendar, DollarSign, Users, Hotel, Mic, Package, CheckCircle, Clock, Truck } from 'lucide-react';
+import { LayoutGrid, MapPin, Calendar, DollarSign, Users, Hotel, Mic, Package, CheckCircle, Truck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const containerVariants = {
@@ -60,7 +59,7 @@ export default function QuickLookView() {
         initial="hidden"
         animate="visible"
       >
-        {shows.map((show, index) => {
+        {shows.map((show) => {
           const days = daysUntilShow(show);
           const totalCost = totalEstimatedCost(show);
           const showAttendees = allAttendees.filter(a => a.tradeshowId === show.id);

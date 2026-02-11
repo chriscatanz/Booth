@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import { 
-  User, LogOut, Building2, ChevronDown, Settings, 
-  Users, Check, Plus 
+  LogOut, Building2, ChevronDown, Settings, 
+  Check,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -15,7 +15,7 @@ interface UserMenuProps {
   onOpenOrgSettings?: () => void;
 }
 
-export function UserMenu({ onOpenSettings, onOpenMembers, onOpenOrgSettings }: UserMenuProps) {
+export function UserMenu({ onOpenSettings, onOpenOrgSettings }: UserMenuProps) {
   const { 
     user, 
     organization, 

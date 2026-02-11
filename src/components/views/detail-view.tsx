@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTradeShowStore } from '@/store/trade-show-store';
 import { useToastStore } from '@/store/toast-store';
@@ -18,14 +18,14 @@ import { HotelMap } from '@/components/ui/hotel-map';
 import { formatCurrency } from '@/lib/utils';
 import { 
   totalEstimatedCost, totalServicesCost, estimatedHotelCost, roiPercentage, 
-  costPerLead, costPerQualifiedLead, leadQualificationRate, dealCloseRate, 
-  revenuePerDeal, parseJsonStringArray 
+  costPerLead, leadQualificationRate, dealCloseRate, 
+  parseJsonStringArray 
 } from '@/types/computed';
 import { SHOW_STATUSES } from '@/lib/constants';
 import { useCustomLists } from '@/hooks/use-custom-lists';
 import { DetailHero, DetailTabs, DetailTabPanel, TabSection, type DetailTab } from '@/components/detail';
 import {
-  Save, Trash2, Copy, Truck, Hotel, Users, Award, Plus, X, Package,
+  Save, Trash2, Copy, Truck, Hotel, Users, X, Package,
   FileStack, Printer, CalendarPlus, Mail, Repeat, Upload, MoreHorizontal, Download,
 } from 'lucide-react';
 import { downloadICS, openMailto, downloadCSV } from '@/services/export-service';
@@ -36,7 +36,6 @@ import { FileUploadZone } from '@/components/ui/file-upload-zone';
 import { ActivityTimeline } from '@/components/ui/activity-timeline';
 import { PermissionGate, usePermission } from '@/components/auth/permission-gate';
 import { DataVisibilityGate } from '@/components/auth/data-visibility-gate';
-import { useDataVisibility } from '@/hooks/use-data-visibility';
 import { TaskList } from '@/components/tasks';
 import { AttendeeSearch } from '@/components/ui/attendee-search';
 import { Attendee } from '@/types';
@@ -44,7 +43,7 @@ import { KitAssignmentSection } from '@/components/kits/kit-assignment-section';
 
 export default function DetailView() {
   const {
-    selectedShow, updateSelectedShow, setSelectedShow,
+    selectedShow, updateSelectedShow,
     attendees, addAttendee, removeAttendee, updateAttendee,
     allAttendees,
     additionalFiles, refreshAdditionalFiles,
@@ -60,8 +59,6 @@ export default function DetailView() {
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   
   const canEdit = usePermission('editor');
-  const canDelete = usePermission('admin');
-  const { canSeeCategory } = useDataVisibility();
   const { boothOptions, graphicsOptions, packingListOptions, tableclothOptions } = useCustomLists();
   
   // Read-only mode for viewers
@@ -305,7 +302,7 @@ export default function DetailView() {
 
         {/* LOGISTICS TAB */}
         <DetailTabPanel id="logistics" activeTab={activeTab}>
-          <DataVisibilityGate category="logistics" fallback={<div className="p-6 text-center text-text-secondary">You don't have access to logistics information.</div>}>
+          <DataVisibilityGate category="logistics" fallback={<div className="p-6 text-center text-text-secondary">You don&apos;t have access to logistics information.</div>}>
           <div className="space-y-6">
             {/* Shipping */}
             <TabSection title="Shipping" icon={Truck}>
@@ -430,7 +427,7 @@ export default function DetailView() {
 
         {/* TRAVEL TAB */}
         <DetailTabPanel id="travel" activeTab={activeTab}>
-          <DataVisibilityGate category="travel" fallback={<div className="p-6 text-center text-text-secondary">You don't have access to travel information.</div>}>
+          <DataVisibilityGate category="travel" fallback={<div className="p-6 text-center text-text-secondary">You don&apos;t have access to travel information.</div>}>
           <div className="space-y-6">
             {/* Attendees */}
             <DataVisibilityGate category="attendees">
@@ -520,7 +517,7 @@ export default function DetailView() {
 
         {/* BUDGET TAB */}
         <DetailTabPanel id="budget" activeTab={activeTab}>
-          <DataVisibilityGate category="budget" fallback={<div className="p-6 text-center text-text-secondary">You don't have access to budget information.</div>}>
+          <DataVisibilityGate category="budget" fallback={<div className="p-6 text-center text-text-secondary">You don&apos;t have access to budget information.</div>}>
           <div className="space-y-6">
             {/* Budget Summary */}
             <TabSection title="Budget Summary">

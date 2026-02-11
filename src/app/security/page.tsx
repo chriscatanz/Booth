@@ -104,7 +104,7 @@ export default function SecurityPage() {
               Security & Trust
             </h1>
             <p className="text-lg text-text-secondary">
-              Your trade show data is sensitive. We treat it that way. Here's how we protect 
+              Your trade show data is sensitive. We treat it that way. Here&apos;s how we protect 
               your information and maintain your trust.
             </p>
           </motion.div>
@@ -209,7 +209,7 @@ export default function SecurityPage() {
             Privacy & Compliance
           </h2>
           <p className="text-text-secondary mb-8">
-            We're committed to protecting your privacy and meeting regulatory requirements.
+            We&apos;re committed to protecting your privacy and meeting regulatory requirements.
           </p>
         </motion.div>
 
@@ -242,7 +242,7 @@ export default function SecurityPage() {
           className="p-8 rounded-2xl border border-border bg-surface"
         >
           <h2 className="text-2xl font-bold text-text-primary mb-4">
-            What We Don't Do
+            What We Don&apos;t Do
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-text-secondary">
             <div className="flex items-center gap-3">

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { useTradeShowStore } from '@/store/trade-show-store';
 import { useAuthStore } from '@/store/auth-store';
 import { useFilteredShows } from '@/hooks/use-filtered-shows';
@@ -9,16 +9,15 @@ import { ViewMode, AlertType, AlertPriority } from '@/types/enums';
 import { TradeShow } from '@/types';
 import { StatCard } from '@/components/ui/stat-card';
 import { formatCurrency } from '@/lib/utils';
-import { formatDateRange, daysUntil, getMonthAbbrev, getDayNumber, formatDate } from '@/lib/date-utils';
+import { getMonthAbbrev, getDayNumber } from '@/lib/date-utils';
 import { daysUntilShow } from '@/types/computed';
 import {
   Calendar, Clock, CalendarDays, DollarSign, AlertTriangle,
-  CheckCircle, CalendarClock, Plus, BarChart3, CalendarPlus, Upload,
+  CheckCircle, CalendarClock, Plus, BarChart3, CalendarPlus,
   ChevronRight, Package, UserPlus, Building2, SquareDashed, Zap, Truck,
 } from 'lucide-react';
 import { ShippingTimeline } from '@/components/ui/shipping-timeline';
-import { parseISO, isValid, isSameMonth, addDays, addMonths } from 'date-fns';
-import { format } from 'date-fns';
+import { parseISO, isValid, isSameMonth, addDays, addMonths, format } from 'date-fns';
 
 interface ShowAlert {
   show: TradeShow;

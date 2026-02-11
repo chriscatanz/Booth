@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   useBoothKits, 
   useKitAvailability, 
   useKitAssignments,
-  useAutoAssign 
 } from '@/hooks/use-booth-kits';
 import { useAuthStore } from '@/store/auth-store';
 import {
@@ -19,15 +18,15 @@ import {
   KIT_STATUS_COLORS,
   ASSIGNMENT_STATUS_LABELS,
   ASSIGNMENT_STATUS_COLORS,
-  KitType,
 } from '@/types/booth-kits';
+import type { KitType } from '@/types/booth-kits';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import {
-  Plus, Package, Box, Search, Filter, Truck, Calendar,
-  MoreHorizontal, Edit, Trash2, ChevronRight, X, Sparkles,
-  AlertTriangle, CheckCircle, Clock, MapPin
+  Plus, Package, Box, Search, Truck, Calendar,
+  Edit, Trash2, X, Sparkles,
+  CheckCircle, MapPin
 } from 'lucide-react';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { KitModal } from '@/components/kits/kit-modal';
@@ -37,7 +36,7 @@ export default function KitsView() {
   const { isEditor } = useAuthStore();
   const { kits, loading: kitsLoading, createKit, updateKit, deleteKit, refresh } = useBoothKits();
   const { availability, loading: availLoading } = useKitAvailability();
-  const { assignments, loading: assignLoading } = useKitAssignments();
+  const { assignments } = useKitAssignments();
   
   // Filters
   const [searchText, setSearchText] = useState('');

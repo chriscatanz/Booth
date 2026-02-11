@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Mail, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 interface LoginFormProps {
@@ -105,7 +104,7 @@ export function LoginForm({ onSwitchToSignUp, onForgotPassword }: LoginFormProps
         </Button>
 
         <p className="text-center text-sm text-text-secondary">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <button
             type="button"
             onClick={onSwitchToSignUp}

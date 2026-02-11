@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useShowKitAssignments, useBoothKits, useKitConflictCheck } from '@/hooks/use-booth-kits';
 import { usePermission } from '@/components/auth/permission-gate';
 import {
   KitAssignment,
-  BoothKit,
   ASSIGNMENT_STATUS_LABELS,
   ASSIGNMENT_STATUS_COLORS,
   KIT_TYPE_LABELS,
@@ -14,12 +13,10 @@ import {
 } from '@/types/booth-kits';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { DatePicker } from '@/components/ui/date-picker';
 import { cn } from '@/lib/utils';
 import {
-  Box, Plus, X, Truck, Calendar, Package, AlertTriangle,
-  ChevronDown, ChevronUp, Check, Loader2
+  Box, Plus, X, Package, AlertTriangle,
+  ChevronDown, ChevronUp, Loader2
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
@@ -43,7 +40,7 @@ export function KitAssignmentSection({
     removeAssignment,
   } = useShowKitAssignments(tradeshowId);
   const { kits } = useBoothKits();
-  const { checking, checkAvailability, getConflicts } = useKitConflictCheck();
+  const { getConflicts } = useKitConflictCheck();
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedKitId, setSelectedKitId] = useState<string>('');

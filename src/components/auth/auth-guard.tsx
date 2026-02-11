@@ -15,9 +15,9 @@ export function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter();
   const { 
     isAuthenticated, 
-    isLoading, 
+    isLoading: _isLoading, 
     user, 
-    organization,
+    organization: _organization,
     organizations,
     initialize 
   } = useAuthStore();

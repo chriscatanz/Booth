@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { 
   Calendar, DollarSign, Users, BarChart3, 
   CheckCircle, ArrowRight, Truck, FileText,
-  Shield, Zap, Package, ChevronDown, Menu, X,
+  Zap, ChevronDown, Menu, X,
   Sparkles, FileSpreadsheet, Layers, RefreshCw, Bell, Box
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -448,7 +448,7 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
                 Let AI handle the busywork
               </h2>
               <p className="text-lg text-text-secondary mb-8">
-                Booth's AI assistant understands trade shows. Generate content in seconds that would take hours to write manually.
+                Booth&apos;s AI assistant understands trade shows. Generate content in seconds that would take hours to write manually.
               </p>
               
               <div className="space-y-4">
@@ -527,9 +527,9 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
                       <div className="bg-bg-tertiary px-4 py-3 rounded-2xl rounded-bl-md max-w-[90%]">
                         <p className="text-sm text-text-primary font-medium mb-2">Here are 5 conversation starters for NRF 2026:</p>
                         <ul className="text-sm text-text-secondary space-y-1">
-                          <li>• "How are you handling the shift to unified commerce?"</li>
-                          <li>• "What's your biggest challenge with inventory visibility?"</li>
-                          <li>• "Have you explored AI for customer personalization?"</li>
+                          <li>• &quot;How are you handling the shift to unified commerce?&quot;</li>
+                          <li>• &quot;What&apos;s your biggest challenge with inventory visibility?&quot;</li>
+                          <li>• &quot;Have you explored AI for customer personalization?&quot;</li>
                         </ul>
                         <p className="text-xs text-text-tertiary mt-2">+ 2 more...</p>
                       </div>
@@ -599,7 +599,7 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
             Ready to take control of your trade show program?
           </h2>
           <p className="text-text-secondary mb-8">
-            Join other marketing teams who've ditched the spreadsheet chaos.
+            Join other marketing teams who&apos;ve ditched the spreadsheet chaos.
           </p>
           <Button variant="primary" size="lg" onClick={onGetStarted}>
             Start Free Trial <ArrowRight size={16} className="ml-1" />
