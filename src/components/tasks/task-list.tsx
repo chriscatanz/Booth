@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { 
   Plus, CheckSquare, CheckCircle2, Clock,
-  MoreHorizontal, Trash2, Edit, AlertCircle
+  MoreHorizontal, Trash2, Edit, AlertCircle, User
 } from 'lucide-react';
 import { TaskModal } from './task-modal';
 import { format, isPast, parseISO } from 'date-fns';
