@@ -296,8 +296,8 @@ export async function fetchInvitationByToken(token: string): Promise<Invitation 
     .eq('token', token)
     .is('accepted_at', null)
     .gt('expires_at', new Date().toISOString())
-    .single();
-  if (error) return null;
+    .maybeSingle(); // Use maybeSingle to avoid 406 error when no row found
+  if (error || !data) return null;
   return mapInvitation(data);
 }
 
