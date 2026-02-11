@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Use service role for calendar feed (token-authenticated, not session-based)
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Lazy initialization to avoid build-time errors
+let _supabase: SupabaseClient | null = null;
+
+function getSupabase(): SupabaseClient {
+  if (!_supabase) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !key) {
+      throw new Error('Missing Supabase configuration');
+    }
+    _supabase = createClient(url, key);
+  }
+  return _supabase;
+}
 
 // Helper to format date as iCalendar all-day date (YYYYMMDD)
 function formatICSDate(dateStr: string | null): string | null {
@@ -45,7 +54,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Look up organization by calendar token
-    const { data: org, error: orgError } = await supabase
+    const { data: org, error: orgError } = await getSupabase()
       .from('organizations')
       .select('id, name, settings')
       .eq('settings->>calendarToken', token)
@@ -56,7 +65,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch all non-template trade shows for this org
-    const { data: shows, error: showsError } = await supabase
+    const { data: shows, error: showsError } = await getSupabase()
       .from('tradeshows')
       .select('id, name, location, start_date, end_date, booth_number, show_status, general_notes')
       .eq('organization_id', org.id)
@@ -153,7 +162,7 @@ export async function POST(request: NextRequest) {
     const accessToken = authHeader.slice(7);
     
     // Verify the user
-    const { data: { user }, error: authError } = await supabase.auth.getUser(accessToken);
+    const { data: { user }, error: authError } = await getSupabase().auth.getUser(accessToken);
     if (authError || !user) {
       return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
     }
@@ -165,7 +174,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check user is admin of this org
-    const { data: membership } = await supabase
+    const { data: membership } = await getSupabase()
       .from('user_organizations')
       .select('role')
       .eq('user_id', user.id)
@@ -177,7 +186,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get current org settings
-    const { data: org } = await supabase
+    const { data: org } = await getSupabase()
       .from('organizations')
       .select('settings')
       .eq('id', organizationId)
@@ -192,7 +201,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update org settings
-    const { error: updateError } = await supabase
+    const { error: updateError } = await getSupabase()
       .from('organizations')
       .update({
         settings: {
@@ -233,7 +242,7 @@ export async function DELETE(request: NextRequest) {
 
     const accessToken = authHeader.slice(7);
     
-    const { data: { user }, error: authError } = await supabase.auth.getUser(accessToken);
+    const { data: { user }, error: authError } = await getSupabase().auth.getUser(accessToken);
     if (authError || !user) {
       return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
     }
@@ -246,7 +255,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Check user is admin
-    const { data: membership } = await supabase
+    const { data: membership } = await getSupabase()
       .from('user_organizations')
       .select('role')
       .eq('user_id', user.id)
@@ -258,7 +267,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Get current settings and remove calendar token
-    const { data: org } = await supabase
+    const { data: org } = await getSupabase()
       .from('organizations')
       .select('settings')
       .eq('id', organizationId)
@@ -266,7 +275,7 @@ export async function DELETE(request: NextRequest) {
 
     const { calendarToken, calendarEnabled, ...restSettings } = (org?.settings || {}) as Record<string, unknown>;
 
-    await supabase
+    await getSupabase()
       .from('organizations')
       .update({
         settings: {
