@@ -4,6 +4,12 @@
   "buildCommand": "npm run build",
   "installCommand": "npm ci",
   "regions": ["iad1"],
+  "crons": [
+    {
+      "path": "/api/cron/send-notification-emails",
+      "schedule": "0 * * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/sw.js",
