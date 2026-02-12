@@ -34,9 +34,14 @@ import { AutoAssignModal } from '@/components/kits/auto-assign-modal';
 
 export default function KitsView() {
   const { isEditor } = useAuthStore();
-  const { kits, loading: kitsLoading, createKit, updateKit, deleteKit, refresh } = useBoothKits();
-  const { availability, loading: availLoading } = useKitAvailability();
-  const { assignments } = useKitAssignments();
+  const { kits, loading: kitsLoading, createKit, updateKit, deleteKit, refresh: refreshKits } = useBoothKits();
+  const { availability, loading: availLoading, refresh: refreshAvailability } = useKitAvailability();
+  const { assignments, refresh: refreshAssignments } = useKitAssignments();
+  
+  // Refresh all kit data
+  const refreshAll = async () => {
+    await Promise.all([refreshKits(), refreshAvailability(), refreshAssignments()]);
+  };
   
   // Filters
   const [searchText, setSearchText] = useState('');
@@ -71,19 +76,20 @@ export default function KitsView() {
   const handleKitCreated = async (input: CreateKitInput) => {
     await createKit(input);
     setShowCreateModal(false);
-    refresh();
+    await refreshAll();
   };
 
   const handleKitUpdated = async (kitId: string, input: Partial<CreateKitInput>) => {
     await updateKit(kitId, input);
     setEditingKit(null);
-    refresh();
+    await refreshAll();
   };
 
   const handleDeleteKit = async (kitId: string) => {
     if (!confirm('Delete this kit? This will also remove all assignments.')) return;
     await deleteKit(kitId);
     setSelectedKit(null);
+    await refreshAll();
   };
 
   if (loading && !availability.length) {
@@ -353,9 +359,9 @@ export default function KitsView() {
       {showAutoAssign && (
         <AutoAssignModal
           onClose={() => setShowAutoAssign(false)}
-          onApplied={() => {
+          onApplied={async () => {
             setShowAutoAssign(false);
-            refresh();
+            await refreshAll();
           }}
         />
       )}
