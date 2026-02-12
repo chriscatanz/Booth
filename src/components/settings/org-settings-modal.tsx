@@ -8,7 +8,7 @@ import { OrganizationMember, Invitation } from '@/types/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  X, Building2, Users, Shield, Save,
+  X, Building2, Users, Shield, Save, User,
   Crown, AlertCircle, Check, Trash2, Settings, Clock, Download, List, Palette, Columns, Eye, Bell, Sparkles, Calendar,
   ChevronDown
 } from 'lucide-react';
@@ -24,12 +24,13 @@ import { RolePermissionsEditor } from './role-permissions-editor';
 import { CalendarIntegration } from './calendar-integration';
 import { NotificationPreferences } from '@/components/notifications/notification-preferences';
 import { AISettings } from './ai-settings';
+import { ChangePassword } from './change-password';
 
 interface OrgSettingsModalProps {
   onClose: () => void;
 }
 
-type SettingsTab = 'general' | 'branding' | 'members' | 'notifications' | 'calendar' | 'permissions' | 'lists' | 'fields' | 'ai' | 'data' | 'audit' | 'danger';
+type SettingsTab = 'general' | 'account' | 'branding' | 'members' | 'notifications' | 'calendar' | 'permissions' | 'lists' | 'fields' | 'ai' | 'data' | 'audit' | 'danger';
 
 export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
   const { organization, isOwner, isAdmin, refreshOrganizations } = useAuthStore();
@@ -87,6 +88,7 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
 
   const tabs: { id: SettingsTab; label: string; icon: React.ReactNode; adminOnly?: boolean; ownerOnly?: boolean }[] = [
     { id: 'general', label: 'General', icon: <Building2 size={18} /> },
+    { id: 'account', label: 'Account', icon: <User size={18} /> },
     { id: 'branding', label: 'Branding', icon: <Palette size={18} />, adminOnly: true },
     { id: 'members', label: 'Members', icon: <Users size={18} /> },
     { id: 'notifications', label: 'Notifications', icon: <Bell size={18} /> },
@@ -270,6 +272,18 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
                       </Button>
                     </div>
                   )}
+                </motion.div>
+              )}
+
+              {activeTab === 'account' && (
+                <motion.div
+                  key="account"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <ChangePassword />
                 </motion.div>
               )}
 
