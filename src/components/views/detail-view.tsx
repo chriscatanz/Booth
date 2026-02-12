@@ -27,8 +27,8 @@ import { SHOW_STATUSES } from '@/lib/constants';
 import { useCustomLists } from '@/hooks/use-custom-lists';
 import { DetailHero, DetailTabs, DetailTabPanel, TabSection, type DetailTab } from '@/components/detail';
 import {
-  Save, Trash2, Copy, Truck, Hotel, Users, X, Package,
-  FileStack, Printer, CalendarPlus, Mail, Repeat, Upload, MoreHorizontal, Download,
+  Truck, Hotel, Users, X, Package,
+  Printer, Upload,
   Link, FileUp, Sparkles, Loader2, ExternalLink, FileText,
 } from 'lucide-react';
 import { downloadICS, openMailto, downloadCSV } from '@/services/export-service';
@@ -62,7 +62,6 @@ export default function DetailView() {
   const [activeTab, setActiveTab] = useState<DetailTab>('overview');
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [showPackingList, setShowPackingList] = useState(false);
-  const [showActionsMenu, setShowActionsMenu] = useState(false);
   
   // Agenda tab state
   const [agendaMode, setAgendaMode] = useState<'manual' | 'url' | 'ai'>('manual');
@@ -179,91 +178,28 @@ Return the agenda in a well-formatted text format that's easy to read.`;
       animate={{ opacity: 1 }}
       className="h-full flex flex-col bg-background"
     >
-      {/* Hero Header */}
-      <DetailHero show={show} canEdit={canEdit} />
+      {/* Hero Header with integrated action buttons */}
+      <DetailHero 
+        show={show} 
+        canEdit={canEdit}
+        isNew={isNew}
+        isSaving={isSaving}
+        onSave={handleSave}
+        onDelete={handleDelete}
+        onDuplicate={duplicateShow}
+        onRepeatYearly={repeatYearly}
+        onExportCSV={() => downloadCSV([show], Object.values(ExportField), show.name.replace(/[^a-z0-9]/gi, '_'))}
+        onSaveTemplate={() => setShowTemplateModal(true)}
+        onDownloadICS={() => downloadICS([show])}
+        onEmailDetails={() => openMailto(show)}
+      />
 
-      {/* Action Bar */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-border bg-surface">
-        <div className="flex items-center gap-2">
-          {!isNew && <AutosaveIndicator status={autosaveStatus} hasUnsavedChanges={hasUnsavedChanges} />}
+      {/* Autosave indicator - minimal bar */}
+      {!isNew && (
+        <div className="px-6 py-1 border-b border-border bg-surface">
+          <AutosaveIndicator status={autosaveStatus} hasUnsavedChanges={hasUnsavedChanges} />
         </div>
-        
-        <div className="flex items-center gap-2">
-          {!isNew && (
-            <>
-              {/* Quick actions - always visible */}
-              <Button variant="ghost" size="sm" onClick={() => downloadICS([show])} title="Add to Calendar">
-                <CalendarPlus size={14} />
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => openMailto(show)} title="Email Details">
-                <Mail size={14} />
-              </Button>
-              
-              {/* More actions dropdown */}
-              <div className="relative">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setShowActionsMenu(!showActionsMenu)}
-                >
-                  <MoreHorizontal size={14} />
-                </Button>
-                
-                {showActionsMenu && (
-                  <>
-                    <div className="fixed inset-0 z-10" onClick={() => setShowActionsMenu(false)} />
-                    <div className="absolute right-0 top-full mt-1 w-48 bg-surface border border-border rounded-lg shadow-lg py-1 z-20">
-                      <button
-                        onClick={() => { 
-                          downloadCSV([show], Object.values(ExportField), show.name.replace(/[^a-z0-9]/gi, '_')); 
-                          setShowActionsMenu(false); 
-                        }}
-                        className="w-full px-3 py-2 text-left text-sm hover:bg-bg-tertiary flex items-center gap-2"
-                      >
-                        <Download size={14} /> Export CSV
-                      </button>
-                      <button
-                        onClick={() => { setShowTemplateModal(true); setShowActionsMenu(false); }}
-                        className="w-full px-3 py-2 text-left text-sm hover:bg-bg-tertiary flex items-center gap-2"
-                      >
-                        <FileStack size={14} /> Save as Template
-                      </button>
-                      <button
-                        onClick={() => { repeatYearly(); setShowActionsMenu(false); }}
-                        className="w-full px-3 py-2 text-left text-sm hover:bg-bg-tertiary flex items-center gap-2"
-                      >
-                        <Repeat size={14} /> Repeat Next Year
-                      </button>
-                      <PermissionGate requires="editor" hideOnly>
-                        <button
-                          onClick={() => { duplicateShow(); setShowActionsMenu(false); }}
-                          className="w-full px-3 py-2 text-left text-sm hover:bg-bg-tertiary flex items-center gap-2"
-                        >
-                          <Copy size={14} /> Duplicate
-                        </button>
-                      </PermissionGate>
-                      <PermissionGate requires="admin" hideOnly>
-                        <button
-                          onClick={() => { handleDelete(); setShowActionsMenu(false); }}
-                          className="w-full px-3 py-2 text-left text-sm text-error hover:bg-error/10 flex items-center gap-2"
-                        >
-                          <Trash2 size={14} /> Delete
-                        </button>
-                      </PermissionGate>
-                    </div>
-                  </>
-                )}
-              </div>
-            </>
-          )}
-          
-          <PermissionGate requires="editor" hideOnly>
-            <Button variant="primary" size="md" onClick={handleSave} loading={isSaving}>
-              <Save size={14} /> Save
-            </Button>
-          </PermissionGate>
-        </div>
-      </div>
+      )}
 
       {/* Validation errors */}
       <AnimatePresence>

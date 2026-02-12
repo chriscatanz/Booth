@@ -1,27 +1,52 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { TradeShow } from '@/types';
-import { StatusBadge } from '@/components/ui/badge';
 import { formatDateRange } from '@/lib/date-utils';
 import { daysUntilShow, totalEstimatedCost, roiPercentage } from '@/types/computed';
 import { formatCurrency, cn } from '@/lib/utils';
 import { 
   MapPin, Calendar, Hash, DollarSign, TrendingUp, 
   Users, Target, CheckCircle, AlertCircle,
+  CalendarPlus, Mail, MoreHorizontal, Save, Download, FileStack, Repeat, Copy, Trash2,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { PermissionGate } from '@/components/auth/permission-gate';
 
 interface DetailHeroProps {
   show: TradeShow;
-  onStatusChange?: (status: string) => void;
   canEdit?: boolean;
+  isNew?: boolean;
+  isSaving?: boolean;
+  onSave?: () => void;
+  onDelete?: () => void;
+  onDuplicate?: () => void;
+  onRepeatYearly?: () => void;
+  onExportCSV?: () => void;
+  onSaveTemplate?: () => void;
+  onDownloadICS?: () => void;
+  onEmailDetails?: () => void;
 }
 
-export function DetailHero({ show }: DetailHeroProps) {
+export function DetailHero({ 
+  show, 
+  canEdit,
+  isNew,
+  isSaving,
+  onSave,
+  onDelete,
+  onDuplicate,
+  onRepeatYearly,
+  onExportCSV,
+  onSaveTemplate,
+  onDownloadICS,
+  onEmailDetails,
+}: DetailHeroProps) {
   const days = daysUntilShow(show);
   const estimated = totalEstimatedCost(show);
   const roi = roiPercentage(show);
+  const [showActionsMenu, setShowActionsMenu] = useState(false);
 
   // Quick status indicators
   const alerts: { icon: React.ElementType; label: string; status: 'success' | 'warning' | 'error' }[] = [];
@@ -38,15 +63,85 @@ export function DetailHero({ show }: DetailHeroProps) {
 
   return (
     <div className="bg-gradient-to-br from-surface via-surface to-bg-secondary border-b border-border">
-      <div className="px-6 py-4">
-        {/* Row 1: Title + Status Badge */}
+      <div className="px-6 py-3">
+        {/* Row 1: Title + Action Buttons */}
         <div className="flex items-center justify-between gap-3 mb-2">
           <h1 className="text-xl font-bold text-text-primary truncate">
             {show.name || 'Untitled Show'}
           </h1>
-          {show.showStatus && (
-            <StatusBadge status={show.showStatus} size="sm" />
-          )}
+          
+          {/* Action Buttons */}
+          <div className="flex items-center gap-1 shrink-0">
+            {!isNew && (
+              <>
+                <Button variant="ghost" size="sm" onClick={onDownloadICS} title="Add to Calendar">
+                  <CalendarPlus size={14} />
+                </Button>
+                <Button variant="ghost" size="sm" onClick={onEmailDetails} title="Email Details">
+                  <Mail size={14} />
+                </Button>
+                
+                {/* More actions dropdown */}
+                <div className="relative">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setShowActionsMenu(!showActionsMenu)}
+                  >
+                    <MoreHorizontal size={14} />
+                  </Button>
+                  
+                  {showActionsMenu && (
+                    <>
+                      <div className="fixed inset-0 z-10" onClick={() => setShowActionsMenu(false)} />
+                      <div className="absolute right-0 top-full mt-1 w-48 bg-surface border border-border rounded-lg shadow-lg py-1 z-20">
+                        <button
+                          onClick={() => { onExportCSV?.(); setShowActionsMenu(false); }}
+                          className="w-full px-3 py-2 text-left text-sm hover:bg-bg-tertiary flex items-center gap-2"
+                        >
+                          <Download size={14} /> Export CSV
+                        </button>
+                        <button
+                          onClick={() => { onSaveTemplate?.(); setShowActionsMenu(false); }}
+                          className="w-full px-3 py-2 text-left text-sm hover:bg-bg-tertiary flex items-center gap-2"
+                        >
+                          <FileStack size={14} /> Save as Template
+                        </button>
+                        <button
+                          onClick={() => { onRepeatYearly?.(); setShowActionsMenu(false); }}
+                          className="w-full px-3 py-2 text-left text-sm hover:bg-bg-tertiary flex items-center gap-2"
+                        >
+                          <Repeat size={14} /> Repeat Next Year
+                        </button>
+                        <PermissionGate requires="editor" hideOnly>
+                          <button
+                            onClick={() => { onDuplicate?.(); setShowActionsMenu(false); }}
+                            className="w-full px-3 py-2 text-left text-sm hover:bg-bg-tertiary flex items-center gap-2"
+                          >
+                            <Copy size={14} /> Duplicate
+                          </button>
+                        </PermissionGate>
+                        <PermissionGate requires="admin" hideOnly>
+                          <button
+                            onClick={() => { onDelete?.(); setShowActionsMenu(false); }}
+                            className="w-full px-3 py-2 text-left text-sm text-error hover:bg-error/10 flex items-center gap-2"
+                          >
+                            <Trash2 size={14} /> Delete
+                          </button>
+                        </PermissionGate>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
+            
+            <PermissionGate requires="editor" hideOnly>
+              <Button variant="primary" size="sm" onClick={onSave} loading={isSaving}>
+                <Save size={14} /> Save
+              </Button>
+            </PermissionGate>
+          </div>
         </div>
 
         {/* Row 2: Meta info + Progress bar + Stats (all inline) */}

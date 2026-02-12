@@ -300,6 +300,20 @@ export function AppShell() {
                   <span className="text-text-primary font-medium truncate max-w-[200px]">
                     {selectedShow.name}
                   </span>
+                  {selectedShow.showStatus && (
+                    <>
+                      <span className="text-text-tertiary">·</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                        selectedShow.showStatus === 'Complete' ? 'bg-success/10 text-success' :
+                        selectedShow.showStatus === 'Planning' ? 'bg-brand-cyan/10 text-brand-cyan' :
+                        selectedShow.showStatus === 'Confirmed' ? 'bg-brand-purple/10 text-brand-purple' :
+                        selectedShow.showStatus === 'Cancelled' ? 'bg-error/10 text-error' :
+                        'bg-bg-tertiary text-text-secondary'
+                      }`}>
+                        {selectedShow.showStatus}
+                      </span>
+                    </>
+                  )}
                 </>
               ) : (
                 <span className="text-text-primary font-medium">{viewMode}</span>
