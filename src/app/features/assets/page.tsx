@@ -19,7 +19,7 @@ export default function AssetsFeaturePage() {
       icon={Package}
       iconColor="#CF222E"
       benefits={[
-        "Inventory all your booth hardware — displays, banners, furniture",
+        "Inventory all your booth hardware: displays, banners, furniture",
         "Track collateral and giveaways with quantity alerts",
         "Reserve assets for upcoming shows to prevent conflicts",
         "See what's available before committing to a show",

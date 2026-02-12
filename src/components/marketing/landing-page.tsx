@@ -68,7 +68,7 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
     {
       icon: DollarSign,
       title: 'Budget Tracking That Works',
-      description: 'Know exactly what each show costs — booth fees, travel, shipping, services, everything.',
+      description: 'Know exactly what each show costs: booth fees, travel, shipping, services, everything.',
     },
     {
       icon: Truck,
@@ -352,7 +352,7 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-text-secondary max-w-2xl mx-auto">
               The AI-powered command center for your entire trade show calendar. 
-              Track shows, manage budgets, generate content, and measure ROI — all in one place.
+              Track shows, manage budgets, generate content, and measure ROI, all in one place.
             </p>
 
             {/* AI Feature Pills */}
@@ -390,7 +390,7 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
                 <div className="w-3 h-3 rounded-full bg-warning/60" />
                 <div className="w-3 h-3 rounded-full bg-success/60" />
               </div>
-              <span className="text-xs text-white/40 ml-2">Booth — Dashboard</span>
+              <span className="text-xs text-white/40 ml-2">Booth | Dashboard</span>
             </div>
             <Image 
               src="/app-screenshot.png" 

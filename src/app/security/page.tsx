@@ -23,7 +23,7 @@ const securityFeatures = [
   {
     icon: Eye,
     title: 'Comprehensive Audit Logging',
-    description: 'Every action is logged with timestamps and user attribution. Know who did what, when — essential for compliance and accountability.',
+    description: 'Every action is logged with timestamps and user attribution. Know who did what and when. Essential for compliance and accountability.',
   },
   {
     icon: Users,
@@ -293,7 +293,7 @@ export default function SecurityPage() {
               <ul className="space-y-2 text-text-secondary">
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="shrink-0 text-success mt-0.5" size={16} />
-                  <span>You provide your own API key (BYOK) — we never see it</span>
+                  <span>You provide your own API key (BYOK). We never see it</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="shrink-0 text-success mt-0.5" size={16} />
@@ -301,7 +301,7 @@ export default function SecurityPage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="shrink-0 text-success mt-0.5" size={16} />
-                  <span>AI features are completely optional — the app works without them</span>
+                  <span>AI features are completely optional. The app works without them</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="shrink-0 text-success mt-0.5" size={16} />

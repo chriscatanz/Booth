@@ -19,7 +19,7 @@ export default function BudgetFeaturePage() {
       icon={DollarSign}
       iconColor="#1A7F37"
       benefits={[
-        "Track all costs in one place — booth fees, travel, shipping, services",
+        "Track all costs in one place: booth fees, travel, shipping, services",
         "See total program spend at a glance with rollup dashboards",
         "Compare budgeted vs actual costs for every show",
         "Forecast quarterly and annual trade show spending",
@@ -29,7 +29,7 @@ export default function BudgetFeaturePage() {
       capabilities={[
         {
           title: 'Complete Cost Tracking',
-          description: 'Registration, booth, travel, hotel, shipping, services — every dollar captured.',
+          description: 'Registration, booth, travel, hotel, shipping, services. Every dollar captured.',
           icon: Receipt,
         },
         {

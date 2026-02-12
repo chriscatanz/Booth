@@ -48,13 +48,13 @@ export default function AboutPage() {
             <div className="space-y-4 text-text-secondary">
               <p>
                 Booth wasn&apos;t born in a startup incubator. It was born in the chaos of managing 
-                20+ trade shows a year — spreadsheets everywhere, details falling through cracks, 
+                20+ trade shows a year. Spreadsheets everywhere, details falling through cracks, 
                 and the constant feeling that there had to be a better way.
               </p>
               <p>
                 As a Sr. Marketing Manager responsible for our company&apos;s entire trade show program, 
                 I lived in a world of shipping deadlines, booth logistics, budget tracking, and 
-                team coordination. I tried every tool out there — project management apps, 
+                team coordination. I tried every tool out there: project management apps, 
                 spreadsheets, even custom databases. Nothing quite fit.
               </p>
               <p>
@@ -63,7 +63,7 @@ export default function AboutPage() {
                 became something I realized other trade show managers desperately needed too.
               </p>
               <p>
-                That&apos;s Booth — a tool shaped by hundreds of actual shows, built to solve the 
+                That&apos;s Booth: a tool shaped by hundreds of actual shows, built to solve the 
                 problems I faced every day. No theoretical features, no bloat. Just the stuff 
                 that actually matters when you&apos;re running a trade show program.
               </p>
@@ -109,7 +109,7 @@ export default function AboutPage() {
             <div>
               <h3 className="font-semibold text-text-primary mb-2">The Spreadsheet Problem</h3>
               <p className="text-sm">
-                Every trade show manager has &quot;the spreadsheet&quot; — a monster file tracking everything 
+                Every trade show manager has &quot;the spreadsheet,&quot; a monster file tracking everything 
                 from booth numbers to hotel confirmations. It works until it doesn&apos;t.
               </p>
             </div>
@@ -123,7 +123,7 @@ export default function AboutPage() {
             <div>
               <h3 className="font-semibold text-text-primary mb-2">The Solution</h3>
               <p className="text-sm">
-                Booth is purpose-built for exhibitors — the people running booths, managing logistics, 
+                Booth is purpose-built for exhibitors: the people running booths, managing logistics, 
                 tracking ROI, and coordinating teams across dozens of shows.
               </p>
             </div>
@@ -160,13 +160,13 @@ export default function AboutPage() {
                 <p>
                   Chris is a Sr. Manager of Growth and Client Success with over a decade of experience 
                   in B2B marketing, specializing in trade show strategy and execution. He&apos;s personally 
-                  managed hundreds of trade shows across his career — from 10x10 inline booths to 
+                  managed hundreds of trade shows across his career, from 10x10 inline booths to 
                   large island exhibits.
                 </p>
                 <p>
                   Beyond trade shows, Chris brings expertise in conversational AI, marketing automation, 
                   and customer success. He&apos;s passionate about helping marketing teams work smarter, 
-                  not harder — which is exactly why he built Booth.
+                  not harder. That&apos;s exactly why he built Booth.
                 </p>
               </div>
               

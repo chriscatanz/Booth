@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     default: 'Booth - Trade Show Management Software',
     template: '%s | Booth',
   },
-  description: 'Your trade show command center. Track shows, manage budgets, coordinate teams, and measure ROI — all in one place. Built by a trade show manager, for trade show managers.',
+  description: 'Your trade show command center. Track shows, manage budgets, coordinate teams, and measure ROI, all in one place. Built by a trade show manager, for trade show managers.',
   keywords: ['trade show management', 'event management', 'trade show software', 'booth management', 'event ROI', 'trade show budget', 'exhibit management'],
   authors: [{ name: 'Booth' }],
   creator: 'Booth',

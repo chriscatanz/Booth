@@ -19,7 +19,7 @@ export default function ImportExportFeaturePage() {
       icon={FileSpreadsheet}
       iconColor="#059669"
       benefits={[
-        "Import shows from CSV — migrate from spreadsheets in minutes",
+        "Import shows from CSV and migrate from spreadsheets in minutes",
         "Smart column mapping detects your field names automatically",
         "Include attendees in the same import file",
         "Export shows and attendees to CSV with custom field selection",

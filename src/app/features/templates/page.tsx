@@ -29,7 +29,7 @@ export default function TemplatesFeaturePage() {
       capabilities={[
         {
           title: 'Save as Template',
-          description: 'Set up a show the way you like it, then save it as a template. Booth gear, packing lists, standard costs — all captured.',
+          description: 'Set up a show the way you like it, then save it as a template. Booth gear, packing lists, standard costs, all captured.',
           icon: Copy,
         },
         {
@@ -39,7 +39,7 @@ export default function TemplatesFeaturePage() {
         },
         {
           title: 'Template Library',
-          description: 'Build a library of templates for different scenarios — flagship 20x20 booth, compact tabletop, virtual event setup.',
+          description: 'Build a library of templates for different scenarios: flagship 20x20 booth, compact tabletop, virtual event setup.',
           icon: FolderOpen,
         },
         {

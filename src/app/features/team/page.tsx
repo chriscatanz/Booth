@@ -20,7 +20,7 @@ export default function TeamFeaturePage() {
       iconColor="#8250DF"
       benefits={[
         "Invite team members with a simple email link",
-        "Role-based permissions — owners, admins, editors, viewers",
+        "Role-based permissions: owners, admins, editors, viewers",
         "Everyone sees the same data, always up to date",
         "Activity feed shows who changed what and when",
         "No more emailing spreadsheets back and forth",
@@ -29,7 +29,7 @@ export default function TeamFeaturePage() {
       capabilities={[
         {
           title: 'Easy Invitations',
-          description: 'Invite teammates via email. They click a link and they\'re in — no complicated setup.',
+          description: 'Invite teammates via email. They click a link and they\'re in. No complicated setup.',
           icon: UserPlus,
         },
         {

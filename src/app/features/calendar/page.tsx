@@ -20,7 +20,7 @@ export default function CalendarFeaturePage() {
       iconColor="#0969DA"
       benefits={[
         "See all shows in a beautiful calendar or list view",
-        "Track key deadlines — shipping cutoffs, registration dates, hotel bookings",
+        "Track key deadlines: shipping cutoffs, registration dates, hotel bookings",
         "Spot scheduling conflicts before they become problems",
         "Filter by status, date range, or team member",
         "Quick-add shows from templates you create",

@@ -29,12 +29,12 @@ export default function AIFeaturePage() {
       capabilities={[
         {
           title: 'One-Click Content Generation',
-          description: 'Select a show and content type, hit generate. Talking points, social posts, emails, reports, and checklists — all customized to your specific show.',
+          description: 'Select a show and content type, hit generate. Talking points, social posts, emails, reports, and checklists, all customized to your specific show.',
           icon: Zap,
         },
         {
           title: 'Smart Document Extraction',
-          description: 'Upload a vendor packet, exhibitor guide, or contract — AI extracts show details automatically and populates your show record.',
+          description: 'Upload a vendor packet, exhibitor guide, or contract. AI extracts show details automatically and populates your show record.',
           icon: Upload,
         },
         {
@@ -49,12 +49,12 @@ export default function AIFeaturePage() {
         },
         {
           title: 'Show-Specific Context',
-          description: 'Select which show to focus on. AI pulls in all details — dates, location, booth size, attendees — to create relevant, specific content.',
+          description: 'Select which show to focus on. AI pulls in all details (dates, location, booth size, attendees) to create relevant, specific content.',
           icon: Target,
         },
         {
           title: 'Bring Your Own API Key',
-          description: 'Use your own Claude API key for complete control over costs and usage. Your data stays private — we never store your prompts or responses.',
+          description: 'Use your own Claude API key for complete control over costs and usage. Your data stays private, and we never store your prompts or responses.',
           icon: Key,
         },
       ]}
