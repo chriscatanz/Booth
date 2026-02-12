@@ -194,6 +194,8 @@ export default function CSVImportModal({ onClose, onImported }: CSVImportModalPr
             eventAppNotes: null,
             showContactName: showData.showContactName || null,
             showContactEmail: showData.showContactEmail || null,
+            venueName: null,
+            venueAddress: null,
             packingListItems: null,
             swagItemsEnabled: false,
             swagItemsDescription: null,
