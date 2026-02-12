@@ -132,7 +132,7 @@ export default function DashboardView({ onViewModeChange }: DashboardViewProps) 
   };
 
   return (
-    <div className="p-4 sm:p-6 space-y-6 max-w-[1400px]">
+    <div className="p-4 sm:p-6 space-y-6 max-w-[1400px] mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

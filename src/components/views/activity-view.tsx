@@ -65,7 +65,7 @@ export default function ActivityView() {
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col max-w-[1200px] mx-auto w-full">
       {/* Header */}
       <div className="px-6 py-4 border-b border-border">
         <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">

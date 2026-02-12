@@ -203,7 +203,7 @@ export default function ListView() {
   }
 
   return (
-    <div className="p-4 sm:p-6">
+    <div className="p-4 sm:p-6 max-w-[1600px] mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-text-primary tracking-tight">List View</h1>
         {selectedShowIds.size > 0 && (

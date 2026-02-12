@@ -148,7 +148,7 @@ export default function CalendarView() {
   };
 
   return (
-    <div className="p-4 sm:p-6 flex flex-col lg:flex-row gap-6 h-full overflow-auto">
+    <div className="p-4 sm:p-6 flex flex-col lg:flex-row gap-6 h-full overflow-auto max-w-[1600px] mx-auto">
       {/* Calendar Grid */}
       <div className="flex-1 min-w-0">
         {/* Month navigation */}

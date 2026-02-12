@@ -110,7 +110,7 @@ export default function AssetsView() {
   }
 
   return (
-    <div className="h-full flex">
+    <div className="h-full flex max-w-[1600px] mx-auto w-full">
       {/* Main List */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}

@@ -101,7 +101,7 @@ export default function KitsView() {
   }
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full max-w-[1600px] mx-auto w-full">
       {/* Main List */}
       <div className={cn(
         "flex-1 p-6 overflow-y-auto",

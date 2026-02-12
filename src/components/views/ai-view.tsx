@@ -51,7 +51,7 @@ export default function AIView() {
   ];
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col max-w-[1400px] mx-auto w-full">
       {/* Header */}
       <div className="border-b border-border px-6 py-4">
         <div className="flex items-center justify-between mb-4">

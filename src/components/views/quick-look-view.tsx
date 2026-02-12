@@ -45,7 +45,7 @@ export default function QuickLookView() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-6 max-w-[1600px] mx-auto">
       <motion.h1 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
