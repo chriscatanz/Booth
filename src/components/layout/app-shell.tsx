@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sidebar } from './sidebar';
 import { TopNav } from './top-nav';
+import { ShowSelector } from './show-selector';
 import { CommandPalette } from './command-palette';
 import { ViewMode } from '@/types/enums';
 import { useTradeShowStore } from '@/store/trade-show-store';
@@ -12,7 +12,7 @@ import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 import { ToastContainer } from '@/components/ui/toast';
 import { LoadingOverlay } from '@/components/ui/loading-spinner';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
-import { AlertCircle, X, Menu, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { AlertCircle, X } from 'lucide-react';
 
 import DashboardView from '@/components/views/dashboard-view';
 import QuickLookView from '@/components/views/quick-look-view';
@@ -58,9 +58,6 @@ export function AppShell() {
   const [showOrgSettings, setShowOrgSettings] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   // const [showAIAssistant, setShowAIAssistant] = useState(false); // Disabled - using full AIView
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   
   // Onboarding wizard
   const { user, organization } = useAuthStore();
@@ -115,28 +112,6 @@ export function AppShell() {
   const errorMessage = useTradeShowStore(s => s.errorMessage);
   const clearError = useTradeShowStore(s => s.clearError);
 
-  // Check for mobile viewport
-  useEffect(() => {
-    const checkMobile = () => {
-      const mobile = window.innerWidth < 1024;
-      setIsMobile(mobile);
-      if (mobile) {
-        setSidebarOpen(false);
-      }
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // Close sidebar when selecting a show on mobile
-  useEffect(() => {
-    if (isMobile && selectedShow) {
-      setSidebarMobileOpen(false);
-    }
-  }, [selectedShow, isMobile]);
-
   // Command palette keyboard shortcut
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -152,9 +127,8 @@ export function AppShell() {
   const handleViewModeChange = useCallback((mode: ViewMode) => {
     setSelectedShow(null);
     setViewMode(mode);
-    if (isMobile) setSidebarMobileOpen(false);
     setShowCommandPalette(false);
-  }, [setSelectedShow, isMobile]);
+  }, [setSelectedShow, setViewMode]);
 
   useKeyboardShortcuts();
 
@@ -223,101 +197,17 @@ export function AppShell() {
       )}
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Mobile sidebar overlay */}
-        <AnimatePresence>
-          {isMobile && sidebarMobileOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-              onClick={() => setSidebarMobileOpen(false)}
-            />
-          )}
-        </AnimatePresence>
-
-        {/* Sidebar */}
-        <AnimatePresence mode="wait">
-          {(isMobile ? sidebarMobileOpen : sidebarOpen) && (
-            <motion.div
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 280, opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              className={`
-                ${isMobile ? 'fixed inset-y-0 left-0 z-50 pt-14' : 'relative'}
-                overflow-hidden
-              `}
-            >
-              <Sidebar 
-                onCloseMobile={() => setSidebarMobileOpen(false)}
-                isMobile={isMobile}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Main Content */}
+        {/* Main Content - Full Width (no sidebar) */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Sidebar toggle + breadcrumb bar */}
-          <div className="h-10 border-b border-border flex items-center px-3 gap-2 shrink-0 bg-surface">
-            {/* Mobile menu button */}
-            {isMobile && (
-              <motion.button
-                onClick={() => setSidebarMobileOpen(!sidebarMobileOpen)}
-                className="p-1.5 rounded-lg hover:bg-bg-tertiary text-text-secondary"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Menu size={18} />
-              </motion.button>
-            )}
-            
-            {/* Desktop sidebar toggle */}
-            {!isMobile && (
-              <motion.button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-1.5 rounded-lg hover:bg-bg-tertiary text-text-secondary"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
-              >
-                {sidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeft size={18} />}
-              </motion.button>
-            )}
+          {/* Toolbar bar with Show Selector */}
+          <div className="h-12 border-b border-border flex items-center px-4 gap-4 shrink-0 bg-surface">
+            {/* Show Selector Dropdown */}
+            <ShowSelector />
 
-            {/* Breadcrumb / Context */}
+            {/* Current View Label */}
             <div className="flex items-center gap-2 text-sm text-text-secondary">
-              {selectedShow ? (
-                <>
-                  <button 
-                    onClick={() => setSelectedShow(null)}
-                    className="hover:text-text-primary transition-colors"
-                  >
-                    {viewMode}
-                  </button>
-                  <span className="text-text-tertiary">/</span>
-                  <span className="text-text-primary font-medium truncate max-w-[200px]">
-                    {selectedShow.name}
-                  </span>
-                  {selectedShow.showStatus && (
-                    <>
-                      <span className="text-text-tertiary">·</span>
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                        selectedShow.showStatus === 'Complete' ? 'bg-success/10 text-success' :
-                        selectedShow.showStatus === 'Planning' ? 'bg-brand-cyan/10 text-brand-cyan' :
-                        selectedShow.showStatus === 'Confirmed' ? 'bg-brand-purple/10 text-brand-purple' :
-                        selectedShow.showStatus === 'Cancelled' ? 'bg-error/10 text-error' :
-                        'bg-bg-tertiary text-text-secondary'
-                      }`}>
-                        {selectedShow.showStatus}
-                      </span>
-                    </>
-                  )}
-                </>
-              ) : (
-                <span className="text-text-primary font-medium">{viewMode}</span>
-              )}
+              <span className="text-text-tertiary">in</span>
+              <span className="text-text-primary font-medium">{viewMode}</span>
             </div>
 
             {/* Right side actions */}
