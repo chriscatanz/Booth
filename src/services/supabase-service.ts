@@ -327,10 +327,8 @@ export async function createTradeShow(show: TradeShow): Promise<TradeShow> {
   const dbData = mapShowToDB(show, true);
   
   // Remove undefined values (Supabase doesn't like them)
-  // Also remove columns that may not exist in production (migration 008 bug)
-  const missingColumns = ['event_type', 'virtual_platform', 'virtual_platform_url', 'virtual_booth_url'];
   const cleanData = Object.fromEntries(
-    Object.entries(dbData).filter(([k, v]) => v !== undefined && !missingColumns.includes(k))
+    Object.entries(dbData).filter(([, v]) => v !== undefined)
   );
   
   console.log('[createTradeShow] Inserting:', JSON.stringify(cleanData, null, 2));
