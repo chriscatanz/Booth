@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(errorUrl);
     }
     
-    console.log('[Auth Callback] Session established for:', data.user?.email);
+    console.log('[Auth Callback] Session established for user:', data.user?.id);
     
     // Set the session cookies and redirect to app
     // The session will be picked up by the client-side Supabase client
