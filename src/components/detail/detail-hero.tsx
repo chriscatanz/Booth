@@ -45,7 +45,7 @@ export function DetailHero({ show }: DetailHeroProps) {
             {show.name || 'Untitled Show'}
           </h1>
           {show.showStatus && (
-            <StatusBadge status={show.showStatus} size="md" />
+            <StatusBadge status={show.showStatus} size="sm" />
           )}
         </div>
 
