@@ -87,7 +87,8 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json();
-    const { prompt, systemPrompt, orgId } = body;
+    const { prompt, orgId } = body;
+    // Note: systemPrompt is intentionally NOT accepted from client to prevent prompt injection
 
     if (!prompt || !orgId) {
       return NextResponse.json(
@@ -150,11 +151,11 @@ export async function POST(request: NextRequest) {
     // Sanitize user prompt to prevent injection
     const sanitizedPrompt = sanitizePrompt(prompt);
 
-    // Make the API call
+    // Make the API call (system prompt is hardcoded to prevent injection attacks)
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 4096,
-      system: systemPrompt || 'You are a helpful assistant for trade show management.',
+      system: 'You are a helpful assistant for trade show management. Help users with booth planning, logistics, budgets, schedules, and event coordination. Be concise and practical.',
       messages: [
         { role: 'user', content: sanitizedPrompt }
       ],
