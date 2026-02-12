@@ -3,7 +3,6 @@
 import React from 'react';
 import { useTheme } from '@/theme/theme-provider';
 import { useTradeShowStore } from '@/store/trade-show-store';
-import { useSettingsStore } from '@/store/settings-store';
 import { useAuthStore } from '@/store/auth-store';
 import { Moon, Sun, RefreshCw, Settings, Download, Menu, Sparkles } from 'lucide-react';
 import { UserMenu } from '@/components/auth/user-menu';
@@ -21,7 +20,6 @@ export function Toolbar({ onExport, onMenuToggle, showMenuButton, onOpenOrgSetti
   const { resolved, toggle } = useTheme();
   const loadShows = useTradeShowStore(s => s.loadShows);
   const isLoading = useTradeShowStore(s => s.isLoading);
-  const setShowSettings = useSettingsStore(s => s.setShowSettings);
   const { isAuthenticated } = useAuthStore();
 
   return (
@@ -83,20 +81,21 @@ export function Toolbar({ onExport, onMenuToggle, showMenuButton, onOpenOrgSetti
         </button>
       )}
 
-      <button
-        onClick={() => setShowSettings(true)}
-        className="p-2 rounded-lg hover:bg-bg-tertiary text-text-secondary transition-colors"
-        title="Settings"
-      >
-        <Settings size={16} />
-      </button>
+      {onOpenOrgSettings && (
+        <button
+          onClick={onOpenOrgSettings}
+          className="p-2 rounded-lg hover:bg-bg-tertiary text-text-secondary transition-colors"
+          title="Settings"
+        >
+          <Settings size={16} />
+        </button>
+      )}
 
       {/* Notifications & User Menu */}
       {isAuthenticated && (
         <div className="ml-2 pl-2 border-l border-border flex items-center gap-1">
           <NotificationCenter />
           <UserMenu 
-            onOpenSettings={() => setShowSettings(true)} 
             onOpenOrgSettings={onOpenOrgSettings}
           />
         </div>

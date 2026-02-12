@@ -25,7 +25,6 @@ import AssetsView from '@/components/views/assets-view';
 import ActivityView from '@/components/views/activity-view';
 import AIView from '@/components/views/ai-view';
 import DetailView from '@/components/views/detail-view';
-import SettingsView from '@/components/views/settings-view';
 import ExportFieldSelector from '@/components/export/export-field-selector';
 import CSVImportModal from '@/components/import/csv-import-modal';
 import { OrgSettingsModal } from '@/components/settings';
@@ -115,8 +114,6 @@ export function AppShell() {
   const loadShows = useTradeShowStore(s => s.loadShows);
   const errorMessage = useTradeShowStore(s => s.errorMessage);
   const clearError = useTradeShowStore(s => s.clearError);
-  const showSettings = useSettingsStore(s => s.showSettings);
-  const setShowSettings = useSettingsStore(s => s.setShowSettings);
 
   // Check for mobile viewport
   useEffect(() => {
@@ -200,7 +197,7 @@ export function AppShell() {
       case ViewMode.Activity:
         return <ActivityView />;
       case ViewMode.AI:
-        return <AIView onOpenSettings={() => setShowSettings(true)} />;
+        return <AIView />;
       default:
         return <DashboardView viewMode={viewMode} onViewModeChange={handleViewModeChange} />;
     }
@@ -381,13 +378,6 @@ export function AppShell() {
             onNavigate={handleViewModeChange}
             onOpenSettings={() => setShowOrgSettings(true)}
           />
-        )}
-      </AnimatePresence>
-      
-      {/* Settings Modal */}
-      <AnimatePresence>
-        {showSettings && (
-          <SettingsView onClose={() => setShowSettings(false)} />
         )}
       </AnimatePresence>
       

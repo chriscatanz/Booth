@@ -11,12 +11,10 @@ import {
 import { cn } from '@/lib/utils';
 
 interface UserMenuProps {
-  onOpenSettings?: () => void;
-  onOpenMembers?: () => void;
   onOpenOrgSettings?: () => void;
 }
 
-export function UserMenu({ onOpenSettings, onOpenOrgSettings }: UserMenuProps) {
+export function UserMenu({ onOpenOrgSettings }: UserMenuProps) {
   const { 
     user, 
     organization, 
@@ -172,22 +170,13 @@ export function UserMenu({ onOpenSettings, onOpenOrgSettings }: UserMenuProps) {
 
             {/* Actions */}
             <div className="p-2">
-              {isAdmin && onOpenOrgSettings && (
+              {onOpenOrgSettings && (
                 <button
                   onClick={() => { onOpenOrgSettings(); setIsOpen(false); }}
                   className="w-full flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-bg-tertiary text-text-secondary text-sm"
                 >
-                  <Building2 size={14} />
-                  Organization Settings
-                </button>
-              )}
-              {onOpenSettings && (
-                <button
-                  onClick={() => { onOpenSettings(); setIsOpen(false); }}
-                  className="w-full flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-bg-tertiary text-text-secondary text-sm"
-                >
                   <Settings size={14} />
-                  App Settings
+                  Settings
                 </button>
               )}
               <button

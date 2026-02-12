@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import {
   Sparkles, Wand2, FileText, MessageSquare, Send, Loader2, 
   Copy, Check, RefreshCw, Upload,
-  Mail, ExternalLink, AlertCircle, Settings, Calendar, MapPin,
+  Mail, ExternalLink, AlertCircle, Calendar, MapPin,
   DollarSign, Building, Clock, CheckSquare, Users, Package, Plus
 } from 'lucide-react';
 import * as taskService from '@/services/task-service';
@@ -21,11 +21,7 @@ import { supabase } from '@/lib/supabase';
 
 type Tab = 'generate' | 'documents' | 'chat';
 
-interface AIViewProps {
-  onOpenSettings?: () => void;
-}
-
-export default function AIView({ onOpenSettings }: AIViewProps) {
+export default function AIView() {
   const [activeTab, setActiveTab] = useState<Tab>('generate');
   const [isConfigured, setIsConfigured] = useState<boolean | null>(null);
   const { organization } = useAuthStore();
@@ -90,13 +86,6 @@ export default function AIView({ onOpenSettings }: AIViewProps) {
                 {isConfigured ? 'API Key Configured' : 'No API Key'}
               </div>
             )}
-            <button
-              onClick={onOpenSettings}
-              className="p-2 rounded-lg hover:bg-bg-tertiary text-text-secondary hover:text-text-primary transition-colors"
-              title="AI Settings"
-            >
-              <Settings size={18} />
-            </button>
           </div>
         </div>
 

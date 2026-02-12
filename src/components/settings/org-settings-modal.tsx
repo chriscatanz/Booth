@@ -25,12 +25,14 @@ import { CalendarIntegration } from './calendar-integration';
 import { NotificationPreferences } from '@/components/notifications/notification-preferences';
 import { AISettings } from './ai-settings';
 import { ChangePassword } from './change-password';
+import { Preferences } from './preferences';
+import { Sliders } from 'lucide-react';
 
 interface OrgSettingsModalProps {
   onClose: () => void;
 }
 
-type SettingsTab = 'general' | 'account' | 'branding' | 'members' | 'notifications' | 'calendar' | 'permissions' | 'lists' | 'fields' | 'ai' | 'data' | 'audit' | 'danger';
+type SettingsTab = 'general' | 'account' | 'preferences' | 'branding' | 'members' | 'notifications' | 'calendar' | 'permissions' | 'lists' | 'fields' | 'ai' | 'data' | 'audit' | 'danger';
 
 export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
   const { organization, isOwner, isAdmin, refreshOrganizations } = useAuthStore();
@@ -89,6 +91,7 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
   const tabs: { id: SettingsTab; label: string; icon: React.ReactNode; adminOnly?: boolean; ownerOnly?: boolean }[] = [
     { id: 'general', label: 'General', icon: <Building2 size={18} /> },
     { id: 'account', label: 'Account', icon: <User size={18} /> },
+    { id: 'preferences', label: 'Preferences', icon: <Sliders size={18} /> },
     { id: 'branding', label: 'Branding', icon: <Palette size={18} />, adminOnly: true },
     { id: 'members', label: 'Members', icon: <Users size={18} /> },
     { id: 'notifications', label: 'Notifications', icon: <Bell size={18} /> },
@@ -284,6 +287,18 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
                   transition={{ duration: 0.15 }}
                 >
                   <ChangePassword />
+                </motion.div>
+              )}
+
+              {activeTab === 'preferences' && (
+                <motion.div
+                  key="preferences"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <Preferences />
                 </motion.div>
               )}
 
