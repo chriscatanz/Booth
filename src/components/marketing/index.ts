@@ -1,1 +1,1 @@
-export { LandingPage } from './landing-page';
+export { MarketingHeader } from './marketing-header';

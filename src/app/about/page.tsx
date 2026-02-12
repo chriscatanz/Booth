@@ -4,24 +4,20 @@ import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { 
-  ArrowLeft, Calendar, Users, Sparkles, Target,
+  Calendar, Users, Sparkles, Target,
   Linkedin, Mail
 } from 'lucide-react';
+import { MarketingHeader } from '@/components/marketing';
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-background">
+      <MarketingHeader />
+
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-brand-purple/10 to-transparent" />
         <div className="max-w-5xl mx-auto px-4 py-12 relative">
-          <Link 
-            href="/" 
-            className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary mb-8"
-          >
-            <ArrowLeft size={16} /> Back to home
-          </Link>
-
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -196,6 +192,29 @@ export default function AboutPage() {
           </div>
         </motion.div>
       </section>
+
+      {/* Footer */}
+      <footer className="border-t border-border py-8 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-brand-purple to-brand-purple-dark flex items-center justify-center">
+              <span className="text-white text-xs font-black">B</span>
+            </div>
+            <span className="text-sm font-bold text-text-secondary">Booth</span>
+          </div>
+          <div className="flex items-center gap-6 text-sm text-text-tertiary">
+            <Link href="/features" className="hover:text-text-secondary transition-colors">Features</Link>
+            <Link href="/#pricing" className="hover:text-text-secondary transition-colors">Pricing</Link>
+            <Link href="/about" className="hover:text-text-secondary transition-colors">About</Link>
+            <Link href="/contact" className="hover:text-text-secondary transition-colors">Contact</Link>
+            <Link href="/terms" className="hover:text-text-secondary transition-colors">Terms</Link>
+            <Link href="/privacy" className="hover:text-text-secondary transition-colors">Privacy</Link>
+          </div>
+          <p className="text-sm text-text-tertiary">
+            © {new Date().getFullYear()} Booth
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

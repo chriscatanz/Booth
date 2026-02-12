@@ -1,42 +1,35 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { 
-  Calendar, DollarSign, Users, BarChart3, Truck,
-  ChevronDown, Menu, X, Sparkles, FileSpreadsheet, 
-  Layers, RefreshCw, Bell, Box
-} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown, Menu, X, Sparkles, FileSpreadsheet, Layers, Calendar, DollarSign, Users, Truck, Package, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-const NAV_FEATURES = [
-  { slug: 'calendar', icon: Calendar, title: 'Trade Show Calendar', color: '#0969DA' },
-  { slug: 'calendar-sync', icon: RefreshCw, title: 'Calendar Sync', color: '#06B6D4' },
-  { slug: 'budget', icon: DollarSign, title: 'Budget Management', color: '#1A7F37' },
-  { slug: 'team', icon: Users, title: 'Team Collaboration', color: '#8250DF' },
-  { slug: 'logistics', icon: Truck, title: 'Shipping & Logistics', color: '#BF8700' },
-  { slug: 'kits', icon: Box, title: 'Booth Kits', color: '#CF222E' },
-  { slug: 'analytics', icon: BarChart3, title: 'ROI & Analytics', color: '#0969DA' },
-  { slug: 'ai', icon: Sparkles, title: 'AI Assistant', color: '#8B5CF6' },
-  { slug: 'notifications', icon: Bell, title: 'Notifications', color: '#F59E0B' },
-  { slug: 'import-export', icon: FileSpreadsheet, title: 'Import & Export', color: '#059669' },
-  { slug: 'templates', icon: Layers, title: 'Show Templates', color: '#EA580C' },
-];
 
 interface MarketingHeaderProps {
   onGetStarted?: () => void;
-  onSignIn?: () => void;
 }
 
-export function MarketingHeader({ onGetStarted, onSignIn }: MarketingHeaderProps) {
+const FEATURES = [
+  { slug: 'calendar', icon: Calendar, color: '#0969DA', title: 'Trade Show Calendar' },
+  { slug: 'budget', icon: DollarSign, color: '#1A7F37', title: 'Budget Management' },
+  { slug: 'team', icon: Users, color: '#8250DF', title: 'Team Collaboration' },
+  { slug: 'logistics', icon: Truck, color: '#BF8700', title: 'Shipping & Logistics' },
+  { slug: 'assets', icon: Package, color: '#CF222E', title: 'Asset Management' },
+  { slug: 'analytics', icon: BarChart3, color: '#0969DA', title: 'ROI & Analytics' },
+  { slug: 'ai', icon: Sparkles, color: '#8B5CF6', title: 'AI Assistant' },
+  { slug: 'import-export', icon: FileSpreadsheet, color: '#059669', title: 'Import & Export' },
+  { slug: 'templates', icon: Layers, color: '#F59E0B', title: 'Show Templates' },
+];
+
+export function MarketingHeader({ onGetStarted }: MarketingHeaderProps) {
   const router = useRouter();
+  const handleGetStarted = onGetStarted || (() => router.push('/'));
   const [featuresOpen, setFeaturesOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -46,22 +39,6 @@ export function MarketingHeader({ onGetStarted, onSignIn }: MarketingHeaderProps
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const handleGetStarted = () => {
-    if (onGetStarted) {
-      onGetStarted();
-    } else {
-      router.push('/');
-    }
-  };
-
-  const handleSignIn = () => {
-    if (onSignIn) {
-      onSignIn();
-    } else {
-      router.push('/?mode=login');
-    }
-  };
 
   return (
     <header className="border-b border-border bg-surface/80 backdrop-blur-sm sticky top-0 z-50">
@@ -81,7 +58,7 @@ export function MarketingHeader({ onGetStarted, onSignIn }: MarketingHeaderProps
             <div ref={dropdownRef} className="relative">
               <button
                 onClick={() => setFeaturesOpen(!featuresOpen)}
-                className="flex items-center gap-1 text-base font-semibold text-text-secondary hover:text-text-primary transition-colors"
+                className="flex items-center gap-1 text-base font-semibold text-text-primary hover:text-brand-purple transition-colors"
               >
                 Features
                 <ChevronDown 
@@ -97,42 +74,19 @@ export function MarketingHeader({ onGetStarted, onSignIn }: MarketingHeaderProps
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-[720px] p-6 bg-surface border border-border rounded-2xl shadow-2xl"
+                    className="absolute top-full left-0 mt-2 w-64 py-2 bg-surface border border-border rounded-xl shadow-xl"
                   >
-                    {/* Mega Menu Grid */}
-                    <div className="grid grid-cols-3 gap-2">
-                      {NAV_FEATURES.map((feature) => (
-                        <Link
-                          key={feature.slug}
-                          href={`/features/${feature.slug}`}
-                          className="flex items-start gap-3 p-3 rounded-xl hover:bg-bg-secondary transition-colors group"
-                          onClick={() => setFeaturesOpen(false)}
-                        >
-                          <div 
-                            className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-                            style={{ backgroundColor: `${feature.color}15` }}
-                          >
-                            <feature.icon size={20} style={{ color: feature.color }} />
-                          </div>
-                          <div>
-                            <span className="text-sm font-semibold text-text-primary group-hover:text-brand-purple transition-colors">
-                              {feature.title}
-                            </span>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                    
-                    {/* View All Link */}
-                    <div className="mt-4 pt-4 border-t border-border">
-                      <Link 
-                        href="/features"
-                        className="text-sm font-semibold text-brand-purple hover:text-brand-purple-dark transition-colors"
+                    {FEATURES.map((feature) => (
+                      <Link
+                        key={feature.slug}
+                        href={`/features/${feature.slug}`}
+                        className="flex items-center gap-3 px-4 py-2 text-sm text-text-secondary hover:bg-bg-secondary hover:text-text-primary transition-colors"
                         onClick={() => setFeaturesOpen(false)}
                       >
-                        View all features →
+                        <feature.icon size={16} style={{ color: feature.color }} />
+                        {feature.title}
                       </Link>
-                    </div>
+                    ))}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -144,25 +98,34 @@ export function MarketingHeader({ onGetStarted, onSignIn }: MarketingHeaderProps
             >
               Pricing
             </Link>
+
+            <Link 
+              href="/about"
+              className="text-base font-semibold text-text-secondary hover:text-text-primary transition-colors"
+            >
+              About
+            </Link>
+
+            <Link 
+              href="/contact"
+              className="text-base font-semibold text-text-secondary hover:text-text-primary transition-colors"
+            >
+              Contact
+            </Link>
           </nav>
 
-          {/* Right Side - Desktop */}
+          {/* Right side - Desktop */}
           <div className="hidden md:flex items-center gap-3">
-            <button 
-              onClick={handleSignIn}
-              className="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
-            >
-              Log In
-            </button>
             <Button variant="primary" size="sm" onClick={handleGetStarted}>
               Start Free Trial
             </Button>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile menu button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 text-text-secondary hover:text-text-primary"
+            className="md:hidden p-2 text-text-secondary hover:text-text-primary transition-colors"
+            aria-label="Toggle menu"
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -175,37 +138,67 @@ export function MarketingHeader({ onGetStarted, onSignIn }: MarketingHeaderProps
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden mt-4 pb-4 border-t border-border pt-4"
+              transition={{ duration: 0.2 }}
+              className="md:hidden overflow-hidden"
             >
-              <nav className="flex flex-col gap-2">
-                <Link 
-                  href="/features"
-                  className="px-4 py-2 text-base font-medium text-text-secondary hover:text-text-primary hover:bg-bg-secondary rounded-lg transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  All Features
-                </Link>
+              <nav className="pt-4 pb-2 border-t border-border mt-4">
+                {/* Features section */}
+                <div className="mb-2">
+                  <span className="block px-2 py-2 text-base font-semibold text-text-primary">
+                    Features
+                  </span>
+                  <div className="pl-4 space-y-1">
+                    {FEATURES.map((feature) => (
+                      <Link
+                        key={feature.slug}
+                        href={`/features/${feature.slug}`}
+                        className="flex items-center gap-3 px-2 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <feature.icon size={16} style={{ color: feature.color }} />
+                        {feature.title}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
                 <Link 
                   href="/#pricing"
-                  className="px-4 py-2 text-base font-medium text-text-secondary hover:text-text-primary hover:bg-bg-secondary rounded-lg transition-colors"
+                  className="block px-2 py-2 text-base font-semibold text-text-secondary hover:text-text-primary transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Pricing
                 </Link>
-                <hr className="border-border my-2" />
-                <button 
-                  onClick={() => { handleSignIn(); setMobileMenuOpen(false); }}
-                  className="px-4 py-2 text-base font-medium text-text-secondary hover:text-text-primary hover:bg-bg-secondary rounded-lg transition-colors text-left"
+
+                <Link 
+                  href="/about"
+                  className="block px-2 py-2 text-base font-semibold text-text-secondary hover:text-text-primary transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
                 >
-                  Log In
-                </button>
-                <Button 
-                  variant="primary" 
-                  className="mx-4 mt-2"
-                  onClick={() => { handleGetStarted(); setMobileMenuOpen(false); }}
+                  About
+                </Link>
+
+                <Link 
+                  href="/contact"
+                  className="block px-2 py-2 text-base font-semibold text-text-secondary hover:text-text-primary transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
                 >
-                  Start Free Trial
-                </Button>
+                  Contact
+                </Link>
+
+                <div className="mt-4 pt-4 border-t border-border">
+                  <Button 
+                    variant="primary" 
+                    size="sm" 
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleGetStarted();
+                    }}
+                    className="w-full"
+                  >
+                    Start Free Trial
+                  </Button>
+                </div>
               </nav>
             </motion.div>
           )}
