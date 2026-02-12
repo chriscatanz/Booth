@@ -96,6 +96,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check subscription status - require active subscription for AI features
+    const { data: subStatus, error: subError } = await supabase
+      .rpc('get_subscription_status', { p_org_id: orgId });
+    
+    if (subError) {
+      console.error('Subscription check failed:', subError);
+    } else if (subStatus) {
+      const isExpired = subStatus.is_expired;
+      const tier = subStatus.tier;
+      if (isExpired || tier === 'cancelled' || tier === 'expired') {
+        return NextResponse.json(
+          { error: 'Your subscription has expired. Please renew to use AI features.' },
+          { status: 403 }
+        );
+      }
+    }
+
     // Get API key from database (decrypted via view)
     const { data: aiSettings, error: settingsError } = await supabase
       .from('v_organization_ai_settings')

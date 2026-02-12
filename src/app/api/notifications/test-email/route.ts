@@ -30,6 +30,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
     }
 
+    // Rate limiting - prevent email abuse (max 5 test emails per minute)
+    const rateLimitKey = `test-email:${user.id}`;
+    const { data: rateLimitOk, error: rateLimitError } = await supabase
+      .rpc('check_rate_limit', {
+        p_key: rateLimitKey,
+        p_limit: 5,
+        p_window_seconds: 60
+      });
+
+    if (rateLimitError) {
+      console.error('Rate limit check failed:', rateLimitError);
+    } else if (rateLimitOk === false) {
+      return NextResponse.json(
+        { error: 'Too many test emails. Please wait a minute and try again.' },
+        { status: 429 }
+      );
+    }
+
     // Get user's email from decrypted view (PII is encrypted)
     const { data: profile } = await supabase
       .from('v_user_profiles')
