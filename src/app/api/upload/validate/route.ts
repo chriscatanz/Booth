@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
         /<meta/i,
         /<link/i,
         /<base/i,
-        /<!--.*-->/s, // HTML comments can hide attacks
+        /<!--[\s\S]*?-->/, // HTML comments can hide attacks
         /&#x?[0-9a-f]+;/i, // HTML entities (potential encoding bypass)
         /\\u[0-9a-f]{4}/i, // Unicode escapes
         /expression\s*\(/i, // CSS expression (IE)
