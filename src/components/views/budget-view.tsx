@@ -210,15 +210,15 @@ export default function BudgetView() {
         <div className="w-full lg:w-[350px] bg-surface rounded-xl border border-border-subtle shadow-sm p-4">
           <h2 className="text-sm font-semibold text-text-primary mb-4">Cost Distribution</h2>
           {costByShow.length === 0 ? (
-            <div className="flex items-center justify-center h-[250px] text-text-secondary text-sm">No data available</div>
+            <div className="flex items-center justify-center h-[300px] text-text-secondary text-sm">No data available</div>
           ) : (
-            <ResponsiveContainer width="100%" height={250}>
+            <ResponsiveContainer width="100%" height={300}>
               <PieChart>
-                <Pie data={costByShow} dataKey="cost" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90} paddingAngle={2}>
+                <Pie data={costByShow} dataKey="cost" nameKey="name" cx="50%" cy="40%" innerRadius={45} outerRadius={80} paddingAngle={2}>
                   {costByShow.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
                 </Pie>
                 <Tooltip formatter={(v) => formatCurrency(Number(v ?? 0))} contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12 }} />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
+                <Legend wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />
               </PieChart>
             </ResponsiveContainer>
           )}
