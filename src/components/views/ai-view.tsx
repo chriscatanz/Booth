@@ -831,7 +831,7 @@ function DocumentsTab() {
     let created = 0;
     
     // Map of deadline fields to task titles
-    const deadlineFields: Array<{ field: keyof typeof extractedData; title: string }> = [
+    const deadlineFields: Array<{ field: keyof aiService.ExtractedShowData; title: string }> = [
       { field: 'earlyBirdDeadline', title: 'Early Bird Deadline' },
       { field: 'registrationDeadline', title: 'Registration Deadline' },
       { field: 'housingDeadline', title: 'Housing/Hotel Block Deadline' },
