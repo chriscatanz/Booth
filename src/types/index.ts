@@ -8,15 +8,18 @@ export interface TradeShow {
   startDate: string | null;
   endDate: string | null;
   boothNumber: string | null;
+  boothSizeId: string | null;        // FK to booth_sizes
   boothSize: string | null;
   cost: number | null;
   attendeesIncluded: number | null;
   totalAttending: number | null;
   totalLeads: number | null;
+  managementCompanyId: string | null; // FK to management_companies
   managementCompany: string | null;
 
   // Event Type (in-person, virtual, hybrid)
   eventType: 'in_person' | 'virtual' | 'hybrid' | null;
+  virtualPlatformId: string | null;  // FK to virtual_platforms
   virtualPlatform: string | null;
   virtualPlatformUrl: string | null;
   virtualBoothUrl: string | null;
@@ -25,7 +28,7 @@ export interface TradeShow {
   registrationConfirmed: boolean | null;
   attendeeListReceived: boolean | null;
 
-  // Shipping & Logistics
+  // Shipping & Logistics (Outbound)
   shippingInfo: string | null;
   trackingNumber: string | null;
   shippingCost: number | null;
@@ -37,6 +40,14 @@ export interface TradeShow {
   trackingStatusDetails: string | null;
   trackingEta: string | null;
   trackingLastUpdated: string | null;
+  shippingCarrierId: string | null;  // FK to shipping_carriers
+  
+  // Return Shipping
+  returnCarrierId: string | null;    // FK to shipping_carriers
+  returnTrackingNumber: string | null;
+  returnShippingCost: number | null;
+  returnShipDate: string | null;
+  returnDeliveryDate: string | null;
 
   // Move-in/Move-out
   moveInDate: string | null;
@@ -45,6 +56,7 @@ export interface TradeShow {
   moveOutTime: string | null;
 
   // Lead Capture
+  leadCaptureSystemId: string | null; // FK to lead_capture_systems
   leadCaptureSystem: string | null;
   leadCaptureCredentials: string | null;
 
@@ -56,6 +68,7 @@ export interface TradeShow {
   utilitiesBooked: boolean | null;
   utilitiesDetails: string | null;
   laborBooked: boolean | null;
+  laborCompanyId: string | null;     // FK to labor_companies
   laborDetails: string | null;
   electricalCost: number | null;
   laborCost: number | null;
@@ -68,6 +81,7 @@ export interface TradeShow {
   sponsorshipDetails: string | null;
 
   // Hotel
+  hotelId: string | null;            // FK to hotels
   hotelName: string | null;
   hotelAddress: string | null;
   hotelConfirmed: boolean | null;
@@ -92,6 +106,7 @@ export interface TradeShow {
   showWebsite: string | null;
 
   // Venue Location (may differ from hotel)
+  venueId: string | null;            // FK to venues
   venueName: string | null;
   venueAddress: string | null;
 
@@ -164,15 +179,18 @@ export function createNewTradeShow(): TradeShow {
     startDate: null,
     endDate: null,
     eventType: 'in_person',
+    virtualPlatformId: null,
     virtualPlatform: null,
     virtualPlatformUrl: null,
     virtualBoothUrl: null,
     boothNumber: null,
+    boothSizeId: null,
     boothSize: null,
     cost: null,
     attendeesIncluded: 0,
     totalAttending: 0,
     totalLeads: null,
+    managementCompanyId: null,
     managementCompany: null,
     registrationConfirmed: false,
     attendeeListReceived: false,
@@ -187,10 +205,17 @@ export function createNewTradeShow(): TradeShow {
     trackingStatusDetails: null,
     trackingEta: null,
     trackingLastUpdated: null,
+    shippingCarrierId: null,
+    returnCarrierId: null,
+    returnTrackingNumber: null,
+    returnShippingCost: null,
+    returnShipDate: null,
+    returnDeliveryDate: null,
     moveInDate: null,
     moveInTime: null,
     moveOutDate: null,
     moveOutTime: null,
+    leadCaptureSystemId: null,
     leadCaptureSystem: null,
     leadCaptureCredentials: null,
     boothToShip: '[]',
@@ -198,6 +223,7 @@ export function createNewTradeShow(): TradeShow {
     utilitiesBooked: false,
     utilitiesDetails: null,
     laborBooked: false,
+    laborCompanyId: null,
     laborDetails: null,
     electricalCost: null,
     laborCost: null,
@@ -206,6 +232,7 @@ export function createNewTradeShow(): TradeShow {
     hasSpeakingEngagement: false,
     speakingDetails: null,
     sponsorshipDetails: null,
+    hotelId: null,
     hotelName: null,
     hotelAddress: null,
     hotelConfirmed: false,
@@ -222,6 +249,7 @@ export function createNewTradeShow(): TradeShow {
     showContactEmail: null,
     showContactPhone: null,
     showWebsite: null,
+    venueId: null,
     venueName: null,
     venueAddress: null,
     packingListItems: '[]',
@@ -284,3 +312,6 @@ export function createNewAttendee(tradeshowId?: number): Attendee {
     localId: crypto.randomUUID(),
   };
 }
+
+// Re-export lookup types
+export * from './lookups';
