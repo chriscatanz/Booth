@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FeaturePageLayout } from '@/components/marketing/feature-page-layout';
 import { 
   Bell, Mail, Calendar, Clock,
-  CheckSquare, AlertTriangle, Settings, Smartphone
+  CheckSquare, AlertTriangle, Settings, Filter
 } from 'lucide-react';
 
 export default function NotificationsFeaturePage() {
@@ -19,39 +19,47 @@ export default function NotificationsFeaturePage() {
       icon={Bell}
       iconColor="#F59E0B"
       benefits={[
+        "Automatic reminders for all key deadlines",
+        "Get notified before shows, not after",
+        "Task due date alerts keep your team accountable",
+        "Instant alerts when booth kits have conflicts",
+        "Choose email, in-app, or both",
+        "Daily digest option for less interruption",
+      ]}
+      capabilities={[
         {
-          icon: Calendar,
           title: 'Show Reminders',
-          description: 'Get notified before each show starts. Never be caught off-guard by an event sneaking up on you.',
+          description: 'Get notified before each show starts. Never be caught off-guard.',
+          icon: Calendar,
         },
         {
-          icon: Clock,
           title: 'Deadline Alerts',
-          description: 'Automatic reminders for early bird pricing, housing deadlines, service kit due dates, and shipping cutoffs.',
+          description: 'Automatic reminders for early bird pricing, housing, and shipping cutoffs.',
+          icon: Clock,
         },
         {
+          title: 'Task Notifications',
+          description: 'Get notified when tasks are due or overdue.',
           icon: CheckSquare,
-          title: 'Task Due Dates',
-          description: 'Get notified when tasks are coming due or overdue. Keep your team accountable.',
         },
         {
+          title: 'Conflict Warnings',
+          description: 'Instant alerts when booth kit assignments overlap.',
           icon: AlertTriangle,
-          title: 'Kit Conflicts',
-          description: 'Instant alerts when booth kit assignments overlap. Catch problems before they happen.',
         },
         {
-          icon: Mail,
           title: 'Email Digests',
-          description: 'Choose in-app notifications, email alerts, or both. Get a daily digest of what needs attention.',
+          description: 'Get a daily summary of what needs attention.',
+          icon: Mail,
         },
         {
+          title: 'Full Control',
+          description: 'Customize exactly what notifications you receive and when.',
           icon: Settings,
-          title: 'Fully Customizable',
-          description: 'Control exactly what notifications you receive and when. Tune the system to your workflow.',
         },
       ]}
       ctaText="Start Free Trial"
-      onCtaClick={() => router.push('/')}
+      onGetStarted={() => router.push('/')}
     />
   );
 }

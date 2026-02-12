@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FeaturePageLayout } from '@/components/marketing/feature-page-layout';
 import { 
   RefreshCw, Calendar, Smartphone, Globe,
-  CheckCircle, Bell, Users, Zap
+  CheckCircle, Bell, Users, Link
 } from 'lucide-react';
 
 export default function CalendarSyncFeaturePage() {
@@ -19,39 +19,47 @@ export default function CalendarSyncFeaturePage() {
       icon={RefreshCw}
       iconColor="#06B6D4"
       benefits={[
+        "One-click subscribe from Google, Outlook, or Apple Calendar",
+        "Shows appear in your calendar automatically",
+        "Changes sync within minutes",
+        "Works on phone, tablet, and desktop",
+        "Team members can all subscribe to the same feed",
+        "Use your calendar app&apos;s native reminders",
+      ]}
+      capabilities={[
         {
+          title: 'Universal Compatibility',
+          description: 'Works with Google Calendar, Outlook, Apple Calendar, and any ICS-compatible app.',
           icon: Calendar,
-          title: 'Works With Your Calendar',
-          description: 'One-click subscribe from Google Calendar, Outlook, or Apple Calendar. Shows appear automatically.',
         },
         {
+          title: 'Auto-Sync',
+          description: 'Add a show in Booth, see it in your calendar automatically.',
           icon: RefreshCw,
-          title: 'Always Up to Date',
-          description: 'Changes sync automatically. Add a show in Booth, see it in your calendar within minutes.',
         },
         {
-          icon: Smartphone,
           title: 'Mobile Ready',
-          description: 'Your trade show schedule on your phone, tablet, and desktop — wherever you check your calendar.',
+          description: 'Your trade show schedule syncs to all your devices.',
+          icon: Smartphone,
         },
         {
+          title: 'Team Sharing',
+          description: 'Everyone subscribes to the same feed and stays in sync.',
           icon: Users,
-          title: 'Share With Your Team',
-          description: 'Team members can subscribe to the same feed. Everyone stays on the same page.',
         },
         {
-          icon: Bell,
           title: 'Native Reminders',
-          description: 'Use your calendar app&apos;s built-in reminders. Get notified the way you&apos;re used to.',
+          description: 'Use your calendar app&apos;s built-in reminder system.',
+          icon: Bell,
         },
         {
+          title: 'Standard Format',
+          description: 'Uses standard ICS format. No proprietary lock-in.',
           icon: Globe,
-          title: 'Standard ICS Format',
-          description: 'Works with any calendar app that supports ICS feeds. No proprietary lock-in.',
         },
       ]}
       ctaText="Start Syncing"
-      onCtaClick={() => router.push('/')}
+      onGetStarted={() => router.push('/')}
     />
   );
 }
