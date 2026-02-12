@@ -255,10 +255,10 @@ export function TopNav({
 
       {/* Right: Actions */}
       <div className="flex items-center gap-2">
-        {/* Command Palette Trigger */}
+        {/* Command Palette Trigger - hidden on mobile */}
         <motion.button
           onClick={onOpenCommandPalette}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-bg-tertiary text-text-secondary hover:text-text-primary text-sm transition-colors"
+          className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-bg-tertiary text-text-secondary hover:text-text-primary text-sm transition-colors"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
