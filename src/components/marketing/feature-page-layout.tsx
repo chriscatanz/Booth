@@ -2,9 +2,10 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { MarketingHeader } from './marketing-header';
 
 interface FeaturePageLayoutProps {
   title: string;
@@ -35,45 +36,7 @@ export function FeaturePageLayout({
 }: FeaturePageLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-surface/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-purple to-brand-purple-dark flex items-center justify-center shadow-lg shadow-brand-purple/25">
-              <span className="text-white text-lg font-black">B</span>
-            </div>
-            <span className="font-black text-xl text-text-primary">Booth</span>
-          </Link>
-          <div className="flex items-center gap-3">
-            <Link 
-              href="/features"
-              className="text-sm text-text-secondary hover:text-text-primary transition-colors hidden sm:inline"
-            >
-              All Features
-            </Link>
-            <Link 
-              href="/#pricing"
-              className="text-sm text-text-secondary hover:text-text-primary transition-colors hidden sm:inline"
-            >
-              Pricing
-            </Link>
-            <Button variant="primary" size="sm" onClick={onGetStarted}>
-              Start Free Trial
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Back link */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6">
-        <Link 
-          href="/"
-          className="inline-flex items-center gap-1 text-sm text-text-tertiary hover:text-text-secondary transition-colors"
-        >
-          <ArrowLeft size={14} />
-          Back to Home
-        </Link>
-      </div>
+      <MarketingHeader onGetStarted={onGetStarted} />
 
       {/* Hero */}
       <section className="py-12 sm:py-16 px-4 sm:px-6">
