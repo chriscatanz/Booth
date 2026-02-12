@@ -51,8 +51,8 @@ const pageVariants = {
 };
 
 export function AppShell() {
-  const defaultView = useSettingsStore(s => s.defaultView);
-  const [viewMode, setViewMode] = useState<ViewMode>(defaultView);
+  const viewMode = useSettingsStore(s => s.currentView);
+  const setViewMode = useSettingsStore(s => s.setCurrentView);
   const [showExport, setShowExport] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [showOrgSettings, setShowOrgSettings] = useState(false);

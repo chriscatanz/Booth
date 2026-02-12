@@ -9,6 +9,8 @@ import { useDataVisibility } from '@/hooks/use-data-visibility';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
+  LayoutGrid,
+  List,
   Calendar,
   CheckSquare,
   Package,
@@ -30,6 +32,8 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { mode: ViewMode.Dashboard, icon: LayoutDashboard, label: 'Dashboard' },
+  { mode: ViewMode.QuickLook, icon: LayoutGrid, label: 'Quick Look' },
+  { mode: ViewMode.List, icon: List, label: 'List' },
   { mode: ViewMode.Calendar, icon: Calendar, label: 'Calendar' },
   { mode: ViewMode.Tasks, icon: CheckSquare, label: 'Tasks', requiresCategory: 'tasks' },
   { mode: ViewMode.Kits, icon: Box, label: 'Kits', requiresCategory: 'logistics' },
