@@ -74,7 +74,7 @@ export default function DetailView() {
   const agendaFileInputRef = useRef<HTMLInputElement>(null);
   
   const canEdit = usePermission('editor');
-  const { boothOptions, graphicsOptions, packingListOptions, tableclothOptions } = useCustomLists();
+  const { graphicsOptions, packingListOptions, tableclothOptions } = useCustomLists();
   const { lookups, refreshCategory } = useLookups();
   
   // Read-only mode for viewers
@@ -98,7 +98,7 @@ export default function DetailView() {
     toast.success('Show deleted');
   };
 
-  const toggleJsonArrayItem = (field: 'boothToShip' | 'graphicsToShip' | 'packingListItems', item: string) => {
+  const toggleJsonArrayItem = (field: 'graphicsToShip' | 'packingListItems', item: string) => {
     const current = parseJsonStringArray(show[field]);
     const updated = current.includes(item)
       ? current.filter(i => i !== item)
@@ -690,15 +690,6 @@ Return the agenda in a well-formatted text format that's easy to read.`;
               <div className="flex gap-6 pt-4">
                 <Checkbox label="Ship to Site" checked={show.shipToSite ?? false} onChange={v => updateSelectedShow({ shipToSite: v })} disabled={readOnly} />
                 <Checkbox label="Ship to Warehouse" checked={show.shipToWarehouse ?? false} onChange={v => updateSelectedShow({ shipToWarehouse: v })} disabled={readOnly} />
-              </div>
-
-              <div className="mt-4">
-                <p className="text-sm font-medium text-text-secondary mb-2">Booth Items to Ship</p>
-                <div className="flex flex-wrap gap-3">
-                  {boothOptions.map(opt => (
-                    <Checkbox key={opt} label={opt} checked={parseJsonStringArray(show.boothToShip).includes(opt)} onChange={() => toggleJsonArrayItem('boothToShip', opt)} disabled={readOnly} />
-                  ))}
-                </div>
               </div>
 
               <div className="mt-4">
