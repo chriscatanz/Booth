@@ -100,13 +100,12 @@ export function DetailTabPanel({ id, activeTab, children }: DetailTabPanelProps)
   );
 }
 
-// Utility component for tab sections
+// Utility component for tab sections - all sections are accordions by default
 interface TabSectionProps {
   title: string;
   icon?: React.ElementType;
   children: React.ReactNode;
   className?: string;
-  collapsible?: boolean;
   defaultOpen?: boolean;
 }
 
@@ -115,52 +114,40 @@ export function TabSection({
   icon: Icon, 
   children, 
   className,
-  collapsible = false,
-  defaultOpen = true,
+  defaultOpen = false,
 }: TabSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
-  if (collapsible) {
-    return (
-      <div className={cn('rounded-xl border border-border bg-surface overflow-hidden', className)}>
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-bg-tertiary/50 transition-colors"
-        >
-          {Icon && <Icon size={18} className="text-text-tertiary shrink-0" />}
-          <span className="font-medium text-text-primary flex-1">{title}</span>
-          <motion.span
-            animate={{ rotate: isOpen ? 180 : 0 }}
-            className="text-text-tertiary"
-          >
-            ▼
-          </motion.span>
-        </button>
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="px-4 pb-4">
-                {children}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    );
-  }
-
   return (
-    <div className={cn('rounded-xl border border-border bg-surface p-4', className)}>
-      <div className="flex items-center gap-3 mb-4">
-        {Icon && <Icon size={18} className="text-text-tertiary" />}
-        <h3 className="font-medium text-text-primary">{title}</h3>
-      </div>
-      {children}
+    <div className={cn('rounded-xl border border-border bg-surface overflow-hidden', className)}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-bg-tertiary/50 transition-colors"
+      >
+        {Icon && <Icon size={18} className="text-text-tertiary shrink-0" />}
+        <span className="font-medium text-text-primary flex-1">{title}</span>
+        <motion.span
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+          className="text-text-tertiary text-xs"
+        >
+          ▼
+        </motion.span>
+      </button>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="px-4 pb-4">
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -234,7 +234,7 @@ Return the agenda in a well-formatted text format that's easy to read.`;
         <DetailTabPanel id="overview" activeTab={activeTab}>
           <div className="space-y-6">
             {/* Basic Information */}
-            <TabSection title="Basic Information">
+            <TabSection title="Basic Information" defaultOpen>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input label="Show Name *" value={show.name} onChange={e => updateSelectedShow({ name: e.target.value })} placeholder="Enter show name" disabled={readOnly} />
                 <Input label="Location" value={show.location ?? ''} onChange={e => updateSelectedShow({ location: e.target.value || null })} placeholder="City, State" disabled={readOnly} />
@@ -376,7 +376,7 @@ Return the agenda in a well-formatted text format that's easy to read.`;
         ═══════════════════════════════════════════════════════════════════ */}
         <DetailTabPanel id="agenda" activeTab={activeTab}>
           <div className="space-y-6">
-            <TabSection title="Event Agenda">
+            <TabSection title="Event Agenda" defaultOpen>
               {/* Mode selector */}
               <div className="flex gap-2 mb-4">
                 <button
@@ -537,7 +537,7 @@ Return the agenda in a well-formatted text format that's easy to read.`;
         <DetailTabPanel id="booth" activeTab={activeTab}>
           <div className="space-y-6">
             {/* Booth Details */}
-            <TabSection title="Booth Details">
+            <TabSection title="Booth Details" defaultOpen>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input label="Booth Number" value={show.boothNumber ?? ''} onChange={e => updateSelectedShow({ boothNumber: e.target.value || null })} disabled={readOnly} />
                 <LookupSelect
@@ -606,7 +606,7 @@ Return the agenda in a well-formatted text format that's easy to read.`;
           <DataVisibilityGate category="logistics" fallback={<div className="p-6 text-center text-text-secondary">You don&apos;t have access to logistics information.</div>}>
           <div className="space-y-6">
             {/* Shipping */}
-            <TabSection title="Shipping" icon={Truck}>
+            <TabSection title="Shipping" icon={Truck} defaultOpen>
               {/* Outbound Shipping */}
               <p className="text-xs font-medium text-text-tertiary uppercase tracking-wide mb-3">Outbound</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -863,7 +863,7 @@ Return the agenda in a well-formatted text format that's easy to read.`;
           <div className="space-y-6">
             {/* Attendees */}
             <DataVisibilityGate category="attendees">
-              <TabSection title={`Team Attendees (${attendees.length})`} icon={Users}>
+              <TabSection title={`Team Attendees (${attendees.length})`} icon={Users} defaultOpen>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <Input label="Total Attending" type="number" value={show.totalAttending?.toString() ?? ''} onChange={e => updateSelectedShow({ totalAttending: e.target.value ? parseInt(e.target.value) : null })} disabled={readOnly} />
                 </div>
@@ -976,7 +976,7 @@ Return the agenda in a well-formatted text format that's easy to read.`;
           <DataVisibilityGate category="budget" fallback={<div className="p-6 text-center text-text-secondary">You don&apos;t have access to budget information.</div>}>
           <div className="space-y-6">
             {/* Budget Summary */}
-            <TabSection title="Budget Summary">
+            <TabSection title="Budget Summary" defaultOpen>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="p-4 bg-bg-tertiary rounded-lg">
                   <span className="text-xs text-text-tertiary">Registration</span>
@@ -1062,7 +1062,7 @@ Return the agenda in a well-formatted text format that's easy to read.`;
           <div className="space-y-6">
             {/* Tasks */}
             <DataVisibilityGate category="tasks">
-              <TabSection title="Tasks">
+              <TabSection title="Tasks" defaultOpen>
                 <TaskList tradeShowId={show.id} readOnly={readOnly} />
               </TabSection>
             </DataVisibilityGate>
