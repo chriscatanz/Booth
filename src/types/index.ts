@@ -86,6 +86,10 @@ export interface TradeShow {
   // Show Contact
   showContactName: string | null;
   showContactEmail: string | null;
+  showContactPhone: string | null;
+  
+  // Show Website
+  showWebsite: string | null;
 
   // Venue Location (may differ from hotel)
   venueName: string | null;
@@ -216,6 +220,8 @@ export function createNewTradeShow(): TradeShow {
     eventAppNotes: null,
     showContactName: null,
     showContactEmail: null,
+    showContactPhone: null,
+    showWebsite: null,
     venueName: null,
     venueAddress: null,
     packingListItems: '[]',

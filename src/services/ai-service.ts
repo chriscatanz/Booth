@@ -775,92 +775,128 @@ Be helpful, specific, and actionable. Reference the provided context when answer
 }
 
 /**
- * Extract show details from document text (vendor packets, exhibitor guides, contracts)
+ * Comprehensive extracted show data from documents
  */
-export async function extractShowFromDocument(documentText: string): Promise<Record<string, unknown>> {
+export interface ExtractedShowData {
+  // Basic Info
+  name: string | null;
+  location: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  boothNumber: string | null;
+  boothSize: string | null;
+  cost: number | null;
+  attendeesIncluded: number | null;
+  managementCompany: string | null;
+  
+  // Event Type & Virtual Details
+  eventType: 'in_person' | 'virtual' | 'hybrid' | null;
+  virtualPlatform: string | null;
+  virtualPlatformUrl: string | null;
+  virtualBoothUrl: string | null;
+  
+  // Venue & Location
+  venueName: string | null;
+  venueAddress: string | null;
+  
+  // Move-in/Move-out
+  moveInDate: string | null;
+  moveInTime: string | null;
+  moveOutDate: string | null;
+  moveOutTime: string | null;
+  
+  // Deadlines
+  earlyBirdDeadline: string | null;
+  registrationDeadline: string | null;
+  housingDeadline: string | null;
+  serviceKitDeadline: string | null;
+  shippingDeadline: string | null;
+  shippingCutoff: string | null;
+  
+  // Contacts
+  showContactName: string | null;
+  showContactEmail: string | null;
+  showContactPhone: string | null;
+  
+  // URLs & Portals
+  showWebsite: string | null;
+  showAgendaUrl: string | null;
+  eventPortalUrl: string | null;
+  
+  // Shipping & Logistics
+  shippingInfo: string | null;
+  warehouseAddress: string | null;
+  shipToSite: boolean | null;
+  shipToWarehouse: boolean | null;
+  
+  // Lead Capture
+  leadCaptureSystem: string | null;
+  
+  // Services & Costs
+  electricalCost: number | null;
+  laborCost: number | null;
+  internetCost: number | null;
+  standardServicesCost: number | null;
+  utilitiesDetails: string | null;
+  laborDetails: string | null;
+  
+  // Speaking & Sponsorship
+  hasSpeakingEngagement: boolean | null;
+  speakingDetails: string | null;
+  sponsorshipDetails: string | null;
+  
+  // Hotel
+  hotelName: string | null;
+  hotelAddress: string | null;
+  hotelCostPerNight: number | null;
+  
+  // Event App
+  hasEventApp: boolean | null;
+  eventAppNotes: string | null;
+  
+  // Additional
+  notes: string | null;
+  
+  // Meta
+  confidence: 'high' | 'medium' | 'low';
+  extractedFields: string[];
+}
+
+/**
+ * Extract show details from document text using the dedicated extraction endpoint
+ */
+export async function extractShowFromDocument(documentText: string): Promise<ExtractedShowData> {
   if (!currentOrgId) {
     throw new Error('Organization not set. Please reload the page.');
   }
 
-  const systemPrompt = `You are a trade show document analyzer. Extract structured data from exhibitor packets, vendor guides, and contracts. Return ONLY valid JSON with no additional text or markdown.`;
-
-  const prompt = `Analyze this trade show document and extract all relevant details. Return a JSON object with the following structure (include only fields that are found in the document):
-
-{
-  "showName": "Name of the trade show",
-  "dates": {
-    "start": "YYYY-MM-DD",
-    "end": "YYYY-MM-DD"
-  },
-  "location": {
-    "venue": "Venue name (convention center, hotel name, etc.)",
-    "venueAddress": "Full street address of the venue",
-    "city": "City",
-    "state": "State/Province",
-    "country": "Country"
-  },
-  "booth": {
-    "number": "Booth number/ID",
-    "size": "e.g., 10x10",
-    "type": "e.g., Island, Corner, Inline"
-  },
-  "costs": {
-    "boothRental": 0,
-    "sponsorship": 0,
-    "additionalFees": []
-  },
-  "deadlines": [
-    {
-      "name": "Deadline name",
-      "date": "YYYY-MM-DD",
-      "description": "What's due"
-    }
-  ],
-  "contacts": [
-    {
-      "name": "Contact name",
-      "role": "Role/Title",
-      "email": "email@example.com",
-      "phone": "Phone number"
-    }
-  ],
-  "logistics": {
-    "setupDate": "YYYY-MM-DD",
-    "teardownDate": "YYYY-MM-DD", 
-    "shippingDeadline": "YYYY-MM-DD",
-    "shippingAddress": "Address for materials"
-  },
-  "notes": ["Any other important information"]
-}
-
-Document to analyze:
-${documentText}
-
-Return ONLY the JSON object, no markdown code blocks or explanatory text.`;
-
-  const result = await callAIAPI(prompt, systemPrompt, currentOrgId);
+  // Get auth token
+  const { supabase } = await import('@/lib/supabase');
+  const { data: { session } } = await supabase.auth.getSession();
   
-  // Parse JSON from response (handle potential markdown wrapping)
-  let jsonStr = result.trim();
-  if (jsonStr.startsWith('```json')) {
-    jsonStr = jsonStr.slice(7);
-  } else if (jsonStr.startsWith('```')) {
-    jsonStr = jsonStr.slice(3);
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+  if (session?.access_token) {
+    headers['Authorization'] = `Bearer ${session.access_token}`;
   }
-  if (jsonStr.endsWith('```')) {
-    jsonStr = jsonStr.slice(0, -3);
-  }
-  jsonStr = jsonStr.trim();
 
-  try {
-    return JSON.parse(jsonStr);
-  } catch {
-    // If JSON parsing fails, return raw text in a structured format
-    return {
-      extractionError: 'Could not parse structured data',
-      rawAnalysis: result
-    };
+  const response = await fetch('/api/ai/extract-show', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      documentText,
+      orgId: currentOrgId,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Extraction failed');
   }
+
+  return data.data as ExtractedShowData;
 }
 
 /**

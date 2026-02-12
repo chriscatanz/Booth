@@ -467,23 +467,8 @@ function GenerateTab({ shows }: { shows: TradeShow[] }) {
 // DOCUMENTS TAB - Extract show details and create tasks from vendor packets
 // ============================================================================
 
-interface ExtractedDeadline {
-  name: string;
-  date: string;
-  description?: string;
-}
-
-interface ExtractedShowData {
-  showName?: string;
-  dates?: { start?: string; end?: string };
-  location?: { venue?: string; venueAddress?: string; city?: string; state?: string; country?: string };
-  booth?: { number?: string; size?: string; type?: string };
-  costs?: { boothRental?: number; sponsorship?: number; additionalFees?: string[] };
-  deadlines?: ExtractedDeadline[];
-  contacts?: { name?: string; role?: string; email?: string; phone?: string }[];
-  logistics?: { setupDate?: string; teardownDate?: string; shippingDeadline?: string; shippingAddress?: string };
-  notes?: string;
-}
+// Use the comprehensive ExtractedShowData from ai-service
+type ExtractedShowData = aiService.ExtractedShowData;
 
 function DocumentsTab() {
   const [documentText, setDocumentText] = useState('');
@@ -591,32 +576,91 @@ function DocumentsTab() {
     setError(null);
 
     try {
-      // Build the new show data
+      // Build the new show data from all extracted fields
       const newShowData: Record<string, unknown> = {
         organization_id: organization.id,
-        name: extractedData.showName || `New Show from ${fileName}`,
+        name: extractedData.name || `New Show from ${fileName}`,
       };
 
-      if (extractedData.dates?.start) newShowData.start_date = extractedData.dates.start;
-      if (extractedData.dates?.end) newShowData.end_date = extractedData.dates.end;
+      // Basic Info
+      if (extractedData.startDate) newShowData.start_date = extractedData.startDate;
+      if (extractedData.endDate) newShowData.end_date = extractedData.endDate;
+      if (extractedData.location) newShowData.location = extractedData.location;
+      if (extractedData.boothNumber) newShowData.booth_number = extractedData.boothNumber;
+      if (extractedData.boothSize) newShowData.booth_size = extractedData.boothSize;
+      if (extractedData.cost) newShowData.cost = extractedData.cost;
+      if (extractedData.attendeesIncluded) newShowData.attendees_included = extractedData.attendeesIncluded;
+      if (extractedData.managementCompany) newShowData.management_company = extractedData.managementCompany;
       
-      const loc = extractedData.location;
-      if (loc) {
-        const locationParts = [loc.city, loc.state].filter(Boolean);
-        if (locationParts.length > 0) newShowData.location = locationParts.join(', ');
-        if (loc.venue) newShowData.venue_name = loc.venue;
-        if (loc.venueAddress) newShowData.venue_address = loc.venueAddress;
+      // Event Type & Virtual
+      if (extractedData.eventType) newShowData.event_type = extractedData.eventType;
+      if (extractedData.virtualPlatform) newShowData.virtual_platform = extractedData.virtualPlatform;
+      if (extractedData.virtualPlatformUrl) newShowData.virtual_platform_url = extractedData.virtualPlatformUrl;
+      if (extractedData.virtualBoothUrl) newShowData.virtual_booth_url = extractedData.virtualBoothUrl;
+      
+      // Venue
+      if (extractedData.venueName) newShowData.venue_name = extractedData.venueName;
+      if (extractedData.venueAddress) newShowData.venue_address = extractedData.venueAddress;
+      
+      // Move-in/Move-out
+      if (extractedData.moveInDate) newShowData.move_in_date = extractedData.moveInDate;
+      if (extractedData.moveInTime) newShowData.move_in_time = extractedData.moveInTime;
+      if (extractedData.moveOutDate) newShowData.move_out_date = extractedData.moveOutDate;
+      if (extractedData.moveOutTime) newShowData.move_out_time = extractedData.moveOutTime;
+      
+      // Shipping & Logistics
+      if (extractedData.shippingDeadline) newShowData.shipping_cutoff = extractedData.shippingDeadline;
+      if (extractedData.shippingCutoff) newShowData.shipping_cutoff = extractedData.shippingCutoff;
+      if (extractedData.shippingInfo) newShowData.shipping_info = extractedData.shippingInfo;
+      if (extractedData.warehouseAddress) {
+        // Append warehouse address to shipping info
+        const existingInfo = newShowData.shipping_info || '';
+        newShowData.shipping_info = existingInfo 
+          ? `${existingInfo}\n\nAdvance Warehouse: ${extractedData.warehouseAddress}`
+          : `Advance Warehouse: ${extractedData.warehouseAddress}`;
       }
+      if (extractedData.shipToSite !== null) newShowData.ship_to_site = extractedData.shipToSite;
+      if (extractedData.shipToWarehouse !== null) newShowData.ship_to_warehouse = extractedData.shipToWarehouse;
       
-      if (extractedData.booth?.number) newShowData.booth_number = extractedData.booth.number;
-      if (extractedData.booth?.size) newShowData.booth_size = extractedData.booth.size;
-      if (extractedData.costs?.boothRental) newShowData.cost = extractedData.costs.boothRental;
-      if (extractedData.logistics?.shippingDeadline) newShowData.shipping_cutoff = extractedData.logistics.shippingDeadline;
-      if (extractedData.logistics?.shippingAddress) newShowData.shipping_info = extractedData.logistics.shippingAddress;
+      // Lead Capture
+      if (extractedData.leadCaptureSystem) newShowData.lead_capture_system = extractedData.leadCaptureSystem;
       
-      const contact = extractedData.contacts?.[0];
-      if (contact?.name) newShowData.show_contact_name = contact.name;
-      if (contact?.email) newShowData.show_contact_email = contact.email;
+      // Costs
+      if (extractedData.electricalCost) newShowData.electrical_cost = extractedData.electricalCost;
+      if (extractedData.laborCost) newShowData.labor_cost = extractedData.laborCost;
+      if (extractedData.internetCost) newShowData.internet_cost = extractedData.internetCost;
+      if (extractedData.standardServicesCost) newShowData.standard_services_cost = extractedData.standardServicesCost;
+      if (extractedData.utilitiesDetails) newShowData.utilities_details = extractedData.utilitiesDetails;
+      if (extractedData.laborDetails) newShowData.labor_details = extractedData.laborDetails;
+      
+      // Speaking & Sponsorship
+      if (extractedData.hasSpeakingEngagement !== null) newShowData.has_speaking_engagement = extractedData.hasSpeakingEngagement;
+      if (extractedData.speakingDetails) newShowData.speaking_details = extractedData.speakingDetails;
+      if (extractedData.sponsorshipDetails) newShowData.sponsorship_details = extractedData.sponsorshipDetails;
+      
+      // Hotel
+      if (extractedData.hotelName) newShowData.hotel_name = extractedData.hotelName;
+      if (extractedData.hotelAddress) newShowData.hotel_address = extractedData.hotelAddress;
+      if (extractedData.hotelCostPerNight) newShowData.hotel_cost_per_night = extractedData.hotelCostPerNight;
+      
+      // URLs & Portals
+      if (extractedData.showWebsite) newShowData.show_website = extractedData.showWebsite;
+      if (extractedData.showAgendaUrl) newShowData.show_agenda_url = extractedData.showAgendaUrl;
+      if (extractedData.eventPortalUrl) newShowData.event_portal_url = extractedData.eventPortalUrl;
+      
+      // Event App
+      if (extractedData.hasEventApp !== null) newShowData.has_event_app = extractedData.hasEventApp;
+      if (extractedData.eventAppNotes) newShowData.event_app_notes = extractedData.eventAppNotes;
+      
+      // Contacts
+      if (extractedData.showContactName) newShowData.show_contact_name = extractedData.showContactName;
+      if (extractedData.showContactEmail) newShowData.show_contact_email = extractedData.showContactEmail;
+      if (extractedData.showContactPhone) newShowData.show_contact_phone = extractedData.showContactPhone;
+      
+      // Show Website
+      if (extractedData.showWebsite) newShowData.show_website = extractedData.showWebsite;
+      
+      // Notes
       if (extractedData.notes) newShowData.general_notes = extractedData.notes;
 
       // Create the show
@@ -666,35 +710,86 @@ function DocumentsTab() {
       // Use snake_case for database columns
       const updates: Record<string, unknown> = {};
       
-      // Map extracted data to show fields (snake_case for DB)
-      if (extractedData.showName) updates.name = extractedData.showName;
-      if (extractedData.dates?.start) updates.start_date = extractedData.dates.start;
-      if (extractedData.dates?.end) updates.end_date = extractedData.dates.end;
+      // Basic Info
+      if (extractedData.name) updates.name = extractedData.name;
+      if (extractedData.startDate) updates.start_date = extractedData.startDate;
+      if (extractedData.endDate) updates.end_date = extractedData.endDate;
+      if (extractedData.location) updates.location = extractedData.location;
+      if (extractedData.boothNumber) updates.booth_number = extractedData.boothNumber;
+      if (extractedData.boothSize) updates.booth_size = extractedData.boothSize;
+      if (extractedData.cost) updates.cost = extractedData.cost;
+      if (extractedData.attendeesIncluded) updates.attendees_included = extractedData.attendeesIncluded;
+      if (extractedData.managementCompany) updates.management_company = extractedData.managementCompany;
       
-      // Build location string and venue info
-      const loc = extractedData.location;
-      if (loc) {
-        const locationParts = [loc.city, loc.state].filter(Boolean);
-        if (locationParts.length > 0) updates.location = locationParts.join(', ');
-        if (loc.venue) updates.venue_name = loc.venue;
-        if (loc.venueAddress) updates.venue_address = loc.venueAddress;
+      // Event Type & Virtual
+      if (extractedData.eventType) updates.event_type = extractedData.eventType;
+      if (extractedData.virtualPlatform) updates.virtual_platform = extractedData.virtualPlatform;
+      if (extractedData.virtualPlatformUrl) updates.virtual_platform_url = extractedData.virtualPlatformUrl;
+      if (extractedData.virtualBoothUrl) updates.virtual_booth_url = extractedData.virtualBoothUrl;
+      
+      // Venue
+      if (extractedData.venueName) updates.venue_name = extractedData.venueName;
+      if (extractedData.venueAddress) updates.venue_address = extractedData.venueAddress;
+      
+      // Move-in/Move-out
+      if (extractedData.moveInDate) updates.move_in_date = extractedData.moveInDate;
+      if (extractedData.moveInTime) updates.move_in_time = extractedData.moveInTime;
+      if (extractedData.moveOutDate) updates.move_out_date = extractedData.moveOutDate;
+      if (extractedData.moveOutTime) updates.move_out_time = extractedData.moveOutTime;
+      
+      // Shipping & Logistics
+      if (extractedData.shippingDeadline || extractedData.shippingCutoff) {
+        updates.shipping_cutoff = extractedData.shippingDeadline || extractedData.shippingCutoff;
       }
+      if (extractedData.shippingInfo || extractedData.warehouseAddress) {
+        const parts = [];
+        if (extractedData.shippingInfo) parts.push(extractedData.shippingInfo);
+        if (extractedData.warehouseAddress) parts.push(`Advance Warehouse: ${extractedData.warehouseAddress}`);
+        const existingInfo = selectedShow.shippingInfo || '';
+        updates.shipping_info = existingInfo 
+          ? `${existingInfo}\n\n${parts.join('\n\n')}`
+          : parts.join('\n\n');
+      }
+      if (extractedData.shipToSite !== null) updates.ship_to_site = extractedData.shipToSite;
+      if (extractedData.shipToWarehouse !== null) updates.ship_to_warehouse = extractedData.shipToWarehouse;
       
-      // Booth info
-      if (extractedData.booth?.number) updates.booth_number = extractedData.booth.number;
-      if (extractedData.booth?.size) updates.booth_size = extractedData.booth.size;
+      // Lead Capture
+      if (extractedData.leadCaptureSystem) updates.lead_capture_system = extractedData.leadCaptureSystem;
       
       // Costs
-      if (extractedData.costs?.boothRental) updates.cost = extractedData.costs.boothRental;
+      if (extractedData.electricalCost) updates.electrical_cost = extractedData.electricalCost;
+      if (extractedData.laborCost) updates.labor_cost = extractedData.laborCost;
+      if (extractedData.internetCost) updates.internet_cost = extractedData.internetCost;
+      if (extractedData.standardServicesCost) updates.standard_services_cost = extractedData.standardServicesCost;
+      if (extractedData.utilitiesDetails) updates.utilities_details = extractedData.utilitiesDetails;
+      if (extractedData.laborDetails) updates.labor_details = extractedData.laborDetails;
       
-      // Logistics
-      if (extractedData.logistics?.shippingDeadline) updates.shipping_cutoff = extractedData.logistics.shippingDeadline;
-      if (extractedData.logistics?.shippingAddress) updates.shipping_info = extractedData.logistics.shippingAddress;
+      // Speaking & Sponsorship
+      if (extractedData.hasSpeakingEngagement !== null) updates.has_speaking_engagement = extractedData.hasSpeakingEngagement;
+      if (extractedData.speakingDetails) updates.speaking_details = extractedData.speakingDetails;
+      if (extractedData.sponsorshipDetails) updates.sponsorship_details = extractedData.sponsorshipDetails;
       
-      // Contacts (first one)
-      const contact = extractedData.contacts?.[0];
-      if (contact?.name) updates.show_contact_name = contact.name;
-      if (contact?.email) updates.show_contact_email = contact.email;
+      // Hotel
+      if (extractedData.hotelName) updates.hotel_name = extractedData.hotelName;
+      if (extractedData.hotelAddress) updates.hotel_address = extractedData.hotelAddress;
+      if (extractedData.hotelCostPerNight) updates.hotel_cost_per_night = extractedData.hotelCostPerNight;
+      
+      // URLs & Portals
+      if (extractedData.showWebsite) updates.show_website = extractedData.showWebsite;
+      if (extractedData.showAgendaUrl) updates.show_agenda_url = extractedData.showAgendaUrl;
+      if (extractedData.eventPortalUrl) updates.event_portal_url = extractedData.eventPortalUrl;
+      
+      // Event App
+      if (extractedData.hasEventApp !== null) updates.has_event_app = extractedData.hasEventApp;
+      if (extractedData.eventAppNotes) updates.event_app_notes = extractedData.eventAppNotes;
+      
+      // Contacts
+      if (extractedData.showContactName) updates.show_contact_name = extractedData.showContactName;
+      if (extractedData.showContactEmail) updates.show_contact_email = extractedData.showContactEmail;
+      if (extractedData.showContactPhone) updates.show_contact_phone = extractedData.showContactPhone;
+      
+      // Show Website
+      if (extractedData.showWebsite) updates.show_website = extractedData.showWebsite;
       
       // Notes
       if (extractedData.notes) {
@@ -727,38 +822,60 @@ function DocumentsTab() {
     setIsApplying(false);
   };
 
-  // Helper to create tasks for a specific show ID
+  // Helper to create tasks for a specific show ID from all extracted deadlines
   const handleCreateTasksForShow = async (showId?: number) => {
-    if (!extractedData?.deadlines?.length && !extractedData?.logistics?.shippingDeadline) {
-      return 0;
-    }
     if (!organization?.id || !user?.id) {
       return 0;
     }
 
     let created = 0;
     
-    for (const deadline of extractedData.deadlines || []) {
-      if (!deadline.name || !deadline.date) continue;
-      
+    // Map of deadline fields to task titles
+    const deadlineFields: Array<{ field: keyof typeof extractedData; title: string }> = [
+      { field: 'earlyBirdDeadline', title: 'Early Bird Deadline' },
+      { field: 'registrationDeadline', title: 'Registration Deadline' },
+      { field: 'housingDeadline', title: 'Housing/Hotel Block Deadline' },
+      { field: 'serviceKitDeadline', title: 'Service Kit / Exhibitor Kit Deadline' },
+      { field: 'shippingDeadline', title: 'Advance Warehouse Shipping Deadline' },
+      { field: 'shippingCutoff', title: 'Direct-to-Site Shipping Cutoff' },
+    ];
+    
+    for (const { field, title } of deadlineFields) {
+      const dateValue = extractedData?.[field];
+      if (dateValue && typeof dateValue === 'string') {
+        await taskService.createTask(organization.id, user.id, {
+          title,
+          description: `Deadline extracted from: ${fileName}`,
+          tradeShowId: showId,
+          dueDate: dateValue,
+          priority: 'high',
+        });
+        created++;
+      }
+    }
+    
+    // Create move-in reminder task if we have a move-in date
+    if (extractedData?.moveInDate) {
+      const moveInTime = extractedData.moveInTime ? ` (${extractedData.moveInTime})` : '';
       await taskService.createTask(organization.id, user.id, {
-        title: deadline.name,
-        description: deadline.description || `Deadline extracted from: ${fileName}`,
+        title: 'Move-In / Setup Day',
+        description: `Exhibitor move-in${moveInTime}. Extracted from: ${fileName}`,
         tradeShowId: showId,
-        dueDate: deadline.date,
+        dueDate: extractedData.moveInDate,
         priority: 'high',
       });
       created++;
     }
     
-    // Also create tasks from logistics deadlines
-    if (extractedData.logistics?.shippingDeadline) {
+    // Create move-out reminder task if we have a move-out date
+    if (extractedData?.moveOutDate) {
+      const moveOutTime = extractedData.moveOutTime ? ` (${extractedData.moveOutTime})` : '';
       await taskService.createTask(organization.id, user.id, {
-        title: 'Shipping Deadline',
-        description: `Ship materials by this date. Extracted from: ${fileName}`,
+        title: 'Move-Out / Teardown Day',
+        description: `Exhibitor move-out${moveOutTime}. Extracted from: ${fileName}`,
         tradeShowId: showId,
-        dueDate: extractedData.logistics.shippingDeadline,
-        priority: 'high',
+        dueDate: extractedData.moveOutDate,
+        priority: 'medium',
       });
       created++;
     }
@@ -766,8 +883,25 @@ function DocumentsTab() {
     return created;
   };
 
+  // Count how many deadline fields have values
+  const countDeadlines = (): number => {
+    if (!extractedData) return 0;
+    let count = 0;
+    const deadlineFields = [
+      'earlyBirdDeadline', 'registrationDeadline', 'housingDeadline',
+      'serviceKitDeadline', 'shippingDeadline', 'shippingCutoff',
+      'moveInDate', 'moveOutDate'
+    ] as const;
+    for (const field of deadlineFields) {
+      if (extractedData[field]) count++;
+    }
+    return count;
+  };
+  
+  const deadlineCount = countDeadlines();
+
   const handleCreateTasks = async () => {
-    if (!extractedData?.deadlines?.length && !extractedData?.logistics?.shippingDeadline) {
+    if (deadlineCount === 0) {
       toast.error('No deadlines found to create tasks');
       return;
     }
@@ -794,13 +928,10 @@ function DocumentsTab() {
 
   const handleApplyAll = async () => {
     await handleApplyToShow();
-    if (extractedData?.deadlines?.length) {
+    if (deadlineCount > 0) {
       await handleCreateTasks();
     }
   };
-
-  const deadlineCount = (extractedData?.deadlines?.length || 0) + 
-    (extractedData?.logistics?.shippingDeadline ? 1 : 0);
 
   return (
     <div className="h-full flex">
@@ -971,98 +1102,98 @@ function DocumentsTab() {
       <div className="flex-1 p-4 flex flex-col overflow-hidden">
         {extractedData ? (
           <div className="flex-1 overflow-y-auto space-y-4">
-            <h3 className="text-sm font-medium text-text-primary sticky top-0 bg-background py-2">
-              Extracted Details
-            </h3>
+            <div className="flex items-center justify-between sticky top-0 bg-background py-2">
+              <h3 className="text-sm font-medium text-text-primary">
+                Extracted Details
+              </h3>
+              <span className={cn(
+                'text-xs px-2 py-0.5 rounded-full',
+                extractedData.confidence === 'high' ? 'bg-success/20 text-success' :
+                extractedData.confidence === 'medium' ? 'bg-warning/20 text-warning' :
+                'bg-text-tertiary/20 text-text-tertiary'
+              )}>
+                {extractedData.confidence} confidence
+              </span>
+            </div>
             
             {/* Show Info */}
-            {extractedData.showName && (
+            {extractedData.name && (
               <div className="p-4 bg-bg-tertiary rounded-xl">
                 <div className="flex items-center gap-2 mb-2">
                   <Calendar size={16} className="text-brand-purple" />
                   <span className="text-sm font-medium text-text-primary">Show Info</span>
                 </div>
                 <div className="space-y-2 text-sm">
-                  <p><span className="text-text-secondary">Name:</span> <span className="text-text-primary font-medium">{extractedData.showName}</span></p>
-                  {extractedData.dates?.start && (
-                    <p><span className="text-text-secondary">Dates:</span> <span className="text-text-primary">{extractedData.dates.start} — {extractedData.dates.end || 'TBD'}</span></p>
+                  <p><span className="text-text-secondary">Name:</span> <span className="text-text-primary font-medium">{extractedData.name}</span></p>
+                  {extractedData.startDate && (
+                    <p><span className="text-text-secondary">Dates:</span> <span className="text-text-primary">{extractedData.startDate} — {extractedData.endDate || 'TBD'}</span></p>
+                  )}
+                  {extractedData.location && (
+                    <p><span className="text-text-secondary">Location:</span> <span className="text-text-primary">{extractedData.location}</span></p>
+                  )}
+                  {extractedData.eventType && (
+                    <p><span className="text-text-secondary">Type:</span> <span className="text-text-primary capitalize">{extractedData.eventType.replace('_', ' ')}</span></p>
+                  )}
+                  {extractedData.managementCompany && (
+                    <p><span className="text-text-secondary">Organizer:</span> <span className="text-text-primary">{extractedData.managementCompany}</span></p>
                   )}
                 </div>
               </div>
             )}
 
-            {/* Location */}
-            {extractedData.location && (
+            {/* Venue & Location */}
+            {(extractedData.venueName || extractedData.venueAddress) && (
               <div className="p-4 bg-bg-tertiary rounded-xl">
                 <div className="flex items-center gap-2 mb-2">
                   <MapPin size={16} className="text-brand-cyan" />
-                  <span className="text-sm font-medium text-text-primary">Location</span>
+                  <span className="text-sm font-medium text-text-primary">Venue</span>
                 </div>
                 <div className="space-y-1 text-sm">
-                  {extractedData.location.venue && <p className="text-text-primary">{extractedData.location.venue}</p>}
-                  <p className="text-text-secondary">
-                    {[extractedData.location.city, extractedData.location.state, extractedData.location.country].filter(Boolean).join(', ')}
-                  </p>
+                  {extractedData.venueName && <p className="text-text-primary font-medium">{extractedData.venueName}</p>}
+                  {extractedData.venueAddress && <p className="text-text-secondary">{extractedData.venueAddress}</p>}
                 </div>
               </div>
             )}
 
             {/* Booth */}
-            {extractedData.booth && (
+            {(extractedData.boothNumber || extractedData.boothSize || extractedData.cost) && (
               <div className="p-4 bg-bg-tertiary rounded-xl">
                 <div className="flex items-center gap-2 mb-2">
                   <Building size={16} className="text-success" />
                   <span className="text-sm font-medium text-text-primary">Booth</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  {extractedData.booth.number && <p><span className="text-text-secondary">Number:</span> <span className="text-text-primary">{extractedData.booth.number}</span></p>}
-                  {extractedData.booth.size && <p><span className="text-text-secondary">Size:</span> <span className="text-text-primary">{extractedData.booth.size}</span></p>}
-                  {extractedData.booth.type && <p><span className="text-text-secondary">Type:</span> <span className="text-text-primary">{extractedData.booth.type}</span></p>}
+                  {extractedData.boothNumber && <p><span className="text-text-secondary">Number:</span> <span className="text-text-primary">{extractedData.boothNumber}</span></p>}
+                  {extractedData.boothSize && <p><span className="text-text-secondary">Size:</span> <span className="text-text-primary">{extractedData.boothSize}</span></p>}
+                  {extractedData.cost && <p><span className="text-text-secondary">Cost:</span> <span className="text-text-primary font-medium">${extractedData.cost.toLocaleString()}</span></p>}
+                  {extractedData.attendeesIncluded && <p><span className="text-text-secondary">Badges:</span> <span className="text-text-primary">{extractedData.attendeesIncluded}</span></p>}
                 </div>
               </div>
             )}
 
-            {/* Costs */}
-            {extractedData.costs && (
-              <div className="p-4 bg-bg-tertiary rounded-xl">
-                <div className="flex items-center gap-2 mb-2">
-                  <DollarSign size={16} className="text-warning" />
-                  <span className="text-sm font-medium text-text-primary">Costs</span>
-                </div>
-                <div className="space-y-1 text-sm">
-                  {extractedData.costs.boothRental && <p><span className="text-text-secondary">Booth Rental:</span> <span className="text-text-primary font-medium">${extractedData.costs.boothRental.toLocaleString()}</span></p>}
-                  {extractedData.costs.sponsorship && <p><span className="text-text-secondary">Sponsorship:</span> <span className="text-text-primary">${extractedData.costs.sponsorship.toLocaleString()}</span></p>}
-                </div>
-              </div>
-            )}
-
-            {/* Deadlines - Most Important! */}
-            {(extractedData.deadlines?.length || extractedData.logistics?.shippingDeadline) && (
-              <div className="p-4 bg-brand-purple/10 border border-brand-purple/20 rounded-xl">
+            {/* Move-in/Move-out */}
+            {(extractedData.moveInDate || extractedData.moveOutDate) && (
+              <div className="p-4 bg-brand-cyan/10 border border-brand-cyan/20 rounded-xl">
                 <div className="flex items-center gap-2 mb-3">
-                  <Clock size={16} className="text-brand-purple" />
-                  <span className="text-sm font-medium text-text-primary">Deadlines</span>
-                  <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-brand-purple text-white">
-                    {deadlineCount} found
-                  </span>
+                  <Clock size={16} className="text-brand-cyan" />
+                  <span className="text-sm font-medium text-text-primary">Setup / Teardown</span>
                 </div>
                 <div className="space-y-2">
-                  {extractedData.deadlines?.map((d, i) => (
-                    <div key={i} className="flex items-start gap-3 p-2 bg-surface rounded-lg">
-                      <CheckSquare size={14} className="text-brand-purple mt-0.5" />
+                  {extractedData.moveInDate && (
+                    <div className="flex items-start gap-3 p-2 bg-surface rounded-lg">
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-text-primary">{d.name}</p>
-                        <p className="text-xs text-text-secondary">{d.date}</p>
-                        {d.description && <p className="text-xs text-text-tertiary mt-1">{d.description}</p>}
+                        <p className="text-sm font-medium text-text-primary">Move-In</p>
+                        <p className="text-xs text-text-secondary">{extractedData.moveInDate}</p>
+                        {extractedData.moveInTime && <p className="text-xs text-text-tertiary">{extractedData.moveInTime}</p>}
                       </div>
                     </div>
-                  ))}
-                  {extractedData.logistics?.shippingDeadline && (
+                  )}
+                  {extractedData.moveOutDate && (
                     <div className="flex items-start gap-3 p-2 bg-surface rounded-lg">
-                      <Package size={14} className="text-brand-purple mt-0.5" />
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-text-primary">Shipping Deadline</p>
-                        <p className="text-xs text-text-secondary">{extractedData.logistics.shippingDeadline}</p>
+                        <p className="text-sm font-medium text-text-primary">Move-Out</p>
+                        <p className="text-xs text-text-secondary">{extractedData.moveOutDate}</p>
+                        {extractedData.moveOutTime && <p className="text-xs text-text-tertiary">{extractedData.moveOutTime}</p>}
                       </div>
                     </div>
                   )}
@@ -1070,21 +1201,170 @@ function DocumentsTab() {
               </div>
             )}
 
-            {/* Contacts */}
-            {extractedData.contacts?.length && (
+            {/* Deadlines */}
+            {deadlineCount > 0 && (
+              <div className="p-4 bg-brand-purple/10 border border-brand-purple/20 rounded-xl">
+                <div className="flex items-center gap-2 mb-3">
+                  <CheckSquare size={16} className="text-brand-purple" />
+                  <span className="text-sm font-medium text-text-primary">Deadlines</span>
+                  <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-brand-purple text-white">
+                    {deadlineCount} found
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {extractedData.earlyBirdDeadline && (
+                    <div className="flex items-start gap-3 p-2 bg-surface rounded-lg">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-text-primary">Early Bird</p>
+                        <p className="text-xs text-text-secondary">{extractedData.earlyBirdDeadline}</p>
+                      </div>
+                    </div>
+                  )}
+                  {extractedData.registrationDeadline && (
+                    <div className="flex items-start gap-3 p-2 bg-surface rounded-lg">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-text-primary">Registration</p>
+                        <p className="text-xs text-text-secondary">{extractedData.registrationDeadline}</p>
+                      </div>
+                    </div>
+                  )}
+                  {extractedData.housingDeadline && (
+                    <div className="flex items-start gap-3 p-2 bg-surface rounded-lg">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-text-primary">Housing Block</p>
+                        <p className="text-xs text-text-secondary">{extractedData.housingDeadline}</p>
+                      </div>
+                    </div>
+                  )}
+                  {extractedData.serviceKitDeadline && (
+                    <div className="flex items-start gap-3 p-2 bg-surface rounded-lg">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-text-primary">Service Kit / Exhibitor Kit</p>
+                        <p className="text-xs text-text-secondary">{extractedData.serviceKitDeadline}</p>
+                      </div>
+                    </div>
+                  )}
+                  {extractedData.shippingDeadline && (
+                    <div className="flex items-start gap-3 p-2 bg-surface rounded-lg">
+                      <Package size={14} className="text-brand-purple mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-text-primary">Advance Warehouse</p>
+                        <p className="text-xs text-text-secondary">{extractedData.shippingDeadline}</p>
+                      </div>
+                    </div>
+                  )}
+                  {extractedData.shippingCutoff && (
+                    <div className="flex items-start gap-3 p-2 bg-surface rounded-lg">
+                      <Package size={14} className="text-brand-purple mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-text-primary">Direct-to-Site Cutoff</p>
+                        <p className="text-xs text-text-secondary">{extractedData.shippingCutoff}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Costs */}
+            {(extractedData.electricalCost || extractedData.laborCost || extractedData.internetCost || extractedData.standardServicesCost) && (
+              <div className="p-4 bg-bg-tertiary rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <DollarSign size={16} className="text-warning" />
+                  <span className="text-sm font-medium text-text-primary">Service Costs</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  {extractedData.electricalCost && <p><span className="text-text-secondary">Electrical:</span> <span className="text-text-primary">${extractedData.electricalCost.toLocaleString()}</span></p>}
+                  {extractedData.laborCost && <p><span className="text-text-secondary">Labor:</span> <span className="text-text-primary">${extractedData.laborCost.toLocaleString()}</span></p>}
+                  {extractedData.internetCost && <p><span className="text-text-secondary">Internet:</span> <span className="text-text-primary">${extractedData.internetCost.toLocaleString()}</span></p>}
+                  {extractedData.standardServicesCost && <p><span className="text-text-secondary">Drayage:</span> <span className="text-text-primary">${extractedData.standardServicesCost.toLocaleString()}</span></p>}
+                </div>
+                {extractedData.utilitiesDetails && <p className="text-xs text-text-tertiary mt-2">{extractedData.utilitiesDetails}</p>}
+                {extractedData.laborDetails && <p className="text-xs text-text-tertiary mt-1">{extractedData.laborDetails}</p>}
+              </div>
+            )}
+
+            {/* Hotel */}
+            {(extractedData.hotelName || extractedData.hotelAddress || extractedData.hotelCostPerNight) && (
+              <div className="p-4 bg-bg-tertiary rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <Building size={16} className="text-text-tertiary" />
+                  <span className="text-sm font-medium text-text-primary">Hotel</span>
+                </div>
+                <div className="space-y-1 text-sm">
+                  {extractedData.hotelName && <p className="text-text-primary font-medium">{extractedData.hotelName}</p>}
+                  {extractedData.hotelAddress && <p className="text-text-secondary">{extractedData.hotelAddress}</p>}
+                  {extractedData.hotelCostPerNight && <p className="text-text-secondary">${extractedData.hotelCostPerNight}/night</p>}
+                </div>
+              </div>
+            )}
+
+            {/* Shipping */}
+            {(extractedData.shippingInfo || extractedData.warehouseAddress) && (
+              <div className="p-4 bg-bg-tertiary rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <Package size={16} className="text-text-tertiary" />
+                  <span className="text-sm font-medium text-text-primary">Shipping</span>
+                </div>
+                <div className="space-y-2 text-sm">
+                  {extractedData.warehouseAddress && (
+                    <div>
+                      <p className="text-text-secondary text-xs">Advance Warehouse:</p>
+                      <p className="text-text-primary">{extractedData.warehouseAddress}</p>
+                    </div>
+                  )}
+                  {extractedData.shippingInfo && <p className="text-text-secondary whitespace-pre-wrap">{extractedData.shippingInfo}</p>}
+                  <div className="flex gap-4">
+                    {extractedData.shipToSite !== null && (
+                      <span className={cn('text-xs', extractedData.shipToSite ? 'text-success' : 'text-text-tertiary')}>
+                        {extractedData.shipToSite ? '✓' : '✗'} Direct-to-site
+                      </span>
+                    )}
+                    {extractedData.shipToWarehouse !== null && (
+                      <span className={cn('text-xs', extractedData.shipToWarehouse ? 'text-success' : 'text-text-tertiary')}>
+                        {extractedData.shipToWarehouse ? '✓' : '✗'} Warehouse
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Contact */}
+            {(extractedData.showContactName || extractedData.showContactEmail || extractedData.showContactPhone) && (
               <div className="p-4 bg-bg-tertiary rounded-xl">
                 <div className="flex items-center gap-2 mb-2">
                   <Users size={16} className="text-text-tertiary" />
-                  <span className="text-sm font-medium text-text-primary">Contacts</span>
+                  <span className="text-sm font-medium text-text-primary">Contact</span>
                 </div>
-                <div className="space-y-2">
-                  {extractedData.contacts.map((c, i) => (
-                    <div key={i} className="text-sm">
-                      <p className="text-text-primary font-medium">{c.name}</p>
-                      {c.role && <p className="text-text-secondary text-xs">{c.role}</p>}
-                      {c.email && <p className="text-text-tertiary text-xs">{c.email}</p>}
-                    </div>
-                  ))}
+                <div className="space-y-1 text-sm">
+                  {extractedData.showContactName && <p className="text-text-primary font-medium">{extractedData.showContactName}</p>}
+                  {extractedData.showContactEmail && <p className="text-text-secondary">{extractedData.showContactEmail}</p>}
+                  {extractedData.showContactPhone && <p className="text-text-secondary">{extractedData.showContactPhone}</p>}
+                </div>
+              </div>
+            )}
+
+            {/* URLs */}
+            {(extractedData.showWebsite || extractedData.showAgendaUrl || extractedData.eventPortalUrl) && (
+              <div className="p-4 bg-bg-tertiary rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <ExternalLink size={16} className="text-text-tertiary" />
+                  <span className="text-sm font-medium text-text-primary">Links</span>
+                </div>
+                <div className="space-y-2 text-sm">
+                  {extractedData.showWebsite && (
+                    <a href={extractedData.showWebsite} target="_blank" rel="noopener noreferrer" 
+                       className="block text-brand-purple hover:underline truncate">{extractedData.showWebsite}</a>
+                  )}
+                  {extractedData.showAgendaUrl && (
+                    <a href={extractedData.showAgendaUrl} target="_blank" rel="noopener noreferrer"
+                       className="block text-brand-purple hover:underline truncate">Agenda</a>
+                  )}
+                  {extractedData.eventPortalUrl && (
+                    <a href={extractedData.eventPortalUrl} target="_blank" rel="noopener noreferrer"
+                       className="block text-brand-purple hover:underline truncate">Exhibitor Portal</a>
+                  )}
                 </div>
               </div>
             )}
@@ -1097,6 +1377,15 @@ function DocumentsTab() {
                   <span className="text-sm font-medium text-text-primary">Notes</span>
                 </div>
                 <p className="text-sm text-text-secondary whitespace-pre-wrap">{extractedData.notes}</p>
+              </div>
+            )}
+
+            {/* Extracted Fields Summary */}
+            {extractedData.extractedFields?.length > 0 && (
+              <div className="p-3 bg-bg-tertiary rounded-lg">
+                <p className="text-xs text-text-tertiary">
+                  <span className="font-medium">{extractedData.extractedFields.length}</span> fields extracted: {extractedData.extractedFields.slice(0, 10).join(', ')}{extractedData.extractedFields.length > 10 ? '...' : ''}
+                </p>
               </div>
             )}
           </div>

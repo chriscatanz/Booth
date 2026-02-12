@@ -3,7 +3,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { createClient as createServerClient } from '@/lib/supabase-server';
 import { createClient } from '@supabase/supabase-js';
 
-// Extracted show data structure matching TradeShow fields
+// Extracted show data structure matching TradeShow fields (comprehensive)
 interface ExtractedShowData {
   // Basic Info
   name: string | null;
@@ -13,15 +13,24 @@ interface ExtractedShowData {
   boothNumber: string | null;
   boothSize: string | null;
   cost: number | null;
-  
-  // Event Details
-  eventType: 'in_person' | 'virtual' | 'hybrid' | null;
+  attendeesIncluded: number | null;
   managementCompany: string | null;
+  
+  // Event Type & Virtual Details
+  eventType: 'in_person' | 'virtual' | 'hybrid' | null;
+  virtualPlatform: string | null;
+  virtualPlatformUrl: string | null;
+  virtualBoothUrl: string | null;
+  
+  // Venue & Location
   venueName: string | null;
   venueAddress: string | null;
   
-  // Registration
-  attendeesIncluded: number | null;
+  // Move-in/Move-out
+  moveInDate: string | null;   // YYYY-MM-DD format
+  moveInTime: string | null;   // Time range e.g. "8:00 AM - 5:00 PM"
+  moveOutDate: string | null;  // YYYY-MM-DD format
+  moveOutTime: string | null;  // Time range e.g. "12:00 PM - 6:00 PM"
   
   // Deadlines (YYYY-MM-DD format)
   earlyBirdDeadline: string | null;
@@ -29,18 +38,48 @@ interface ExtractedShowData {
   housingDeadline: string | null;
   serviceKitDeadline: string | null;
   shippingDeadline: string | null;
+  shippingCutoff: string | null;
   
   // Contacts
   showContactName: string | null;
   showContactEmail: string | null;
   showContactPhone: string | null;
   
-  // URLs
+  // URLs & Portals
   showWebsite: string | null;
+  showAgendaUrl: string | null;
+  eventPortalUrl: string | null;
   
-  // Shipping
+  // Shipping & Logistics
   shippingInfo: string | null;
   warehouseAddress: string | null;
+  shipToSite: boolean | null;
+  shipToWarehouse: boolean | null;
+  
+  // Lead Capture
+  leadCaptureSystem: string | null;
+  
+  // Services & Costs
+  electricalCost: number | null;
+  laborCost: number | null;
+  internetCost: number | null;
+  standardServicesCost: number | null;
+  utilitiesDetails: string | null;
+  laborDetails: string | null;
+  
+  // Speaking & Sponsorship
+  hasSpeakingEngagement: boolean | null;
+  speakingDetails: string | null;
+  sponsorshipDetails: string | null;
+  
+  // Hotel
+  hotelName: string | null;
+  hotelAddress: string | null;
+  hotelCostPerNight: number | null;
+  
+  // Event App
+  hasEventApp: boolean | null;
+  eventAppNotes: string | null;
   
   // Additional extracted info
   notes: string | null;
@@ -50,50 +89,108 @@ interface ExtractedShowData {
   extractedFields: string[];  // List of fields that were found
 }
 
-const EXTRACTION_PROMPT = `You are an expert at extracting trade show and exhibition information from documents.
+const EXTRACTION_PROMPT = `You are an expert at extracting trade show and exhibition information from documents. Extract EVERY piece of information you can find.
 
-Analyze the following document and extract all trade show details you can find. Return a JSON object with these fields:
+Analyze the following document and extract all trade show details. Return a JSON object with these fields:
 
 {
+  // BASIC INFO
   "name": "Show/event name",
   "location": "City, State/Country",
-  "startDate": "YYYY-MM-DD format",
-  "endDate": "YYYY-MM-DD format",
-  "boothNumber": "Booth/stand number if mentioned",
-  "boothSize": "Booth dimensions (e.g., '10x10', '20x20')",
-  "cost": numeric value only (no currency symbols),
+  "startDate": "YYYY-MM-DD (first day of show floor)",
+  "endDate": "YYYY-MM-DD (last day of show floor)",
+  "boothNumber": "Booth/stand number",
+  "boothSize": "Dimensions (e.g., '10x10', '20x20')",
+  "cost": numeric (booth/exhibit space cost, no currency symbols),
+  "attendeesIncluded": numeric (number of badges/passes included),
+  "managementCompany": "Show management/organizer company name",
+
+  // EVENT TYPE
   "eventType": "in_person" | "virtual" | "hybrid",
-  "managementCompany": "Show management company name",
-  "venueName": "Venue/convention center name",
-  "venueAddress": "Full street address of the venue",
-  "attendeesIncluded": numeric value,
+  "virtualPlatform": "Platform name (e.g., Hopin, vFairs)",
+  "virtualPlatformUrl": "URL to virtual platform",
+  "virtualBoothUrl": "URL to your virtual booth",
+
+  // VENUE
+  "venueName": "Convention center/venue name",
+  "venueAddress": "Full street address of venue",
+
+  // MOVE-IN/MOVE-OUT (setup and teardown)
+  "moveInDate": "YYYY-MM-DD (exhibitor setup day)",
+  "moveInTime": "Time window (e.g., '8:00 AM - 5:00 PM')",
+  "moveOutDate": "YYYY-MM-DD (teardown day)",
+  "moveOutTime": "Time window (e.g., '3:00 PM - 8:00 PM')",
+
+  // DEADLINES
   "earlyBirdDeadline": "YYYY-MM-DD",
   "registrationDeadline": "YYYY-MM-DD",
-  "housingDeadline": "YYYY-MM-DD",
-  "serviceKitDeadline": "YYYY-MM-DD",
-  "shippingDeadline": "YYYY-MM-DD",
+  "housingDeadline": "YYYY-MM-DD (hotel block cutoff)",
+  "serviceKitDeadline": "YYYY-MM-DD (exhibitor kit/services order deadline)",
+  "shippingDeadline": "YYYY-MM-DD (advance warehouse receipt deadline)",
+  "shippingCutoff": "YYYY-MM-DD (direct-to-site shipping cutoff)",
+
+  // CONTACTS
   "showContactName": "Primary contact name",
   "showContactEmail": "Contact email",
   "showContactPhone": "Contact phone",
-  "showWebsite": "Official show website URL",
-  "shippingInfo": "Shipping/drayage instructions",
+
+  // URLS & PORTALS
+  "showWebsite": "Official show website",
+  "showAgendaUrl": "URL to agenda/schedule",
+  "eventPortalUrl": "Exhibitor portal/dashboard URL",
+
+  // SHIPPING & LOGISTICS
+  "shippingInfo": "Shipping instructions, carrier requirements",
   "warehouseAddress": "Advance warehouse address",
+  "shipToSite": true/false (direct-to-site shipping allowed),
+  "shipToWarehouse": true/false (advance warehouse shipping available),
+
+  // LEAD CAPTURE
+  "leadCaptureSystem": "Official lead retrieval system (e.g., CompuSystems, Validar)",
+
+  // SERVICES & COSTS
+  "electricalCost": numeric (electrical/power cost),
+  "laborCost": numeric (I&D labor cost),
+  "internetCost": numeric (WiFi/internet cost),
+  "standardServicesCost": numeric (drayage, material handling),
+  "utilitiesDetails": "Electrical/plumbing/compressed air details",
+  "laborDetails": "Labor/I&D requirements and notes",
+
+  // SPEAKING & SPONSORSHIP
+  "hasSpeakingEngagement": true/false,
+  "speakingDetails": "Session title, time, room",
+  "sponsorshipDetails": "Sponsorship package details",
+
+  // HOTEL
+  "hotelName": "Official/recommended hotel name",
+  "hotelAddress": "Hotel address",
+  "hotelCostPerNight": numeric (room rate),
+
+  // EVENT APP
+  "hasEventApp": true/false,
+  "eventAppNotes": "App name, download instructions",
+
+  // CATCH-ALL
   "notes": "Any other important details not captured above",
+
+  // META
   "confidence": "high" | "medium" | "low",
   "extractedFields": ["list", "of", "fields", "you", "found"]
 }
 
 Rules:
-1. Return ONLY valid JSON, no other text
+1. Return ONLY valid JSON, no other text or markdown
 2. Use null for fields you cannot find
-3. Convert all dates to YYYY-MM-DD format (handle various date formats)
-4. For cost, extract the numeric value only (e.g., "$5,000" → 5000)
-5. If the year is not specified for dates, assume the next occurrence of that date
-6. Set confidence based on how much information you found:
-   - high: Found show name + dates + location
-   - medium: Found show name + at least one other key field
-   - low: Limited information extracted
-7. List all fields you successfully extracted in extractedFields
+3. Convert all dates to YYYY-MM-DD format
+4. For costs, extract numeric values only (e.g., "$5,000" → 5000)
+5. If year is not specified, assume the next occurrence
+6. Move-in is typically 1-2 days before show start; move-out is typically show end day or day after
+7. Look for terms like: "installation", "setup", "dismantling", "teardown", "move-in", "move-out", "exhibitor access"
+8. Set confidence:
+   - high: Found name + dates + location + at least 5 other fields
+   - medium: Found name + dates OR name + 3+ other fields
+   - low: Limited information
+9. List ALL fields you found in extractedFields
 
 DOCUMENT:
 `;
