@@ -44,8 +44,11 @@ import { AttendeeSearch } from '@/components/ui/attendee-search';
 import { Attendee } from '@/types';
 import { KitAssignmentSection } from '@/components/kits/kit-assignment-section';
 import { TrackingStatusDisplay } from '@/components/ui/tracking-status';
+import { LookupSelect } from '@/components/ui/lookup-select';
+import { useLookups } from '@/hooks/use-lookups';
 import { supabase } from '@/lib/supabase';
 import * as aiService from '@/services/ai-service';
+import * as lookupService from '@/services/lookup-service';
 
 export default function DetailView() {
   const {
@@ -72,6 +75,7 @@ export default function DetailView() {
   
   const canEdit = usePermission('editor');
   const { boothOptions, graphicsOptions, packingListOptions, tableclothOptions } = useCustomLists();
+  const { lookups, refreshCategory } = useLookups();
   
   // Read-only mode for viewers
   const readOnly = !canEdit;
@@ -244,7 +248,29 @@ Return the agenda in a well-formatted text format that's easy to read.`;
                   placeholder="Select status"
                   disabled={readOnly}
                 />
-                <Input label="Management Company" value={show.managementCompany ?? ''} onChange={e => updateSelectedShow({ managementCompany: e.target.value || null })} disabled={readOnly} />
+                <LookupSelect
+                  label="Management Company"
+                  value={show.managementCompanyId}
+                  onChange={v => {
+                    const company = lookups.managementCompanies.find(c => c.id === v);
+                    updateSelectedShow({ 
+                      managementCompanyId: v,
+                      managementCompany: company?.name || null 
+                    });
+                  }}
+                  options={lookups.managementCompanies.map(c => ({ id: c.id, name: c.name, subtitle: c.companyType }))}
+                  placeholder="Select company..."
+                  disabled={readOnly}
+                  onCreateNew={async () => {
+                    const name = prompt('Enter company name:');
+                    if (name && organization?.id) {
+                      const newCompany = await lookupService.createManagementCompany(organization.id, { name });
+                      await refreshCategory('managementCompanies');
+                      updateSelectedShow({ managementCompanyId: newCompany.id, managementCompany: newCompany.name });
+                    }
+                  }}
+                  createLabel="Add new company"
+                />
                 <Select
                   label="Event Type"
                   value={show.eventType ?? 'in_person'}
@@ -260,7 +286,29 @@ Return the agenda in a well-formatted text format that's easy to read.`;
               
               {(show.eventType === 'virtual' || show.eventType === 'hybrid') && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 p-4 rounded-lg bg-brand-cyan/5 border border-brand-cyan/20">
-                  <Input label="Virtual Platform" value={show.virtualPlatform ?? ''} onChange={e => updateSelectedShow({ virtualPlatform: e.target.value || null })} placeholder="e.g., Zoom, Hopin" disabled={readOnly} />
+                  <LookupSelect
+                    label="Virtual Platform"
+                    value={show.virtualPlatformId}
+                    onChange={v => {
+                      const platform = lookups.virtualPlatforms.find(p => p.id === v);
+                      updateSelectedShow({ 
+                        virtualPlatformId: v,
+                        virtualPlatform: platform?.name || null 
+                      });
+                    }}
+                    options={lookups.virtualPlatforms.map(p => ({ id: p.id, name: p.name }))}
+                    placeholder="Select platform..."
+                    disabled={readOnly}
+                    onCreateNew={async () => {
+                      const name = prompt('Enter platform name:');
+                      if (name && organization?.id) {
+                        const newPlatform = await lookupService.createVirtualPlatform(organization.id, { name });
+                        await refreshCategory('virtualPlatforms');
+                        updateSelectedShow({ virtualPlatformId: newPlatform.id, virtualPlatform: newPlatform.name });
+                      }
+                    }}
+                    createLabel="Add new platform"
+                  />
                   <Input label="Platform URL" value={show.virtualPlatformUrl ?? ''} onChange={e => updateSelectedShow({ virtualPlatformUrl: e.target.value || null })} placeholder="https://..." disabled={readOnly} />
                   <Input label="Virtual Booth URL" value={show.virtualBoothUrl ?? ''} onChange={e => updateSelectedShow({ virtualBoothUrl: e.target.value || null })} placeholder="Your booth page URL" className="sm:col-span-2" disabled={readOnly} />
                 </div>
@@ -270,7 +318,30 @@ Return the agenda in a well-formatted text format that's easy to read.`;
             {/* Venue Location */}
             <TabSection title="Venue Location">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input label="Venue Name" value={show.venueName ?? ''} onChange={e => updateSelectedShow({ venueName: e.target.value || null })} placeholder="e.g., Convention Center" disabled={readOnly} />
+                <LookupSelect
+                  label="Venue"
+                  value={show.venueId}
+                  onChange={v => {
+                    const venue = lookups.venues.find(ven => ven.id === v);
+                    updateSelectedShow({ 
+                      venueId: v,
+                      venueName: venue?.name || null,
+                      venueAddress: venue ? `${venue.address || ''}, ${venue.city || ''}, ${venue.state || ''}`.replace(/^, |, $/g, '') : null
+                    });
+                  }}
+                  options={lookups.venues.map(v => ({ id: v.id, name: v.name, subtitle: v.city ? `${v.city}, ${v.state}` : undefined }))}
+                  placeholder="Select venue..."
+                  disabled={readOnly}
+                  onCreateNew={async () => {
+                    const name = prompt('Enter venue name:');
+                    if (name && organization?.id) {
+                      const newVenue = await lookupService.createVenue(organization.id, { name });
+                      await refreshCategory('venues');
+                      updateSelectedShow({ venueId: newVenue.id, venueName: newVenue.name });
+                    }
+                  }}
+                  createLabel="Add new venue"
+                />
                 <Input label="Venue Address" value={show.venueAddress ?? ''} onChange={e => updateSelectedShow({ venueAddress: e.target.value || null })} placeholder="Full address" disabled={readOnly} />
               </div>
               <VenueMap 
@@ -469,7 +540,29 @@ Return the agenda in a well-formatted text format that's easy to read.`;
             <TabSection title="Booth Details">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input label="Booth Number" value={show.boothNumber ?? ''} onChange={e => updateSelectedShow({ boothNumber: e.target.value || null })} disabled={readOnly} />
-                <Input label="Booth Size" value={show.boothSize ?? ''} onChange={e => updateSelectedShow({ boothSize: e.target.value || null })} placeholder="e.g., 10x10" disabled={readOnly} />
+                <LookupSelect
+                  label="Booth Size"
+                  value={show.boothSizeId}
+                  onChange={v => {
+                    const size = lookups.boothSizes.find(s => s.id === v);
+                    updateSelectedShow({ 
+                      boothSizeId: v,
+                      boothSize: size?.name || null 
+                    });
+                  }}
+                  options={lookups.boothSizes.map(s => ({ id: s.id, name: s.name, subtitle: s.sqFootage ? `${s.sqFootage} sq ft` : undefined }))}
+                  placeholder="Select size..."
+                  disabled={readOnly}
+                  onCreateNew={async () => {
+                    const name = prompt('Enter booth size (e.g., 10x10 Inline):');
+                    if (name && organization?.id) {
+                      const newSize = await lookupService.createBoothSize(organization.id, { name });
+                      await refreshCategory('boothSizes');
+                      updateSelectedShow({ boothSizeId: newSize.id, boothSize: newSize.name });
+                    }
+                  }}
+                  createLabel="Add new size"
+                />
               </div>
             </TabSection>
 
@@ -514,13 +607,32 @@ Return the agenda in a well-formatted text format that's easy to read.`;
           <div className="space-y-6">
             {/* Shipping */}
             <TabSection title="Shipping" icon={Truck}>
+              {/* Outbound Shipping */}
+              <p className="text-xs font-medium text-text-tertiary uppercase tracking-wide mb-3">Outbound</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input label="Shipping Info" value={show.shippingInfo ?? ''} onChange={e => updateSelectedShow({ shippingInfo: e.target.value || null })} disabled={readOnly} />
+                <LookupSelect
+                  label="Shipping Carrier"
+                  value={show.shippingCarrierId}
+                  onChange={v => updateSelectedShow({ shippingCarrierId: v })}
+                  options={lookups.shippingCarriers.map(c => ({ id: c.id, name: c.name, subtitle: c.carrierType }))}
+                  placeholder="Select carrier..."
+                  disabled={readOnly}
+                  onCreateNew={async () => {
+                    const name = prompt('Enter carrier name:');
+                    if (name && organization?.id) {
+                      const newCarrier = await lookupService.createShippingCarrier(organization.id, { name });
+                      await refreshCategory('shippingCarriers');
+                      updateSelectedShow({ shippingCarrierId: newCarrier.id });
+                    }
+                  }}
+                  createLabel="Add new carrier"
+                />
                 <Input label="Tracking Number" value={show.trackingNumber ?? ''} onChange={e => updateSelectedShow({ trackingNumber: e.target.value || null })} disabled={readOnly} />
                 <DataVisibilityGate category="budget">
                   <Input label="Shipping Cost" type="number" value={show.shippingCost?.toString() ?? ''} onChange={e => updateSelectedShow({ shippingCost: e.target.value ? parseFloat(e.target.value) : null })} disabled={readOnly} />
                 </DataVisibilityGate>
                 <DatePicker label="Shipping Cutoff" value={show.shippingCutoff} onChange={v => updateSelectedShow({ shippingCutoff: v })} disabled={readOnly} />
+                <Input label="Shipping Notes" value={show.shippingInfo ?? ''} onChange={e => updateSelectedShow({ shippingInfo: e.target.value || null })} placeholder="Instructions, warehouse address..." className="sm:col-span-2" disabled={readOnly} />
               </div>
 
               {/* Tracking Status */}
@@ -544,6 +656,36 @@ Return the agenda in a well-formatted text format that's easy to read.`;
                   />
                 </div>
               )}
+
+              {/* Return Shipping */}
+              <div className="mt-6 pt-4 border-t border-border">
+                <p className="text-xs font-medium text-text-tertiary uppercase tracking-wide mb-3">Return Shipping</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <LookupSelect
+                    label="Return Carrier"
+                    value={show.returnCarrierId}
+                    onChange={v => updateSelectedShow({ returnCarrierId: v })}
+                    options={lookups.shippingCarriers.map(c => ({ id: c.id, name: c.name, subtitle: c.carrierType }))}
+                    placeholder="Select carrier..."
+                    disabled={readOnly}
+                    onCreateNew={async () => {
+                      const name = prompt('Enter carrier name:');
+                      if (name && organization?.id) {
+                        const newCarrier = await lookupService.createShippingCarrier(organization.id, { name });
+                        await refreshCategory('shippingCarriers');
+                        updateSelectedShow({ returnCarrierId: newCarrier.id });
+                      }
+                    }}
+                    createLabel="Add new carrier"
+                  />
+                  <Input label="Return Tracking Number" value={show.returnTrackingNumber ?? ''} onChange={e => updateSelectedShow({ returnTrackingNumber: e.target.value || null })} disabled={readOnly} />
+                  <DataVisibilityGate category="budget">
+                    <Input label="Return Shipping Cost" type="number" value={show.returnShippingCost?.toString() ?? ''} onChange={e => updateSelectedShow({ returnShippingCost: e.target.value ? parseFloat(e.target.value) : null })} disabled={readOnly} />
+                  </DataVisibilityGate>
+                  <DatePicker label="Return Ship Date" value={show.returnShipDate} onChange={v => updateSelectedShow({ returnShipDate: v })} disabled={readOnly} />
+                  <DatePicker label="Expected Delivery" value={show.returnDeliveryDate} onChange={v => updateSelectedShow({ returnDeliveryDate: v })} disabled={readOnly} />
+                </div>
+              </div>
 
               <div className="flex gap-6 pt-4">
                 <Checkbox label="Ship to Site" checked={show.shipToSite ?? false} onChange={v => updateSelectedShow({ shipToSite: v })} disabled={readOnly} />
@@ -593,7 +735,29 @@ Return the agenda in a well-formatted text format that's easy to read.`;
             {/* Lead Capture */}
             <TabSection title="Lead Capture">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input label="Lead Capture System" value={show.leadCaptureSystem ?? ''} onChange={e => updateSelectedShow({ leadCaptureSystem: e.target.value || null })} placeholder="e.g., iLeads, Compusystems, Custom App" disabled={readOnly} />
+                <LookupSelect
+                  label="Lead Capture System"
+                  value={show.leadCaptureSystemId}
+                  onChange={v => {
+                    const system = lookups.leadCaptureSystems.find(s => s.id === v);
+                    updateSelectedShow({ 
+                      leadCaptureSystemId: v,
+                      leadCaptureSystem: system?.name || null 
+                    });
+                  }}
+                  options={lookups.leadCaptureSystems.map(s => ({ id: s.id, name: s.name }))}
+                  placeholder="Select system..."
+                  disabled={readOnly}
+                  onCreateNew={async () => {
+                    const name = prompt('Enter system name:');
+                    if (name && organization?.id) {
+                      const newSystem = await lookupService.createLeadCaptureSystem(organization.id, { name });
+                      await refreshCategory('leadCaptureSystems');
+                      updateSelectedShow({ leadCaptureSystemId: newSystem.id, leadCaptureSystem: newSystem.name });
+                    }
+                  }}
+                  createLabel="Add new system"
+                />
                 <Input label="Login Credentials" type="password" value={show.leadCaptureCredentials ?? ''} onChange={e => updateSelectedShow({ leadCaptureCredentials: e.target.value || null })} placeholder="Username / Password" disabled={readOnly} />
               </div>
             </TabSection>
@@ -606,7 +770,24 @@ Return the agenda in a well-formatted text format that's easy to read.`;
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input label="Utilities Details" value={show.utilitiesDetails ?? ''} onChange={e => updateSelectedShow({ utilitiesDetails: e.target.value || null })} disabled={readOnly} />
-                <Input label="Labor Details" value={show.laborDetails ?? ''} onChange={e => updateSelectedShow({ laborDetails: e.target.value || null })} disabled={readOnly} />
+                <LookupSelect
+                  label="Labor / I&D Company"
+                  value={show.laborCompanyId}
+                  onChange={v => updateSelectedShow({ laborCompanyId: v })}
+                  options={lookups.laborCompanies.map(c => ({ id: c.id, name: c.name, subtitle: c.serviceRegions || undefined }))}
+                  placeholder="Select company..."
+                  disabled={readOnly}
+                  onCreateNew={async () => {
+                    const name = prompt('Enter company name:');
+                    if (name && organization?.id) {
+                      const newCompany = await lookupService.createLaborCompany(organization.id, { name });
+                      await refreshCategory('laborCompanies');
+                      updateSelectedShow({ laborCompanyId: newCompany.id });
+                    }
+                  }}
+                  createLabel="Add new company"
+                />
+                <Input label="Labor Details" value={show.laborDetails ?? ''} onChange={e => updateSelectedShow({ laborDetails: e.target.value || null })} className="sm:col-span-2" disabled={readOnly} />
                 <DataVisibilityGate category="budget">
                   <Input label="Electrical Cost" type="number" value={show.electricalCost?.toString() ?? ''} onChange={e => updateSelectedShow({ electricalCost: e.target.value ? parseFloat(e.target.value) : null })} disabled={readOnly} />
                 </DataVisibilityGate>
@@ -741,7 +922,31 @@ Return the agenda in a well-formatted text format that's easy to read.`;
             {/* Hotel */}
             <TabSection title="Hotel" icon={Hotel}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input label="Hotel Name" value={show.hotelName ?? ''} onChange={e => updateSelectedShow({ hotelName: e.target.value || null })} disabled={readOnly} />
+                <LookupSelect
+                  label="Hotel"
+                  value={show.hotelId}
+                  onChange={v => {
+                    const hotel = lookups.hotels.find(h => h.id === v);
+                    updateSelectedShow({ 
+                      hotelId: v,
+                      hotelName: hotel?.name || null,
+                      hotelAddress: hotel ? `${hotel.address || ''}, ${hotel.city || ''}, ${hotel.state || ''}`.replace(/^, |, $/g, '') : null,
+                      hotelCostPerNight: hotel?.corporateRate || show.hotelCostPerNight
+                    });
+                  }}
+                  options={lookups.hotels.map(h => ({ id: h.id, name: h.name, subtitle: h.city ? `${h.city}, ${h.state}` : h.brand || undefined }))}
+                  placeholder="Select hotel..."
+                  disabled={readOnly}
+                  onCreateNew={async () => {
+                    const name = prompt('Enter hotel name:');
+                    if (name && organization?.id) {
+                      const newHotel = await lookupService.createHotel(organization.id, { name });
+                      await refreshCategory('hotels');
+                      updateSelectedShow({ hotelId: newHotel.id, hotelName: newHotel.name });
+                    }
+                  }}
+                  createLabel="Add new hotel"
+                />
                 <Input label="Hotel Address" value={show.hotelAddress ?? ''} onChange={e => updateSelectedShow({ hotelAddress: e.target.value || null })} disabled={readOnly} />
                 <DataVisibilityGate category="budget">
                   <Input label="Cost Per Night" type="number" value={show.hotelCostPerNight?.toString() ?? ''} onChange={e => updateSelectedShow({ hotelCostPerNight: e.target.value ? parseFloat(e.target.value) : null })} disabled={readOnly} />
