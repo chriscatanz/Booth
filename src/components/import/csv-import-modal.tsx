@@ -189,6 +189,7 @@ export default function CSVImportModal({ onClose, onImported }: CSVImportModalPr
             hotelConfirmationPath: null,
             showAgendaUrl: null,
             showAgendaPdfPath: null,
+            agendaContent: null,
             eventPortalUrl: null,
             hasEventApp: false,
             eventAppNotes: null,

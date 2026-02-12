@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTradeShowStore } from '@/store/trade-show-store';
 import { useToastStore } from '@/store/toast-store';
+import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AutosaveIndicator } from '@/components/ui/autosave-indicator';
@@ -28,6 +29,7 @@ import { DetailHero, DetailTabs, DetailTabPanel, TabSection, type DetailTab } fr
 import {
   Save, Trash2, Copy, Truck, Hotel, Users, X, Package,
   FileStack, Printer, CalendarPlus, Mail, Repeat, Upload, MoreHorizontal, Download,
+  Link, FileUp, Sparkles, Loader2, ExternalLink,
 } from 'lucide-react';
 import { downloadICS, openMailto, downloadCSV } from '@/services/export-service';
 import { ExportField } from '@/types/enums';
@@ -41,6 +43,8 @@ import { TaskList } from '@/components/tasks';
 import { AttendeeSearch } from '@/components/ui/attendee-search';
 import { Attendee } from '@/types';
 import { KitAssignmentSection } from '@/components/kits/kit-assignment-section';
+import { supabase } from '@/lib/supabase';
+import * as aiService from '@/services/ai-service';
 
 export default function DetailView() {
   const {
@@ -53,11 +57,18 @@ export default function DetailView() {
   } = useTradeShowStore();
 
   const toast = useToastStore();
+  const { organization } = useAuthStore();
   const { status: autosaveStatus, hasUnsavedChanges } = useAutosave({ debounceMs: 2500 });
   const [activeTab, setActiveTab] = useState<DetailTab>('overview');
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [showPackingList, setShowPackingList] = useState(false);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
+  
+  // Agenda tab state
+  const [agendaMode, setAgendaMode] = useState<'manual' | 'url' | 'ai'>('manual');
+  const [isExtractingAgenda, setIsExtractingAgenda] = useState(false);
+  const [agendaFile, setAgendaFile] = useState<File | null>(null);
+  const agendaFileInputRef = useRef<HTMLInputElement>(null);
   
   const canEdit = usePermission('editor');
   const { boothOptions, graphicsOptions, packingListOptions, tableclothOptions } = useCustomLists();
@@ -89,6 +100,71 @@ export default function DetailView() {
       ? current.filter(i => i !== item)
       : [...current, item];
     updateSelectedShow({ [field]: JSON.stringify(updated) });
+  };
+
+  // Agenda AI extraction
+  const handleAgendaFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAgendaFile(file);
+  };
+
+  const handleExtractAgenda = async () => {
+    if (!agendaFile || !organization?.id) return;
+    
+    setIsExtractingAgenda(true);
+    try {
+      // Parse document first
+      const formData = new FormData();
+      formData.append('files', agendaFile);
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: HeadersInit = {};
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
+      const parseResponse = await fetch('/api/documents/parse', {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      if (!parseResponse.ok) {
+        throw new Error('Failed to parse document');
+      }
+
+      const parseData = await parseResponse.json();
+      const documentText = parseData.documents?.[0]?.text || '';
+      
+      if (!documentText) {
+        throw new Error('Could not extract text from document');
+      }
+
+      // Now extract agenda using AI
+      const prompt = `Extract the event agenda/schedule from this document. Format it clearly with times, session titles, speakers, and locations if available. Use a clean, readable format.
+
+Document:
+${documentText}
+
+Return the agenda in a well-formatted text format that's easy to read.`;
+
+      const result = await aiService.generateContent({
+        type: 'checklist',
+        context: { customPrompt: prompt }
+      });
+
+      updateSelectedShow({ agendaContent: result });
+      toast.success('Agenda extracted successfully!');
+      setAgendaFile(null);
+      if (agendaFileInputRef.current) {
+        agendaFileInputRef.current.value = '';
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to extract agenda');
+    } finally {
+      setIsExtractingAgenda(false);
+    }
   };
 
   // Tab counts for badges
@@ -211,7 +287,9 @@ export default function DetailView() {
 
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto">
-        {/* OVERVIEW TAB */}
+        {/* ═══════════════════════════════════════════════════════════════════
+            OVERVIEW TAB
+        ═══════════════════════════════════════════════════════════════════ */}
         <DetailTabPanel id="overview" activeTab={activeTab}>
           <div className="space-y-6">
             {/* Basic Information */}
@@ -250,12 +328,6 @@ export default function DetailView() {
                   <Input label="Virtual Booth URL" value={show.virtualBoothUrl ?? ''} onChange={e => updateSelectedShow({ virtualBoothUrl: e.target.value || null })} placeholder="Your booth page URL" className="sm:col-span-2" disabled={readOnly} />
                 </div>
               )}
-              
-              <DataVisibilityGate category="notes">
-                <div className="mt-4">
-                  <RichTextEditor label="General Notes" value={show.generalNotes} onChange={v => updateSelectedShow({ generalNotes: v || null })} placeholder="Notes about this show..." readOnly={readOnly} />
-                </div>
-              </DataVisibilityGate>
             </TabSection>
 
             {/* Venue Location */}
@@ -278,11 +350,195 @@ export default function DetailView() {
               )}
             </TabSection>
 
-            {/* Booth & Registration */}
-            <TabSection title="Booth & Registration">
+            {/* Event Contacts */}
+            <DataVisibilityGate category="contacts">
+              <TabSection title="Event Contacts">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Input label="Show Contact Name" value={show.showContactName ?? ''} onChange={e => updateSelectedShow({ showContactName: e.target.value || null })} disabled={readOnly} />
+                  <Input label="Show Contact Email" value={show.showContactEmail ?? ''} onChange={e => updateSelectedShow({ showContactEmail: e.target.value || null })} disabled={readOnly} />
+                  <Input label="Event Portal URL" value={show.eventPortalUrl ?? ''} onChange={e => updateSelectedShow({ eventPortalUrl: e.target.value || null })} placeholder="https://" disabled={readOnly} />
+                </div>
+              </TabSection>
+            </DataVisibilityGate>
+          </div>
+        </DetailTabPanel>
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            AGENDA TAB
+        ═══════════════════════════════════════════════════════════════════ */}
+        <DetailTabPanel id="agenda" activeTab={activeTab}>
+          <div className="space-y-6">
+            <TabSection title="Event Agenda">
+              {/* Mode selector */}
+              <div className="flex gap-2 mb-4">
+                <button
+                  onClick={() => setAgendaMode('manual')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    agendaMode === 'manual' 
+                      ? 'bg-brand-purple text-white' 
+                      : 'bg-bg-tertiary text-text-secondary hover:bg-bg-tertiary/80'
+                  }`}
+                >
+                  <FileText size={16} />
+                  Manual Entry
+                </button>
+                <button
+                  onClick={() => setAgendaMode('url')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    agendaMode === 'url' 
+                      ? 'bg-brand-purple text-white' 
+                      : 'bg-bg-tertiary text-text-secondary hover:bg-bg-tertiary/80'
+                  }`}
+                >
+                  <Link size={16} />
+                  Link to URL
+                </button>
+                <button
+                  onClick={() => setAgendaMode('ai')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    agendaMode === 'ai' 
+                      ? 'bg-brand-purple text-white' 
+                      : 'bg-bg-tertiary text-text-secondary hover:bg-bg-tertiary/80'
+                  }`}
+                >
+                  <Sparkles size={16} />
+                  AI Extract
+                </button>
+              </div>
+
+              {/* Manual Entry Mode */}
+              {agendaMode === 'manual' && (
+                <div>
+                  <RichTextEditor 
+                    label="Agenda Content" 
+                    value={show.agendaContent} 
+                    onChange={v => updateSelectedShow({ agendaContent: v || null })} 
+                    placeholder="Enter the event schedule, sessions, speakers, and times..."
+                    readOnly={readOnly}
+                  />
+                </div>
+              )}
+
+              {/* URL Mode */}
+              {agendaMode === 'url' && (
+                <div className="space-y-4">
+                  <Input 
+                    label="Agenda URL" 
+                    value={show.showAgendaUrl ?? ''} 
+                    onChange={e => updateSelectedShow({ showAgendaUrl: e.target.value || null })} 
+                    placeholder="https://eventsite.com/agenda"
+                    disabled={readOnly}
+                  />
+                  {show.showAgendaUrl && (
+                    <a 
+                      href={show.showAgendaUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-sm text-brand-purple hover:underline"
+                    >
+                      <ExternalLink size={14} />
+                      View Agenda
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {/* AI Extract Mode */}
+              {agendaMode === 'ai' && (
+                <div className="space-y-4">
+                  <p className="text-sm text-text-secondary">
+                    Upload a document (PDF, DOC, or TXT) containing the event agenda and we&apos;ll extract it using AI.
+                  </p>
+                  
+                  <div className="flex items-center gap-4">
+                    <input
+                      ref={agendaFileInputRef}
+                      type="file"
+                      accept=".pdf,.doc,.docx,.txt,.rtf"
+                      onChange={handleAgendaFileSelect}
+                      className="hidden"
+                      disabled={readOnly}
+                    />
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => agendaFileInputRef.current?.click()}
+                      disabled={readOnly}
+                    >
+                      <FileUp size={14} />
+                      {agendaFile ? agendaFile.name : 'Select Document'}
+                    </Button>
+                    
+                    {agendaFile && (
+                      <Button 
+                        variant="primary" 
+                        size="sm" 
+                        onClick={handleExtractAgenda}
+                        loading={isExtractingAgenda}
+                        disabled={readOnly}
+                      >
+                        {isExtractingAgenda ? (
+                          <>
+                            <Loader2 size={14} className="animate-spin" />
+                            Extracting...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles size={14} />
+                            Extract Agenda
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Show extracted content */}
+                  {show.agendaContent && (
+                    <div className="mt-4">
+                      <RichTextEditor 
+                        label="Extracted Agenda" 
+                        value={show.agendaContent} 
+                        onChange={v => updateSelectedShow({ agendaContent: v || null })} 
+                        placeholder="Extracted agenda will appear here..."
+                        readOnly={readOnly}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+            </TabSection>
+
+            {/* General Notes (moved from Overview) */}
+            <DataVisibilityGate category="notes">
+              <TabSection title="General Notes">
+                <RichTextEditor 
+                  label="" 
+                  value={show.generalNotes} 
+                  onChange={v => updateSelectedShow({ generalNotes: v || null })} 
+                  placeholder="Notes about this show..."
+                  readOnly={readOnly}
+                />
+              </TabSection>
+            </DataVisibilityGate>
+          </div>
+        </DetailTabPanel>
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            BOOTH TAB
+        ═══════════════════════════════════════════════════════════════════ */}
+        <DetailTabPanel id="booth" activeTab={activeTab}>
+          <div className="space-y-6">
+            {/* Booth Details */}
+            <TabSection title="Booth Details">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input label="Booth Number" value={show.boothNumber ?? ''} onChange={e => updateSelectedShow({ boothNumber: e.target.value || null })} disabled={readOnly} />
                 <Input label="Booth Size" value={show.boothSize ?? ''} onChange={e => updateSelectedShow({ boothSize: e.target.value || null })} placeholder="e.g., 10x10" disabled={readOnly} />
+              </div>
+            </TabSection>
+
+            {/* Registration */}
+            <TabSection title="Registration">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <DataVisibilityGate category="budget">
                   <Input label="Registration Cost" type="number" value={show.cost?.toString() ?? ''} onChange={e => updateSelectedShow({ cost: e.target.value ? parseFloat(e.target.value) : null })} disabled={readOnly} />
                 </DataVisibilityGate>
@@ -298,30 +554,24 @@ export default function DetailView() {
               </div>
             </TabSection>
 
-            {/* Event Details & Contacts */}
-            <TabSection title="Event Details & Contacts">
-              <DataVisibilityGate category="contacts">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Input label="Show Contact Name" value={show.showContactName ?? ''} onChange={e => updateSelectedShow({ showContactName: e.target.value || null })} disabled={readOnly} />
-                  <Input label="Show Contact Email" value={show.showContactEmail ?? ''} onChange={e => updateSelectedShow({ showContactEmail: e.target.value || null })} disabled={readOnly} />
-                  <Input label="Show Agenda URL" value={show.showAgendaUrl ?? ''} onChange={e => updateSelectedShow({ showAgendaUrl: e.target.value || null })} placeholder="https://" disabled={readOnly} />
-                  <Input label="Event Portal URL" value={show.eventPortalUrl ?? ''} onChange={e => updateSelectedShow({ eventPortalUrl: e.target.value || null })} placeholder="https://" disabled={readOnly} />
-                </div>
-              </DataVisibilityGate>
-              <DataVisibilityGate category="notes">
-                <div className="space-y-4 pt-4">
+            {/* Speaking & Sponsorship */}
+            <DataVisibilityGate category="notes">
+              <TabSection title="Speaking & Sponsorship">
+                <div className="space-y-4">
                   <Toggle label="Has Speaking Engagement" enabled={show.hasSpeakingEngagement ?? false} onChange={v => updateSelectedShow({ hasSpeakingEngagement: v })} disabled={readOnly} />
                   {show.hasSpeakingEngagement && (
                     <Textarea label="Speaking Details" value={show.speakingDetails ?? ''} onChange={e => updateSelectedShow({ speakingDetails: e.target.value || null })} disabled={readOnly} />
                   )}
                   <Textarea label="Sponsorship Details" value={show.sponsorshipDetails ?? ''} onChange={e => updateSelectedShow({ sponsorshipDetails: e.target.value || null })} disabled={readOnly} />
                 </div>
-              </DataVisibilityGate>
-            </TabSection>
+              </TabSection>
+            </DataVisibilityGate>
           </div>
         </DetailTabPanel>
 
-        {/* LOGISTICS TAB */}
+        {/* ═══════════════════════════════════════════════════════════════════
+            LOGISTICS TAB
+        ═══════════════════════════════════════════════════════════════════ */}
         <DetailTabPanel id="logistics" activeTab={activeTab}>
           <DataVisibilityGate category="logistics" fallback={<div className="p-6 text-center text-text-secondary">You don&apos;t have access to logistics information.</div>}>
           <div className="space-y-6">
@@ -446,13 +696,15 @@ export default function DetailView() {
           </DataVisibilityGate>
         </DetailTabPanel>
 
-        {/* TRAVEL TAB */}
+        {/* ═══════════════════════════════════════════════════════════════════
+            TRAVEL TAB
+        ═══════════════════════════════════════════════════════════════════ */}
         <DetailTabPanel id="travel" activeTab={activeTab}>
           <DataVisibilityGate category="travel" fallback={<div className="p-6 text-center text-text-secondary">You don&apos;t have access to travel information.</div>}>
           <div className="space-y-6">
             {/* Attendees */}
             <DataVisibilityGate category="attendees">
-              <TabSection title={`Attendees (${attendees.length})`} icon={Users}>
+              <TabSection title={`Team Attendees (${attendees.length})`} icon={Users}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <Input label="Total Attending" type="number" value={show.totalAttending?.toString() ?? ''} onChange={e => updateSelectedShow({ totalAttending: e.target.value ? parseInt(e.target.value) : null })} disabled={readOnly} />
                 </div>
@@ -491,9 +743,7 @@ export default function DetailView() {
                       allAttendees={allAttendees}
                       excludeIds={attendees.map(a => a.dbId).filter((id): id is number => id !== null && id !== undefined)}
                       onSelect={(selected: Partial<Attendee>) => {
-                        // Add new attendee pre-filled with selected data
                         addAttendee();
-                        // Get the newly added attendee (last one) and update it
                         const newAttendees = useTradeShowStore.getState().attendees;
                         const newAtt = newAttendees[newAttendees.length - 1];
                         if (newAtt) {
@@ -536,7 +786,9 @@ export default function DetailView() {
           </DataVisibilityGate>
         </DetailTabPanel>
 
-        {/* BUDGET TAB */}
+        {/* ═══════════════════════════════════════════════════════════════════
+            BUDGET TAB
+        ═══════════════════════════════════════════════════════════════════ */}
         <DetailTabPanel id="budget" activeTab={activeTab}>
           <DataVisibilityGate category="budget" fallback={<div className="p-6 text-center text-text-secondary">You don&apos;t have access to budget information.</div>}>
           <div className="space-y-6">
@@ -620,7 +872,9 @@ export default function DetailView() {
           </DataVisibilityGate>
         </DetailTabPanel>
 
-        {/* NOTES & TASKS TAB */}
+        {/* ═══════════════════════════════════════════════════════════════════
+            NOTES & TASKS TAB
+        ═══════════════════════════════════════════════════════════════════ */}
         <DetailTabPanel id="notes" activeTab={activeTab}>
           <div className="space-y-6">
             {/* Tasks */}

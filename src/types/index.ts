@@ -61,9 +61,10 @@ export interface TradeShow {
   hotelConfirmationNumber: string | null;
   hotelConfirmationPath: string | null;
 
-  // Event Information
+  // Event Information & Agenda
   showAgendaUrl: string | null;
   showAgendaPdfPath: string | null;
+  agendaContent: string | null;
   eventPortalUrl: string | null;
   hasEventApp: boolean | null;
   eventAppNotes: string | null;
@@ -185,6 +186,7 @@ export function createNewTradeShow(): TradeShow {
     hotelConfirmationPath: null,
     showAgendaUrl: null,
     showAgendaPdfPath: null,
+    agendaContent: null,
     eventPortalUrl: null,
     hasEventApp: false,
     eventAppNotes: null,
