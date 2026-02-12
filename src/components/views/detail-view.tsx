@@ -62,7 +62,7 @@ export default function DetailView() {
 
   const toast = useToastStore();
   const { organization } = useAuthStore();
-  const { status: autosaveStatus, hasUnsavedChanges } = useAutosave({ debounceMs: 2500 });
+  const { status: autosaveStatus, hasUnsavedChanges } = useAutosave({ debounceMs: 5000 });
   const [activeTab, setActiveTab] = useState<DetailTab>('overview');
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [showPackingList, setShowPackingList] = useState(false);
