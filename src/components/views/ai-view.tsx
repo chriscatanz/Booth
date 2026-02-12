@@ -53,57 +53,59 @@ export default function AIView() {
   return (
     <div className="h-full flex flex-col max-w-[1400px] mx-auto w-full">
       {/* Header */}
-      <div className="border-b border-border px-6 py-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-purple to-brand-purple-dark flex items-center justify-center">
-              <Sparkles size={20} className="text-white" />
+      <div className="border-b border-border px-4 sm:px-6 py-3 sm:py-4">
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-brand-purple to-brand-purple-dark flex items-center justify-center">
+              <Sparkles size={16} className="sm:w-5 sm:h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-text-primary">AI Assistant</h1>
-              <p className="text-sm text-text-secondary">Generate content, extract data, and get answers</p>
+              <h1 className="text-lg sm:text-xl font-bold text-text-primary">AI Assistant</h1>
+              <p className="text-xs sm:text-sm text-text-secondary hidden sm:block">Generate content, extract data, and get answers</p>
             </div>
           </div>
           
           {/* Status Indicator */}
           <div className="flex items-center gap-2">
             {isConfigured === null ? (
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-bg-tertiary text-text-secondary border border-border">
-                <Loader2 size={12} className="animate-spin" />
-                Checking...
+              <div className="flex items-center gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-medium bg-bg-tertiary text-text-secondary border border-border">
+                <Loader2 size={10} className="animate-spin" />
+                <span className="hidden sm:inline">Checking...</span>
               </div>
             ) : (
               <div className={cn(
-                'flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium',
+                'flex items-center gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-medium',
                 isConfigured 
                   ? 'bg-green-500/10 text-green-600 border border-green-500/20'
                   : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
               )}>
                 <div className={cn(
-                  'w-2 h-2 rounded-full',
+                  'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full',
                   isConfigured ? 'bg-green-500' : 'bg-amber-500'
                 )} />
-                {isConfigured ? 'API Key Configured' : 'No API Key'}
+                {isConfigured ? <span className="hidden sm:inline">API Key Configured</span> : <span className="hidden sm:inline">No API Key</span>}
+                {isConfigured ? <span className="sm:hidden">Ready</span> : <span className="sm:hidden">No Key</span>}
               </div>
             )}
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center gap-1 bg-bg-tertiary rounded-lg p-1">
+        <div className="flex items-center gap-1 bg-bg-tertiary rounded-lg p-1 overflow-x-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                'flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all',
+                'flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-all whitespace-nowrap',
                 activeTab === tab.id
                   ? 'bg-surface text-text-primary shadow-sm'
                   : 'text-text-secondary hover:text-text-primary'
               )}
             >
-              <tab.icon size={16} />
-              {tab.label}
+              <tab.icon size={14} className="sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">{tab.label}</span>
+              <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
             </button>
           ))}
         </div>
@@ -255,9 +257,9 @@ function GenerateTab({ shows }: { shows: TradeShow[] }) {
   };
 
   return (
-    <div className="h-full flex">
+    <div className="h-full flex flex-col sm:flex-row">
       {/* Left Panel - Controls */}
-      <div className="w-80 border-r border-border p-4 space-y-4 overflow-auto">
+      <div className="sm:w-80 border-b sm:border-b-0 sm:border-r border-border p-4 space-y-4 overflow-auto">
         {/* Show Selector */}
         <div>
           <label className="block text-sm font-medium text-text-primary mb-2">Select a Show (optional)</label>
@@ -337,24 +339,26 @@ function GenerateTab({ shows }: { shows: TradeShow[] }) {
           </div>
         </div>
 
-        {/* Generate Button */}
-        <Button onClick={handleGenerate} disabled={isGenerating} className="w-full">
-          {isGenerating ? (
-            <>
-              <Loader2 size={16} className="animate-spin" />
-              Generating...
-            </>
-          ) : (
-            <>
-              <Wand2 size={16} />
-              Generate
-            </>
-          )}
-        </Button>
+        {/* Generate Button - sticky on mobile */}
+        <div className="sticky bottom-0 pt-2 bg-surface sm:bg-transparent">
+          <Button onClick={handleGenerate} disabled={isGenerating} className="w-full">
+            {isGenerating ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Wand2 size={16} />
+                Generate
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {/* Right Panel - Result */}
-      <div className="flex-1 p-4 flex flex-col">
+      <div className="flex-1 p-4 flex flex-col min-h-0">
         {result ? (
           <>
             {/* Action Bar */}
@@ -446,7 +450,8 @@ function GenerateTab({ shows }: { shows: TradeShow[] }) {
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center">
+          /* Empty state - hidden on mobile since controls are above */
+          <div className="hidden sm:flex flex-1 items-center justify-center">
             <div className="text-center">
               <div className="w-16 h-16 rounded-2xl bg-bg-tertiary flex items-center justify-center mx-auto mb-4">
                 <Wand2 size={32} className="text-text-tertiary" />
@@ -934,9 +939,9 @@ function DocumentsTab() {
   };
 
   return (
-    <div className="h-full flex">
+    <div className="h-full flex flex-col sm:flex-row">
       {/* Left Panel - Upload */}
-      <div className="w-80 border-r border-border p-4 space-y-4 overflow-y-auto">
+      <div className="sm:w-80 border-b sm:border-b-0 sm:border-r border-border p-4 space-y-4 overflow-y-auto">
         <div>
           <h3 className="text-sm font-medium text-text-primary mb-2">Upload Document</h3>
           <p className="text-xs text-text-secondary mb-4">
@@ -1099,7 +1104,7 @@ function DocumentsTab() {
       </div>
 
       {/* Right Panel - Results */}
-      <div className="flex-1 p-4 flex flex-col overflow-hidden">
+      <div className="flex-1 p-4 flex flex-col overflow-hidden min-h-0">
         {extractedData ? (
           <div className="flex-1 overflow-y-auto space-y-4">
             <div className="flex items-center justify-between sticky top-0 bg-background py-2">
@@ -1475,7 +1480,7 @@ function ChatTab({ shows }: { shows: TradeShow[] }) {
   return (
     <div className="h-full flex flex-col">
       {/* Messages */}
-      <div className="flex-1 overflow-auto p-4 space-y-4">
+      <div className="flex-1 overflow-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center max-w-md">
