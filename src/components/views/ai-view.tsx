@@ -686,7 +686,7 @@ function DocumentsTab() {
       toast.success('New show created from document!');
 
       // Auto-create tasks if there are deadlines
-      if (extractedData.deadlines?.length && newShow) {
+      if (deadlineCount > 0 && newShow) {
         await handleCreateTasksForShow(newShow.id);
       }
     } catch (err) {
