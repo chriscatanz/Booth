@@ -33,6 +33,20 @@ export interface TradeShow {
   shipToWarehouse: boolean | null;
   shippingCutoff: string | null;
   shippingLabelPath: string | null;
+  trackingStatus: string | null;
+  trackingStatusDetails: string | null;
+  trackingEta: string | null;
+  trackingLastUpdated: string | null;
+
+  // Move-in/Move-out
+  moveInDate: string | null;
+  moveInTime: string | null;
+  moveOutDate: string | null;
+  moveOutTime: string | null;
+
+  // Lead Capture
+  leadCaptureSystem: string | null;
+  leadCaptureCredentials: string | null;
 
   // Booth Equipment
   boothToShip: string | null;       // JSON array string
@@ -165,6 +179,16 @@ export function createNewTradeShow(): TradeShow {
     shipToWarehouse: false,
     shippingCutoff: null,
     shippingLabelPath: null,
+    trackingStatus: null,
+    trackingStatusDetails: null,
+    trackingEta: null,
+    trackingLastUpdated: null,
+    moveInDate: null,
+    moveInTime: null,
+    moveOutDate: null,
+    moveOutTime: null,
+    leadCaptureSystem: null,
+    leadCaptureCredentials: null,
     boothToShip: '[]',
     graphicsToShip: '[]',
     utilitiesBooked: false,

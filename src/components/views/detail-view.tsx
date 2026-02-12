@@ -43,6 +43,7 @@ import { TaskList } from '@/components/tasks';
 import { AttendeeSearch } from '@/components/ui/attendee-search';
 import { Attendee } from '@/types';
 import { KitAssignmentSection } from '@/components/kits/kit-assignment-section';
+import { TrackingStatusDisplay } from '@/components/ui/tracking-status';
 import { supabase } from '@/lib/supabase';
 import * as aiService from '@/services/ai-service';
 
@@ -521,6 +522,29 @@ Return the agenda in a well-formatted text format that's easy to read.`;
                 </DataVisibilityGate>
                 <DatePicker label="Shipping Cutoff" value={show.shippingCutoff} onChange={v => updateSelectedShow({ shippingCutoff: v })} disabled={readOnly} />
               </div>
+
+              {/* Tracking Status */}
+              {show.trackingNumber && (
+                <div className="mt-4 p-3 bg-bg-tertiary rounded-lg">
+                  <TrackingStatusDisplay
+                    trackingNumber={show.trackingNumber}
+                    status={show.trackingStatus}
+                    statusDetails={show.trackingStatusDetails}
+                    eta={show.trackingEta}
+                    lastUpdated={show.trackingLastUpdated}
+                    onStatusUpdate={(result) => {
+                      updateSelectedShow({
+                        trackingStatus: result.status,
+                        trackingStatusDetails: result.statusDetails,
+                        trackingEta: result.eta,
+                        trackingLastUpdated: result.lastUpdated,
+                      });
+                    }}
+                    disabled={readOnly}
+                  />
+                </div>
+              )}
+
               <div className="flex gap-6 pt-4">
                 <Checkbox label="Ship to Site" checked={show.shipToSite ?? false} onChange={v => updateSelectedShow({ shipToSite: v })} disabled={readOnly} />
                 <Checkbox label="Ship to Warehouse" checked={show.shipToWarehouse ?? false} onChange={v => updateSelectedShow({ shipToWarehouse: v })} disabled={readOnly} />
@@ -554,6 +578,24 @@ Return the agenda in a well-formatted text format that's easy to read.`;
                   />
                 </div>
               )}
+            </TabSection>
+
+            {/* Move-in / Move-out */}
+            <TabSection title="Move-in / Move-out">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <DatePicker label="Move-in Date" value={show.moveInDate} onChange={v => updateSelectedShow({ moveInDate: v })} disabled={readOnly} />
+                <Input label="Move-in Time" value={show.moveInTime ?? ''} onChange={e => updateSelectedShow({ moveInTime: e.target.value || null })} placeholder="e.g., 2:00 PM - 4:00 PM" disabled={readOnly} />
+                <DatePicker label="Move-out Date" value={show.moveOutDate} onChange={v => updateSelectedShow({ moveOutDate: v })} disabled={readOnly} />
+                <Input label="Move-out Time" value={show.moveOutTime ?? ''} onChange={e => updateSelectedShow({ moveOutTime: e.target.value || null })} placeholder="e.g., 12:00 PM - 2:00 PM" disabled={readOnly} />
+              </div>
+            </TabSection>
+
+            {/* Lead Capture */}
+            <TabSection title="Lead Capture">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input label="Lead Capture System" value={show.leadCaptureSystem ?? ''} onChange={e => updateSelectedShow({ leadCaptureSystem: e.target.value || null })} placeholder="e.g., iLeads, Compusystems, Custom App" disabled={readOnly} />
+                <Input label="Login Credentials" type="password" value={show.leadCaptureCredentials ?? ''} onChange={e => updateSelectedShow({ leadCaptureCredentials: e.target.value || null })} placeholder="Username / Password" disabled={readOnly} />
+              </div>
             </TabSection>
 
             {/* On-Site Services */}
