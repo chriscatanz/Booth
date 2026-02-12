@@ -4,26 +4,29 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Menu, X, Sparkles, FileSpreadsheet, Layers, Calendar, DollarSign, Users, Truck, Package, BarChart3 } from 'lucide-react';
+import { ChevronDown, Menu, X, Sparkles, FileSpreadsheet, Layers, Calendar, DollarSign, Users, Truck, BarChart3, RefreshCw, Bell, Box } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface MarketingHeaderProps {
   onGetStarted?: () => void;
+  onSignIn?: () => void;
 }
 
-const FEATURES = [
-  { slug: 'calendar', icon: Calendar, color: '#0969DA', title: 'Trade Show Calendar' },
-  { slug: 'budget', icon: DollarSign, color: '#1A7F37', title: 'Budget Management' },
-  { slug: 'team', icon: Users, color: '#8250DF', title: 'Team Collaboration' },
-  { slug: 'logistics', icon: Truck, color: '#BF8700', title: 'Shipping & Logistics' },
-  { slug: 'assets', icon: Package, color: '#CF222E', title: 'Asset Management' },
-  { slug: 'analytics', icon: BarChart3, color: '#0969DA', title: 'ROI & Analytics' },
-  { slug: 'ai', icon: Sparkles, color: '#8B5CF6', title: 'AI Assistant' },
-  { slug: 'import-export', icon: FileSpreadsheet, color: '#059669', title: 'Import & Export' },
-  { slug: 'templates', icon: Layers, color: '#F59E0B', title: 'Show Templates' },
+const NAV_FEATURES = [
+  { slug: 'calendar', icon: Calendar, title: 'Trade Show Calendar', color: '#0969DA', description: 'Visual schedule & deadlines' },
+  { slug: 'calendar-sync', icon: RefreshCw, title: 'Calendar Sync', color: '#06B6D4', description: 'Google, Outlook & Apple' },
+  { slug: 'budget', icon: DollarSign, title: 'Budget Management', color: '#1A7F37', description: 'Track every dollar' },
+  { slug: 'team', icon: Users, title: 'Team Collaboration', color: '#8250DF', description: 'Collaborate with roles' },
+  { slug: 'logistics', icon: Truck, title: 'Shipping & Logistics', color: '#BF8700', description: 'Shipping timeline & packing' },
+  { slug: 'kits', icon: Box, title: 'Booth Kits', color: '#CF222E', description: 'Inventory & auto-assign' },
+  { slug: 'analytics', icon: BarChart3, title: 'ROI & Analytics', color: '#0969DA', description: 'ROI & performance' },
+  { slug: 'ai', icon: Sparkles, title: 'AI Assistant', color: '#8B5CF6', description: 'One Click Show & chat' },
+  { slug: 'notifications', icon: Bell, title: 'Notifications', color: '#F59E0B', description: 'Email & in-app alerts' },
+  { slug: 'import-export', icon: FileSpreadsheet, title: 'Import & Export', color: '#059669', description: 'CSV import & export' },
+  { slug: 'templates', icon: Layers, title: 'Show Templates', color: '#EA580C', description: 'Reusable show setups' },
 ];
 
-export function MarketingHeader({ onGetStarted }: MarketingHeaderProps) {
+export function MarketingHeader({ onGetStarted, onSignIn }: MarketingHeaderProps) {
   const router = useRouter();
   const handleGetStarted = onGetStarted || (() => router.push('/'));
   const [featuresOpen, setFeaturesOpen] = useState(false);
@@ -58,7 +61,7 @@ export function MarketingHeader({ onGetStarted }: MarketingHeaderProps) {
             <div ref={dropdownRef} className="relative">
               <button
                 onClick={() => setFeaturesOpen(!featuresOpen)}
-                className="flex items-center gap-1 text-base font-semibold text-text-primary hover:text-brand-purple transition-colors"
+                className="flex items-center gap-1 text-base font-semibold text-text-secondary hover:text-text-primary transition-colors"
               >
                 Features
                 <ChevronDown 
@@ -74,30 +77,60 @@ export function MarketingHeader({ onGetStarted }: MarketingHeaderProps) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute top-full left-0 mt-2 w-64 py-2 bg-surface border border-border rounded-xl shadow-xl"
+                    className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-[720px] p-6 bg-surface border border-border rounded-2xl shadow-2xl"
                   >
-                    {FEATURES.map((feature) => (
+                    {/* Mega Menu Grid */}
+                    <div className="grid grid-cols-3 gap-2">
+                      {NAV_FEATURES.map((feature) => (
+                        <Link
+                          key={feature.slug}
+                          href={`/features/${feature.slug}`}
+                          className="flex items-start gap-3 p-3 rounded-xl hover:bg-bg-secondary transition-colors group"
+                          onClick={() => setFeaturesOpen(false)}
+                        >
+                          <div 
+                            className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+                            style={{ backgroundColor: `${feature.color}15` }}
+                          >
+                            <feature.icon size={20} style={{ color: feature.color }} />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-text-primary group-hover:text-brand-purple transition-colors">
+                              {feature.title}
+                            </p>
+                            <p className="text-xs text-text-tertiary mt-0.5">
+                              {feature.description}
+                            </p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                    
+                    {/* Footer */}
+                    <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
                       <Link
-                        key={feature.slug}
-                        href={`/features/${feature.slug}`}
-                        className="flex items-center gap-3 px-4 py-2 text-sm text-text-secondary hover:bg-bg-secondary hover:text-text-primary transition-colors"
+                        href="/features"
+                        className="text-sm font-semibold text-brand-purple hover:text-brand-purple-dark transition-colors flex items-center gap-1"
                         onClick={() => setFeaturesOpen(false)}
                       >
-                        <feature.icon size={16} style={{ color: feature.color }} />
-                        {feature.title}
+                        View all features
+                        <ChevronDown size={14} className="-rotate-90" />
                       </Link>
-                    ))}
+                      <p className="text-xs text-text-tertiary">
+                        Built by a trade show manager, for trade show managers
+                      </p>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            <Link 
+            <a 
               href="/#pricing"
               className="text-base font-semibold text-text-secondary hover:text-text-primary transition-colors"
             >
               Pricing
-            </Link>
+            </a>
 
             <Link 
               href="/about"
@@ -116,6 +149,14 @@ export function MarketingHeader({ onGetStarted }: MarketingHeaderProps) {
 
           {/* Right side - Desktop */}
           <div className="hidden md:flex items-center gap-3">
+            {onSignIn && (
+              <button 
+                onClick={onSignIn}
+                className="text-base font-semibold text-text-secondary hover:text-text-primary transition-colors"
+              >
+                Sign In
+              </button>
+            )}
             <Button variant="primary" size="sm" onClick={handleGetStarted}>
               Start Free Trial
             </Button>
@@ -144,11 +185,15 @@ export function MarketingHeader({ onGetStarted }: MarketingHeaderProps) {
               <nav className="pt-4 pb-2 border-t border-border mt-4">
                 {/* Features section */}
                 <div className="mb-2">
-                  <span className="block px-2 py-2 text-base font-semibold text-text-primary">
+                  <Link
+                    href="/features"
+                    className="block px-2 py-2 text-base font-semibold text-text-primary"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     Features
-                  </span>
+                  </Link>
                   <div className="pl-4 space-y-1">
-                    {FEATURES.map((feature) => (
+                    {NAV_FEATURES.map((feature) => (
                       <Link
                         key={feature.slug}
                         href={`/features/${feature.slug}`}
@@ -162,13 +207,13 @@ export function MarketingHeader({ onGetStarted }: MarketingHeaderProps) {
                   </div>
                 </div>
 
-                <Link 
+                <a 
                   href="/#pricing"
                   className="block px-2 py-2 text-base font-semibold text-text-secondary hover:text-text-primary transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Pricing
-                </Link>
+                </a>
 
                 <Link 
                   href="/about"
