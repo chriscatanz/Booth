@@ -29,7 +29,7 @@ import { DetailHero, DetailTabs, DetailTabPanel, TabSection, type DetailTab } fr
 import {
   Save, Trash2, Copy, Truck, Hotel, Users, X, Package,
   FileStack, Printer, CalendarPlus, Mail, Repeat, Upload, MoreHorizontal, Download,
-  Link, FileUp, Sparkles, Loader2, ExternalLink,
+  Link, FileUp, Sparkles, Loader2, ExternalLink, FileText,
 } from 'lucide-react';
 import { downloadICS, openMailto, downloadCSV } from '@/services/export-service';
 import { ExportField } from '@/types/enums';
