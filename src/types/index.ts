@@ -72,6 +72,10 @@ export interface TradeShow {
   showContactName: string | null;
   showContactEmail: string | null;
 
+  // Venue Location (may differ from hotel)
+  venueName: string | null;
+  venueAddress: string | null;
+
   // Packing List
   packingListItems: string | null;  // JSON array string
   swagItemsEnabled: boolean | null;
@@ -186,6 +190,8 @@ export function createNewTradeShow(): TradeShow {
     eventAppNotes: null,
     showContactName: null,
     showContactEmail: null,
+    venueName: null,
+    venueAddress: null,
     packingListItems: '[]',
     swagItemsEnabled: false,
     swagItemsDescription: null,

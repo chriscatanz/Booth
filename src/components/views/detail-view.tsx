@@ -15,6 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Toggle } from '@/components/ui/toggle';
 import { DatePicker } from '@/components/ui/date-picker';
 import { HotelMap } from '@/components/ui/hotel-map';
+import { VenueMap } from '@/components/ui/venue-map';
 import { formatCurrency } from '@/lib/utils';
 import { 
   totalEstimatedCost, totalServicesCost, estimatedHotelCost, roiPercentage, 
@@ -255,6 +256,26 @@ export default function DetailView() {
                   <RichTextEditor label="General Notes" value={show.generalNotes} onChange={v => updateSelectedShow({ generalNotes: v || null })} placeholder="Notes about this show..." readOnly={readOnly} />
                 </div>
               </DataVisibilityGate>
+            </TabSection>
+
+            {/* Venue Location */}
+            <TabSection title="Venue Location">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input label="Venue Name" value={show.venueName ?? ''} onChange={e => updateSelectedShow({ venueName: e.target.value || null })} placeholder="e.g., Convention Center" disabled={readOnly} />
+                <Input label="Venue Address" value={show.venueAddress ?? ''} onChange={e => updateSelectedShow({ venueAddress: e.target.value || null })} placeholder="Full address" disabled={readOnly} />
+              </div>
+              <VenueMap 
+                venueName={show.venueName}
+                venueAddress={show.venueAddress}
+                hotelName={show.hotelName}
+                hotelAddress={show.hotelAddress}
+                showLocation={show.location}
+              />
+              {(show.hotelAddress || show.hotelName) && show.venueAddress && show.venueAddress !== show.hotelAddress && (
+                <p className="text-xs text-text-tertiary mt-2">
+                  Map shows both venue and hotel locations. Click &quot;Hotel → Venue&quot; for walking/driving directions.
+                </p>
+              )}
             </TabSection>
 
             {/* Booth & Registration */}

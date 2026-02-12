@@ -476,7 +476,7 @@ interface ExtractedDeadline {
 interface ExtractedShowData {
   showName?: string;
   dates?: { start?: string; end?: string };
-  location?: { venue?: string; city?: string; state?: string; country?: string };
+  location?: { venue?: string; venueAddress?: string; city?: string; state?: string; country?: string };
   booth?: { number?: string; size?: string; type?: string };
   costs?: { boothRental?: number; sponsorship?: number; additionalFees?: string[] };
   deadlines?: ExtractedDeadline[];
@@ -604,6 +604,8 @@ function DocumentsTab() {
       if (loc) {
         const locationParts = [loc.city, loc.state].filter(Boolean);
         if (locationParts.length > 0) newShowData.location = locationParts.join(', ');
+        if (loc.venue) newShowData.venue_name = loc.venue;
+        if (loc.venueAddress) newShowData.venue_address = loc.venueAddress;
       }
       
       if (extractedData.booth?.number) newShowData.booth_number = extractedData.booth.number;
@@ -669,11 +671,13 @@ function DocumentsTab() {
       if (extractedData.dates?.start) updates.start_date = extractedData.dates.start;
       if (extractedData.dates?.end) updates.end_date = extractedData.dates.end;
       
-      // Build location string
+      // Build location string and venue info
       const loc = extractedData.location;
       if (loc) {
         const locationParts = [loc.city, loc.state].filter(Boolean);
         if (locationParts.length > 0) updates.location = locationParts.join(', ');
+        if (loc.venue) updates.venue_name = loc.venue;
+        if (loc.venueAddress) updates.venue_address = loc.venueAddress;
       }
       
       // Booth info

@@ -17,7 +17,8 @@ interface ExtractedShowData {
   // Event Details
   eventType: 'in_person' | 'virtual' | 'hybrid' | null;
   managementCompany: string | null;
-  venue: string | null;
+  venueName: string | null;
+  venueAddress: string | null;
   
   // Registration
   attendeesIncluded: number | null;
@@ -63,7 +64,8 @@ Analyze the following document and extract all trade show details you can find. 
   "cost": numeric value only (no currency symbols),
   "eventType": "in_person" | "virtual" | "hybrid",
   "managementCompany": "Show management company name",
-  "venue": "Venue/convention center name",
+  "venueName": "Venue/convention center name",
+  "venueAddress": "Full street address of the venue",
   "attendeesIncluded": numeric value,
   "earlyBirdDeadline": "YYYY-MM-DD",
   "registrationDeadline": "YYYY-MM-DD",

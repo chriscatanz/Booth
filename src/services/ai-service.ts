@@ -793,7 +793,8 @@ export async function extractShowFromDocument(documentText: string): Promise<Rec
     "end": "YYYY-MM-DD"
   },
   "location": {
-    "venue": "Venue name",
+    "venue": "Venue name (convention center, hotel name, etc.)",
+    "venueAddress": "Full street address of the venue",
     "city": "City",
     "state": "State/Province",
     "country": "Country"
