@@ -80,8 +80,26 @@ export async function POST(request: NextRequest) {
 
     const authError = !user;
     
-    if (authError || !user) {
+    if (authError || !user || !supabase) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Database-based rate limiting
+    const rateLimitKey = `doc-parse:${user.id}`;
+    const { data: rateLimitOk, error: rateLimitError } = await supabase
+      .rpc('check_rate_limit', {
+        p_key: rateLimitKey,
+        p_limit: 20,  // 20 document parses per minute
+        p_window_seconds: 60
+      });
+
+    if (rateLimitError) {
+      console.error('Rate limit check failed:', rateLimitError);
+    } else if (rateLimitOk === false) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Please try again later.' },
+        { status: 429 }
+      );
     }
 
     // Parse multipart form data

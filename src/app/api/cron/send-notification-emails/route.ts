@@ -19,15 +19,19 @@ function getSupabase(): SupabaseClient {
 
 export async function GET(request: NextRequest) {
   try {
-    // Verify this is a legitimate cron request from Vercel
+    // Verify this is a legitimate cron request
     const authHeader = request.headers.get('authorization');
     const cronSecret = process.env.CRON_SECRET;
     
-    // In production, verify the cron secret
-    if (process.env.NODE_ENV === 'production' && cronSecret) {
-      if (authHeader !== `Bearer ${cronSecret}`) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
+    // SECURITY: Always require CRON_SECRET when set, fail secure otherwise
+    if (!cronSecret) {
+      console.error('CRON_SECRET not configured - rejecting request');
+      return NextResponse.json({ error: 'Cron not configured' }, { status: 503 });
+    }
+    
+    if (authHeader !== `Bearer ${cronSecret}`) {
+      console.warn('Cron auth failed - invalid or missing token');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabase = getSupabase();

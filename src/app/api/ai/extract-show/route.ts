@@ -96,6 +96,35 @@ Rules:
 DOCUMENT:
 `;
 
+// Sanitize document text to prevent prompt injection
+function sanitizeDocumentText(text: string): string {
+  // Remove potential prompt injection patterns
+  let sanitized = text;
+  
+  // Remove attempts to break out of the document context
+  sanitized = sanitized.replace(/```/g, '');
+  
+  // Remove common injection patterns
+  const injectionPatterns = [
+    /ignore\s+(previous|above|all)\s+(instructions?|prompts?)/gi,
+    /disregard\s+(previous|above|all)/gi,
+    /new\s+instructions?:/gi,
+    /system\s*:/gi,
+    /assistant\s*:/gi,
+    /user\s*:/gi,
+    /<\|im_start\|>/gi,
+    /<\|im_end\|>/gi,
+    /\[INST\]/gi,
+    /\[\/INST\]/gi,
+  ];
+  
+  for (const pattern of injectionPatterns) {
+    sanitized = sanitized.replace(pattern, '[FILTERED]');
+  }
+  
+  return sanitized;
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Try SSR-based auth first (for browser requests with cookies)
@@ -131,6 +160,24 @@ export async function POST(request: NextRequest) {
 
     if (!user || !supabase) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Database-based rate limiting
+    const rateLimitKey = `ai-extract:${user.id}`;
+    const { data: rateLimitOk, error: rateLimitError } = await supabase
+      .rpc('check_rate_limit', {
+        p_key: rateLimitKey,
+        p_limit: 10,  // 10 extractions per minute
+        p_window_seconds: 60
+      });
+
+    if (rateLimitError) {
+      console.error('Rate limit check failed:', rateLimitError);
+    } else if (rateLimitOk === false) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Please try again later.' },
+        { status: 429 }
+      );
     }
 
     // Parse request
@@ -185,6 +232,9 @@ export async function POST(request: NextRequest) {
       apiKey: aiSettings.ai_api_key,
     });
 
+    // Sanitize document text to prevent prompt injection
+    const sanitizedText = sanitizeDocumentText(documentText);
+
     // Extract show data
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -192,7 +242,7 @@ export async function POST(request: NextRequest) {
       messages: [
         { 
           role: 'user', 
-          content: EXTRACTION_PROMPT + documentText 
+          content: EXTRACTION_PROMPT + sanitizedText 
         }
       ],
     });

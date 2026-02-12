@@ -109,10 +109,23 @@ export async function POST(request: NextRequest) {
       const dangerousPatterns = [
         /<script/i,
         /javascript:/i,
-        /on\w+=/i, // onclick, onerror, etc.
+        /vbscript:/i,
+        /on\w+\s*=/i, // onclick, onerror, onload, etc.
         /<iframe/i,
         /<embed/i,
         /<object/i,
+        /<foreignObject/i,
+        /<use[^>]+href\s*=\s*["'][^"'#]/i, // external use references
+        /xlink:href\s*=\s*["'](?!#)/i, // external xlink references
+        /data:/i, // data URIs can contain scripts
+        /<meta/i,
+        /<link/i,
+        /<base/i,
+        /<!--.*-->/s, // HTML comments can hide attacks
+        /&#x?[0-9a-f]+;/i, // HTML entities (potential encoding bypass)
+        /\\u[0-9a-f]{4}/i, // Unicode escapes
+        /expression\s*\(/i, // CSS expression (IE)
+        /url\s*\(\s*["']?\s*javascript/i, // CSS url() with javascript
       ];
       
       if (dangerousPatterns.some(pattern => pattern.test(text))) {

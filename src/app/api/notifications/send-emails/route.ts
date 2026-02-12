@@ -17,22 +17,19 @@ function getSupabase(): SupabaseClient {
   return _supabase;
 }
 
-// Simple auth check - can use a secret key for cron jobs
+// SECURITY: Only allow CRON_SECRET for internal/cron calls
 function isAuthorized(request: NextRequest): boolean {
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
   
-  // Allow if cron secret matches
-  if (cronSecret && authHeader === `Bearer ${cronSecret}`) {
-    return true;
+  // Require CRON_SECRET to be configured
+  if (!cronSecret) {
+    console.error('CRON_SECRET not configured');
+    return false;
   }
   
-  // Allow if service role key is used
-  if (authHeader === `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`) {
-    return true;
-  }
-  
-  return false;
+  // Only allow if cron secret matches exactly
+  return authHeader === `Bearer ${cronSecret}`;
 }
 
 export async function POST(request: NextRequest) {

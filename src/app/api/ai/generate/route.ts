@@ -3,6 +3,32 @@ import Anthropic from '@anthropic-ai/sdk';
 import { createClient as createServerClient } from '@/lib/supabase-server';
 import { createClient } from '@supabase/supabase-js';
 
+// Sanitize user input to prevent prompt injection
+function sanitizePrompt(text: string): string {
+  let sanitized = text;
+  
+  // Remove attempts to break out of context
+  sanitized = sanitized.replace(/```/g, '');
+  
+  // Remove common injection patterns
+  const injectionPatterns = [
+    /ignore\s+(previous|above|all)\s+(instructions?|prompts?)/gi,
+    /disregard\s+(previous|above|all)/gi,
+    /new\s+instructions?:/gi,
+    /system\s*:/gi,
+    /<\|im_start\|>/gi,
+    /<\|im_end\|>/gi,
+    /\[INST\]/gi,
+    /\[\/INST\]/gi,
+  ];
+  
+  for (const pattern of injectionPatterns) {
+    sanitized = sanitized.replace(pattern, '[FILTERED]');
+  }
+  
+  return sanitized;
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Try SSR-based auth first (for browser requests with cookies)
@@ -104,13 +130,16 @@ export async function POST(request: NextRequest) {
       apiKey: aiSettings.ai_api_key,
     });
 
+    // Sanitize user prompt to prevent injection
+    const sanitizedPrompt = sanitizePrompt(prompt);
+
     // Make the API call
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 4096,
       system: systemPrompt || 'You are a helpful assistant for trade show management.',
       messages: [
-        { role: 'user', content: prompt }
+        { role: 'user', content: sanitizedPrompt }
       ],
     });
 
