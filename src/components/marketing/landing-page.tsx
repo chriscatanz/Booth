@@ -343,7 +343,7 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
             {/* AI Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-cyan-500/10 border border-purple-500/20 mb-6">
               <Sparkles size={16} className="text-brand-purple" />
-              <span className="text-sm font-medium text-text-primary">Now with AI-powered content generation</span>
+              <span className="text-sm font-medium text-text-primary">Now with AI-powered assistance</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-text-primary leading-tight">
