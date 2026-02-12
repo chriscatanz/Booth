@@ -130,58 +130,61 @@ export default function TasksView() {
   return (
     <div className="h-full flex flex-col max-w-[1600px] mx-auto w-full">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
-            <CheckSquare className="text-brand-purple" />
-            Task Board
-          </h1>
-          <p className="text-sm text-text-secondary mt-1">
-            {tasks.length} tasks · {tasksByStatus.done.length} completed
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          {/* Filters */}
-          <div className="flex items-center gap-2">
-            <Filter size={16} className="text-text-tertiary" />
-            
-            <select
-              value={filterShow}
-              onChange={(e) => setFilterShow(e.target.value)}
-              className="px-3 py-1.5 rounded-lg bg-bg-tertiary border border-border text-sm"
-            >
-              <option value="all">All Shows</option>
-              {uniqueShows.map(([id, name]) => (
-                <option key={id} value={id}>{name}</option>
-              ))}
-            </select>
-            
-            <select
-              value={filterAssignee}
-              onChange={(e) => setFilterAssignee(e.target.value)}
-              className="px-3 py-1.5 rounded-lg bg-bg-tertiary border border-border text-sm"
-            >
-              <option value="all">All Assignees</option>
-              {uniqueAssignees.map(([id, name]) => (
-                <option key={id} value={id}>{name}</option>
-              ))}
-            </select>
-            
-            {(filterShow !== 'all' || filterAssignee !== 'all') && (
-              <button
-                onClick={() => { setFilterShow('all'); setFilterAssignee('all'); }}
-                className="p-1.5 rounded-lg hover:bg-bg-tertiary text-text-tertiary"
-              >
-                <X size={16} />
-              </button>
-            )}
+      <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border space-y-3">
+        {/* Title row */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
+              <CheckSquare className="text-brand-purple" size={20} />
+              Task Board
+            </h1>
+            <p className="text-xs sm:text-sm text-text-secondary mt-0.5">
+              {tasks.length} tasks · {tasksByStatus.done.length} completed
+            </p>
           </div>
           
+          {/* New Task button - always visible */}
           {isEditor && (
-            <Button variant="primary" onClick={() => handleCreateTask('todo')}>
-              <Plus size={16} /> New Task
+            <Button variant="primary" size="sm" onClick={() => handleCreateTask('todo')}>
+              <Plus size={16} />
+              <span className="hidden sm:inline">New Task</span>
             </Button>
+          )}
+        </div>
+
+        {/* Filters row */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+          <Filter size={14} className="text-text-tertiary shrink-0" />
+          
+          <select
+            value={filterShow}
+            onChange={(e) => setFilterShow(e.target.value)}
+            className="px-2 sm:px-3 py-1.5 rounded-lg bg-bg-tertiary border border-border text-xs sm:text-sm min-w-0"
+          >
+            <option value="all">All Shows</option>
+            {uniqueShows.map(([id, name]) => (
+              <option key={id} value={id}>{name}</option>
+            ))}
+          </select>
+          
+          <select
+            value={filterAssignee}
+            onChange={(e) => setFilterAssignee(e.target.value)}
+            className="px-2 sm:px-3 py-1.5 rounded-lg bg-bg-tertiary border border-border text-xs sm:text-sm min-w-0"
+          >
+            <option value="all">All Assignees</option>
+            {uniqueAssignees.map(([id, name]) => (
+              <option key={id} value={id}>{name}</option>
+            ))}
+          </select>
+          
+          {(filterShow !== 'all' || filterAssignee !== 'all') && (
+            <button
+              onClick={() => { setFilterShow('all'); setFilterAssignee('all'); }}
+              className="p-1.5 rounded-lg hover:bg-bg-tertiary text-text-tertiary shrink-0"
+            >
+              <X size={14} />
+            </button>
           )}
         </div>
       </div>
@@ -194,8 +197,8 @@ export default function TasksView() {
       )}
 
       {/* Kanban Board */}
-      <div className="flex-1 overflow-x-auto p-6">
-        <div className="flex gap-4 h-full min-w-max">
+      <div className="flex-1 overflow-x-auto p-3 sm:p-6">
+        <div className="flex gap-3 sm:gap-4 h-full min-w-max">
           {COLUMNS.map((status) => (
             <KanbanColumn
               key={status}
@@ -264,7 +267,7 @@ function KanbanColumn({
 
   return (
     <div
-      className="w-80 flex-shrink-0 flex flex-col bg-bg-tertiary/50 rounded-xl"
+      className="w-72 sm:w-80 flex-shrink-0 flex flex-col bg-bg-tertiary/50 rounded-xl"
       onDrop={handleDrop}
       onDragOver={handleDragOver}
     >
