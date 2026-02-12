@@ -200,21 +200,21 @@ export function AppShell() {
         {/* Main Content - Full Width (no sidebar) */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Toolbar bar with Show Selector */}
-          <div className="h-12 border-b border-border flex items-center px-4 gap-4 shrink-0 bg-surface">
+          <div className="h-12 border-b border-border flex items-center px-2 sm:px-4 gap-2 sm:gap-4 shrink-0 bg-surface">
             {/* Show Selector Dropdown */}
             <ShowSelector />
 
-            {/* Current View Label */}
-            <div className="flex items-center gap-2 text-sm text-text-secondary">
+            {/* Current View Label - hide on mobile */}
+            <div className="hidden sm:flex items-center gap-2 text-sm text-text-secondary">
               <span className="text-text-tertiary">in</span>
               <span className="text-text-primary font-medium">{viewMode}</span>
             </div>
 
             {/* Right side actions */}
             <div className="ml-auto flex items-center gap-2">
-              {/* Import/Export buttons - only show on relevant views */}
+              {/* Import/Export buttons - only show on relevant views, hide on mobile */}
               {(viewMode === ViewMode.List || viewMode === ViewMode.Dashboard) && !selectedShow && (
-                <>
+                <div className="hidden sm:flex items-center gap-2">
                   <button
                     onClick={() => setShowImport(true)}
                     className="text-xs text-text-secondary hover:text-text-primary transition-colors"
@@ -228,7 +228,7 @@ export function AppShell() {
                   >
                     Export
                   </button>
-                </>
+                </div>
               )}
             </div>
           </div>

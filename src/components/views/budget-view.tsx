@@ -134,19 +134,19 @@ export default function BudgetView() {
     >
     <div className="p-4 sm:p-6 space-y-6 max-w-[1400px] mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-text-primary">Budget Reports</h1>
           <p className="text-sm text-text-secondary">Track and analyze your trade show spending</p>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-text-secondary">Timeframe</span>
-          <div className="flex rounded-lg border border-border overflow-hidden">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <span className="text-sm text-text-secondary hidden sm:inline">Timeframe</span>
+          <div className="flex rounded-lg border border-border overflow-hidden overflow-x-auto">
             {Object.values(BudgetTimeframe).map(tf => (
               <button
                 key={tf}
                 onClick={() => setTimeframe(tf)}
-                className={`px-3 py-1.5 text-xs font-medium transition-colors ${timeframe === tf ? 'bg-brand-purple text-white' : 'bg-surface text-text-secondary hover:bg-bg-tertiary'}`}
+                className={`px-2 sm:px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap ${timeframe === tf ? 'bg-brand-purple text-white' : 'bg-surface text-text-secondary hover:bg-bg-tertiary'}`}
               >
                 {tf}
               </button>

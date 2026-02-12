@@ -104,11 +104,11 @@ export default function KitsView() {
     <div className="flex h-full max-w-[1600px] mx-auto w-full">
       {/* Main List */}
       <div className={cn(
-        "flex-1 p-6 overflow-y-auto",
+        "flex-1 p-4 sm:p-6 overflow-y-auto",
         selectedKit && "border-r border-border"
       )}>
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-text-primary">Booth Kits</h1>
             <p className="text-text-secondary text-sm mt-1">
@@ -120,12 +120,13 @@ export default function KitsView() {
               variant="outline"
               onClick={() => setShowAutoAssign(true)}
               className="gap-2"
+              size="sm"
             >
               <Sparkles className="h-4 w-4" />
-              Auto-Assign
+              <span className="hidden sm:inline">Auto-</span>Assign
             </Button>
             {isEditor && (
-              <Button onClick={() => setShowCreateModal(true)} className="gap-2">
+              <Button onClick={() => setShowCreateModal(true)} className="gap-2" size="sm">
                 <Plus className="h-4 w-4" />
                 Add Kit
               </Button>
@@ -134,8 +135,8 @@ export default function KitsView() {
         </div>
 
         {/* Filters */}
-        <div className="flex gap-3 mb-6">
-          <div className="relative flex-1 max-w-xs">
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
+          <div className="relative flex-1 sm:max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary" />
             <Input
               placeholder="Search kits..."
@@ -144,11 +145,11 @@ export default function KitsView() {
               className="pl-10"
             />
           </div>
-          <div className="flex gap-1 bg-bg-tertiary rounded-lg p-1">
+          <div className="flex gap-1 bg-bg-tertiary rounded-lg p-1 overflow-x-auto">
             <button
               onClick={() => setFilterType('all')}
               className={cn(
-                "px-3 py-1.5 text-sm rounded-md transition-colors",
+                "px-3 py-1.5 text-sm rounded-md transition-colors whitespace-nowrap",
                 filterType === 'all' 
                   ? "bg-surface text-text-primary shadow-sm" 
                   : "text-text-secondary hover:text-text-primary"
@@ -161,7 +162,7 @@ export default function KitsView() {
                 key={type}
                 onClick={() => setFilterType(type as KitType)}
                 className={cn(
-                  "px-3 py-1.5 text-sm rounded-md transition-colors",
+                  "px-3 py-1.5 text-sm rounded-md transition-colors whitespace-nowrap",
                   filterType === type 
                     ? "bg-surface text-text-primary shadow-sm" 
                     : "text-text-secondary hover:text-text-primary"
@@ -174,7 +175,7 @@ export default function KitsView() {
         </div>
 
         {/* Stats Summary */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
           <div className="bg-surface rounded-lg p-4 border border-border">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-success/10 rounded-lg">

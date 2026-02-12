@@ -92,7 +92,7 @@ export function ShowSelector() {
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all min-w-[200px] max-w-[320px]',
+          'flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-lg border transition-all min-w-[140px] sm:min-w-[200px] max-w-[200px] sm:max-w-[320px]',
           isOpen 
             ? 'border-brand-purple bg-brand-purple/5' 
             : 'border-border hover:border-text-tertiary bg-surface'
@@ -128,7 +128,7 @@ export function ShowSelector() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.96 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full left-0 mt-1 w-[360px] bg-surface border border-border rounded-xl shadow-xl z-50 overflow-hidden"
+            className="absolute top-full left-0 mt-1 w-[calc(100vw-1rem)] sm:w-[360px] max-w-[360px] bg-surface border border-border rounded-xl shadow-xl z-50 overflow-hidden"
           >
             {/* Search + Actions Header */}
             <div className="p-3 border-b border-border">
