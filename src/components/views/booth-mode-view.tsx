@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MapPin, Hotel, Calendar, Users, FileText, 
@@ -9,6 +9,15 @@ import {
 } from 'lucide-react';
 import { TradeShow } from '@/types';
 import { format, differenceInDays, isWithinInterval, parseISO } from 'date-fns';
+import { createClient } from '@/lib/supabase/client';
+
+interface TeamMember {
+  id: string;
+  name: string;
+  phone?: string;
+  title?: string;
+  role: string; // from junction table
+}
 
 interface BoothModeViewProps {
   show: TradeShow;
@@ -18,6 +27,7 @@ interface BoothModeViewProps {
 export function BoothModeView({ show, onExit }: BoothModeViewProps) {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<'info' | 'agenda' | 'notes'>('info');
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
 
   const today = new Date();
   const startDate = show.startDate ? parseISO(show.startDate) : null;
@@ -25,7 +35,39 @@ export function BoothModeView({ show, onExit }: BoothModeViewProps) {
   
   const isLive = startDate && endDate && isWithinInterval(today, { start: startDate, end: endDate });
   const daysUntil = startDate ? differenceInDays(startDate, today) : null;
-  const daysRemaining = endDate ? differenceInDays(endDate, today) + 1 : null;
+
+  // Fetch team members for this show
+  useEffect(() => {
+    async function loadTeamMembers() {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('tradeshow_team_members')
+        .select(`
+          role,
+          team_member:team_members (
+            id,
+            name,
+            phone,
+            title
+          )
+        `)
+        .eq('tradeshow_id', show.id);
+
+      if (!error && data) {
+        const members: TeamMember[] = data
+          .filter(d => d.team_member)
+          .map(d => ({
+            id: (d.team_member as { id: string }).id,
+            name: (d.team_member as { name: string }).name,
+            phone: (d.team_member as { phone?: string }).phone,
+            title: (d.team_member as { title?: string }).title,
+            role: d.role || 'support',
+          }));
+        setTeamMembers(members);
+      }
+    }
+    loadTeamMembers();
+  }, [show.id]);
 
   const copyToClipboard = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
@@ -41,10 +83,6 @@ export function BoothModeView({ show, onExit }: BoothModeViewProps) {
   // Build full addresses
   const venueAddress = show.venueAddress || '';
   const hotelAddress = show.hotelAddress || '';
-
-  // Team members would come from tradeshow_team_members junction table
-  // For now, showing empty state - can be populated later
-  const teamMembers: { name?: string; role?: string; phone?: string }[] = [];
 
   return (
     <motion.div 
@@ -264,8 +302,8 @@ export function BoothModeView({ show, onExit }: BoothModeViewProps) {
                       </div>
                     </div>
                     <div className="divide-y divide-white/5">
-                      {teamMembers.map((member, idx) => (
-                        <div key={idx} className="p-4 flex items-center justify-between">
+                      {teamMembers.map((member) => (
+                        <div key={member.id} className="p-4 flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-purple to-brand-pink flex items-center justify-center">
                               <span className="text-white font-semibold text-sm">
