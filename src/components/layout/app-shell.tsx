@@ -25,6 +25,7 @@ import AssetsView from '@/components/views/assets-view';
 import ActivityView from '@/components/views/activity-view';
 import AIView from '@/components/views/ai-view';
 import DetailView from '@/components/views/detail-view';
+import { BoothModeView } from '@/components/views/booth-mode-view';
 import ExportFieldSelector from '@/components/export/export-field-selector';
 import CSVImportModal from '@/components/import/csv-import-modal';
 import { OrgSettingsModal } from '@/components/settings';
@@ -57,6 +58,7 @@ export function AppShell() {
   const [showImport, setShowImport] = useState(false);
   const [showOrgSettings, setShowOrgSettings] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [showBoothMode, setShowBoothMode] = useState(false);
   // const [showAIAssistant, setShowAIAssistant] = useState(false); // Disabled - using full AIView
   
   // Onboarding wizard
@@ -185,6 +187,8 @@ export function AppShell() {
         onViewModeChange={handleViewModeChange}
         onOpenSettings={() => setShowOrgSettings(true)}
         onOpenCommandPalette={() => setShowCommandPalette(true)}
+        onEnterBoothMode={() => setShowBoothMode(true)}
+        canEnterBoothMode={!!selectedShow}
       />
       
       {/* Subscription Banner */}
@@ -330,6 +334,16 @@ export function AppShell() {
       {/* Floating AI Chat Bubble - disabled, using full view */}
       {/* Floating AI Chat Bubble - quick access to AI view */}
       <AIChatBubble />
+
+      {/* Booth Mode - Immersive Mobile Experience */}
+      <AnimatePresence>
+        {showBoothMode && selectedShow && (
+          <BoothModeView
+            show={selectedShow}
+            onExit={() => setShowBoothMode(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

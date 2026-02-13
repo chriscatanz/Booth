@@ -5,15 +5,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { useAuthStore } from '@/store/auth-store';
 import { 
-  LogOut, Building2, ChevronDown, Settings, Check,
+  LogOut, Building2, ChevronDown, Settings, Check, Zap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface UserMenuProps {
   onOpenOrgSettings?: () => void;
+  onEnterBoothMode?: () => void;
+  canEnterBoothMode?: boolean;
 }
 
-export function UserMenu({ onOpenOrgSettings }: UserMenuProps) {
+export function UserMenu({ onOpenOrgSettings, onEnterBoothMode, canEnterBoothMode }: UserMenuProps) {
   const { 
     user, 
     organization, 
@@ -169,6 +171,16 @@ export function UserMenu({ onOpenOrgSettings }: UserMenuProps) {
 
             {/* Actions */}
             <div className="p-2">
+              {/* Booth Mode - Mobile Only */}
+              {onEnterBoothMode && canEnterBoothMode && (
+                <button
+                  onClick={() => { onEnterBoothMode(); setIsOpen(false); }}
+                  className="w-full sm:hidden flex items-center gap-2 px-2 py-2 rounded-lg bg-gradient-to-r from-brand-purple/20 to-brand-pink/20 hover:from-brand-purple/30 hover:to-brand-pink/30 text-brand-purple text-sm font-medium mb-1"
+                >
+                  <Zap size={14} />
+                  Booth Mode
+                </button>
+              )}
               {onOpenOrgSettings && (
                 <button
                   onClick={() => { onOpenOrgSettings(); setIsOpen(false); }}

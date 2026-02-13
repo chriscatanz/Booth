@@ -56,6 +56,8 @@ interface TopNavProps {
   onViewModeChange: (mode: ViewMode) => void;
   onOpenSettings: () => void;
   onOpenCommandPalette: () => void;
+  onEnterBoothMode?: () => void;
+  canEnterBoothMode?: boolean;
 }
 
 export function TopNav({ 
@@ -63,6 +65,8 @@ export function TopNav({
   onViewModeChange, 
   onOpenSettings,
   onOpenCommandPalette,
+  onEnterBoothMode,
+  canEnterBoothMode,
 }: TopNavProps) {
   const { organization } = useAuthStore();
   const { canSeeCategory } = useDataVisibility();
@@ -270,7 +274,11 @@ export function TopNav({
         </motion.button>
 
         {/* User Menu with Sign Out */}
-        <UserMenu onOpenOrgSettings={onOpenSettings} />
+        <UserMenu 
+          onOpenOrgSettings={onOpenSettings}
+          onEnterBoothMode={onEnterBoothMode}
+          canEnterBoothMode={canEnterBoothMode}
+        />
       </div>
     </header>
   );
