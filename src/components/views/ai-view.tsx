@@ -475,6 +475,9 @@ function GenerateTab({ shows }: { shows: TradeShow[] }) {
 // Use the comprehensive ExtractedShowData from ai-service
 type ExtractedShowData = aiService.ExtractedShowData;
 
+// Section keys for selective import
+type ImportSection = 'showInfo' | 'venue' | 'booth' | 'setupTeardown' | 'deadlines' | 'costs' | 'hotel' | 'shipping' | 'contact' | 'links' | 'notes';
+
 function DocumentsTab() {
   const [documentText, setDocumentText] = useState('');
   const [fileName, setFileName] = useState<string | null>(null);
@@ -486,6 +489,31 @@ function DocumentsTab() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [targetShowId, setTargetShowId] = useState<string>('');
+  
+  // Track which sections to import (all selected by default)
+  const [selectedSections, setSelectedSections] = useState<Set<ImportSection>>(
+    new Set(['showInfo', 'venue', 'booth', 'setupTeardown', 'deadlines', 'costs', 'hotel', 'shipping', 'contact', 'links', 'notes'])
+  );
+  
+  const toggleSection = (section: ImportSection) => {
+    setSelectedSections(prev => {
+      const next = new Set(prev);
+      if (next.has(section)) {
+        next.delete(section);
+      } else {
+        next.add(section);
+      }
+      return next;
+    });
+  };
+  
+  const selectAllSections = () => {
+    setSelectedSections(new Set(['showInfo', 'venue', 'booth', 'setupTeardown', 'deadlines', 'costs', 'hotel', 'shipping', 'contact', 'links', 'notes']));
+  };
+  
+  const deselectAllSections = () => {
+    setSelectedSections(new Set());
+  };
   
   const { shows, loadShows } = useTradeShowStore();
   
@@ -563,6 +591,8 @@ function DocumentsTab() {
     try {
       const result = await aiService.extractShowFromDocument(documentText);
       setExtractedData(result as ExtractedShowData);
+      // Reset selection to all when new data is extracted
+      selectAllSections();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Extraction failed');
     }
@@ -1107,28 +1137,58 @@ function DocumentsTab() {
       <div className="flex-1 p-4 flex flex-col overflow-hidden min-h-0">
         {extractedData ? (
           <div className="flex-1 overflow-y-auto space-y-4">
-            <div className="flex items-center justify-between sticky top-0 bg-background py-2">
+            <div className="flex items-center justify-between sticky top-0 bg-background py-2 z-10">
               <h3 className="text-sm font-medium text-text-primary">
                 Extracted Details
               </h3>
-              <span className={cn(
-                'text-xs px-2 py-0.5 rounded-full',
-                extractedData.confidence === 'high' ? 'bg-success/20 text-success' :
-                extractedData.confidence === 'medium' ? 'bg-warning/20 text-warning' :
-                'bg-text-tertiary/20 text-text-tertiary'
-              )}>
-                {extractedData.confidence} confidence
-              </span>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={selectAllSections}
+                  className="text-xs text-brand-purple hover:underline"
+                >
+                  All
+                </button>
+                <span className="text-text-tertiary">/</span>
+                <button 
+                  onClick={deselectAllSections}
+                  className="text-xs text-brand-purple hover:underline"
+                >
+                  None
+                </button>
+                <span className={cn(
+                  'text-xs px-2 py-0.5 rounded-full ml-2',
+                  extractedData.confidence === 'high' ? 'bg-success/20 text-success' :
+                  extractedData.confidence === 'medium' ? 'bg-warning/20 text-warning' :
+                  'bg-text-tertiary/20 text-text-tertiary'
+                )}>
+                  {extractedData.confidence} confidence
+                </span>
+              </div>
             </div>
             
             {/* Show Info */}
             {extractedData.name && (
-              <div className="p-4 bg-bg-tertiary rounded-xl">
+              <div 
+                className={cn(
+                  "p-4 rounded-xl cursor-pointer transition-all border-2",
+                  selectedSections.has('showInfo') 
+                    ? "bg-bg-tertiary border-brand-purple/50" 
+                    : "bg-bg-tertiary/50 border-transparent opacity-50"
+                )}
+                onClick={() => toggleSection('showInfo')}
+              >
                 <div className="flex items-center gap-2 mb-2">
+                  <input 
+                    type="checkbox" 
+                    checked={selectedSections.has('showInfo')}
+                    onChange={() => toggleSection('showInfo')}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-4 h-4 rounded border-border text-brand-purple focus:ring-brand-purple"
+                  />
                   <Calendar size={16} className="text-brand-purple" />
                   <span className="text-sm font-medium text-text-primary">Show Info</span>
                 </div>
-                <div className="space-y-2 text-sm">
+                <div className="space-y-2 text-sm ml-6">
                   <p><span className="text-text-secondary">Name:</span> <span className="text-text-primary font-medium">{extractedData.name}</span></p>
                   {extractedData.startDate && (
                     <p><span className="text-text-secondary">Dates:</span> <span className="text-text-primary">{extractedData.startDate} — {extractedData.endDate || 'TBD'}</span></p>
@@ -1148,12 +1208,27 @@ function DocumentsTab() {
 
             {/* Venue & Location */}
             {(extractedData.venueName || extractedData.venueAddress) && (
-              <div className="p-4 bg-bg-tertiary rounded-xl">
+              <div 
+                className={cn(
+                  "p-4 rounded-xl cursor-pointer transition-all border-2",
+                  selectedSections.has('venue') 
+                    ? "bg-bg-tertiary border-brand-cyan/50" 
+                    : "bg-bg-tertiary/50 border-transparent opacity-50"
+                )}
+                onClick={() => toggleSection('venue')}
+              >
                 <div className="flex items-center gap-2 mb-2">
+                  <input 
+                    type="checkbox" 
+                    checked={selectedSections.has('venue')}
+                    onChange={() => toggleSection('venue')}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-4 h-4 rounded border-border text-brand-purple focus:ring-brand-purple"
+                  />
                   <MapPin size={16} className="text-brand-cyan" />
                   <span className="text-sm font-medium text-text-primary">Venue</span>
                 </div>
-                <div className="space-y-1 text-sm">
+                <div className="space-y-1 text-sm ml-6">
                   {extractedData.venueName && <p className="text-text-primary font-medium">{extractedData.venueName}</p>}
                   {extractedData.venueAddress && <p className="text-text-secondary">{extractedData.venueAddress}</p>}
                 </div>
@@ -1162,12 +1237,27 @@ function DocumentsTab() {
 
             {/* Booth */}
             {(extractedData.boothNumber || extractedData.boothSize || extractedData.cost) && (
-              <div className="p-4 bg-bg-tertiary rounded-xl">
+              <div 
+                className={cn(
+                  "p-4 rounded-xl cursor-pointer transition-all border-2",
+                  selectedSections.has('booth') 
+                    ? "bg-bg-tertiary border-success/50" 
+                    : "bg-bg-tertiary/50 border-transparent opacity-50"
+                )}
+                onClick={() => toggleSection('booth')}
+              >
                 <div className="flex items-center gap-2 mb-2">
+                  <input 
+                    type="checkbox" 
+                    checked={selectedSections.has('booth')}
+                    onChange={() => toggleSection('booth')}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-4 h-4 rounded border-border text-brand-purple focus:ring-brand-purple"
+                  />
                   <Building size={16} className="text-success" />
                   <span className="text-sm font-medium text-text-primary">Booth</span>
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="grid grid-cols-2 gap-2 text-sm ml-6">
                   {extractedData.boothNumber && <p><span className="text-text-secondary">Number:</span> <span className="text-text-primary">{extractedData.boothNumber}</span></p>}
                   {extractedData.boothSize && <p><span className="text-text-secondary">Size:</span> <span className="text-text-primary">{extractedData.boothSize}</span></p>}
                   {extractedData.cost && <p><span className="text-text-secondary">Cost:</span> <span className="text-text-primary font-medium">${extractedData.cost.toLocaleString()}</span></p>}
@@ -1178,12 +1268,27 @@ function DocumentsTab() {
 
             {/* Move-in/Move-out */}
             {(extractedData.moveInDate || extractedData.moveOutDate) && (
-              <div className="p-4 bg-brand-cyan/10 border border-brand-cyan/20 rounded-xl">
+              <div 
+                className={cn(
+                  "p-4 rounded-xl cursor-pointer transition-all border-2",
+                  selectedSections.has('setupTeardown') 
+                    ? "bg-brand-cyan/10 border-brand-cyan/50" 
+                    : "bg-brand-cyan/5 border-transparent opacity-50"
+                )}
+                onClick={() => toggleSection('setupTeardown')}
+              >
                 <div className="flex items-center gap-2 mb-3">
+                  <input 
+                    type="checkbox" 
+                    checked={selectedSections.has('setupTeardown')}
+                    onChange={() => toggleSection('setupTeardown')}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-4 h-4 rounded border-border text-brand-purple focus:ring-brand-purple"
+                  />
                   <Clock size={16} className="text-brand-cyan" />
                   <span className="text-sm font-medium text-text-primary">Setup / Teardown</span>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2 ml-6">
                   {extractedData.moveInDate && (
                     <div className="flex items-start gap-3 p-2 bg-surface rounded-lg">
                       <div className="flex-1">
@@ -1208,15 +1313,30 @@ function DocumentsTab() {
 
             {/* Deadlines */}
             {deadlineCount > 0 && (
-              <div className="p-4 bg-brand-purple/10 border border-brand-purple/20 rounded-xl">
+              <div 
+                className={cn(
+                  "p-4 rounded-xl cursor-pointer transition-all border-2",
+                  selectedSections.has('deadlines') 
+                    ? "bg-brand-purple/10 border-brand-purple/50" 
+                    : "bg-brand-purple/5 border-transparent opacity-50"
+                )}
+                onClick={() => toggleSection('deadlines')}
+              >
                 <div className="flex items-center gap-2 mb-3">
+                  <input 
+                    type="checkbox" 
+                    checked={selectedSections.has('deadlines')}
+                    onChange={() => toggleSection('deadlines')}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-4 h-4 rounded border-border text-brand-purple focus:ring-brand-purple"
+                  />
                   <CheckSquare size={16} className="text-brand-purple" />
                   <span className="text-sm font-medium text-text-primary">Deadlines</span>
                   <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-brand-purple text-white">
                     {deadlineCount} found
                   </span>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2 ml-6">
                   {extractedData.earlyBirdDeadline && (
                     <div className="flex items-start gap-3 p-2 bg-surface rounded-lg">
                       <div className="flex-1">
@@ -1273,30 +1393,60 @@ function DocumentsTab() {
 
             {/* Costs */}
             {(extractedData.electricalCost || extractedData.laborCost || extractedData.internetCost || extractedData.standardServicesCost) && (
-              <div className="p-4 bg-bg-tertiary rounded-xl">
+              <div 
+                className={cn(
+                  "p-4 rounded-xl cursor-pointer transition-all border-2",
+                  selectedSections.has('costs') 
+                    ? "bg-bg-tertiary border-warning/50" 
+                    : "bg-bg-tertiary/50 border-transparent opacity-50"
+                )}
+                onClick={() => toggleSection('costs')}
+              >
                 <div className="flex items-center gap-2 mb-2">
+                  <input 
+                    type="checkbox" 
+                    checked={selectedSections.has('costs')}
+                    onChange={() => toggleSection('costs')}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-4 h-4 rounded border-border text-brand-purple focus:ring-brand-purple"
+                  />
                   <DollarSign size={16} className="text-warning" />
                   <span className="text-sm font-medium text-text-primary">Service Costs</span>
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="grid grid-cols-2 gap-2 text-sm ml-6">
                   {extractedData.electricalCost && <p><span className="text-text-secondary">Electrical:</span> <span className="text-text-primary">${extractedData.electricalCost.toLocaleString()}</span></p>}
                   {extractedData.laborCost && <p><span className="text-text-secondary">Labor:</span> <span className="text-text-primary">${extractedData.laborCost.toLocaleString()}</span></p>}
                   {extractedData.internetCost && <p><span className="text-text-secondary">Internet:</span> <span className="text-text-primary">${extractedData.internetCost.toLocaleString()}</span></p>}
                   {extractedData.standardServicesCost && <p><span className="text-text-secondary">Drayage:</span> <span className="text-text-primary">${extractedData.standardServicesCost.toLocaleString()}</span></p>}
                 </div>
-                {extractedData.utilitiesDetails && <p className="text-xs text-text-tertiary mt-2">{extractedData.utilitiesDetails}</p>}
-                {extractedData.laborDetails && <p className="text-xs text-text-tertiary mt-1">{extractedData.laborDetails}</p>}
+                {extractedData.utilitiesDetails && <p className="text-xs text-text-tertiary mt-2 ml-6">{extractedData.utilitiesDetails}</p>}
+                {extractedData.laborDetails && <p className="text-xs text-text-tertiary mt-1 ml-6">{extractedData.laborDetails}</p>}
               </div>
             )}
 
             {/* Hotel */}
             {(extractedData.hotelName || extractedData.hotelAddress || extractedData.hotelCostPerNight) && (
-              <div className="p-4 bg-bg-tertiary rounded-xl">
+              <div 
+                className={cn(
+                  "p-4 rounded-xl cursor-pointer transition-all border-2",
+                  selectedSections.has('hotel') 
+                    ? "bg-bg-tertiary border-text-tertiary/50" 
+                    : "bg-bg-tertiary/50 border-transparent opacity-50"
+                )}
+                onClick={() => toggleSection('hotel')}
+              >
                 <div className="flex items-center gap-2 mb-2">
+                  <input 
+                    type="checkbox" 
+                    checked={selectedSections.has('hotel')}
+                    onChange={() => toggleSection('hotel')}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-4 h-4 rounded border-border text-brand-purple focus:ring-brand-purple"
+                  />
                   <Building size={16} className="text-text-tertiary" />
                   <span className="text-sm font-medium text-text-primary">Hotel</span>
                 </div>
-                <div className="space-y-1 text-sm">
+                <div className="space-y-1 text-sm ml-6">
                   {extractedData.hotelName && <p className="text-text-primary font-medium">{extractedData.hotelName}</p>}
                   {extractedData.hotelAddress && <p className="text-text-secondary">{extractedData.hotelAddress}</p>}
                   {extractedData.hotelCostPerNight && <p className="text-text-secondary">${extractedData.hotelCostPerNight}/night</p>}
@@ -1306,12 +1456,27 @@ function DocumentsTab() {
 
             {/* Shipping */}
             {(extractedData.shippingInfo || extractedData.warehouseAddress) && (
-              <div className="p-4 bg-bg-tertiary rounded-xl">
+              <div 
+                className={cn(
+                  "p-4 rounded-xl cursor-pointer transition-all border-2",
+                  selectedSections.has('shipping') 
+                    ? "bg-bg-tertiary border-text-tertiary/50" 
+                    : "bg-bg-tertiary/50 border-transparent opacity-50"
+                )}
+                onClick={() => toggleSection('shipping')}
+              >
                 <div className="flex items-center gap-2 mb-2">
+                  <input 
+                    type="checkbox" 
+                    checked={selectedSections.has('shipping')}
+                    onChange={() => toggleSection('shipping')}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-4 h-4 rounded border-border text-brand-purple focus:ring-brand-purple"
+                  />
                   <Package size={16} className="text-text-tertiary" />
                   <span className="text-sm font-medium text-text-primary">Shipping</span>
                 </div>
-                <div className="space-y-2 text-sm">
+                <div className="space-y-2 text-sm ml-6">
                   {extractedData.warehouseAddress && (
                     <div>
                       <p className="text-text-secondary text-xs">Advance Warehouse:</p>
@@ -1337,12 +1502,27 @@ function DocumentsTab() {
 
             {/* Contact */}
             {(extractedData.showContactName || extractedData.showContactEmail || extractedData.showContactPhone) && (
-              <div className="p-4 bg-bg-tertiary rounded-xl">
+              <div 
+                className={cn(
+                  "p-4 rounded-xl cursor-pointer transition-all border-2",
+                  selectedSections.has('contact') 
+                    ? "bg-bg-tertiary border-text-tertiary/50" 
+                    : "bg-bg-tertiary/50 border-transparent opacity-50"
+                )}
+                onClick={() => toggleSection('contact')}
+              >
                 <div className="flex items-center gap-2 mb-2">
+                  <input 
+                    type="checkbox" 
+                    checked={selectedSections.has('contact')}
+                    onChange={() => toggleSection('contact')}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-4 h-4 rounded border-border text-brand-purple focus:ring-brand-purple"
+                  />
                   <Users size={16} className="text-text-tertiary" />
                   <span className="text-sm font-medium text-text-primary">Contact</span>
                 </div>
-                <div className="space-y-1 text-sm">
+                <div className="space-y-1 text-sm ml-6">
                   {extractedData.showContactName && <p className="text-text-primary font-medium">{extractedData.showContactName}</p>}
                   {extractedData.showContactEmail && <p className="text-text-secondary">{extractedData.showContactEmail}</p>}
                   {extractedData.showContactPhone && <p className="text-text-secondary">{extractedData.showContactPhone}</p>}
@@ -1352,22 +1532,40 @@ function DocumentsTab() {
 
             {/* URLs */}
             {(extractedData.showWebsite || extractedData.showAgendaUrl || extractedData.eventPortalUrl) && (
-              <div className="p-4 bg-bg-tertiary rounded-xl">
+              <div 
+                className={cn(
+                  "p-4 rounded-xl cursor-pointer transition-all border-2",
+                  selectedSections.has('links') 
+                    ? "bg-bg-tertiary border-text-tertiary/50" 
+                    : "bg-bg-tertiary/50 border-transparent opacity-50"
+                )}
+                onClick={() => toggleSection('links')}
+              >
                 <div className="flex items-center gap-2 mb-2">
+                  <input 
+                    type="checkbox" 
+                    checked={selectedSections.has('links')}
+                    onChange={() => toggleSection('links')}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-4 h-4 rounded border-border text-brand-purple focus:ring-brand-purple"
+                  />
                   <ExternalLink size={16} className="text-text-tertiary" />
                   <span className="text-sm font-medium text-text-primary">Links</span>
                 </div>
-                <div className="space-y-2 text-sm">
+                <div className="space-y-2 text-sm ml-6">
                   {extractedData.showWebsite && (
                     <a href={extractedData.showWebsite} target="_blank" rel="noopener noreferrer" 
+                       onClick={(e) => e.stopPropagation()}
                        className="block text-brand-purple hover:underline truncate">{extractedData.showWebsite}</a>
                   )}
                   {extractedData.showAgendaUrl && (
                     <a href={extractedData.showAgendaUrl} target="_blank" rel="noopener noreferrer"
+                       onClick={(e) => e.stopPropagation()}
                        className="block text-brand-purple hover:underline truncate">Agenda</a>
                   )}
                   {extractedData.eventPortalUrl && (
                     <a href={extractedData.eventPortalUrl} target="_blank" rel="noopener noreferrer"
+                       onClick={(e) => e.stopPropagation()}
                        className="block text-brand-purple hover:underline truncate">Exhibitor Portal</a>
                   )}
                 </div>
@@ -1376,12 +1574,27 @@ function DocumentsTab() {
 
             {/* Notes */}
             {extractedData.notes && (
-              <div className="p-4 bg-bg-tertiary rounded-xl">
+              <div 
+                className={cn(
+                  "p-4 rounded-xl cursor-pointer transition-all border-2",
+                  selectedSections.has('notes') 
+                    ? "bg-bg-tertiary border-text-tertiary/50" 
+                    : "bg-bg-tertiary/50 border-transparent opacity-50"
+                )}
+                onClick={() => toggleSection('notes')}
+              >
                 <div className="flex items-center gap-2 mb-2">
+                  <input 
+                    type="checkbox" 
+                    checked={selectedSections.has('notes')}
+                    onChange={() => toggleSection('notes')}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-4 h-4 rounded border-border text-brand-purple focus:ring-brand-purple"
+                  />
                   <FileText size={16} className="text-text-tertiary" />
                   <span className="text-sm font-medium text-text-primary">Notes</span>
                 </div>
-                <p className="text-sm text-text-secondary whitespace-pre-wrap">{extractedData.notes}</p>
+                <p className="text-sm text-text-secondary whitespace-pre-wrap ml-6">{extractedData.notes}</p>
               </div>
             )}
 
