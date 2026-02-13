@@ -15,9 +15,10 @@ export function middleware(request: NextRequest) {
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // unsafe-eval needed for some React features
     "style-src 'self' 'unsafe-inline' https://unpkg.com", // unpkg for Leaflet CSS
-    "img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in https://*.openstreetmap.org https://*.tile.openstreetmap.org https://unpkg.com",
+    "img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in https://*.openstreetmap.org https://*.tile.openstreetmap.org https://unpkg.com https://*.google.com https://*.googleapis.com https://*.gstatic.com",
     "font-src 'self' data:",
     "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://nominatim.openstreetmap.org https://api.anthropic.com",
+    "frame-src https://www.google.com https://maps.google.com https://*.google.com", // Google Maps embeds
     "frame-ancestors 'none'",
     "form-action 'self'",
     "base-uri 'self'",
