@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" fill="none">
+  <!-- Background -->
+  <rect width="1200" height="675" fill="#FAFAFA"/>
+  
+  <!-- Header Bar -->
+  <rect width="1200" height="64" fill="white"/>
+  <rect y="64" width="1200" height="1" fill="#E5E7EB"/>
+  
+  <!-- Logo -->
+  <rect x="24" y="16" width="32" height="32" rx="8" fill="url(#purpleGrad)"/>
+  <text x="40" y="38" fill="white" font-family="system-ui" font-size="14" font-weight="bold" text-anchor="middle">B</text>
+  
+  <!-- Main Content -->
+  <rect x="24" y="88" width="1152" height="563" rx="12" fill="white" stroke="#E5E7EB"/>
+  
+  <!-- Title -->
+  <circle cx="64" cy="124" r="20" fill="#F5F3FF"/>
+  <rect x="56" y="116" width="16" height="16" rx="3" stroke="#8B5CF6" stroke-width="2" fill="none"/>
+  <text x="100" y="124" fill="#1F2937" font-family="system-ui" font-size="24" font-weight="bold">Assets</text>
+  <text x="100" y="148" fill="#6B7280" font-family="system-ui" font-size="14">Track your collateral, displays, and giveaways</text>
+  
+  <!-- Action Button -->
+  <rect x="1020" y="108" width="100" height="36" rx="8" fill="#8B5CF6"/>
+  <text x="1070" y="131" fill="white" font-family="system-ui" font-size="13" text-anchor="middle">+ Add Asset</text>
+  
+  <!-- Stats Row -->
+  <g>
+    <rect x="48" y="180" width="200" height="80" rx="10" fill="#F5F3FF" stroke="#DDD6FE"/>
+    <text x="72" y="215" fill="#374151" font-family="system-ui" font-size="24" font-weight="bold">156</text>
+    <text x="72" y="238" fill="#6B7280" font-family="system-ui" font-size="12">Total Assets</text>
+    
+    <rect x="264" y="180" width="200" height="80" rx="10" fill="#F0FDF4" stroke="#BBF7D0"/>
+    <text x="288" y="215" fill="#374151" font-family="system-ui" font-size="24" font-weight="bold">$24,500</text>
+    <text x="288" y="238" fill="#6B7280" font-family="system-ui" font-size="12">Capital Equipment</text>
+    
+    <rect x="480" y="180" width="200" height="80" rx="10" fill="#EFF6FF" stroke="#BFDBFE"/>
+    <text x="504" y="215" fill="#374151" font-family="system-ui" font-size="24" font-weight="bold">12,400</text>
+    <text x="504" y="238" fill="#6B7280" font-family="system-ui" font-size="12">Collateral Items</text>
+  </g>
+  
+  <!-- Filter Tabs -->
+  <g font-family="system-ui" font-size="13">
+    <rect x="48" y="284" width="50" height="32" rx="6" fill="#8B5CF6"/>
+    <text x="73" y="305" fill="white" text-anchor="middle">All</text>
+    <rect x="108" y="284" width="80" height="32" rx="6" fill="#F3F4F6"/>
+    <text x="148" y="305" fill="#6B7280" text-anchor="middle">Displays</text>
+    <rect x="198" y="284" width="80" height="32" rx="6" fill="#F3F4F6"/>
+    <text x="238" y="305" fill="#6B7280" text-anchor="middle">Banners</text>
+    <rect x="288" y="284" width="90" height="32" rx="6" fill="#F3F4F6"/>
+    <text x="333" y="305" fill="#6B7280" text-anchor="middle">Collateral</text>
+    <rect x="388" y="284" width="80" height="32" rx="6" fill="#F3F4F6"/>
+    <text x="428" y="305" fill="#6B7280" text-anchor="middle">Giveaways</text>
+  </g>
+  
+  <!-- Search -->
+  <rect x="760" y="284" width="240" height="32" rx="6" fill="#F3F4F6"/>
+  <text x="784" y="305" fill="#9CA3AF" font-family="system-ui" font-size="13">🔍 Search assets...</text>
+  
+  <!-- Asset Table -->
+  <rect x="48" y="340" width="1080" height="44" rx="8" fill="#F9FAFB"/>
+  <g fill="#6B7280" font-family="system-ui" font-size="12" font-weight="500">
+    <text x="72" y="367">Asset Name</text>
+    <text x="350" y="367">Category</text>
+    <text x="500" y="367">Quantity</text>
+    <text x="620" y="367">Location</text>
+    <text x="800" y="367">Last Used</text>
+    <text x="980" y="367">Status</text>
+  </g>
+  
+  <!-- Asset Rows -->
+  <g font-family="system-ui">
+    <!-- Row 1 -->
+    <rect x="48" y="392" width="1080" height="56" fill="white"/>
+    <rect x="48" y="448" width="1080" height="1" fill="#E5E7EB"/>
+    <rect x="72" y="406" width="40" height="28" rx="4" fill="#8B5CF6" opacity="0.1"/>
+    <text x="92" y="425" fill="#8B5CF6" font-size="16" text-anchor="middle">📺</text>
+    <text x="124" y="420" fill="#1F2937" font-size="14" font-weight="500">10ft Backlit Display</text>
+    <text x="124" y="438" fill="#6B7280" font-size="12">SKU: DSP-001</text>
+    <rect x="350" y="410" width="70" height="24" rx="12" fill="#F5F3FF"/>
+    <text x="385" y="427" fill="#8B5CF6" font-size="11" text-anchor="middle">Display</text>
+    <text x="500" y="425" fill="#374151" font-size="14">1</text>
+    <text x="620" y="425" fill="#374151" font-size="14">Office - Kit A</text>
+    <text x="800" y="425" fill="#6B7280" font-size="13">CUNA GAC • Jan 15</text>
+    <rect x="980" y="410" width="70" height="24" rx="12" fill="#F0FDF4"/>
+    <text x="1015" y="427" fill="#16A34A" font-size="11" text-anchor="middle">Available</text>
+    
+    <!-- Row 2 -->
+    <rect x="48" y="449" width="1080" height="56" fill="#FAFAFA"/>
+    <rect x="48" y="505" width="1080" height="1" fill="#E5E7EB"/>
+    <rect x="72" y="463" width="40" height="28" rx="4" fill="#06B6D4" opacity="0.1"/>
+    <text x="92" y="482" fill="#06B6D4" font-size="16" text-anchor="middle">🎌</text>
+    <text x="124" y="477" fill="#1F2937" font-size="14" font-weight="500">Retractable Banner Stand</text>
+    <text x="124" y="495" fill="#6B7280" font-size="12">SKU: BNR-002</text>
+    <rect x="350" y="467" width="70" height="24" rx="12" fill="#ECFEFF"/>
+    <text x="385" y="484" fill="#0891B2" font-size="11" text-anchor="middle">Banner</text>
+    <text x="500" y="482" fill="#374151" font-size="14">4</text>
+    <text x="620" y="482" fill="#374151" font-size="14">Office - General</text>
+    <text x="800" y="482" fill="#6B7280" font-size="13">Tech Expo • Feb 10</text>
+    <rect x="980" y="467" width="70" height="24" rx="12" fill="#F0FDF4"/>
+    <text x="1015" y="484" fill="#16A34A" font-size="11" text-anchor="middle">Available</text>
+    
+    <!-- Row 3 -->
+    <rect x="48" y="506" width="1080" height="56" fill="white"/>
+    <rect x="48" y="562" width="1080" height="1" fill="#E5E7EB"/>
+    <rect x="72" y="520" width="40" height="28" rx="4" fill="#10B981" opacity="0.1"/>
+    <text x="92" y="539" fill="#10B981" font-size="16" text-anchor="middle">📄</text>
+    <text x="124" y="534" fill="#1F2937" font-size="14" font-weight="500">Product Brochures</text>
+    <text x="124" y="552" fill="#6B7280" font-size="12">SKU: COL-010</text>
+    <rect x="350" y="524" width="80" height="24" rx="12" fill="#F0FDF4"/>
+    <text x="390" y="541" fill="#16A34A" font-size="11" text-anchor="middle">Collateral</text>
+    <text x="500" y="539" fill="#374151" font-size="14">2,500</text>
+    <text x="620" y="539" fill="#374151" font-size="14">Warehouse</text>
+    <text x="800" y="539" fill="#6B7280" font-size="13">Multiple shows</text>
+    <rect x="980" y="524" width="70" height="24" rx="12" fill="#FEF3C7"/>
+    <text x="1015" y="541" fill="#CA8A04" font-size="11" text-anchor="middle">Low Stock</text>
+    
+    <!-- Row 4 -->
+    <rect x="48" y="563" width="1080" height="56" fill="#FAFAFA"/>
+    <rect x="72" y="577" width="40" height="28" rx="4" fill="#F59E0B" opacity="0.1"/>
+    <text x="92" y="596" fill="#F59E0B" font-size="16" text-anchor="middle">🎁</text>
+    <text x="124" y="591" fill="#1F2937" font-size="14" font-weight="500">Branded Pens</text>
+    <text x="124" y="609" fill="#6B7280" font-size="12">SKU: GVA-005</text>
+    <rect x="350" y="581" width="80" height="24" rx="12" fill="#FEF3C7"/>
+    <text x="390" y="598" fill="#CA8A04" font-size="11" text-anchor="middle">Giveaway</text>
+    <text x="500" y="596" fill="#374151" font-size="14">5,000</text>
+    <text x="620" y="596" fill="#374151" font-size="14">Warehouse</text>
+    <text x="800" y="596" fill="#6B7280" font-size="13">Last order: Dec 2025</text>
+    <rect x="980" y="581" width="70" height="24" rx="12" fill="#F0FDF4"/>
+    <text x="1015" y="598" fill="#16A34A" font-size="11" text-anchor="middle">In Stock</text>
+  </g>
+  
+  <defs>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6"/>
+      <stop offset="100%" style="stop-color:#7C3AED"/>
+    </linearGradient>
+  </defs>
+</svg>

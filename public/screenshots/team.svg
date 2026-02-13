@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" fill="none">
+  <!-- Background -->
+  <rect width="1200" height="675" fill="#FAFAFA"/>
+  
+  <!-- Header Bar -->
+  <rect width="1200" height="64" fill="white"/>
+  <rect y="64" width="1200" height="1" fill="#E5E7EB"/>
+  
+  <!-- Logo -->
+  <rect x="24" y="16" width="32" height="32" rx="8" fill="url(#purpleGrad)"/>
+  <text x="40" y="38" fill="white" font-family="system-ui" font-size="14" font-weight="bold" text-anchor="middle">B</text>
+  
+  <!-- Main Content -->
+  <rect x="24" y="88" width="1152" height="563" rx="12" fill="white" stroke="#E5E7EB"/>
+  
+  <!-- Title -->
+  <circle cx="64" cy="124" r="20" fill="#EDE9FE"/>
+  <text x="64" y="130" fill="#7C3AED" font-family="system-ui" font-size="16" text-anchor="middle">👥</text>
+  <text x="100" y="124" fill="#1F2937" font-family="system-ui" font-size="24" font-weight="bold">Team Members</text>
+  <text x="100" y="148" fill="#6B7280" font-family="system-ui" font-size="14">Manage access and permissions for your organization</text>
+  
+  <!-- Invite Button -->
+  <rect x="1020" y="108" width="100" height="36" rx="8" fill="#8B5CF6"/>
+  <text x="1070" y="131" fill="white" font-family="system-ui" font-size="13" text-anchor="middle">+ Invite</text>
+  
+  <!-- Table Header -->
+  <rect x="48" y="180" width="1080" height="48" rx="8" fill="#F9FAFB"/>
+  <text x="72" y="210" fill="#6B7280" font-family="system-ui" font-size="13" font-weight="500">Member</text>
+  <text x="400" y="210" fill="#6B7280" font-family="system-ui" font-size="13" font-weight="500">Email</text>
+  <text x="700" y="210" fill="#6B7280" font-family="system-ui" font-size="13" font-weight="500">Role</text>
+  <text x="900" y="210" fill="#6B7280" font-family="system-ui" font-size="13" font-weight="500">Status</text>
+  <text x="1050" y="210" fill="#6B7280" font-family="system-ui" font-size="13" font-weight="500">Actions</text>
+  
+  <!-- Member 1 - Owner -->
+  <rect x="48" y="240" width="1080" height="64" fill="white"/>
+  <rect x="48" y="304" width="1080" height="1" fill="#E5E7EB"/>
+  <circle cx="88" cy="272" r="20" fill="#8B5CF6"/>
+  <text x="88" y="278" fill="white" font-family="system-ui" font-size="14" font-weight="500" text-anchor="middle">CM</text>
+  <text x="120" y="268" fill="#1F2937" font-family="system-ui" font-size="14" font-weight="500">Chris Martinez</text>
+  <text x="120" y="286" fill="#6B7280" font-family="system-ui" font-size="12">Added Dec 1, 2025</text>
+  <text x="400" y="277" fill="#374151" font-family="system-ui" font-size="14">chris@directlink.ai</text>
+  <rect x="700" y="260" width="60" height="24" rx="12" fill="#FEF3C7"/>
+  <text x="730" y="277" fill="#CA8A04" font-family="system-ui" font-size="12" text-anchor="middle">Owner</text>
+  <rect x="900" y="260" width="60" height="24" rx="12" fill="#F0FDF4"/>
+  <text x="930" y="277" fill="#16A34A" font-family="system-ui" font-size="12" text-anchor="middle">Active</text>
+  <text x="1050" y="277" fill="#6B7280" font-family="system-ui" font-size="13">—</text>
+  
+  <!-- Member 2 - Admin -->
+  <rect x="48" y="305" width="1080" height="64" fill="#FAFAFA"/>
+  <rect x="48" y="369" width="1080" height="1" fill="#E5E7EB"/>
+  <circle cx="88" cy="337" r="20" fill="#06B6D4"/>
+  <text x="88" y="343" fill="white" font-family="system-ui" font-size="14" font-weight="500" text-anchor="middle">SJ</text>
+  <text x="120" y="333" fill="#1F2937" font-family="system-ui" font-size="14" font-weight="500">Sarah Johnson</text>
+  <text x="120" y="351" fill="#6B7280" font-family="system-ui" font-size="12">Added Jan 10, 2026</text>
+  <text x="400" y="342" fill="#374151" font-family="system-ui" font-size="14">sarah@directlink.ai</text>
+  <rect x="700" y="325" width="60" height="24" rx="12" fill="#EDE9FE"/>
+  <text x="730" y="342" fill="#7C3AED" font-family="system-ui" font-size="12" text-anchor="middle">Admin</text>
+  <rect x="900" y="325" width="60" height="24" rx="12" fill="#F0FDF4"/>
+  <text x="930" y="342" fill="#16A34A" font-family="system-ui" font-size="12" text-anchor="middle">Active</text>
+  <text x="1050" y="342" fill="#8B5CF6" font-family="system-ui" font-size="13">Edit</text>
+  
+  <!-- Member 3 - Editor -->
+  <rect x="48" y="370" width="1080" height="64" fill="white"/>
+  <rect x="48" y="434" width="1080" height="1" fill="#E5E7EB"/>
+  <circle cx="88" cy="402" r="20" fill="#10B981"/>
+  <text x="88" y="408" fill="white" font-family="system-ui" font-size="14" font-weight="500" text-anchor="middle">MB</text>
+  <text x="120" y="398" fill="#1F2937" font-family="system-ui" font-size="14" font-weight="500">Mike Brown</text>
+  <text x="120" y="416" fill="#6B7280" font-family="system-ui" font-size="12">Added Jan 25, 2026</text>
+  <text x="400" y="407" fill="#374151" font-family="system-ui" font-size="14">mike@directlink.ai</text>
+  <rect x="700" y="390" width="60" height="24" rx="12" fill="#DBEAFE"/>
+  <text x="730" y="407" fill="#3B82F6" font-family="system-ui" font-size="12" text-anchor="middle">Editor</text>
+  <rect x="900" y="390" width="60" height="24" rx="12" fill="#F0FDF4"/>
+  <text x="930" y="407" fill="#16A34A" font-family="system-ui" font-size="12" text-anchor="middle">Active</text>
+  <text x="1050" y="407" fill="#8B5CF6" font-family="system-ui" font-size="13">Edit</text>
+  
+  <!-- Member 4 - Viewer -->
+  <rect x="48" y="435" width="1080" height="64" fill="#FAFAFA"/>
+  <rect x="48" y="499" width="1080" height="1" fill="#E5E7EB"/>
+  <circle cx="88" cy="467" r="20" fill="#F59E0B"/>
+  <text x="88" y="473" fill="white" font-family="system-ui" font-size="14" font-weight="500" text-anchor="middle">JD</text>
+  <text x="120" y="463" fill="#1F2937" font-family="system-ui" font-size="14" font-weight="500">Jane Doe</text>
+  <text x="120" y="481" fill="#6B7280" font-family="system-ui" font-size="12">Added Feb 1, 2026</text>
+  <text x="400" y="472" fill="#374151" font-family="system-ui" font-size="14">jane@directlink.ai</text>
+  <rect x="700" y="455" width="60" height="24" rx="12" fill="#F3F4F6"/>
+  <text x="730" y="472" fill="#6B7280" font-family="system-ui" font-size="12" text-anchor="middle">Viewer</text>
+  <rect x="900" y="455" width="60" height="24" rx="12" fill="#F0FDF4"/>
+  <text x="930" y="472" fill="#16A34A" font-family="system-ui" font-size="12" text-anchor="middle">Active</text>
+  <text x="1050" y="472" fill="#8B5CF6" font-family="system-ui" font-size="13">Edit</text>
+  
+  <!-- Pending Invite -->
+  <rect x="48" y="500" width="1080" height="64" fill="white"/>
+  <circle cx="88" cy="532" r="20" fill="#E5E7EB"/>
+  <text x="88" y="538" fill="#9CA3AF" font-family="system-ui" font-size="14" font-weight="500" text-anchor="middle">?</text>
+  <text x="120" y="528" fill="#9CA3AF" font-family="system-ui" font-size="14" font-weight="500">Pending Invitation</text>
+  <text x="120" y="546" fill="#9CA3AF" font-family="system-ui" font-size="12">Sent Feb 12, 2026</text>
+  <text x="400" y="537" fill="#9CA3AF" font-family="system-ui" font-size="14">alex@partner.com</text>
+  <rect x="700" y="520" width="60" height="24" rx="12" fill="#F3F4F6"/>
+  <text x="730" y="537" fill="#6B7280" font-family="system-ui" font-size="12" text-anchor="middle">Viewer</text>
+  <rect x="900" y="520" width="70" height="24" rx="12" fill="#FEF3C7"/>
+  <text x="935" y="537" fill="#CA8A04" font-family="system-ui" font-size="12" text-anchor="middle">Pending</text>
+  <text x="1050" y="537" fill="#DC2626" font-family="system-ui" font-size="13">Revoke</text>
+  
+  <!-- Permissions Legend -->
+  <rect x="48" y="590" width="1080" height="50" rx="8" fill="#F9FAFB"/>
+  <text x="72" y="620" fill="#6B7280" font-family="system-ui" font-size="12">
+    <tspan font-weight="500" fill="#374151">Roles:</tspan>
+    <tspan fill="#CA8A04"> Owner</tspan> - Full access |
+    <tspan fill="#7C3AED"> Admin</tspan> - Manage members |
+    <tspan fill="#3B82F6"> Editor</tspan> - Edit shows |
+    <tspan fill="#6B7280"> Viewer</tspan> - View only
+  </text>
+  
+  <defs>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6"/>
+      <stop offset="100%" style="stop-color:#7C3AED"/>
+    </linearGradient>
+  </defs>
+</svg>

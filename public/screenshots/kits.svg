@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" fill="none">
+  <!-- Background -->
+  <rect width="1200" height="675" fill="#FAFAFA"/>
+  
+  <!-- Header Bar -->
+  <rect width="1200" height="64" fill="white"/>
+  <rect y="64" width="1200" height="1" fill="#E5E7EB"/>
+  
+  <!-- Logo -->
+  <rect x="24" y="16" width="32" height="32" rx="8" fill="url(#purpleGrad)"/>
+  <text x="40" y="38" fill="white" font-family="system-ui" font-size="14" font-weight="bold" text-anchor="middle">B</text>
+  
+  <!-- Main Content -->
+  <rect x="24" y="88" width="1152" height="563" rx="12" fill="white" stroke="#E5E7EB"/>
+  
+  <!-- Title -->
+  <circle cx="64" cy="124" r="20" fill="#FEE2E2"/>
+  <rect x="56" y="116" width="16" height="16" rx="3" stroke="#DC2626" stroke-width="2" fill="none"/>
+  <text x="100" y="124" fill="#1F2937" font-family="system-ui" font-size="24" font-weight="bold">Booth Kits</text>
+  <text x="100" y="148" fill="#6B7280" font-family="system-ui" font-size="14">Manage your booth inventory and track assignments</text>
+  
+  <!-- Action Buttons -->
+  <rect x="920" y="108" width="100" height="36" rx="8" fill="white" stroke="#E5E7EB"/>
+  <text x="945" y="131" fill="#6B7280" font-family="system-ui" font-size="13">✦ Auto-Assign</text>
+  <rect x="1030" y="108" width="90" height="36" rx="8" fill="#8B5CF6"/>
+  <text x="1055" y="131" fill="white" font-family="system-ui" font-size="13">+ Add Kit</text>
+  
+  <!-- Stats Row -->
+  <g>
+    <rect x="48" y="180" width="170" height="80" rx="10" fill="#F0FDF4" stroke="#BBF7D0"/>
+    <circle cx="76" cy="210" r="14" fill="#DCFCE7"/>
+    <text x="76" y="216" fill="#16A34A" font-family="system-ui" font-size="14" text-anchor="middle">✓</text>
+    <text x="100" y="215" fill="#374151" font-family="system-ui" font-size="22" font-weight="bold">3</text>
+    <text x="100" y="238" fill="#6B7280" font-family="system-ui" font-size="12">Available</text>
+    
+    <rect x="234" y="180" width="170" height="80" rx="10" fill="#EFF6FF" stroke="#BFDBFE"/>
+    <circle cx="262" cy="210" r="14" fill="#DBEAFE"/>
+    <rect x="256" y="204" width="12" height="12" rx="2" stroke="#3B82F6" stroke-width="2" fill="none"/>
+    <text x="286" y="215" fill="#374151" font-family="system-ui" font-size="22" font-weight="bold">2</text>
+    <text x="286" y="238" fill="#6B7280" font-family="system-ui" font-size="12">Assigned</text>
+    
+    <rect x="420" y="180" width="170" height="80" rx="10" fill="#FEF3C7" stroke="#FDE68A"/>
+    <circle cx="448" cy="210" r="14" fill="#FEF9C3"/>
+    <text x="448" y="216" fill="#CA8A04" font-family="system-ui" font-size="12" text-anchor="middle">📦</text>
+    <text x="472" y="215" fill="#374151" font-family="system-ui" font-size="22" font-weight="bold">1</text>
+    <text x="472" y="238" fill="#6B7280" font-family="system-ui" font-size="12">In Transit</text>
+    
+    <rect x="606" y="180" width="170" height="80" rx="10" fill="#F5F3FF" stroke="#DDD6FE"/>
+    <circle cx="634" cy="210" r="14" fill="#EDE9FE"/>
+    <text x="634" y="216" fill="#7C3AED" font-family="system-ui" font-size="12" text-anchor="middle">📍</text>
+    <text x="658" y="215" fill="#374151" font-family="system-ui" font-size="22" font-weight="bold">1</text>
+    <text x="658" y="238" fill="#6B7280" font-family="system-ui" font-size="12">At Shows</text>
+  </g>
+  
+  <!-- Filter Tabs -->
+  <g>
+    <rect x="48" y="284" width="50" height="32" rx="6" fill="#8B5CF6"/>
+    <text x="73" y="305" fill="white" font-family="system-ui" font-size="13" text-anchor="middle">All</text>
+    <rect x="108" y="284" width="80" height="32" rx="6" fill="#F3F4F6"/>
+    <text x="148" y="305" fill="#6B7280" font-family="system-ui" font-size="13" text-anchor="middle">Flagship</text>
+    <rect x="198" y="284" width="80" height="32" rx="6" fill="#F3F4F6"/>
+    <text x="238" y="305" fill="#6B7280" font-family="system-ui" font-size="13" text-anchor="middle">Standard</text>
+    <rect x="288" y="284" width="80" height="32" rx="6" fill="#F3F4F6"/>
+    <text x="328" y="305" fill="#6B7280" font-family="system-ui" font-size="13" text-anchor="middle">Compact</text>
+  </g>
+  
+  <!-- Kit Cards -->
+  <!-- Kit A -->
+  <rect x="48" y="340" width="360" height="150" rx="12" fill="white" stroke="#E5E7EB"/>
+  <rect x="48" y="340" width="360" height="6" rx="3" fill="#8B5CF6"/>
+  <text x="72" y="380" fill="#1F2937" font-family="system-ui" font-size="18" font-weight="600">Kit A - Flagship</text>
+  <rect x="220" y="362" width="70" height="24" rx="12" fill="#F0FDF4"/>
+  <text x="255" y="379" fill="#16A34A" font-family="system-ui" font-size="12" text-anchor="middle">Available</text>
+  <text x="72" y="410" fill="#6B7280" font-family="system-ui" font-size="13">10ft backlit display, 2 banners, counter</text>
+  <rect x="72" y="430" width="312" height="1" fill="#E5E7EB"/>
+  <text x="72" y="460" fill="#9CA3AF" font-family="system-ui" font-size="12">Last used: Jan 15, 2026 • CUNA GAC</text>
+  <text x="350" y="460" fill="#8B5CF6" font-family="system-ui" font-size="12" font-weight="500" text-anchor="end">Assign →</text>
+  
+  <!-- Kit B -->
+  <rect x="424" y="340" width="360" height="150" rx="12" fill="white" stroke="#E5E7EB"/>
+  <rect x="424" y="340" width="360" height="6" rx="3" fill="#06B6D4"/>
+  <text x="448" y="380" fill="#1F2937" font-family="system-ui" font-size="18" font-weight="600">Kit B - Standard</text>
+  <rect x="596" y="362" width="70" height="24" rx="12" fill="#EFF6FF"/>
+  <text x="631" y="379" fill="#3B82F6" font-family="system-ui" font-size="12" text-anchor="middle">Assigned</text>
+  <text x="448" y="410" fill="#6B7280" font-family="system-ui" font-size="13">2 pull-up banners, tablecloth, literature rack</text>
+  <rect x="448" y="430" width="312" height="1" fill="#E5E7EB"/>
+  <text x="448" y="460" fill="#9CA3AF" font-family="system-ui" font-size="12">Assigned: ICBA Live 2026 • Mar 1-4</text>
+  <text x="726" y="460" fill="#8B5CF6" font-family="system-ui" font-size="12" font-weight="500" text-anchor="end">View →</text>
+  
+  <!-- Kit C -->
+  <rect x="800" y="340" width="360" height="150" rx="12" fill="white" stroke="#E5E7EB"/>
+  <rect x="800" y="340" width="360" height="6" rx="3" fill="#10B981"/>
+  <text x="824" y="380" fill="#1F2937" font-family="system-ui" font-size="18" font-weight="600">Kit C - Compact</text>
+  <rect x="972" y="362" width="70" height="24" rx="12" fill="#FEF3C7"/>
+  <text x="1007" y="379" fill="#CA8A04" font-family="system-ui" font-size="12" text-anchor="middle">In Transit</text>
+  <text x="824" y="410" fill="#6B7280" font-family="system-ui" font-size="13">1 pull-up banner, tabletop display</text>
+  <rect x="824" y="430" width="312" height="1" fill="#E5E7EB"/>
+  <text x="824" y="460" fill="#9CA3AF" font-family="system-ui" font-size="12">Shipping to: Tech Expo • Est. Feb 14</text>
+  <text x="1102" y="460" fill="#F59E0B" font-family="system-ui" font-size="12" font-weight="500" text-anchor="end">Track →</text>
+  
+  <!-- Kit D -->
+  <rect x="48" y="510" width="360" height="120" rx="12" fill="white" stroke="#E5E7EB"/>
+  <rect x="48" y="510" width="360" height="6" rx="3" fill="#F59E0B"/>
+  <text x="72" y="550" fill="#1F2937" font-family="system-ui" font-size="18" font-weight="600">Kit D - Tabletop</text>
+  <rect x="220" y="532" width="70" height="24" rx="12" fill="#F5F3FF"/>
+  <text x="255" y="549" fill="#7C3AED" font-family="system-ui" font-size="12" text-anchor="middle">At Show</text>
+  <text x="72" y="580" fill="#6B7280" font-family="system-ui" font-size="13">Tabletop retractable, literature holder</text>
+  <text x="72" y="610" fill="#9CA3AF" font-family="system-ui" font-size="12">Currently at: CU Direct Summit • Returns Feb 16</text>
+  
+  <defs>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6"/>
+      <stop offset="100%" style="stop-color:#7C3AED"/>
+    </linearGradient>
+  </defs>
+</svg>

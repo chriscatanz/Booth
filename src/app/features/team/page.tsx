@@ -59,7 +59,7 @@ export default function TeamFeaturePage() {
         },
       ]}
       ctaText="Start Free Trial"
-      screenshot="/screenshots/team.png"
+      screenshot="/screenshots/team.svg"
       onGetStarted={() => router.push('/')}
     />
   );

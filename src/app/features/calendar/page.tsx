@@ -58,7 +58,7 @@ export default function CalendarFeaturePage() {
           icon: Map,
         },
       ]}
-      screenshot="/screenshots/calendar.png"
+      screenshot="/screenshots/calendar.svg"
       onGetStarted={() => router.push('/')}
     />
   );

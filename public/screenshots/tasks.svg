@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" fill="none">
+  <!-- Background -->
+  <rect width="1200" height="675" fill="#FAFAFA"/>
+  
+  <!-- Header Bar -->
+  <rect width="1200" height="64" fill="white"/>
+  <rect y="64" width="1200" height="1" fill="#E5E7EB"/>
+  
+  <!-- Logo -->
+  <rect x="24" y="16" width="32" height="32" rx="8" fill="url(#purpleGrad)"/>
+  <text x="40" y="38" fill="white" font-family="system-ui" font-size="14" font-weight="bold" text-anchor="middle">B</text>
+  
+  <!-- Main Content -->
+  <rect x="24" y="88" width="1152" height="563" rx="12" fill="white" stroke="#E5E7EB"/>
+  
+  <!-- Title -->
+  <rect x="56" y="116" width="20" height="20" rx="4" stroke="#8B5CF6" stroke-width="2" fill="none"/>
+  <text x="88" y="134" fill="#1F2937" font-family="system-ui" font-size="24" font-weight="bold">Task Board</text>
+  <text x="88" y="156" fill="#6B7280" font-family="system-ui" font-size="14">12 tasks · 4 completed</text>
+  
+  <!-- New Task Button -->
+  <rect x="1010" y="112" width="100" height="36" rx="8" fill="#8B5CF6"/>
+  <text x="1060" y="135" fill="white" font-family="system-ui" font-size="13" text-anchor="middle">+ New Task</text>
+  
+  <!-- Filters -->
+  <rect x="48" y="180" width="120" height="32" rx="6" fill="#F3F4F6"/>
+  <text x="108" y="201" fill="#6B7280" font-family="system-ui" font-size="13" text-anchor="middle">All Shows ▾</text>
+  <rect x="180" y="180" width="140" height="32" rx="6" fill="#F3F4F6"/>
+  <text x="250" y="201" fill="#6B7280" font-family="system-ui" font-size="13" text-anchor="middle">All Assignees ▾</text>
+  
+  <!-- Kanban Columns -->
+  <!-- To Do -->
+  <rect x="48" y="230" width="360" height="400" rx="12" fill="#F9FAFB"/>
+  <g>
+    <text x="72" y="262" fill="#6B7280" font-family="system-ui" font-size="14" font-weight="600">To Do</text>
+    <rect x="110" y="248" width="24" height="20" rx="10" fill="#E5E7EB"/>
+    <text x="122" y="262" fill="#6B7280" font-family="system-ui" font-size="12" text-anchor="middle">5</text>
+  </g>
+  
+  <!-- Task Cards in To Do -->
+  <rect x="64" y="284" width="328" height="90" rx="8" fill="white" stroke="#E5E7EB"/>
+  <text x="84" y="310" fill="#1F2937" font-family="system-ui" font-size="14" font-weight="500">Ship booth materials</text>
+  <rect x="84" y="320" width="80" height="20" rx="4" fill="#FEE2E2"/>
+  <text x="124" y="334" fill="#DC2626" font-family="system-ui" font-size="10" text-anchor="middle">High Priority</text>
+  <text x="84" y="358" fill="#6B7280" font-family="system-ui" font-size="12">ICBA Live 2026 • Due Feb 16</text>
+  
+  <rect x="64" y="384" width="328" height="90" rx="8" fill="white" stroke="#E5E7EB"/>
+  <text x="84" y="410" fill="#1F2937" font-family="system-ui" font-size="14" font-weight="500">Book team flights</text>
+  <rect x="84" y="420" width="60" height="20" rx="4" fill="#FEF3C7"/>
+  <text x="114" y="434" fill="#CA8A04" font-family="system-ui" font-size="10" text-anchor="middle">Medium</text>
+  <text x="84" y="458" fill="#6B7280" font-family="system-ui" font-size="12">Tech Expo • Due Feb 28</text>
+  
+  <rect x="64" y="484" width="328" height="70" rx="8" fill="white" stroke="#E5E7EB"/>
+  <text x="84" y="510" fill="#1F2937" font-family="system-ui" font-size="14" font-weight="500">Update collateral inventory</text>
+  <text x="84" y="538" fill="#6B7280" font-family="system-ui" font-size="12">General • Due Mar 1</text>
+  
+  <!-- In Progress -->
+  <rect x="420" y="230" width="360" height="400" rx="12" fill="#EFF6FF"/>
+  <g>
+    <text x="444" y="262" fill="#3B82F6" font-family="system-ui" font-size="14" font-weight="600">In Progress</text>
+    <rect x="530" y="248" width="24" height="20" rx="10" fill="#BFDBFE"/>
+    <text x="542" y="262" fill="#3B82F6" font-family="system-ui" font-size="12" text-anchor="middle">3</text>
+  </g>
+  
+  <rect x="436" y="284" width="328" height="90" rx="8" fill="white" stroke="#BFDBFE"/>
+  <text x="456" y="310" fill="#1F2937" font-family="system-ui" font-size="14" font-weight="500">Finalize hotel reservations</text>
+  <text x="456" y="334" fill="#6B7280" font-family="system-ui" font-size="12">ICBA Live 2026</text>
+  <circle cx="760" cy="356" r="12" fill="#8B5CF6"/>
+  <text x="760" y="360" fill="white" font-family="system-ui" font-size="9" text-anchor="middle">CM</text>
+  
+  <rect x="436" y="384" width="328" height="90" rx="8" fill="white" stroke="#BFDBFE"/>
+  <text x="456" y="410" fill="#1F2937" font-family="system-ui" font-size="14" font-weight="500">Design new banner graphics</text>
+  <text x="456" y="434" fill="#6B7280" font-family="system-ui" font-size="12">All 2026 Shows</text>
+  <circle cx="760" cy="456" r="12" fill="#06B6D4"/>
+  <text x="760" y="460" fill="white" font-family="system-ui" font-size="9" text-anchor="middle">SJ</text>
+  
+  <!-- Done -->
+  <rect x="792" y="230" width="360" height="400" rx="12" fill="#F0FDF4"/>
+  <g>
+    <text x="816" y="262" fill="#16A34A" font-family="system-ui" font-size="14" font-weight="600">Done</text>
+    <rect x="858" y="248" width="24" height="20" rx="10" fill="#BBF7D0"/>
+    <text x="870" y="262" fill="#16A34A" font-family="system-ui" font-size="12" text-anchor="middle">4</text>
+  </g>
+  
+  <rect x="808" y="284" width="328" height="70" rx="8" fill="white" stroke="#BBF7D0"/>
+  <text x="828" y="310" fill="#9CA3AF" font-family="system-ui" font-size="14" font-weight="500" text-decoration="line-through">Register for ICBA Live</text>
+  <text x="828" y="334" fill="#9CA3AF" font-family="system-ui" font-size="12">Completed Feb 1</text>
+  
+  <rect x="808" y="364" width="328" height="70" rx="8" fill="white" stroke="#BBF7D0"/>
+  <text x="828" y="390" fill="#9CA3AF" font-family="system-ui" font-size="14" font-weight="500" text-decoration="line-through">Submit booth artwork</text>
+  <text x="828" y="414" fill="#9CA3AF" font-family="system-ui" font-size="12">Completed Feb 5</text>
+  
+  <rect x="808" y="444" width="328" height="70" rx="8" fill="white" stroke="#BBF7D0"/>
+  <text x="828" y="470" fill="#9CA3AF" font-family="system-ui" font-size="14" font-weight="500" text-decoration="line-through">Order new business cards</text>
+  <text x="828" y="494" fill="#9CA3AF" font-family="system-ui" font-size="12">Completed Feb 10</text>
+  
+  <defs>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6"/>
+      <stop offset="100%" style="stop-color:#7C3AED"/>
+    </linearGradient>
+  </defs>
+</svg>

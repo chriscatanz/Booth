@@ -58,7 +58,7 @@ export default function AssetsFeaturePage() {
           icon: Archive,
         },
       ]}
-      screenshot="/screenshots/assets.png"
+      screenshot="/screenshots/assets.svg"
       onGetStarted={() => router.push('/')}
     />
   );

@@ -59,7 +59,7 @@ export default function LogisticsFeaturePage() {
         },
       ]}
       ctaText="Start Free Trial"
-      screenshot="/screenshots/dashboard.png"
+      screenshot="/screenshots/dashboard.svg"
       onGetStarted={() => router.push('/')}
     />
   );

@@ -84,7 +84,7 @@ export default function NotificationsPage() {
       benefits={benefits}
       capabilities={capabilities}
       ctaText="Start Free Trial"
-      screenshot="/screenshots/dashboard.png"
+      screenshot="/screenshots/dashboard.svg"
       onGetStarted={() => router.push('/signup')}
     />
   );

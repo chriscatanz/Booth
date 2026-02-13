@@ -85,7 +85,7 @@ export default function BoothModePage() {
       benefits={benefits}
       capabilities={capabilities}
       ctaText="Start Free Trial"
-      screenshot="/screenshots/detail.png"
+      screenshot="/screenshots/detail.svg"
       onGetStarted={() => router.push('/signup')}
     />
   );

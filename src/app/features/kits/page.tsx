@@ -59,7 +59,7 @@ export default function KitsFeaturePage() {
         },
       ]}
       ctaText="Start Managing Kits"
-      screenshot="/screenshots/kits.png"
+      screenshot="/screenshots/kits.svg"
       onGetStarted={() => router.push('/')}
     />
   );

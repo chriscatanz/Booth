@@ -59,7 +59,7 @@ export default function ImportExportFeaturePage() {
         },
       ]}
       ctaText="Start Free Trial"
-      screenshot="/screenshots/quicklook.png"
+      screenshot="/screenshots/quicklook.svg"
       onGetStarted={() => router.push('/')}
     />
   );
