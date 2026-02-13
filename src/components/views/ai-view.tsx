@@ -617,13 +617,13 @@ function DocumentsTab() {
         name: extractedData.name || `New Show from ${fileName}`,
       };
 
-      // Show Info section
+      // Show Info section (matches UI: name, dates, location, eventType, managementCompany)
       if (selectedSections.has('showInfo')) {
         if (extractedData.startDate) newShowData.start_date = extractedData.startDate;
         if (extractedData.endDate) newShowData.end_date = extractedData.endDate;
         if (extractedData.location) newShowData.location = extractedData.location;
         if (extractedData.eventType) newShowData.event_type = extractedData.eventType;
-        if (extractedData.attendeesIncluded) newShowData.attendees_included = extractedData.attendeesIncluded;
+        if (extractedData.managementCompany) newShowData.management_company = extractedData.managementCompany;
       }
       
       // Venue section
@@ -632,10 +632,12 @@ function DocumentsTab() {
         if (extractedData.venueAddress) newShowData.venue_address = extractedData.venueAddress;
       }
       
-      // Booth section
+      // Booth section (matches UI: boothNumber, boothSize, cost, attendeesIncluded)
       if (selectedSections.has('booth')) {
         if (extractedData.boothNumber) newShowData.booth_number = extractedData.boothNumber;
         if (extractedData.boothSize) newShowData.booth_size = extractedData.boothSize;
+        if (extractedData.cost) newShowData.cost = extractedData.cost;
+        if (extractedData.attendeesIncluded) newShowData.attendees_included = extractedData.attendeesIncluded;
         if (extractedData.leadCaptureSystem) newShowData.lead_capture_system = extractedData.leadCaptureSystem;
         if (extractedData.virtualPlatform) newShowData.virtual_platform = extractedData.virtualPlatform;
         if (extractedData.virtualPlatformUrl) newShowData.virtual_platform_url = extractedData.virtualPlatformUrl;
@@ -650,9 +652,8 @@ function DocumentsTab() {
         if (extractedData.moveOutTime) newShowData.move_out_time = extractedData.moveOutTime;
       }
       
-      // Costs section
+      // Costs section (matches UI: electrical, labor, internet, drayage - NOT main cost)
       if (selectedSections.has('costs')) {
-        if (extractedData.cost) newShowData.cost = extractedData.cost;
         if (extractedData.electricalCost) newShowData.electrical_cost = extractedData.electricalCost;
         if (extractedData.laborCost) newShowData.labor_cost = extractedData.laborCost;
         if (extractedData.internetCost) newShowData.internet_cost = extractedData.internetCost;
@@ -683,12 +684,11 @@ function DocumentsTab() {
         if (extractedData.shipToWarehouse !== null) newShowData.ship_to_warehouse = extractedData.shipToWarehouse;
       }
       
-      // Contact section
+      // Contact section (NOT managementCompany - that's in showInfo per UI)
       if (selectedSections.has('contact')) {
         if (extractedData.showContactName) newShowData.show_contact_name = extractedData.showContactName;
         if (extractedData.showContactEmail) newShowData.show_contact_email = extractedData.showContactEmail;
         if (extractedData.showContactPhone) newShowData.show_contact_phone = extractedData.showContactPhone;
-        if (extractedData.managementCompany) newShowData.management_company = extractedData.managementCompany;
       }
       
       // Links section
@@ -755,14 +755,14 @@ function DocumentsTab() {
       // Use snake_case for database columns
       const updates: Record<string, unknown> = {};
       
-      // Show Info section
+      // Show Info section (matches UI: name, dates, location, eventType, managementCompany)
       if (selectedSections.has('showInfo')) {
         if (extractedData.name) updates.name = extractedData.name;
         if (extractedData.startDate) updates.start_date = extractedData.startDate;
         if (extractedData.endDate) updates.end_date = extractedData.endDate;
         if (extractedData.location) updates.location = extractedData.location;
         if (extractedData.eventType) updates.event_type = extractedData.eventType;
-        if (extractedData.attendeesIncluded) updates.attendees_included = extractedData.attendeesIncluded;
+        if (extractedData.managementCompany) updates.management_company = extractedData.managementCompany;
       }
       
       // Venue section
@@ -771,10 +771,12 @@ function DocumentsTab() {
         if (extractedData.venueAddress) updates.venue_address = extractedData.venueAddress;
       }
       
-      // Booth section
+      // Booth section (matches UI: boothNumber, boothSize, cost, attendeesIncluded)
       if (selectedSections.has('booth')) {
         if (extractedData.boothNumber) updates.booth_number = extractedData.boothNumber;
         if (extractedData.boothSize) updates.booth_size = extractedData.boothSize;
+        if (extractedData.cost) updates.cost = extractedData.cost;
+        if (extractedData.attendeesIncluded) updates.attendees_included = extractedData.attendeesIncluded;
         if (extractedData.leadCaptureSystem) updates.lead_capture_system = extractedData.leadCaptureSystem;
         if (extractedData.virtualPlatform) updates.virtual_platform = extractedData.virtualPlatform;
         if (extractedData.virtualPlatformUrl) updates.virtual_platform_url = extractedData.virtualPlatformUrl;
@@ -789,9 +791,8 @@ function DocumentsTab() {
         if (extractedData.moveOutTime) updates.move_out_time = extractedData.moveOutTime;
       }
       
-      // Costs section
+      // Costs section (matches UI: electrical, labor, internet, drayage - NOT main cost)
       if (selectedSections.has('costs')) {
-        if (extractedData.cost) updates.cost = extractedData.cost;
         if (extractedData.electricalCost) updates.electrical_cost = extractedData.electricalCost;
         if (extractedData.laborCost) updates.labor_cost = extractedData.laborCost;
         if (extractedData.internetCost) updates.internet_cost = extractedData.internetCost;
@@ -825,12 +826,11 @@ function DocumentsTab() {
         if (extractedData.shipToWarehouse !== null) updates.ship_to_warehouse = extractedData.shipToWarehouse;
       }
       
-      // Contact section
+      // Contact section (NOT managementCompany - that's in showInfo per UI)
       if (selectedSections.has('contact')) {
         if (extractedData.showContactName) updates.show_contact_name = extractedData.showContactName;
         if (extractedData.showContactEmail) updates.show_contact_email = extractedData.showContactEmail;
         if (extractedData.showContactPhone) updates.show_contact_phone = extractedData.showContactPhone;
-        if (extractedData.managementCompany) updates.management_company = extractedData.managementCompany;
       }
       
       // Links section
