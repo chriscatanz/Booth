@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { TradeShow } from '@/types';
 import { format, differenceInDays, isWithinInterval, parseISO } from 'date-fns';
-import { createClient } from '@/lib/supabase/client';
+import { supabase } from '@/lib/supabase';
 
 interface TeamMember {
   id: string;
@@ -39,7 +39,7 @@ export function BoothModeView({ show, onExit }: BoothModeViewProps) {
   // Fetch team members for this show
   useEffect(() => {
     async function loadTeamMembers() {
-      const supabase = createClient();
+      if (!supabase) return;
       const { data, error } = await supabase
         .from('tradeshow_team_members')
         .select(`
