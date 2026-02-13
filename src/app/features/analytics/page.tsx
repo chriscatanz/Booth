@@ -58,6 +58,7 @@ export default function AnalyticsFeaturePage() {
           icon: Award,
         },
       ]}
+      screenshot="/screenshots/budget.png"
       onGetStarted={() => router.push('/')}
     />
   );

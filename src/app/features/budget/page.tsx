@@ -58,6 +58,7 @@ export default function BudgetFeaturePage() {
           icon: FileSpreadsheet,
         },
       ]}
+      screenshot="/screenshots/budget.png"
       onGetStarted={() => router.push('/')}
     />
   );

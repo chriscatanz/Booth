@@ -54,6 +54,7 @@ export default function TemplatesFeaturePage() {
         },
       ]}
       ctaText="Start Free Trial"
+      screenshot="/screenshots/detail.png"
       onGetStarted={() => router.push('/')}
     />
   );

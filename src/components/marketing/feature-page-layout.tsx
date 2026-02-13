@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import Image from 'next/image';
 import { MarketingHeader } from './marketing-header';
 
 interface FeaturePageLayoutProps {
@@ -19,6 +20,7 @@ interface FeaturePageLayoutProps {
     description: string;
     icon: React.ElementType;
   }[];
+  screenshot?: string;
   ctaText?: string;
   onGetStarted: () => void;
 }
@@ -31,6 +33,7 @@ export function FeaturePageLayout({
   iconColor,
   benefits,
   capabilities,
+  screenshot,
   ctaText = 'Start Free Trial',
   onGetStarted,
 }: FeaturePageLayoutProps) {
@@ -65,6 +68,29 @@ export function FeaturePageLayout({
           </motion.div>
         </div>
       </section>
+
+      {/* Screenshot */}
+      {screenshot && (
+        <section className="py-8 px-4 sm:px-6">
+          <div className="max-w-5xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="rounded-2xl border border-border shadow-2xl overflow-hidden bg-surface"
+            >
+              <Image 
+                src={screenshot} 
+                alt={`${subtitle} screenshot`}
+                width={1200}
+                height={675}
+                className="w-full h-auto"
+                priority
+              />
+            </motion.div>
+          </div>
+        </section>
+      )}
 
       {/* Benefits */}
       <section className="py-12 px-4 sm:px-6 bg-bg-secondary">

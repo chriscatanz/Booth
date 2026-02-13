@@ -59,6 +59,7 @@ export default function AIFeaturePage() {
         },
       ]}
       ctaText="Start Free Trial"
+      screenshot="/screenshots/ai.png"
       onGetStarted={() => router.push('/')}
     />
   );

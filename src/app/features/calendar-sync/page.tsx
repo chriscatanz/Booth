@@ -84,6 +84,7 @@ export default function CalendarSyncPage() {
       benefits={benefits}
       capabilities={capabilities}
       ctaText="Start Free Trial"
+      screenshot="/screenshots/calendar.png"
       onGetStarted={() => router.push('/signup')}
     />
   );
