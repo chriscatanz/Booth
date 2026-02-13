@@ -85,12 +85,10 @@ export function BoothModeView({ show, onExit }: BoothModeViewProps) {
 
   const openUber = (address: string) => {
     const encoded = encodeURIComponent(address);
-    // Try native Uber app first, falls back to mobile web
-    window.location.href = `uber://?action=setPickup&dropoff[formatted_address]=${encoded}`;
-    // Fallback to web after a short delay if app doesn't open
-    setTimeout(() => {
-      window.open(`https://m.uber.com/ul/?action=setPickup&dropoff[formatted_address]=${encoded}`, '_blank');
-    }, 500);
+    // Use Uber universal link - works on both iOS and Android
+    // pickup=my_location uses current GPS, dropoff is the destination
+    const uberUrl = `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff%5Bformatted_address%5D=${encoded}`;
+    window.open(uberUrl, '_blank');
   };
 
   // Build full addresses
