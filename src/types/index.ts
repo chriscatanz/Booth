@@ -168,7 +168,10 @@ export interface AdditionalFile {
   fileType: string | null;
   uploadedAt: string | null;
   localId: string;
+  visibility: 'all' | 'editors' | 'admins'; // Who can view this document
 }
+
+export type DocumentVisibility = 'all' | 'editors' | 'admins';
 
 // New TradeShow defaults (mirrors createNewShow in ViewModel)
 export function createNewTradeShow(): TradeShow {

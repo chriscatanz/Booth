@@ -285,6 +285,7 @@ Return ONLY the HTML content, no markdown, no code fences.`;
           <ShowReadView 
             show={show}
             attendees={attendees}
+            files={additionalFiles}
             canEdit={canEdit}
             onEdit={() => setViewMode('edit')}
           />

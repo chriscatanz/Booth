@@ -2,8 +2,8 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, Loader2, Trash2, ExternalLink } from 'lucide-react';
-import { AdditionalFile } from '@/types';
+import { Upload, Loader2, Trash2, ExternalLink, Eye, Shield, Lock } from 'lucide-react';
+import { AdditionalFile, DocumentVisibility } from '@/types';
 import { cn } from '@/lib/utils';
 import * as api from '@/services/supabase-service';
 
@@ -14,10 +14,17 @@ interface FileUploadZoneProps {
   disabled?: boolean;
 }
 
+const visibilityOptions: { value: DocumentVisibility; label: string; icon: React.ReactNode; desc: string }[] = [
+  { value: 'all', label: 'Everyone', icon: <Eye size={14} />, desc: 'All team members' },
+  { value: 'editors', label: 'Editors+', icon: <Shield size={14} />, desc: 'Editors, admins, owners' },
+  { value: 'admins', label: 'Admins Only', icon: <Lock size={14} />, desc: 'Admins and owners only' },
+];
+
 export function FileUploadZone({ tradeshowId, files, onFilesChange, disabled }: FileUploadZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
+  const [uploadVisibility, setUploadVisibility] = useState<DocumentVisibility>('all');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFiles = useCallback(async (fileList: FileList | null) => {
@@ -33,7 +40,7 @@ export function FileUploadZone({ tradeshowId, files, onFilesChange, disabled }: 
         // Upload to storage
         const publicUrl = await api.uploadFile(file);
         
-        // Create record in database
+        // Create record in database with visibility
         await api.createAdditionalFile({
           dbId: null,
           tradeshowId,
@@ -42,6 +49,7 @@ export function FileUploadZone({ tradeshowId, files, onFilesChange, disabled }: 
           fileType: file.type || 'application/octet-stream',
           uploadedAt: null,
           localId: crypto.randomUUID(),
+          visibility: uploadVisibility,
         });
       } catch (err) {
         console.error('Upload failed:', err);
@@ -51,7 +59,7 @@ export function FileUploadZone({ tradeshowId, files, onFilesChange, disabled }: 
     setIsUploading(false);
     setUploadProgress(null);
     onFilesChange();
-  }, [tradeshowId, disabled, onFilesChange]);
+  }, [tradeshowId, disabled, onFilesChange, uploadVisibility]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -96,6 +104,31 @@ export function FileUploadZone({ tradeshowId, files, onFilesChange, disabled }: 
 
   return (
     <div className="space-y-3">
+      {/* Visibility selector */}
+      {!disabled && (
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-text-tertiary">Visibility:</span>
+          <div className="flex gap-1">
+            {visibilityOptions.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setUploadVisibility(opt.value)}
+                className={cn(
+                  'flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors',
+                  uploadVisibility === opt.value
+                    ? 'bg-brand-purple text-white'
+                    : 'bg-bg-tertiary text-text-secondary hover:bg-bg-secondary'
+                )}
+                title={opt.desc}
+              >
+                {opt.icon}
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Upload zone */}
       <div
         onDrop={handleDrop}
@@ -155,7 +188,19 @@ export function FileUploadZone({ tradeshowId, files, onFilesChange, disabled }: 
               >
                 <span className="text-lg">{getFileIcon(file.fileType)}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-text-primary truncate">{file.fileName}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium text-text-primary truncate">{file.fileName}</p>
+                    {file.visibility && file.visibility !== 'all' && (
+                      <span className={cn(
+                        'flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium',
+                        file.visibility === 'admins' && 'bg-warning/20 text-warning',
+                        file.visibility === 'editors' && 'bg-brand-cyan/20 text-brand-cyan',
+                      )}>
+                        {file.visibility === 'admins' ? <Lock size={10} /> : <Shield size={10} />}
+                        {file.visibility === 'admins' ? 'Admin' : 'Editor+'}
+                      </span>
+                    )}
+                  </div>
                   {file.uploadedAt && (
                     <p className="text-xs text-text-tertiary">
                       {new Date(file.uploadedAt).toLocaleDateString()}

@@ -1,6 +1,6 @@
 'use client';
 
-import { TradeShow, Attendee } from '@/types';
+import { TradeShow, Attendee, AdditionalFile } from '@/types';
 import { 
   totalEstimatedCost, totalServicesCost, estimatedHotelCost,
   parseJsonStringArray 
@@ -21,11 +21,21 @@ import { useToastStore } from '@/store/toast-store';
 interface ShowReadViewProps {
   show: TradeShow;
   attendees: Attendee[];
+  files?: AdditionalFile[];
   onEdit?: () => void;
   canEdit?: boolean;
 }
 
-export function ShowReadView({ show, attendees, onEdit, canEdit }: ShowReadViewProps) {
+const getFileIcon = (fileType: string | null) => {
+  if (!fileType) return '📄';
+  if (fileType.startsWith('image/')) return '🖼️';
+  if (fileType.includes('pdf')) return '📕';
+  if (fileType.includes('word') || fileType.includes('document')) return '📝';
+  if (fileType.includes('sheet') || fileType.includes('excel')) return '📊';
+  return '📄';
+};
+
+export function ShowReadView({ show, attendees, files = [], onEdit, canEdit }: ShowReadViewProps) {
   const toast = useToastStore();
   
   // Computed values
@@ -443,6 +453,35 @@ export function ShowReadView({ show, attendees, onEdit, canEdit }: ShowReadViewP
             className="text-sm text-text-secondary whitespace-pre-wrap [&_strong]:font-semibold [&_strong]:text-text-primary [&_ul]:list-disc [&_ul]:ml-4 [&_li]:mb-1 [&_p]:mb-2"
             dangerouslySetInnerHTML={{ __html: show.generalNotes }}
           />
+        </Card>
+      )}
+
+      {/* Documents */}
+      {files.length > 0 && (
+        <Card>
+          <CardHeader icon={<FileText size={18} />} title={`Documents (${files.length})`} />
+          <div className="space-y-2">
+            {files.map((file) => (
+              <a
+                key={file.localId}
+                href={file.filePath}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 rounded-lg bg-bg-tertiary hover:bg-bg-secondary transition-colors"
+              >
+                <span className="text-xl">{getFileIcon(file.fileType)}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-text-primary truncate">{file.fileName}</p>
+                  {file.uploadedAt && (
+                    <p className="text-xs text-text-tertiary">
+                      {new Date(file.uploadedAt).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+                <ExternalLink size={14} className="text-text-tertiary" />
+              </a>
+            ))}
+          </div>
         </Card>
       )}
 

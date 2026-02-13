@@ -261,6 +261,7 @@ function mapAdditionalFileFromDB(row: Record<string, unknown>): AdditionalFile {
     fileType: row.file_type as string | null,
     uploadedAt: row.uploaded_at as string | null,
     localId: crypto.randomUUID(),
+    visibility: (row.visibility as 'all' | 'editors' | 'admins') || 'all',
   };
 }
 
@@ -475,6 +476,7 @@ export async function createAdditionalFile(file: AdditionalFile): Promise<Additi
     file_name: file.fileName,
     file_path: file.filePath,
     file_type: file.fileType,
+    visibility: file.visibility || 'all',
   };
   
   // Add org/user context if available
