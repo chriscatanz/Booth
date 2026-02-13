@@ -5,8 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { useAuthStore } from '@/store/auth-store';
 import { 
-  LogOut, Building2, ChevronDown, Settings, 
-  Check, Download,
+  LogOut, Building2, ChevronDown, Settings, Check,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -179,14 +178,6 @@ export function UserMenu({ onOpenOrgSettings }: UserMenuProps) {
                   Settings
                 </button>
               )}
-              <a
-                href="/download"
-                onClick={() => setIsOpen(false)}
-                className="w-full flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-bg-tertiary text-text-secondary text-sm"
-              >
-                <Download size={14} />
-                Download App
-              </a>
               <button
                 onClick={() => { signOut(); setIsOpen(false); }}
                 className="w-full flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-error/10 text-error text-sm"
