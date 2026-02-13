@@ -31,7 +31,7 @@ export function ShowReadView({ show, attendees, onEdit, canEdit }: ShowReadViewP
   // Computed values
   const totalCost = totalEstimatedCost(show);
   const servicesCost = totalServicesCost(show);
-  const hotelCost = estimatedHotelCost(show, attendees.length);
+  const hotelCost = estimatedHotelCost(show);
   const graphicsToShip = parseJsonStringArray(show.graphicsToShip);
   const packingItems = parseJsonStringArray(show.packingListItems);
   
