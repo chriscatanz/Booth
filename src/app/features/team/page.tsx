@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FeaturePageLayout } from '@/components/marketing/feature-page-layout';
 import { 
   Users, Shield, Activity, Bell, 
-  UserPlus, Eye, Lock
+  UserPlus, Eye, Lock, FileText, BookOpen
 } from 'lucide-react';
 
 export default function TeamFeaturePage() {
@@ -21,9 +21,9 @@ export default function TeamFeaturePage() {
       benefits={[
         "Invite team members with a simple email link",
         "Role-based permissions: owners, admins, editors, viewers",
-        "Everyone sees the same data, always up to date",
+        "Control document visibility: hide payment receipts from viewers",
+        "Clean read view for stakeholders who just need info at a glance",
         "Activity feed shows who changed what and when",
-        "No more emailing spreadsheets back and forth",
         "Onboard new team members in minutes, not days",
       ]}
       capabilities={[
@@ -34,8 +34,18 @@ export default function TeamFeaturePage() {
         },
         {
           title: 'Role-Based Access',
-          description: 'Owners, admins, editors, and viewers. Give people exactly the access they need.',
+          description: 'Owners, admins, editors, and viewers. Give people exactly the access they need. Control who sees budget info, contacts, and documents.',
           icon: Shield,
+        },
+        {
+          title: 'Document Visibility',
+          description: 'Upload documents with visibility controls. Mark payment receipts as admin-only while keeping venue maps visible to everyone.',
+          icon: FileText,
+        },
+        {
+          title: 'Read View',
+          description: 'A clean, card-based view for consuming show info. Perfect for stakeholders who need to check details without the complexity of edit mode.',
+          icon: BookOpen,
         },
         {
           title: 'Activity Feed',
@@ -43,21 +53,12 @@ export default function TeamFeaturePage() {
           icon: Activity,
         },
         {
-          title: 'Real-Time Updates',
-          description: 'Changes sync instantly. Everyone always sees the latest information.',
-          icon: Bell,
-        },
-        {
-          title: 'Viewer Mode',
-          description: 'Give stakeholders read-only access to check status without risking edits.',
-          icon: Eye,
-        },
-        {
           title: 'Secure by Default',
-          description: 'Your data is encrypted and access is strictly controlled by your team settings.',
+          description: 'Your data is encrypted and access is strictly controlled by your team settings. PII fields are encrypted at rest.',
           icon: Lock,
         },
       ]}
+      ctaText="Start Free Trial"
       onGetStarted={() => router.push('/')}
     />
   );

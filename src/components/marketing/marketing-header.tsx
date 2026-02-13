@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Menu, X, Sparkles, FileSpreadsheet, Layers, Calendar, DollarSign, Users, Truck, BarChart3, RefreshCw, Bell, Box } from 'lucide-react';
+import { ChevronDown, Menu, X, Sparkles, FileSpreadsheet, Layers, Calendar, DollarSign, Users, Truck, BarChart3, RefreshCw, Bell, Box, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface MarketingHeaderProps {
@@ -15,12 +15,13 @@ interface MarketingHeaderProps {
 const NAV_FEATURES = [
   { slug: 'calendar', icon: Calendar, title: 'Trade Show Calendar', color: '#0969DA', description: 'Visual schedule & deadlines' },
   { slug: 'calendar-sync', icon: RefreshCw, title: 'Calendar Sync', color: '#06B6D4', description: 'Google, Outlook & Apple' },
+  { slug: 'booth-mode', icon: Smartphone, title: 'Booth Mode', color: '#06B6D4', description: 'Show-day mobile command center' },
   { slug: 'budget', icon: DollarSign, title: 'Budget Management', color: '#1A7F37', description: 'Track every dollar' },
-  { slug: 'team', icon: Users, title: 'Team Collaboration', color: '#8250DF', description: 'Collaborate with roles' },
-  { slug: 'logistics', icon: Truck, title: 'Shipping & Logistics', color: '#BF8700', description: 'Shipping timeline & packing' },
+  { slug: 'team', icon: Users, title: 'Team Collaboration', color: '#8250DF', description: 'Roles & document visibility' },
+  { slug: 'logistics', icon: Truck, title: 'Shipping & Logistics', color: '#BF8700', description: 'Live tracking & deadlines' },
   { slug: 'kits', icon: Box, title: 'Booth Kits', color: '#CF222E', description: 'Inventory & auto-assign' },
   { slug: 'analytics', icon: BarChart3, title: 'ROI & Analytics', color: '#0969DA', description: 'ROI & performance' },
-  { slug: 'ai', icon: Sparkles, title: 'AI Assistant', color: '#8B5CF6', description: 'One Click Show & chat' },
+  { slug: 'ai', icon: Sparkles, title: 'AI Assistant', color: '#8B5CF6', description: 'Smart extraction & chat' },
   { slug: 'notifications', icon: Bell, title: 'Notifications', color: '#F59E0B', description: 'Email & in-app alerts' },
   { slug: 'import-export', icon: FileSpreadsheet, title: 'Import & Export', color: '#059669', description: 'CSV import & export' },
   { slug: 'templates', icon: Layers, title: 'Show Templates', color: '#EA580C', description: 'Reusable show setups' },

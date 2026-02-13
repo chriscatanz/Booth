@@ -9,7 +9,7 @@ import { MarketingHeader } from '@/components/marketing';
 import { 
   Calendar, DollarSign, Users, BarChart3, 
   Truck, Package, ArrowRight,
-  Sparkles, FileSpreadsheet, Layers
+  Sparkles, FileSpreadsheet, Layers, Smartphone
 } from 'lucide-react';
 
 const FEATURES = [
@@ -35,15 +35,23 @@ const FEATURES = [
     color: '#8250DF',
     title: 'Team Collaboration',
     description: 'Get your whole team on the same page with shared access and roles.',
-    highlights: ['Role-based access', 'Activity feed', 'Real-time updates'],
+    highlights: ['Role-based access', 'Document visibility', 'Read view'],
+  },
+  {
+    slug: 'booth-mode',
+    icon: Smartphone,
+    color: '#06B6D4',
+    title: 'Booth Mode',
+    description: 'A focused, mobile-first interface for the trade show floor.',
+    highlights: ['Show-day command center', 'One-tap Uber', 'Team contacts'],
   },
   {
     slug: 'logistics',
     icon: Truck,
     color: '#BF8700',
     title: 'Shipping & Logistics',
-    description: 'Never miss a shipping deadline or show up without your materials.',
-    highlights: ['Shipping timeline', 'Packing lists', 'Tracking numbers'],
+    description: 'Track shipments in real-time and never miss a deadline.',
+    highlights: ['Live tracking', 'Deadline alerts', 'Return shipping'],
   },
   {
     slug: 'assets',
@@ -66,8 +74,8 @@ const FEATURES = [
     icon: Sparkles,
     color: '#8B5CF6',
     title: 'AI Assistant',
-    description: 'Generate content, extract data from documents, and chat about your shows.',
-    highlights: ['Content generation', 'Document extraction', 'Show chat'],
+    description: 'Generate content, extract 40+ fields from documents, and chat about your shows.',
+    highlights: ['Content generation', 'Smart extraction', 'Selective import'],
   },
   {
     slug: 'import-export',
