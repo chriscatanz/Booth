@@ -429,7 +429,7 @@ export function ShowReadView({ show, attendees, onEdit, canEdit }: ShowReadViewP
         <Card>
           <CardHeader icon={<Calendar size={18} />} title="Agenda" />
           <div 
-            className="prose prose-sm max-w-none text-text-secondary whitespace-pre-wrap"
+            className="text-sm text-text-secondary whitespace-pre-wrap [&_h3]:font-semibold [&_h3]:text-text-primary [&_h3]:mt-4 [&_h3]:mb-2 [&_h4]:font-medium [&_h4]:text-text-primary [&_h4]:mt-3 [&_h4]:mb-1 [&_ul]:list-disc [&_ul]:ml-4 [&_li]:mb-1 [&_p]:mb-2"
             dangerouslySetInnerHTML={{ __html: show.agendaContent }}
           />
         </Card>
@@ -440,7 +440,7 @@ export function ShowReadView({ show, attendees, onEdit, canEdit }: ShowReadViewP
         <Card>
           <CardHeader icon={<FileText size={18} />} title="Notes" />
           <div 
-            className="prose prose-sm max-w-none text-text-secondary whitespace-pre-wrap"
+            className="text-sm text-text-secondary whitespace-pre-wrap [&_strong]:font-semibold [&_strong]:text-text-primary [&_ul]:list-disc [&_ul]:ml-4 [&_li]:mb-1 [&_p]:mb-2"
             dangerouslySetInnerHTML={{ __html: show.generalNotes }}
           />
         </Card>
