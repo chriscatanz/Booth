@@ -329,7 +329,7 @@ export function ShowReadView({ show, attendees, onEdit, canEdit }: ShowReadViewP
           <CardHeader icon={<Users size={18} />} title={`Team (${attendees.length})`} />
           <div className="space-y-3">
             {attendees.map((attendee) => (
-              <div key={attendee.id} className="flex items-center gap-3">
+              <div key={attendee.localId} className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-brand-purple/20 flex items-center justify-center text-brand-purple text-sm font-medium">
                   {attendee.name?.[0]?.toUpperCase() || '?'}
                 </div>
