@@ -226,14 +226,22 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
               </Button>
             </div>
 
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-text-secondary hover:text-text-primary transition-colors"
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+            {/* Mobile - Sign In + Menu */}
+            <div className="flex md:hidden items-center gap-2">
+              <button 
+                onClick={onSignIn}
+                className="px-3 py-2 text-sm font-semibold text-text-secondary hover:text-text-primary transition-colors"
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 text-text-secondary hover:text-text-primary transition-colors"
+                aria-label="Toggle menu"
+              >
+                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
           </div>
 
           {/* Mobile Menu */}
