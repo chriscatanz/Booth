@@ -611,92 +611,102 @@ function DocumentsTab() {
     setError(null);
 
     try {
-      // Build the new show data from all extracted fields
+      // Build the new show data from selected sections only
       const newShowData: Record<string, unknown> = {
         organization_id: organization.id,
         name: extractedData.name || `New Show from ${fileName}`,
       };
 
-      // Basic Info
-      if (extractedData.startDate) newShowData.start_date = extractedData.startDate;
-      if (extractedData.endDate) newShowData.end_date = extractedData.endDate;
-      if (extractedData.location) newShowData.location = extractedData.location;
-      if (extractedData.boothNumber) newShowData.booth_number = extractedData.boothNumber;
-      if (extractedData.boothSize) newShowData.booth_size = extractedData.boothSize;
-      if (extractedData.cost) newShowData.cost = extractedData.cost;
-      if (extractedData.attendeesIncluded) newShowData.attendees_included = extractedData.attendeesIncluded;
-      if (extractedData.managementCompany) newShowData.management_company = extractedData.managementCompany;
-      
-      // Event Type & Virtual
-      if (extractedData.eventType) newShowData.event_type = extractedData.eventType;
-      if (extractedData.virtualPlatform) newShowData.virtual_platform = extractedData.virtualPlatform;
-      if (extractedData.virtualPlatformUrl) newShowData.virtual_platform_url = extractedData.virtualPlatformUrl;
-      if (extractedData.virtualBoothUrl) newShowData.virtual_booth_url = extractedData.virtualBoothUrl;
-      
-      // Venue
-      if (extractedData.venueName) newShowData.venue_name = extractedData.venueName;
-      if (extractedData.venueAddress) newShowData.venue_address = extractedData.venueAddress;
-      
-      // Move-in/Move-out
-      if (extractedData.moveInDate) newShowData.move_in_date = extractedData.moveInDate;
-      if (extractedData.moveInTime) newShowData.move_in_time = extractedData.moveInTime;
-      if (extractedData.moveOutDate) newShowData.move_out_date = extractedData.moveOutDate;
-      if (extractedData.moveOutTime) newShowData.move_out_time = extractedData.moveOutTime;
-      
-      // Shipping & Logistics
-      if (extractedData.shippingDeadline) newShowData.shipping_cutoff = extractedData.shippingDeadline;
-      if (extractedData.shippingCutoff) newShowData.shipping_cutoff = extractedData.shippingCutoff;
-      if (extractedData.shippingInfo) newShowData.shipping_info = extractedData.shippingInfo;
-      if (extractedData.warehouseAddress) {
-        // Append warehouse address to shipping info
-        const existingInfo = newShowData.shipping_info || '';
-        newShowData.shipping_info = existingInfo 
-          ? `${existingInfo}\n\nAdvance Warehouse: ${extractedData.warehouseAddress}`
-          : `Advance Warehouse: ${extractedData.warehouseAddress}`;
+      // Show Info section
+      if (selectedSections.has('showInfo')) {
+        if (extractedData.startDate) newShowData.start_date = extractedData.startDate;
+        if (extractedData.endDate) newShowData.end_date = extractedData.endDate;
+        if (extractedData.location) newShowData.location = extractedData.location;
+        if (extractedData.eventType) newShowData.event_type = extractedData.eventType;
+        if (extractedData.attendeesIncluded) newShowData.attendees_included = extractedData.attendeesIncluded;
       }
-      if (extractedData.shipToSite !== null) newShowData.ship_to_site = extractedData.shipToSite;
-      if (extractedData.shipToWarehouse !== null) newShowData.ship_to_warehouse = extractedData.shipToWarehouse;
       
-      // Lead Capture
-      if (extractedData.leadCaptureSystem) newShowData.lead_capture_system = extractedData.leadCaptureSystem;
+      // Venue section
+      if (selectedSections.has('venue')) {
+        if (extractedData.venueName) newShowData.venue_name = extractedData.venueName;
+        if (extractedData.venueAddress) newShowData.venue_address = extractedData.venueAddress;
+      }
       
-      // Costs
-      if (extractedData.electricalCost) newShowData.electrical_cost = extractedData.electricalCost;
-      if (extractedData.laborCost) newShowData.labor_cost = extractedData.laborCost;
-      if (extractedData.internetCost) newShowData.internet_cost = extractedData.internetCost;
-      if (extractedData.standardServicesCost) newShowData.standard_services_cost = extractedData.standardServicesCost;
-      if (extractedData.utilitiesDetails) newShowData.utilities_details = extractedData.utilitiesDetails;
-      if (extractedData.laborDetails) newShowData.labor_details = extractedData.laborDetails;
+      // Booth section
+      if (selectedSections.has('booth')) {
+        if (extractedData.boothNumber) newShowData.booth_number = extractedData.boothNumber;
+        if (extractedData.boothSize) newShowData.booth_size = extractedData.boothSize;
+        if (extractedData.leadCaptureSystem) newShowData.lead_capture_system = extractedData.leadCaptureSystem;
+        if (extractedData.virtualPlatform) newShowData.virtual_platform = extractedData.virtualPlatform;
+        if (extractedData.virtualPlatformUrl) newShowData.virtual_platform_url = extractedData.virtualPlatformUrl;
+        if (extractedData.virtualBoothUrl) newShowData.virtual_booth_url = extractedData.virtualBoothUrl;
+      }
       
-      // Speaking & Sponsorship
-      if (extractedData.hasSpeakingEngagement !== null) newShowData.has_speaking_engagement = extractedData.hasSpeakingEngagement;
-      if (extractedData.speakingDetails) newShowData.speaking_details = extractedData.speakingDetails;
-      if (extractedData.sponsorshipDetails) newShowData.sponsorship_details = extractedData.sponsorshipDetails;
+      // Setup/Teardown section
+      if (selectedSections.has('setupTeardown')) {
+        if (extractedData.moveInDate) newShowData.move_in_date = extractedData.moveInDate;
+        if (extractedData.moveInTime) newShowData.move_in_time = extractedData.moveInTime;
+        if (extractedData.moveOutDate) newShowData.move_out_date = extractedData.moveOutDate;
+        if (extractedData.moveOutTime) newShowData.move_out_time = extractedData.moveOutTime;
+      }
       
-      // Hotel
-      if (extractedData.hotelName) newShowData.hotel_name = extractedData.hotelName;
-      if (extractedData.hotelAddress) newShowData.hotel_address = extractedData.hotelAddress;
-      if (extractedData.hotelCostPerNight) newShowData.hotel_cost_per_night = extractedData.hotelCostPerNight;
+      // Costs section
+      if (selectedSections.has('costs')) {
+        if (extractedData.cost) newShowData.cost = extractedData.cost;
+        if (extractedData.electricalCost) newShowData.electrical_cost = extractedData.electricalCost;
+        if (extractedData.laborCost) newShowData.labor_cost = extractedData.laborCost;
+        if (extractedData.internetCost) newShowData.internet_cost = extractedData.internetCost;
+        if (extractedData.standardServicesCost) newShowData.standard_services_cost = extractedData.standardServicesCost;
+        if (extractedData.utilitiesDetails) newShowData.utilities_details = extractedData.utilitiesDetails;
+        if (extractedData.laborDetails) newShowData.labor_details = extractedData.laborDetails;
+      }
       
-      // URLs & Portals
-      if (extractedData.showWebsite) newShowData.show_website = extractedData.showWebsite;
-      if (extractedData.showAgendaUrl) newShowData.show_agenda_url = extractedData.showAgendaUrl;
-      if (extractedData.eventPortalUrl) newShowData.event_portal_url = extractedData.eventPortalUrl;
+      // Hotel section
+      if (selectedSections.has('hotel')) {
+        if (extractedData.hotelName) newShowData.hotel_name = extractedData.hotelName;
+        if (extractedData.hotelAddress) newShowData.hotel_address = extractedData.hotelAddress;
+        if (extractedData.hotelCostPerNight) newShowData.hotel_cost_per_night = extractedData.hotelCostPerNight;
+      }
       
-      // Event App
-      if (extractedData.hasEventApp !== null) newShowData.has_event_app = extractedData.hasEventApp;
-      if (extractedData.eventAppNotes) newShowData.event_app_notes = extractedData.eventAppNotes;
+      // Shipping section
+      if (selectedSections.has('shipping')) {
+        if (extractedData.shippingDeadline) newShowData.shipping_cutoff = extractedData.shippingDeadline;
+        if (extractedData.shippingCutoff) newShowData.shipping_cutoff = extractedData.shippingCutoff;
+        if (extractedData.shippingInfo) newShowData.shipping_info = extractedData.shippingInfo;
+        if (extractedData.warehouseAddress) {
+          const existingInfo = newShowData.shipping_info || '';
+          newShowData.shipping_info = existingInfo 
+            ? `${existingInfo}\n\nAdvance Warehouse: ${extractedData.warehouseAddress}`
+            : `Advance Warehouse: ${extractedData.warehouseAddress}`;
+        }
+        if (extractedData.shipToSite !== null) newShowData.ship_to_site = extractedData.shipToSite;
+        if (extractedData.shipToWarehouse !== null) newShowData.ship_to_warehouse = extractedData.shipToWarehouse;
+      }
       
-      // Contacts
-      if (extractedData.showContactName) newShowData.show_contact_name = extractedData.showContactName;
-      if (extractedData.showContactEmail) newShowData.show_contact_email = extractedData.showContactEmail;
-      if (extractedData.showContactPhone) newShowData.show_contact_phone = extractedData.showContactPhone;
+      // Contact section
+      if (selectedSections.has('contact')) {
+        if (extractedData.showContactName) newShowData.show_contact_name = extractedData.showContactName;
+        if (extractedData.showContactEmail) newShowData.show_contact_email = extractedData.showContactEmail;
+        if (extractedData.showContactPhone) newShowData.show_contact_phone = extractedData.showContactPhone;
+        if (extractedData.managementCompany) newShowData.management_company = extractedData.managementCompany;
+      }
       
-      // Show Website
-      if (extractedData.showWebsite) newShowData.show_website = extractedData.showWebsite;
+      // Links section
+      if (selectedSections.has('links')) {
+        if (extractedData.showWebsite) newShowData.show_website = extractedData.showWebsite;
+        if (extractedData.showAgendaUrl) newShowData.show_agenda_url = extractedData.showAgendaUrl;
+        if (extractedData.eventPortalUrl) newShowData.event_portal_url = extractedData.eventPortalUrl;
+        if (extractedData.hasEventApp !== null) newShowData.has_event_app = extractedData.hasEventApp;
+        if (extractedData.eventAppNotes) newShowData.event_app_notes = extractedData.eventAppNotes;
+      }
       
-      // Notes
-      if (extractedData.notes) newShowData.general_notes = extractedData.notes;
+      // Notes section
+      if (selectedSections.has('notes')) {
+        if (extractedData.hasSpeakingEngagement !== null) newShowData.has_speaking_engagement = extractedData.hasSpeakingEngagement;
+        if (extractedData.speakingDetails) newShowData.speaking_details = extractedData.speakingDetails;
+        if (extractedData.sponsorshipDetails) newShowData.sponsorship_details = extractedData.sponsorshipDetails;
+        if (extractedData.notes) newShowData.general_notes = extractedData.notes;
+      }
 
       // Create the show
       const { data: newShow, error: createError } = await supabase
@@ -720,8 +730,8 @@ function DocumentsTab() {
       setSuccessMessage(`Created new show: ${newShow?.name || 'Unknown'}`);
       toast.success('New show created from document!');
 
-      // Auto-create tasks if there are deadlines
-      if (deadlineCount > 0 && newShow) {
+      // Auto-create tasks if deadlines section is selected and there are deadlines
+      if (selectedSections.has('deadlines') && deadlineCount > 0 && newShow) {
         await handleCreateTasksForShow(newShow.id);
       }
     } catch (err) {
@@ -745,93 +755,104 @@ function DocumentsTab() {
       // Use snake_case for database columns
       const updates: Record<string, unknown> = {};
       
-      // Basic Info
-      if (extractedData.name) updates.name = extractedData.name;
-      if (extractedData.startDate) updates.start_date = extractedData.startDate;
-      if (extractedData.endDate) updates.end_date = extractedData.endDate;
-      if (extractedData.location) updates.location = extractedData.location;
-      if (extractedData.boothNumber) updates.booth_number = extractedData.boothNumber;
-      if (extractedData.boothSize) updates.booth_size = extractedData.boothSize;
-      if (extractedData.cost) updates.cost = extractedData.cost;
-      if (extractedData.attendeesIncluded) updates.attendees_included = extractedData.attendeesIncluded;
-      if (extractedData.managementCompany) updates.management_company = extractedData.managementCompany;
-      
-      // Event Type & Virtual
-      if (extractedData.eventType) updates.event_type = extractedData.eventType;
-      if (extractedData.virtualPlatform) updates.virtual_platform = extractedData.virtualPlatform;
-      if (extractedData.virtualPlatformUrl) updates.virtual_platform_url = extractedData.virtualPlatformUrl;
-      if (extractedData.virtualBoothUrl) updates.virtual_booth_url = extractedData.virtualBoothUrl;
-      
-      // Venue
-      if (extractedData.venueName) updates.venue_name = extractedData.venueName;
-      if (extractedData.venueAddress) updates.venue_address = extractedData.venueAddress;
-      
-      // Move-in/Move-out
-      if (extractedData.moveInDate) updates.move_in_date = extractedData.moveInDate;
-      if (extractedData.moveInTime) updates.move_in_time = extractedData.moveInTime;
-      if (extractedData.moveOutDate) updates.move_out_date = extractedData.moveOutDate;
-      if (extractedData.moveOutTime) updates.move_out_time = extractedData.moveOutTime;
-      
-      // Shipping & Logistics
-      if (extractedData.shippingDeadline || extractedData.shippingCutoff) {
-        updates.shipping_cutoff = extractedData.shippingDeadline || extractedData.shippingCutoff;
+      // Show Info section
+      if (selectedSections.has('showInfo')) {
+        if (extractedData.name) updates.name = extractedData.name;
+        if (extractedData.startDate) updates.start_date = extractedData.startDate;
+        if (extractedData.endDate) updates.end_date = extractedData.endDate;
+        if (extractedData.location) updates.location = extractedData.location;
+        if (extractedData.eventType) updates.event_type = extractedData.eventType;
+        if (extractedData.attendeesIncluded) updates.attendees_included = extractedData.attendeesIncluded;
       }
-      if (extractedData.shippingInfo || extractedData.warehouseAddress) {
-        const parts = [];
-        if (extractedData.shippingInfo) parts.push(extractedData.shippingInfo);
-        if (extractedData.warehouseAddress) parts.push(`Advance Warehouse: ${extractedData.warehouseAddress}`);
-        const existingInfo = selectedShow.shippingInfo || '';
-        updates.shipping_info = existingInfo 
-          ? `${existingInfo}\n\n${parts.join('\n\n')}`
-          : parts.join('\n\n');
+      
+      // Venue section
+      if (selectedSections.has('venue')) {
+        if (extractedData.venueName) updates.venue_name = extractedData.venueName;
+        if (extractedData.venueAddress) updates.venue_address = extractedData.venueAddress;
       }
-      if (extractedData.shipToSite !== null) updates.ship_to_site = extractedData.shipToSite;
-      if (extractedData.shipToWarehouse !== null) updates.ship_to_warehouse = extractedData.shipToWarehouse;
       
-      // Lead Capture
-      if (extractedData.leadCaptureSystem) updates.lead_capture_system = extractedData.leadCaptureSystem;
+      // Booth section
+      if (selectedSections.has('booth')) {
+        if (extractedData.boothNumber) updates.booth_number = extractedData.boothNumber;
+        if (extractedData.boothSize) updates.booth_size = extractedData.boothSize;
+        if (extractedData.leadCaptureSystem) updates.lead_capture_system = extractedData.leadCaptureSystem;
+        if (extractedData.virtualPlatform) updates.virtual_platform = extractedData.virtualPlatform;
+        if (extractedData.virtualPlatformUrl) updates.virtual_platform_url = extractedData.virtualPlatformUrl;
+        if (extractedData.virtualBoothUrl) updates.virtual_booth_url = extractedData.virtualBoothUrl;
+      }
       
-      // Costs
-      if (extractedData.electricalCost) updates.electrical_cost = extractedData.electricalCost;
-      if (extractedData.laborCost) updates.labor_cost = extractedData.laborCost;
-      if (extractedData.internetCost) updates.internet_cost = extractedData.internetCost;
-      if (extractedData.standardServicesCost) updates.standard_services_cost = extractedData.standardServicesCost;
-      if (extractedData.utilitiesDetails) updates.utilities_details = extractedData.utilitiesDetails;
-      if (extractedData.laborDetails) updates.labor_details = extractedData.laborDetails;
+      // Setup/Teardown section
+      if (selectedSections.has('setupTeardown')) {
+        if (extractedData.moveInDate) updates.move_in_date = extractedData.moveInDate;
+        if (extractedData.moveInTime) updates.move_in_time = extractedData.moveInTime;
+        if (extractedData.moveOutDate) updates.move_out_date = extractedData.moveOutDate;
+        if (extractedData.moveOutTime) updates.move_out_time = extractedData.moveOutTime;
+      }
       
-      // Speaking & Sponsorship
-      if (extractedData.hasSpeakingEngagement !== null) updates.has_speaking_engagement = extractedData.hasSpeakingEngagement;
-      if (extractedData.speakingDetails) updates.speaking_details = extractedData.speakingDetails;
-      if (extractedData.sponsorshipDetails) updates.sponsorship_details = extractedData.sponsorshipDetails;
+      // Costs section
+      if (selectedSections.has('costs')) {
+        if (extractedData.cost) updates.cost = extractedData.cost;
+        if (extractedData.electricalCost) updates.electrical_cost = extractedData.electricalCost;
+        if (extractedData.laborCost) updates.labor_cost = extractedData.laborCost;
+        if (extractedData.internetCost) updates.internet_cost = extractedData.internetCost;
+        if (extractedData.standardServicesCost) updates.standard_services_cost = extractedData.standardServicesCost;
+        if (extractedData.utilitiesDetails) updates.utilities_details = extractedData.utilitiesDetails;
+        if (extractedData.laborDetails) updates.labor_details = extractedData.laborDetails;
+      }
       
-      // Hotel
-      if (extractedData.hotelName) updates.hotel_name = extractedData.hotelName;
-      if (extractedData.hotelAddress) updates.hotel_address = extractedData.hotelAddress;
-      if (extractedData.hotelCostPerNight) updates.hotel_cost_per_night = extractedData.hotelCostPerNight;
+      // Hotel section
+      if (selectedSections.has('hotel')) {
+        if (extractedData.hotelName) updates.hotel_name = extractedData.hotelName;
+        if (extractedData.hotelAddress) updates.hotel_address = extractedData.hotelAddress;
+        if (extractedData.hotelCostPerNight) updates.hotel_cost_per_night = extractedData.hotelCostPerNight;
+      }
       
-      // URLs & Portals
-      if (extractedData.showWebsite) updates.show_website = extractedData.showWebsite;
-      if (extractedData.showAgendaUrl) updates.show_agenda_url = extractedData.showAgendaUrl;
-      if (extractedData.eventPortalUrl) updates.event_portal_url = extractedData.eventPortalUrl;
+      // Shipping section
+      if (selectedSections.has('shipping')) {
+        if (extractedData.shippingDeadline || extractedData.shippingCutoff) {
+          updates.shipping_cutoff = extractedData.shippingDeadline || extractedData.shippingCutoff;
+        }
+        if (extractedData.shippingInfo || extractedData.warehouseAddress) {
+          const parts = [];
+          if (extractedData.shippingInfo) parts.push(extractedData.shippingInfo);
+          if (extractedData.warehouseAddress) parts.push(`Advance Warehouse: ${extractedData.warehouseAddress}`);
+          const existingInfo = selectedShow.shippingInfo || '';
+          updates.shipping_info = existingInfo 
+            ? `${existingInfo}\n\n${parts.join('\n\n')}`
+            : parts.join('\n\n');
+        }
+        if (extractedData.shipToSite !== null) updates.ship_to_site = extractedData.shipToSite;
+        if (extractedData.shipToWarehouse !== null) updates.ship_to_warehouse = extractedData.shipToWarehouse;
+      }
       
-      // Event App
-      if (extractedData.hasEventApp !== null) updates.has_event_app = extractedData.hasEventApp;
-      if (extractedData.eventAppNotes) updates.event_app_notes = extractedData.eventAppNotes;
+      // Contact section
+      if (selectedSections.has('contact')) {
+        if (extractedData.showContactName) updates.show_contact_name = extractedData.showContactName;
+        if (extractedData.showContactEmail) updates.show_contact_email = extractedData.showContactEmail;
+        if (extractedData.showContactPhone) updates.show_contact_phone = extractedData.showContactPhone;
+        if (extractedData.managementCompany) updates.management_company = extractedData.managementCompany;
+      }
       
-      // Contacts
-      if (extractedData.showContactName) updates.show_contact_name = extractedData.showContactName;
-      if (extractedData.showContactEmail) updates.show_contact_email = extractedData.showContactEmail;
-      if (extractedData.showContactPhone) updates.show_contact_phone = extractedData.showContactPhone;
+      // Links section
+      if (selectedSections.has('links')) {
+        if (extractedData.showWebsite) updates.show_website = extractedData.showWebsite;
+        if (extractedData.showAgendaUrl) updates.show_agenda_url = extractedData.showAgendaUrl;
+        if (extractedData.eventPortalUrl) updates.event_portal_url = extractedData.eventPortalUrl;
+        if (extractedData.hasEventApp !== null) updates.has_event_app = extractedData.hasEventApp;
+        if (extractedData.eventAppNotes) updates.event_app_notes = extractedData.eventAppNotes;
+      }
       
-      // Show Website
-      if (extractedData.showWebsite) updates.show_website = extractedData.showWebsite;
-      
-      // Notes
-      if (extractedData.notes) {
-        const existingNotes = selectedShow.generalNotes || '';
-        updates.general_notes = existingNotes 
-          ? `${existingNotes}\n\n--- Extracted Notes ---\n${extractedData.notes}`
-          : extractedData.notes;
+      // Notes section
+      if (selectedSections.has('notes')) {
+        if (extractedData.hasSpeakingEngagement !== null) updates.has_speaking_engagement = extractedData.hasSpeakingEngagement;
+        if (extractedData.speakingDetails) updates.speaking_details = extractedData.speakingDetails;
+        if (extractedData.sponsorshipDetails) updates.sponsorship_details = extractedData.sponsorshipDetails;
+        if (extractedData.notes) {
+          const existingNotes = selectedShow.generalNotes || '';
+          updates.general_notes = existingNotes 
+            ? `${existingNotes}\n\n--- Extracted Notes ---\n${extractedData.notes}`
+            : extractedData.notes;
+        }
       }
 
       // Apply updates directly via Supabase
@@ -963,7 +984,8 @@ function DocumentsTab() {
 
   const handleApplyAll = async () => {
     await handleApplyToShow();
-    if (deadlineCount > 0) {
+    // Only create deadline tasks if the deadlines section is selected
+    if (selectedSections.has('deadlines') && deadlineCount > 0) {
       await handleCreateTasks();
     }
   };
