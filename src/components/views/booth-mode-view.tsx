@@ -388,11 +388,11 @@ export function BoothModeView({ show, onExit }: BoothModeViewProps) {
                 exit={{ opacity: 0, x: 20 }}
                 className="space-y-4"
               >
-                {show.notes ? (
+                {show.generalNotes ? (
                   <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
                     <div 
                       className="prose prose-invert prose-sm max-w-none text-white/80"
-                      dangerouslySetInnerHTML={{ __html: show.notes }}
+                      dangerouslySetInnerHTML={{ __html: show.generalNotes }}
                     />
                   </div>
                 ) : (
