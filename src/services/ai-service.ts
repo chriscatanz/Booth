@@ -212,6 +212,25 @@ export function setCurrentOrg(orgId: string) {
   currentOrgId = orgId;
 }
 
+// Helper to get org ID with fallback to auth store
+async function getOrgId(): Promise<string> {
+  if (currentOrgId) return currentOrgId;
+  
+  // Try to get from auth store as fallback
+  try {
+    const { useAuthStore } = await import('@/store/auth-store');
+    const org = useAuthStore.getState().organization;
+    if (org?.id) {
+      currentOrgId = org.id;
+      return org.id;
+    }
+  } catch {
+    // Store not available
+  }
+  
+  throw new Error('Organization not set. Please reload the page.');
+}
+
 // Org branding context cache
 let orgBrandingCache: {
   companyDescription?: string;
@@ -226,9 +245,7 @@ export function setOrgBranding(branding: { companyDescription?: string; productD
  * Content Generation
  */
 export async function generateContent(request: ContentGenerationRequest): Promise<string> {
-  if (!currentOrgId) {
-    throw new Error('Organization not set. Please reload the page.');
-  }
+  const orgId = await getOrgId();
 
   // Build company context section if available
   const companyContext = orgBrandingCache?.companyDescription || orgBrandingCache?.productDescription
@@ -428,7 +445,7 @@ Be specific with numbers. If data is missing, note what additional tracking woul
 
   const systemPrompt = 'You are a trade show expert helping users prepare for and execute successful trade shows.';
 
-  return callAIAPI(prompts[request.type], systemPrompt, currentOrgId);
+  return callAIAPI(prompts[request.type], systemPrompt, orgId);
 }
 
 /**
@@ -595,9 +612,7 @@ If nothing relevant was found, say so clearly.`,
  * Document Intelligence - with hierarchical chunking for large documents
  */
 export async function analyzeDocument(request: DocumentAnalysisRequest): Promise<string> {
-  if (!currentOrgId) {
-    throw new Error('Organization not set. Please reload the page.');
-  }
+  const orgId = await getOrgId();
 
   const { documentText, analysisType, customQuery, onProgress } = request;
   const systemPrompt = 'You are an expert at analyzing trade show and exhibitor documents. Be thorough and precise.';
@@ -655,7 +670,7 @@ ${documentText}
 Provide a clear, direct answer based only on information in the document. If the information isn't in the document, say so.`,
     };
 
-    return callAIAPI(prompts[analysisType], systemPrompt, currentOrgId);
+    return callAIAPI(prompts[analysisType], systemPrompt, orgId);
   }
 
   // Large document - use hierarchical chunking
@@ -673,7 +688,7 @@ Provide a clear, direct answer based only on information in the document. If the
     const batchPromises = batch.map((chunk, batchIndex) => {
       const chunkIndex = i + batchIndex;
       const prompt = getChunkPrompt(analysisType, chunk, chunkIndex, chunks.length, customQuery);
-      return callAIAPI(prompt, systemPrompt, currentOrgId!);
+      return callAIAPI(prompt, systemPrompt, orgId);
     });
     
     const batchResults = await Promise.all(batchPromises);
@@ -690,7 +705,7 @@ Provide a clear, direct answer based only on information in the document. If the
   onProgress?.({ current: chunks.length, total: totalSteps, stage: 'Consolidating results...' });
   
   const mergePrompt = getMergePrompt(analysisType, chunkResults, customQuery);
-  const finalResult = await callAIAPI(mergePrompt, systemPrompt, currentOrgId);
+  const finalResult = await callAIAPI(mergePrompt, systemPrompt, orgId);
   
   onProgress?.({ current: totalSteps, total: totalSteps, stage: 'Complete' });
   
@@ -701,9 +716,7 @@ Provide a clear, direct answer based only on information in the document. If the
  * Show Assistant - Conversational AI
  */
 export async function chatWithAssistant(request: ShowAssistantRequest): Promise<string> {
-  if (!currentOrgId) {
-    throw new Error('Organization not set. Please reload the page.');
-  }
+  const orgId = await getOrgId();
 
   // Build conversation prompt from messages
   const conversationHistory = request.messages
@@ -765,7 +778,7 @@ You have access to the following context about the user's shows, attendees, and 
 
 Be helpful, specific, and actionable. Reference the provided context when answering questions. If asked about data you don't have, suggest what information would be helpful. Keep responses concise but thorough.`;
 
-  return callAIAPI(prompt, systemPrompt, currentOrgId);
+  return callAIAPI(prompt, systemPrompt, orgId);
 }
 
 /**
@@ -860,9 +873,7 @@ export interface ExtractedShowData {
  * Extract show details from document text using the dedicated extraction endpoint
  */
 export async function extractShowFromDocument(documentText: string): Promise<ExtractedShowData> {
-  if (!currentOrgId) {
-    throw new Error('Organization not set. Please reload the page.');
-  }
+  const orgId = await getOrgId();
 
   // Get auth token
   const { supabase } = await import('@/lib/supabase');
@@ -880,7 +891,7 @@ export async function extractShowFromDocument(documentText: string): Promise<Ext
     headers,
     body: JSON.stringify({
       documentText,
-      orgId: currentOrgId,
+      orgId,
     }),
   });
 
@@ -897,12 +908,9 @@ export async function extractShowFromDocument(documentText: string): Promise<Ext
  * Test API connection
  */
 export async function testConnection(): Promise<{ success: boolean; error?: string }> {
-  if (!currentOrgId) {
-    return { success: false, error: 'Organization not set' };
-  }
-
   try {
-    await callAIAPI('Hi, this is a connection test. Respond with "Connected!"', undefined, currentOrgId);
+    const orgId = await getOrgId();
+    await callAIAPI('Hi, this is a connection test. Respond with "Connected!"', undefined, orgId);
     return { success: true };
   } catch (err) {
     return { 
