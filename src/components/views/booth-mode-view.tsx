@@ -312,13 +312,25 @@ export function BoothModeView({ show, onExit }: BoothModeViewProps) {
                 {(venueAddress || hotelAddress) && (
                   <div className="rounded-2xl overflow-hidden border border-white/10">
                     <div className="aspect-[16/10] bg-white/5 relative">
-                      <iframe
-                        src={`https://www.google.com/maps/embed/v1/directions?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&origin=${encodeURIComponent(hotelAddress || venueAddress)}&destination=${encodeURIComponent(venueAddress || hotelAddress)}&mode=driving`}
-                        className="w-full h-full border-0"
-                        allowFullScreen
-                        loading="lazy"
-                        referrerPolicy="no-referrer-when-downgrade"
-                      />
+                      {venueAddress && hotelAddress ? (
+                        // Show directions between hotel and venue
+                        <iframe
+                          src={`https://www.google.com/maps/embed/v1/directions?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&origin=${encodeURIComponent(hotelAddress)}&destination=${encodeURIComponent(venueAddress)}&mode=driving&zoom=14`}
+                          className="w-full h-full border-0"
+                          allowFullScreen
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                        />
+                      ) : (
+                        // Show single location
+                        <iframe
+                          src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(venueAddress || hotelAddress)}&zoom=15`}
+                          className="w-full h-full border-0"
+                          allowFullScreen
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                        />
+                      )}
                     </div>
                   </div>
                 )}
