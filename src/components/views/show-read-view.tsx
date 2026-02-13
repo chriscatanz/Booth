@@ -429,7 +429,7 @@ export function ShowReadView({ show, attendees, onEdit, canEdit }: ShowReadViewP
         <Card>
           <CardHeader icon={<FileText size={18} />} title="Notes" />
           <div 
-            className="prose prose-sm max-w-none text-text-secondary"
+            className="prose prose-sm max-w-none text-text-secondary whitespace-pre-wrap"
             dangerouslySetInnerHTML={{ __html: show.generalNotes }}
           />
         </Card>
