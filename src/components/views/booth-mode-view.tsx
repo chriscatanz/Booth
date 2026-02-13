@@ -83,12 +83,30 @@ export function BoothModeView({ show, onExit }: BoothModeViewProps) {
     window.open(`https://maps.google.com/maps?q=${encoded}`, '_blank');
   };
 
-  const openUber = (address: string) => {
-    const encoded = encodeURIComponent(address);
-    // Use Uber universal link - works on both iOS and Android
-    // pickup=my_location uses current GPS, dropoff is the destination
-    const uberUrl = `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff%5Bformatted_address%5D=${encoded}`;
-    window.open(uberUrl, '_blank');
+  const openUber = async (address: string, name?: string) => {
+    try {
+      // Geocode address to lat/lng using Nominatim (required by Uber)
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`,
+        { headers: { 'User-Agent': 'Booth App' } }
+      );
+      const results = await response.json();
+      
+      if (results && results[0]) {
+        const { lat, lon } = results[0];
+        const encoded = encodeURIComponent(address);
+        const nickname = encodeURIComponent(name || address.split(',')[0]);
+        // Uber requires lat/lng - formatted_address is display only
+        const uberUrl = `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=${lat}&dropoff[longitude]=${lon}&dropoff[nickname]=${nickname}&dropoff[formatted_address]=${encoded}`;
+        window.open(uberUrl, '_blank');
+      } else {
+        // Fallback to Google Maps if geocoding fails
+        window.open(`https://maps.google.com/maps?q=${encodeURIComponent(address)}`, '_blank');
+      }
+    } catch {
+      // Fallback to Google Maps on error
+      window.open(`https://maps.google.com/maps?q=${encodeURIComponent(address)}`, '_blank');
+    }
   };
 
   // Build full addresses
@@ -244,7 +262,7 @@ export function BoothModeView({ show, onExit }: BoothModeViewProps) {
                         <span className="text-sm font-medium text-white/80">Directions</span>
                       </button>
                       <button
-                        onClick={() => openUber(venueAddress)}
+                        onClick={() => openUber(venueAddress, show.venueName || undefined)}
                         className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/5 hover:bg-white/10 transition-colors border-l border-white/10"
                       >
                         <Car size={16} className="text-blue-400" />
@@ -296,7 +314,7 @@ export function BoothModeView({ show, onExit }: BoothModeViewProps) {
                         <span className="text-sm font-medium text-white/80">Directions</span>
                       </button>
                       <button
-                        onClick={() => openUber(hotelAddress)}
+                        onClick={() => openUber(hotelAddress, show.hotelName || undefined)}
                         className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/5 hover:bg-white/10 transition-colors border-l border-white/10"
                       >
                         <Car size={16} className="text-amber-400" />
