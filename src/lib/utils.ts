@@ -38,7 +38,22 @@ export function escapeCSV(value: string): string {
 
 // Strip HTML tags
 export function stripHtml(html: string): string {
-  return html.replace(/<[^>]+>/g, '');
+  return html
+    // Convert block elements and br to newlines
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n')
+    .replace(/<\/div>/gi, '\n')
+    .replace(/<\/li>/gi, '\n')
+    .replace(/<\/h[1-6]>/gi, '\n')
+    .replace(/<\/tr>/gi, '\n')
+    // Add newline before headings and list items for spacing
+    .replace(/<h[1-6][^>]*>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '• ')
+    // Strip remaining tags
+    .replace(/<[^>]+>/g, '')
+    // Clean up multiple newlines
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 // Truncate text
