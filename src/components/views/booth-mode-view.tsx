@@ -56,13 +56,16 @@ export function BoothModeView({ show, onExit }: BoothModeViewProps) {
       if (!error && data) {
         const members: TeamMember[] = data
           .filter(d => d.team_member)
-          .map(d => ({
-            id: (d.team_member as { id: string }).id,
-            name: (d.team_member as { name: string }).name,
-            phone: (d.team_member as { phone?: string }).phone,
-            title: (d.team_member as { title?: string }).title,
-            role: d.role || 'support',
-          }));
+          .map(d => {
+            const tm = d.team_member as unknown as { id: string; name: string; phone?: string; title?: string };
+            return {
+              id: tm.id,
+              name: tm.name,
+              phone: tm.phone,
+              title: tm.title,
+              role: d.role || 'support',
+            };
+          });
         setTeamMembers(members);
       }
     }
