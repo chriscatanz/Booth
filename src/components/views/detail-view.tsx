@@ -17,7 +17,7 @@ import { Toggle } from '@/components/ui/toggle';
 import { DatePicker } from '@/components/ui/date-picker';
 import { HotelMap } from '@/components/ui/hotel-map';
 import { VenueMap } from '@/components/ui/venue-map';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, cn } from '@/lib/utils';
 import { 
   totalEstimatedCost, totalServicesCost, estimatedHotelCost, roiPercentage, 
   costPerLead, leadQualificationRate, dealCloseRate, 
