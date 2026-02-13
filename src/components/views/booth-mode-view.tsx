@@ -42,8 +42,9 @@ export function BoothModeView({ show, onExit }: BoothModeViewProps) {
   const venueAddress = show.venueAddress || '';
   const hotelAddress = show.hotelAddress || '';
 
-  // Mock team data - in real implementation, pull from tradeshow_team_members
-  const teamMembers = show.attendees?.filter(a => a.role === 'staff' || a.role === 'lead') || [];
+  // Team members would come from tradeshow_team_members junction table
+  // For now, showing empty state - can be populated later
+  const teamMembers: { name?: string; role?: string; phone?: string }[] = [];
 
   return (
     <motion.div 
