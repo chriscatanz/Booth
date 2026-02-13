@@ -424,6 +424,17 @@ export function ShowReadView({ show, attendees, onEdit, canEdit }: ShowReadViewP
         </Card>
       )}
 
+      {/* Agenda */}
+      {show.agendaContent && (
+        <Card>
+          <CardHeader icon={<Calendar size={18} />} title="Agenda" />
+          <div 
+            className="prose prose-sm max-w-none text-text-secondary whitespace-pre-wrap"
+            dangerouslySetInnerHTML={{ __html: show.agendaContent }}
+          />
+        </Card>
+      )}
+
       {/* Notes */}
       {show.generalNotes && (
         <Card>
