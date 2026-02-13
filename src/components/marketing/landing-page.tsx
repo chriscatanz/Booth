@@ -8,7 +8,7 @@ import {
   Calendar, DollarSign, Users, BarChart3, 
   CheckCircle, ArrowRight, Truck, FileText,
   Zap, ChevronDown, Menu, X,
-  Sparkles, FileSpreadsheet, Layers, RefreshCw, Bell, Box
+  Sparkles, FileSpreadsheet, Layers, RefreshCw, Bell, Box, Smartphone
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PricingSection } from './pricing-section';
@@ -23,6 +23,7 @@ interface LandingPageProps {
 const NAV_FEATURES = [
   { slug: 'calendar', icon: Calendar, title: 'Trade Show Calendar', color: '#0969DA' },
   { slug: 'calendar-sync', icon: RefreshCw, title: 'Calendar Sync', color: '#06B6D4' },
+  { slug: 'booth-mode', icon: Smartphone, title: 'Booth Mode', color: '#8B5CF6' },
   { slug: 'budget', icon: DollarSign, title: 'Budget Management', color: '#1A7F37' },
   { slug: 'team', icon: Users, title: 'Team Collaboration', color: '#8250DF' },
   { slug: 'logistics', icon: Truck, title: 'Shipping & Logistics', color: '#BF8700' },

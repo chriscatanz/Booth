@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import {
   X, Building2, Users, Shield, Save, User,
   Crown, AlertCircle, Check, Trash2, Settings, Clock, Download, List, Palette, Columns, Eye, Bell, Sparkles, Calendar,
-  ChevronDown
+  ChevronDown, CreditCard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { authenticatedFetch } from '@/lib/api';
@@ -26,13 +26,14 @@ import { NotificationPreferences } from '@/components/notifications/notification
 import { AISettings } from './ai-settings';
 import { ChangePassword } from './change-password';
 import { Preferences } from './preferences';
+import { BillingSettings } from './billing-settings';
 import { Sliders } from 'lucide-react';
 
 interface OrgSettingsModalProps {
   onClose: () => void;
 }
 
-type SettingsTab = 'general' | 'account' | 'preferences' | 'branding' | 'members' | 'notifications' | 'calendar' | 'permissions' | 'lists' | 'fields' | 'ai' | 'data' | 'audit' | 'danger';
+type SettingsTab = 'general' | 'account' | 'preferences' | 'billing' | 'branding' | 'members' | 'notifications' | 'calendar' | 'permissions' | 'lists' | 'fields' | 'ai' | 'data' | 'audit' | 'danger';
 
 export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
   const { organization, isOwner, isAdmin, refreshOrganizations } = useAuthStore();
@@ -92,6 +93,7 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
     { id: 'general', label: 'General', icon: <Building2 size={18} /> },
     { id: 'account', label: 'Account', icon: <User size={18} /> },
     { id: 'preferences', label: 'Preferences', icon: <Sliders size={18} /> },
+    { id: 'billing', label: 'Billing', icon: <CreditCard size={18} />, ownerOnly: true },
     { id: 'branding', label: 'Branding', icon: <Palette size={18} />, adminOnly: true },
     { id: 'members', label: 'Members', icon: <Users size={18} /> },
     { id: 'notifications', label: 'Notifications', icon: <Bell size={18} /> },
@@ -314,6 +316,18 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
                   transition={{ duration: 0.15 }}
                 >
                   <Preferences />
+                </motion.div>
+              )}
+
+              {activeTab === 'billing' && isOwner && (
+                <motion.div
+                  key="billing"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <BillingSettings />
                 </motion.div>
               )}
 

@@ -34,7 +34,7 @@ export default function AIFeaturePage() {
         },
         {
           title: 'Smart Document Extraction',
-          description: 'Upload a vendor packet, exhibitor guide, or contract. AI extracts 40+ fields including deadlines, costs, shipping info, and contacts. Review what was found and select exactly which sections to import.',
+          description: 'Upload a vendor packet, exhibitor guide, or contract. AI extracts 40+ fields across 11 categories including deadlines, costs, shipping info, contacts, and agenda items. Preview what was found and choose exactly which fields to import with granular checkboxes.',
           icon: Upload,
         },
         {

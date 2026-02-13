@@ -9,7 +9,7 @@ import { MarketingHeader } from '@/components/marketing';
 import { 
   Calendar, DollarSign, Users, BarChart3, 
   Truck, Package, ArrowRight,
-  Sparkles, FileSpreadsheet, Layers, Smartphone
+  Sparkles, FileSpreadsheet, Layers, Smartphone, RefreshCw, Bell
 } from 'lucide-react';
 
 const FEATURES = [
@@ -92,6 +92,22 @@ const FEATURES = [
     title: 'Show Templates',
     description: 'Save your booth setup once, reuse it for every similar show.',
     highlights: ['Reusable setups', 'Template library', 'Quick duplication'],
+  },
+  {
+    slug: 'calendar-sync',
+    icon: RefreshCw,
+    color: '#0969DA',
+    title: 'Calendar Sync',
+    description: 'Subscribe to your shows from Google Calendar, Outlook, or Apple Calendar.',
+    highlights: ['ICS feed export', 'Auto-updates', 'Team sharing'],
+  },
+  {
+    slug: 'notifications',
+    icon: Bell,
+    color: '#DC2626',
+    title: 'Email Notifications',
+    description: 'Get timely reminders about deadlines, shipping cutoffs, and upcoming shows.',
+    highlights: ['Deadline alerts', 'Daily digests', 'Configurable timing'],
   },
 ];
 

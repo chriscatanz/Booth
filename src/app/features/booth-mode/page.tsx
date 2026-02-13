@@ -1,65 +1,91 @@
 'use client';
 
-import React from 'react';
 import { useRouter } from 'next/navigation';
 import { FeaturePageLayout } from '@/components/marketing/feature-page-layout';
 import { 
-  Smartphone, MapPin, Users, Calendar,
-  Navigation, Clock, Wifi, Bell
+  Smartphone, 
+  MapPin, 
+  Users, 
+  Car, 
+  Calendar, 
+  FileText,
+  Navigation,
+  Clock,
+  Phone,
+  CheckSquare
 } from 'lucide-react';
 
-export default function BoothModeFeaturePage() {
+export default function BoothModePage() {
   const router = useRouter();
+
+  const benefits = [
+    'Instant access to venue and hotel locations',
+    'One-tap Uber to get you there on time',
+    'Team member contacts at your fingertips',
+    'Show agenda always available offline',
+    'Quick access to booth assignments and setup info',
+    'No more digging through emails on the show floor',
+  ];
+
+  const capabilities = [
+    {
+      title: 'Show Day Dashboard',
+      description: 'Everything you need for the current show in one mobile-optimized view. No scrolling through tabs.',
+      icon: Smartphone,
+    },
+    {
+      title: 'One-Tap Uber',
+      description: 'Get an Uber to the venue or hotel with a single tap. We handle the address lookup automatically.',
+      icon: Car,
+    },
+    {
+      title: 'Venue Navigation',
+      description: 'Interactive map showing venue location, your hotel, and directions between them.',
+      icon: MapPin,
+    },
+    {
+      title: 'Team Contacts',
+      description: 'Tap to call or text any team member assigned to the show. No contact hunting required.',
+      icon: Phone,
+    },
+    {
+      title: 'Show Agenda',
+      description: 'Full agenda view with times and sessions. Know where you need to be and when.',
+      icon: Calendar,
+    },
+    {
+      title: 'Booth Assignment',
+      description: 'Your booth number, kit details, and setup instructions. All in your pocket.',
+      icon: CheckSquare,
+    },
+    {
+      title: 'Quick Documents',
+      description: 'Access important show documents, contracts, and exhibitor manuals on the go.',
+      icon: FileText,
+    },
+    {
+      title: 'Show Timeline',
+      description: 'See setup, show days, and teardown at a glance. Always know what phase you are in.',
+      icon: Clock,
+    },
+    {
+      title: 'Offline Ready',
+      description: 'Key information cached locally. Works even when conference WiFi lets you down.',
+      icon: Navigation,
+    },
+  ];
 
   return (
     <FeaturePageLayout
-      title="Your Show-Day Command Center"
+      title="Your Show Day Command Center"
       subtitle="Booth Mode"
-      description="When the show starts, switch to Booth Mode. A focused, mobile-first interface designed for the trade show floor. Everything you need, nothing you don't."
+      description="A mobile-first experience designed for when you are on the show floor. Everything you need, nothing you do not. Activate it from the menu when you arrive at your next show."
       icon={Smartphone}
-      iconColor="#06B6D4"
-      benefits={[
-        "Tap your booth number to copy it instantly when asked",
-        "One-tap Uber to venue or hotel with pre-loaded addresses",
-        "Quick access to team contact info on the floor",
-        "View the show agenda without digging through emails",
-        "Hotel confirmation number always one tap away",
-        "Distraction-free dark interface that works in any lighting",
-      ]}
-      capabilities={[
-        {
-          title: 'Immersive Show-Day Interface',
-          description: 'Full-screen dark mode interface built for the trade show floor. Large tap targets, essential info front and center, zero clutter.',
-          icon: Smartphone,
-        },
-        {
-          title: 'Venue & Hotel at a Glance',
-          description: 'Venue address, hotel details, and confirmation numbers displayed prominently. Tap to copy, tap to navigate, tap to call an Uber.',
-          icon: MapPin,
-        },
-        {
-          title: 'One-Tap Transportation',
-          description: 'Uber buttons pre-loaded with venue and hotel coordinates. No typing addresses into your phone while juggling booth materials.',
-          icon: Navigation,
-        },
-        {
-          title: 'Team Contacts Ready',
-          description: 'See who from your team is at the show. Tap to text or call. No searching through your contacts during setup.',
-          icon: Users,
-        },
-        {
-          title: 'Show Agenda Built In',
-          description: 'Exhibitor hours, setup times, reception schedules. All extracted from your vendor packet and displayed cleanly.',
-          icon: Calendar,
-        },
-        {
-          title: 'Quick Reference Info',
-          description: 'WiFi credentials, show contact, badge pickup location. The stuff you always forget and need in the moment.',
-          icon: Wifi,
-        },
-      ]}
+      iconColor="#8B5CF6"
+      benefits={benefits}
+      capabilities={capabilities}
       ctaText="Start Free Trial"
-      onGetStarted={() => router.push('/')}
+      onGetStarted={() => router.push('/signup')}
     />
   );
 }
