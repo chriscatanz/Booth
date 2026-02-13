@@ -13,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { PricingSection } from './pricing-section';
 import { TestimonialsSection } from './testimonials-section';
+import { InstallButton } from './install-button';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -373,8 +374,9 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
               <Button variant="primary" size="lg" onClick={onGetStarted}>
                 Start 7-Day Free Trial <ArrowRight size={16} className="ml-1" />
               </Button>
-              <p className="text-sm text-text-tertiary">No credit card required</p>
+              <InstallButton variant="secondary" />
             </div>
+            <p className="mt-3 text-sm text-text-tertiary">No credit card required</p>
           </motion.div>
 
           {/* App preview */}
