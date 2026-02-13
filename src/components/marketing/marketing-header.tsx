@@ -15,7 +15,7 @@ interface MarketingHeaderProps {
 const NAV_FEATURES = [
   { slug: 'calendar', icon: Calendar, title: 'Trade Show Calendar', color: '#0969DA', description: 'Visual schedule & deadlines' },
   { slug: 'calendar-sync', icon: RefreshCw, title: 'Calendar Sync', color: '#06B6D4', description: 'Google, Outlook & Apple' },
-  { slug: 'booth-mode', icon: Smartphone, title: 'Booth Mode', color: '#06B6D4', description: 'Show-day mobile command center' },
+  { slug: 'booth-mode', icon: Smartphone, title: 'Booth Mode', color: '#8B5CF6', description: 'Show-day mobile command center' },
   { slug: 'budget', icon: DollarSign, title: 'Budget Management', color: '#1A7F37', description: 'Track every dollar' },
   { slug: 'team', icon: Users, title: 'Team Collaboration', color: '#8250DF', description: 'Roles & document visibility' },
   { slug: 'logistics', icon: Truck, title: 'Shipping & Logistics', color: '#BF8700', description: 'Live tracking & deadlines' },

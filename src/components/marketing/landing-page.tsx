@@ -21,18 +21,18 @@ interface LandingPageProps {
 }
 
 const NAV_FEATURES = [
-  { slug: 'calendar', icon: Calendar, title: 'Trade Show Calendar', color: '#0969DA' },
-  { slug: 'calendar-sync', icon: RefreshCw, title: 'Calendar Sync', color: '#06B6D4' },
-  { slug: 'booth-mode', icon: Smartphone, title: 'Booth Mode', color: '#8B5CF6' },
-  { slug: 'budget', icon: DollarSign, title: 'Budget Management', color: '#1A7F37' },
-  { slug: 'team', icon: Users, title: 'Team Collaboration', color: '#8250DF' },
-  { slug: 'logistics', icon: Truck, title: 'Shipping & Logistics', color: '#BF8700' },
-  { slug: 'kits', icon: Box, title: 'Booth Kits', color: '#CF222E' },
-  { slug: 'analytics', icon: BarChart3, title: 'ROI & Analytics', color: '#0969DA' },
-  { slug: 'ai', icon: Sparkles, title: 'AI Assistant', color: '#8B5CF6' },
-  { slug: 'notifications', icon: Bell, title: 'Notifications', color: '#F59E0B' },
-  { slug: 'import-export', icon: FileSpreadsheet, title: 'Import & Export', color: '#059669' },
-  { slug: 'templates', icon: Layers, title: 'Show Templates', color: '#EA580C' },
+  { slug: 'calendar', icon: Calendar, title: 'Trade Show Calendar', color: '#0969DA', description: 'Visual schedule & deadlines' },
+  { slug: 'calendar-sync', icon: RefreshCw, title: 'Calendar Sync', color: '#06B6D4', description: 'Google, Outlook & Apple' },
+  { slug: 'booth-mode', icon: Smartphone, title: 'Booth Mode', color: '#8B5CF6', description: 'Show-day mobile command center' },
+  { slug: 'budget', icon: DollarSign, title: 'Budget Management', color: '#1A7F37', description: 'Track every dollar' },
+  { slug: 'team', icon: Users, title: 'Team Collaboration', color: '#8250DF', description: 'Roles & document visibility' },
+  { slug: 'logistics', icon: Truck, title: 'Shipping & Logistics', color: '#BF8700', description: 'Live tracking & deadlines' },
+  { slug: 'kits', icon: Box, title: 'Booth Kits', color: '#CF222E', description: 'Inventory & auto-assign' },
+  { slug: 'analytics', icon: BarChart3, title: 'ROI & Analytics', color: '#0969DA', description: 'ROI & performance' },
+  { slug: 'ai', icon: Sparkles, title: 'AI Assistant', color: '#8B5CF6', description: 'Smart extraction & chat' },
+  { slug: 'notifications', icon: Bell, title: 'Notifications', color: '#F59E0B', description: 'Email & in-app alerts' },
+  { slug: 'import-export', icon: FileSpreadsheet, title: 'Import & Export', color: '#059669', description: 'CSV import & export' },
+  { slug: 'templates', icon: Layers, title: 'Show Templates', color: '#EA580C', description: 'Reusable show setups' },
 ];
 
 export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
@@ -165,17 +165,7 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
                                 {feature.title}
                               </p>
                               <p className="text-xs text-text-tertiary mt-0.5">
-                                {feature.slug === 'calendar' && 'Visual schedule & deadlines'}
-                                {feature.slug === 'calendar-sync' && 'Google, Outlook & Apple'}
-                                {feature.slug === 'budget' && 'Track every dollar'}
-                                {feature.slug === 'team' && 'Collaborate with roles'}
-                                {feature.slug === 'logistics' && 'Shipping timeline & packing'}
-                                {feature.slug === 'kits' && 'Inventory & auto-assign'}
-                                {feature.slug === 'analytics' && 'ROI & performance'}
-                                {feature.slug === 'ai' && 'One Click Show & chat'}
-                                {feature.slug === 'notifications' && 'Email & in-app alerts'}
-                                {feature.slug === 'import-export' && 'CSV import & export'}
-                                {feature.slug === 'templates' && 'Reusable show setups'}
+                                {feature.description}
                               </p>
                             </div>
                           </Link>
