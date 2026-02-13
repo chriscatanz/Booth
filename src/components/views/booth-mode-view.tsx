@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MapPin, Hotel, Calendar, Users, FileText, 
   Navigation, MessageSquare, Clock,
-  X, Copy, Check
+  X, Copy, Check, Car
 } from 'lucide-react';
 import { TradeShow } from '@/types';
 import { format, differenceInDays, isWithinInterval, parseISO } from 'date-fns';
@@ -81,6 +81,16 @@ export function BoothModeView({ show, onExit }: BoothModeViewProps) {
   const openMaps = (address: string) => {
     const encoded = encodeURIComponent(address);
     window.open(`https://maps.google.com/maps?q=${encoded}`, '_blank');
+  };
+
+  const openUber = (address: string) => {
+    const encoded = encodeURIComponent(address);
+    // Try native Uber app first, falls back to mobile web
+    window.location.href = `uber://?action=setPickup&dropoff[formatted_address]=${encoded}`;
+    // Fallback to web after a short delay if app doesn't open
+    setTimeout(() => {
+      window.open(`https://m.uber.com/ul/?action=setPickup&dropoff[formatted_address]=${encoded}`, '_blank');
+    }, 500);
   };
 
   // Build full addresses
@@ -227,13 +237,22 @@ export function BoothModeView({ show, onExit }: BoothModeViewProps) {
                     </div>
                   </div>
                   {venueAddress && (
-                    <button
-                      onClick={() => openMaps(venueAddress)}
-                      className="w-full flex items-center justify-center gap-2 py-3 border-t border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
-                    >
-                      <Navigation size={16} className="text-blue-400" />
-                      <span className="text-sm font-medium text-white/80">Get Directions</span>
-                    </button>
+                    <div className="flex border-t border-white/10">
+                      <button
+                        onClick={() => openMaps(venueAddress)}
+                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/5 hover:bg-white/10 transition-colors"
+                      >
+                        <Navigation size={16} className="text-blue-400" />
+                        <span className="text-sm font-medium text-white/80">Directions</span>
+                      </button>
+                      <button
+                        onClick={() => openUber(venueAddress)}
+                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/5 hover:bg-white/10 transition-colors border-l border-white/10"
+                      >
+                        <Car size={16} className="text-blue-400" />
+                        <span className="text-sm font-medium text-white/80">Uber</span>
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -270,13 +289,22 @@ export function BoothModeView({ show, onExit }: BoothModeViewProps) {
                     </div>
                   </div>
                   {hotelAddress && (
-                    <button
-                      onClick={() => openMaps(hotelAddress)}
-                      className="w-full flex items-center justify-center gap-2 py-3 border-t border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
-                    >
-                      <Navigation size={16} className="text-amber-400" />
-                      <span className="text-sm font-medium text-white/80">Get Directions</span>
-                    </button>
+                    <div className="flex border-t border-white/10">
+                      <button
+                        onClick={() => openMaps(hotelAddress)}
+                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/5 hover:bg-white/10 transition-colors"
+                      >
+                        <Navigation size={16} className="text-amber-400" />
+                        <span className="text-sm font-medium text-white/80">Directions</span>
+                      </button>
+                      <button
+                        onClick={() => openUber(hotelAddress)}
+                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/5 hover:bg-white/10 transition-colors border-l border-white/10"
+                      >
+                        <Car size={16} className="text-amber-400" />
+                        <span className="text-sm font-medium text-white/80">Uber</span>
+                      </button>
+                    </div>
                   )}
                 </div>
 
