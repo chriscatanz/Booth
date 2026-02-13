@@ -49,6 +49,8 @@ import { useLookups } from '@/hooks/use-lookups';
 import { supabase } from '@/lib/supabase';
 import * as aiService from '@/services/ai-service';
 import * as lookupService from '@/services/lookup-service';
+import { ShowReadView } from './show-read-view';
+import { Eye, Pencil } from 'lucide-react';
 
 export default function DetailView() {
   const {
@@ -77,6 +79,10 @@ export default function DetailView() {
   const { graphicsOptions, packingListOptions, tableclothOptions } = useCustomLists();
   const { lookups, refreshCategory } = useLookups();
   
+  // View mode: 'read' for clean consumption, 'edit' for form editing
+  // Everyone defaults to read mode for cleaner consumption; editors can toggle to edit
+  const [viewMode, setViewMode] = useState<'read' | 'edit'>('read');
+  
   // Read-only mode for viewers
   const readOnly = !canEdit;
 
@@ -86,6 +92,9 @@ export default function DetailView() {
   const isNew = show.id === 0;
   const estimated = totalEstimatedCost(show);
   const roi = roiPercentage(show);
+  
+  // Effective view mode: new shows always edit, viewers always read
+  const effectiveViewMode = isNew ? 'edit' : (!canEdit ? 'read' : viewMode);
 
   const handleSave = async () => {
     const success = await saveShow();
@@ -210,16 +219,52 @@ Return ONLY the HTML content, no markdown, no code fences.`;
         onEmailDetails={() => openMailto(show)}
       />
 
-      {/* Autosave indicator - minimal bar */}
+      {/* View Mode Toggle + Autosave indicator */}
       {!isNew && (
-        <div className="px-6 py-1 border-b border-border bg-surface">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-2 border-b border-border bg-surface">
+          {/* View Mode Toggle - only for editors */}
+          {canEdit ? (
+            <div className="flex items-center gap-1 p-1 bg-bg-tertiary rounded-lg">
+              <button
+                onClick={() => setViewMode('read')}
+                className={cn(
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
+                  effectiveViewMode === 'read' 
+                    ? 'bg-surface text-text-primary shadow-sm' 
+                    : 'text-text-secondary hover:text-text-primary'
+                )}
+              >
+                <Eye size={14} />
+                <span className="hidden sm:inline">View</span>
+              </button>
+              <button
+                onClick={() => setViewMode('edit')}
+                className={cn(
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
+                  effectiveViewMode === 'edit' 
+                    ? 'bg-surface text-text-primary shadow-sm' 
+                    : 'text-text-secondary hover:text-text-primary'
+                )}
+              >
+                <Pencil size={14} />
+                <span className="hidden sm:inline">Edit</span>
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 text-sm text-text-tertiary">
+              <Eye size={14} />
+              <span>View Only</span>
+            </div>
+          )}
+          
+          {/* Autosave indicator */}
           <AutosaveIndicator status={autosaveStatus} hasUnsavedChanges={hasUnsavedChanges} />
         </div>
       )}
 
       {/* Validation errors */}
       <AnimatePresence>
-        {validationErrors.length > 0 && (
+        {validationErrors.length > 0 && effectiveViewMode === 'edit' && (
           <motion.div 
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -234,8 +279,23 @@ Return ONLY the HTML content, no markdown, no code fences.`;
         )}
       </AnimatePresence>
 
-      {/* Tabs */}
-      <DetailTabs activeTab={activeTab} onTabChange={setActiveTab} tabCounts={tabCounts} />
+      {/* READ MODE */}
+      {effectiveViewMode === 'read' && (
+        <div className="flex-1 overflow-y-auto">
+          <ShowReadView 
+            show={show}
+            attendees={attendees}
+            canEdit={canEdit}
+            onEdit={() => setViewMode('edit')}
+          />
+        </div>
+      )}
+
+      {/* EDIT MODE - Tabs and Form */}
+      {effectiveViewMode === 'edit' && (
+        <>
+          {/* Tabs */}
+          <DetailTabs activeTab={activeTab} onTabChange={setActiveTab} tabCounts={tabCounts} />
 
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto">
@@ -1093,6 +1153,8 @@ Return ONLY the HTML content, no markdown, no code fences.`;
           </div>
         </DetailTabPanel>
       </div>
+        </>
+      )}
 
       {/* Modals */}
       <AnimatePresence>
