@@ -52,7 +52,7 @@ import * as lookupService from '@/services/lookup-service';
 
 export default function DetailView() {
   const {
-    selectedShow, updateSelectedShow,
+    selectedShow, setSelectedShow, updateSelectedShow,
     attendees, addAttendee, removeAttendee, updateAttendee,
     allAttendees,
     additionalFiles, refreshAdditionalFiles,
@@ -189,6 +189,7 @@ Return the agenda in a well-formatted text format that's easy to read.`;
         canEdit={canEdit}
         isNew={isNew}
         isSaving={isSaving}
+        onBack={() => setSelectedShow(null)}
         onSave={handleSave}
         onDelete={handleDelete}
         onDuplicate={duplicateShow}

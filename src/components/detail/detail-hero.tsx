@@ -10,6 +10,7 @@ import {
   MapPin, Calendar, Hash, DollarSign, TrendingUp, 
   Users, Target, CheckCircle, AlertCircle,
   CalendarPlus, Mail, MoreHorizontal, Save, Download, FileStack, Repeat, Copy, Trash2,
+  ArrowLeft,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PermissionGate } from '@/components/auth/permission-gate';
@@ -19,6 +20,7 @@ interface DetailHeroProps {
   canEdit?: boolean;
   isNew?: boolean;
   isSaving?: boolean;
+  onBack?: () => void;
   onSave?: () => void;
   onDelete?: () => void;
   onDuplicate?: () => void;
@@ -34,6 +36,7 @@ export function DetailHero({
   canEdit,
   isNew,
   isSaving,
+  onBack,
   onSave,
   onDelete,
   onDuplicate,
@@ -64,11 +67,22 @@ export function DetailHero({
   return (
     <div className="bg-gradient-to-br from-surface via-surface to-bg-secondary border-b border-border">
       <div className="px-6 py-3">
-        {/* Row 1: Title + Action Buttons */}
+        {/* Row 1: Back + Title + Action Buttons */}
         <div className="flex items-center justify-between gap-3 mb-2">
-          <h1 className="text-xl font-bold text-text-primary truncate">
-            {show.name || 'Untitled Show'}
-          </h1>
+          <div className="flex items-center gap-2 min-w-0">
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="p-1.5 -ml-1.5 rounded-lg hover:bg-bg-tertiary text-text-secondary hover:text-text-primary transition-colors shrink-0"
+                title="Back to list"
+              >
+                <ArrowLeft size={20} />
+              </button>
+            )}
+            <h1 className="text-xl font-bold text-text-primary truncate">
+              {show.name || 'Untitled Show'}
+            </h1>
+          </div>
           
           {/* Action Buttons */}
           <div className="flex items-center gap-1 shrink-0">
