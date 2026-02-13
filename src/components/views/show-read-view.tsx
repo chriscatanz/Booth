@@ -435,9 +435,9 @@ export function ShowReadView({ show, attendees, onEdit, canEdit }: ShowReadViewP
         </Card>
       )}
 
-      {/* Floating Edit Button */}
+      {/* Floating Edit Button - bottom left to avoid chat widget */}
       {canEdit && onEdit && (
-        <div className="fixed bottom-6 right-6 z-40">
+        <div className="fixed bottom-6 left-6 z-40">
           <Button 
             variant="primary" 
             size="lg"
