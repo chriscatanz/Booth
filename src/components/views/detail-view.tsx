@@ -146,12 +146,22 @@ export default function DetailView() {
       }
 
       // Now extract agenda using AI
-      const prompt = `Extract the event agenda/schedule from this document. Format it clearly with times, session titles, speakers, and locations if available. Use a clean, readable format.
+      const prompt = `Extract the event agenda/schedule from this document and format it as clean HTML.
 
 Document:
 ${documentText}
 
-Return the agenda in a well-formatted text format that's easy to read.`;
+Requirements:
+- Use <h3> for day headers (e.g., "Monday, March 1")
+- Use <h4> for session categories or time blocks
+- Use <ul> and <li> for lists of sessions, items, or activities
+- Use <p> for descriptions or notes
+- Use <strong> for times and important info
+- Include speakers, locations, and room numbers when available
+- Group related sessions logically
+- Keep it scannable and well-organized
+
+Return ONLY the HTML content, no markdown, no code fences.`;
 
       const result = await aiService.generateContent({
         type: 'checklist',

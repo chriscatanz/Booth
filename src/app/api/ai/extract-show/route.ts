@@ -139,8 +139,8 @@ Analyze the following document and extract all trade show details. Return a JSON
   "showAgendaUrl": "URL to agenda/schedule",
   "eventPortalUrl": "Exhibitor portal/dashboard URL",
 
-  // SHIPPING & LOGISTICS
-  "shippingInfo": "Shipping instructions, carrier requirements",
+  // SHIPPING & LOGISTICS (format longer text as HTML with <p>, <ul>, <li>)
+  "shippingInfo": "Shipping instructions, carrier requirements - format as HTML with lists for multiple items",
   "warehouseAddress": "Advance warehouse address",
   "shipToSite": true/false (direct-to-site shipping allowed),
   "shipToWarehouse": true/false (advance warehouse shipping available),
@@ -170,8 +170,8 @@ Analyze the following document and extract all trade show details. Return a JSON
   "hasEventApp": true/false,
   "eventAppNotes": "App name, download instructions",
 
-  // CATCH-ALL
-  "notes": "Any other important details not captured above",
+  // CATCH-ALL (format as HTML with <p>, <ul>, <li> for readability)
+  "notes": "Any other important details not captured above, formatted as clean HTML with paragraphs and lists",
 
   // META
   "confidence": "high" | "medium" | "low",
