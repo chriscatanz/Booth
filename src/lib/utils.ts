@@ -4,12 +4,12 @@ export function cn(...classes: (string | boolean | undefined | null)[]): string 
 }
 
 // Format currency with no decimals
-export function formatCurrency(value: number): string {
+export function formatCurrency(value: number | null | undefined): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     maximumFractionDigits: 0,
-  }).format(value);
+  }).format(value ?? 0);
 }
 
 // Format currency with decimals
