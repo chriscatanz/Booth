@@ -51,18 +51,41 @@ export function DetailHero({
   const roi = roiPercentage(show);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
 
-  // Quick status indicators
-  const alerts: { icon: React.ElementType; label: string; status: 'success' | 'warning' | 'error' }[] = [];
+  // Quick status indicators - show confirmed items as success badges
+  const badges: { icon: React.ElementType; label: string; status: 'success' | 'warning' | 'neutral' }[] = [];
   
-  if (!show.registrationConfirmed) {
-    alerts.push({ icon: AlertCircle, label: 'Registration pending', status: 'warning' });
-  }
-  if (!show.hotelConfirmed && show.startDate) {
-    alerts.push({ icon: AlertCircle, label: 'Hotel not confirmed', status: 'warning' });
-  }
+  // Registration
   if (show.registrationConfirmed) {
-    alerts.push({ icon: CheckCircle, label: 'Registered', status: 'success' });
+    badges.push({ icon: CheckCircle, label: 'Registered', status: 'success' });
   }
+  
+  // Hotel
+  if (show.hotelConfirmed) {
+    badges.push({ icon: CheckCircle, label: 'Hotel', status: 'success' });
+  }
+  
+  // Utilities
+  if (show.utilitiesBooked) {
+    badges.push({ icon: CheckCircle, label: 'Utilities', status: 'success' });
+  }
+  
+  // Labor
+  if (show.laborBooked) {
+    badges.push({ icon: CheckCircle, label: 'Labor', status: 'success' });
+  }
+  
+  // Shipping/Tracking
+  if (show.trackingNumber) {
+    badges.push({ icon: CheckCircle, label: 'Shipped', status: 'success' });
+  }
+  
+  // Attendee list
+  if (show.attendeeListReceived) {
+    badges.push({ icon: CheckCircle, label: 'Attendee List', status: 'success' });
+  }
+
+  // Keep alerts for warnings only
+  const alerts = badges;
 
   return (
     <div className="bg-gradient-to-br from-surface via-surface to-bg-secondary border-b border-border">
@@ -256,7 +279,7 @@ export function DetailHero({
                     'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium',
                     alert.status === 'success' && 'bg-success/10 text-success',
                     alert.status === 'warning' && 'bg-warning/10 text-warning',
-                    alert.status === 'error' && 'bg-error/10 text-error',
+                    alert.status === 'neutral' && 'bg-bg-tertiary text-text-secondary',
                   )}
                 >
                   <alert.icon size={10} />
