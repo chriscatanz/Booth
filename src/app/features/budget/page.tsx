@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FeaturePageLayout } from '@/components/marketing/feature-page-layout';
 import { 
   DollarSign, PieChart, TrendingUp, Receipt, 
-  Calculator, FileSpreadsheet, Target
+  Calculator, FileSpreadsheet, Target, BarChart3, Award
 } from 'lucide-react';
 
 export default function BudgetFeaturePage() {
@@ -13,17 +13,17 @@ export default function BudgetFeaturePage() {
 
   return (
     <FeaturePageLayout
-      title="Know Exactly What Every Show Costs"
-      subtitle="Budget Management"
-      description="Stop guessing what your trade show program actually costs. Track every expense, forecast spending, and make data-driven decisions."
+      title="Track Costs, Measure Results"
+      subtitle="Budget & ROI"
+      description="Know exactly what every show costs and whether it's worth it. Track expenses, measure leads, and calculate real ROI."
       icon={DollarSign}
       iconColor="#1A7F37"
       benefits={[
         "Track all costs in one place: booth fees, travel, shipping, services",
         "See total program spend at a glance with rollup dashboards",
-        "Compare budgeted vs actual costs for every show",
-        "Forecast quarterly and annual trade show spending",
-        "Break down costs by category to find savings opportunities",
+        "Calculate cost per lead automatically for every show",
+        "Compare budgeted vs actual costs in real-time",
+        "Attribute revenue back to specific trade shows",
         "Generate expense reports for finance in seconds",
       ]}
       capabilities={[
@@ -38,19 +38,29 @@ export default function BudgetFeaturePage() {
           icon: Target,
         },
         {
-          title: 'Spending Forecasts',
-          description: 'See your projected spend for the quarter and year based on upcoming shows.',
+          title: 'Cost Per Lead',
+          description: 'Automatic calculation based on your total costs and leads captured at each show.',
+          icon: Calculator,
+        },
+        {
+          title: 'ROI Calculations',
+          description: 'See your return on investment with automatic ROI percentage calculations.',
+          icon: Award,
+        },
+        {
+          title: 'Revenue Attribution',
+          description: 'Connect closed deals back to the shows where relationships started.',
           icon: TrendingUp,
+        },
+        {
+          title: 'Show Comparisons',
+          description: 'Compare performance across shows to identify your winners and losers.',
+          icon: BarChart3,
         },
         {
           title: 'Category Breakdown',
           description: 'Understand where your money goes with automatic expense categorization.',
           icon: PieChart,
-        },
-        {
-          title: 'Quick Calculations',
-          description: 'Automatic totals, per-show costs, and cost-per-lead calculations.',
-          icon: Calculator,
         },
         {
           title: 'Export Reports',

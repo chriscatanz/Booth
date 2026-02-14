@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FeaturePageLayout } from '@/components/marketing/feature-page-layout';
 import { 
   Calendar, Clock, Eye, Filter, 
-  CalendarDays, Map, AlertTriangle
+  CalendarDays, Map, AlertTriangle, RefreshCw, Globe, Smartphone
 } from 'lucide-react';
 
 export default function CalendarFeaturePage() {
@@ -14,17 +14,17 @@ export default function CalendarFeaturePage() {
   return (
     <FeaturePageLayout
       title="Your Trade Show Calendar, Finally Organized"
-      subtitle="Calendar Management"
-      description="See your entire trade show schedule at a glance. Track dates, deadlines, and never double-book your team again."
+      subtitle="Calendar & Sync"
+      description="See your entire trade show schedule at a glance. Track dates, deadlines, and sync to Google Calendar, Outlook, or Apple Calendar."
       icon={Calendar}
       iconColor="#0969DA"
       benefits={[
         "See all shows in a beautiful calendar or list view",
         "Track key deadlines: shipping cutoffs, registration dates, hotel bookings",
+        "Sync to Google Calendar, Outlook, or Apple Calendar with one click",
         "Spot scheduling conflicts before they become problems",
-        "Filter by status, date range, or team member",
-        "Quick-add shows from templates you create",
-        "Export to Google Calendar, Outlook, or iCal",
+        "Automatic updates when show dates change",
+        "Export to .ics file for any calendar app",
       ]}
       capabilities={[
         {
@@ -38,19 +38,29 @@ export default function CalendarFeaturePage() {
           icon: Clock,
         },
         {
+          title: 'Calendar Sync',
+          description: 'One-click subscribe from Google Calendar, Outlook, or Apple Calendar. Events update automatically.',
+          icon: RefreshCw,
+        },
+        {
           title: 'Conflict Detection',
           description: 'Get warned when shows overlap or when your team is double-booked.',
           icon: AlertTriangle,
         },
         {
+          title: 'Works Everywhere',
+          description: 'Native support for Google, Outlook (web & desktop), and Apple Calendar on Mac, iPhone, and iPad.',
+          icon: Globe,
+        },
+        {
+          title: 'Mobile Ready',
+          description: 'Your shows follow you everywhere. See your trade show schedule on any device.',
+          icon: Smartphone,
+        },
+        {
           title: 'Advanced Filtering',
           description: 'Filter by status, date range, location, or any custom field you create.',
           icon: Filter,
-        },
-        {
-          title: 'Calendar Sync',
-          description: 'One-click export to your personal calendar. Never miss a show date.',
-          icon: CalendarDays,
         },
         {
           title: 'Location Mapping',
