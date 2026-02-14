@@ -46,12 +46,16 @@ export interface TierConfig {
   price: number; // monthly in cents
   userLimit: number | null;
   showLimit: number | null;
+  storageLimitGB: number;
   features: {
     aiDocExtraction: boolean;
     csvImportFull: boolean;
     customBranding: boolean;
     prioritySupport: boolean;
     unlimitedTemplates: boolean;
+    advancedAnalytics: boolean;
+    customFields: boolean;
+    phoneSupport: boolean;
   };
 }
 
@@ -59,40 +63,52 @@ export const TIER_CONFIG: Record<SubscriptionTier, TierConfig> = {
   trial: {
     name: 'Trial',
     price: 0,
-    userLimit: null,
-    showLimit: null,
+    userLimit: 5,
+    showLimit: 5,
+    storageLimitGB: 1,
     features: {
       aiDocExtraction: true,
-      csvImportFull: true,
-      customBranding: true,
+      csvImportFull: false,
+      customBranding: false,
       prioritySupport: false,
-      unlimitedTemplates: true,
+      unlimitedTemplates: false,
+      advancedAnalytics: false,
+      customFields: false,
+      phoneSupport: false,
     },
   },
   starter: {
-    name: 'Starter',
+    name: 'Team',
     price: 7400, // $74
     userLimit: 5,
-    showLimit: null, // Keep shows unlimited for now
+    showLimit: null, // Unlimited shows
+    storageLimitGB: 5,
     features: {
       aiDocExtraction: true,
       csvImportFull: true,
       customBranding: true,
-      prioritySupport: false,
+      prioritySupport: true, // Priority email support
       unlimitedTemplates: true,
+      advancedAnalytics: false, // Business only
+      customFields: false, // Business only
+      phoneSupport: false, // Business only
     },
   },
   pro: {
-    name: 'Pro',
+    name: 'Business',
     price: 12400, // $124
-    userLimit: null,
+    userLimit: null, // Unlimited team members
     showLimit: null,
+    storageLimitGB: 25,
     features: {
       aiDocExtraction: true,
       csvImportFull: true,
       customBranding: true,
       prioritySupport: true,
       unlimitedTemplates: true,
+      advancedAnalytics: true, // Business only
+      customFields: true, // Business only
+      phoneSupport: true, // Business only
     },
   },
   cancelled: {
@@ -100,12 +116,16 @@ export const TIER_CONFIG: Record<SubscriptionTier, TierConfig> = {
     price: 0,
     userLimit: 0,
     showLimit: 0,
+    storageLimitGB: 0,
     features: {
       aiDocExtraction: false,
       csvImportFull: false,
       customBranding: false,
       prioritySupport: false,
       unlimitedTemplates: false,
+      advancedAnalytics: false,
+      customFields: false,
+      phoneSupport: false,
     },
   },
   expired: {
@@ -113,12 +133,16 @@ export const TIER_CONFIG: Record<SubscriptionTier, TierConfig> = {
     price: 0,
     userLimit: 0,
     showLimit: 0,
+    storageLimitGB: 0,
     features: {
       aiDocExtraction: false,
       csvImportFull: false,
       customBranding: false,
       prioritySupport: false,
       unlimitedTemplates: false,
+      advancedAnalytics: false,
+      customFields: false,
+      phoneSupport: false,
     },
   },
 };
