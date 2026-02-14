@@ -21,6 +21,7 @@ export interface UserProfile {
   phone: string | null;
   jobTitle: string | null;
   lastActiveAt: string | null;
+  isSuperAdmin: boolean;
   createdAt: string;
   updatedAt: string;
 }

@@ -33,6 +33,7 @@ function mapUserProfile(row: Record<string, unknown>): UserProfile {
     phone: row.phone as string | null,
     jobTitle: row.job_title as string | null,
     lastActiveAt: row.last_active_at as string | null,
+    isSuperAdmin: (row.is_super_admin as boolean) ?? false,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };

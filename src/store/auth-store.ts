@@ -25,6 +25,7 @@ interface AuthState {
   isAdmin: boolean;
   isEditor: boolean;
   isViewer: boolean;
+  isSuperAdmin: boolean;
 
   // Actions
   initialize: () => Promise<void>;
@@ -66,6 +67,7 @@ export const useAuthStore = create<AuthState>()(
       isAdmin: false,
       isEditor: false,
       isViewer: false,
+      isSuperAdmin: false,
 
       initialize: async () => {
         try {
@@ -111,6 +113,7 @@ export const useAuthStore = create<AuthState>()(
             isAdmin: hasMinRole(role, 'admin'),
             isEditor: hasMinRole(role, 'editor'),
             isViewer: role === 'viewer',
+            isSuperAdmin: profile.isSuperAdmin ?? false,
             isLoading: false,
           });
         } catch (err) {
@@ -160,6 +163,7 @@ export const useAuthStore = create<AuthState>()(
             isAdmin: false,
             isEditor: false,
             isViewer: false,
+            isSuperAdmin: false,
           });
         } catch (err) {
           console.error('Sign out failed:', err);
