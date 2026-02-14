@@ -221,7 +221,31 @@ export function ShowReadView({ show, attendees, files = [], tasks, onEdit, canEd
               {show.agendaContent ? (
                 <Card>
                   <CardTitle icon={<Calendar size={16} />} title="Event Agenda" />
-                  <div className="mt-4 prose prose-sm max-w-none text-text-secondary" dangerouslySetInnerHTML={{ __html: show.agendaContent }} />
+                  <div 
+                    className="mt-4 text-sm text-text-secondary agenda-content"
+                    style={{
+                      lineHeight: '1.7',
+                    }}
+                    dangerouslySetInnerHTML={{ __html: show.agendaContent }} 
+                  />
+                  <style jsx global>{`
+                    .agenda-content p { margin-bottom: 0.75rem; }
+                    .agenda-content ul, .agenda-content ol { margin: 0.5rem 0 0.75rem 1.5rem; }
+                    .agenda-content li { margin-bottom: 0.25rem; }
+                    .agenda-content ul { list-style-type: disc; }
+                    .agenda-content ol { list-style-type: decimal; }
+                    .agenda-content strong { color: var(--text-primary); font-weight: 600; }
+                    .agenda-content h1, .agenda-content h2, .agenda-content h3, .agenda-content h4 {
+                      color: var(--text-primary);
+                      font-weight: 600;
+                      margin-top: 1rem;
+                      margin-bottom: 0.5rem;
+                    }
+                    .agenda-content h1 { font-size: 1.25rem; }
+                    .agenda-content h2 { font-size: 1.125rem; }
+                    .agenda-content h3 { font-size: 1rem; }
+                    .agenda-content br { display: block; content: ""; margin-top: 0.5rem; }
+                  `}</style>
                 </Card>
               ) : (
                 <EmptyState icon={<Calendar size={32} />} message="No agenda content added yet" />
@@ -487,7 +511,11 @@ export function ShowReadView({ show, attendees, files = [], tasks, onEdit, canEd
               {show.generalNotes ? (
                 <Card>
                   <CardTitle icon={<FileText size={16} />} title="Notes" />
-                  <div className="mt-4 prose prose-sm max-w-none text-text-secondary" dangerouslySetInnerHTML={{ __html: show.generalNotes }} />
+                  <div 
+                    className="mt-4 text-sm text-text-secondary agenda-content"
+                    style={{ lineHeight: '1.7' }}
+                    dangerouslySetInnerHTML={{ __html: show.generalNotes }} 
+                  />
                 </Card>
               ) : (
                 <EmptyState icon={<FileText size={32} />} message="No notes added yet" />
