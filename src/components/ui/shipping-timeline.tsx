@@ -93,10 +93,14 @@ export function ShippingTimeline({ shows, onSelectShow, daysToShow = 45, shippin
     );
   }
 
+  // Calculate total width to prevent scroll past content
+  const totalWidth = 192 + (days.length * 24); // 192px for show name column + 24px per day
+
   return (
     <div className="overflow-x-auto">
+      <div style={{ width: totalWidth, minWidth: totalWidth }}>
       {/* Header with day numbers */}
-      <div className="flex min-w-max">
+      <div className="flex">
         <div className="w-48 shrink-0 px-3 py-2 border-b border-border text-xs font-medium text-text-secondary">
           Show
         </div>
@@ -121,7 +125,7 @@ export function ShippingTimeline({ shows, onSelectShow, daysToShow = 45, shippin
       </div>
 
       {/* Month labels */}
-      <div className="flex min-w-max border-b border-border">
+      <div className="flex border-b border-border">
         <div className="w-48 shrink-0" />
         <div className="flex-1 flex">
           {weekMarkers.map(({ date, index }) => (
@@ -152,7 +156,7 @@ export function ShippingTimeline({ shows, onSelectShow, daysToShow = 45, shippin
         const isShipByWarning = daysUntilShipBy !== null && daysUntilShipBy > 3 && daysUntilShipBy <= 7;
 
         return (
-          <div key={show.id} className="flex min-w-max hover:bg-bg-tertiary/50 transition-colors">
+          <div key={show.id} className="flex hover:bg-bg-tertiary/50 transition-colors">
             <button
               onClick={() => onSelectShow(show)}
               className="w-48 shrink-0 px-3 py-2 border-b border-border text-left truncate text-sm text-text-primary hover:text-brand-purple"
@@ -269,6 +273,7 @@ export function ShippingTimeline({ shows, onSelectShow, daysToShow = 45, shippin
         );
       })}
 
+      </div>
       {/* Legend */}
       <div className="flex flex-wrap items-center gap-4 mt-3 px-3 text-xs text-text-secondary">
         <div className="flex items-center gap-1">
