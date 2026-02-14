@@ -318,3 +318,6 @@ export function createNewAttendee(tradeshowId?: number): Attendee {
 
 // Re-export lookup types
 export * from './lookups';
+
+// Re-export badge types
+export * from './badges';

@@ -27,13 +27,14 @@ import { AISettings } from './ai-settings';
 import { ChangePassword } from './change-password';
 import { Preferences } from './preferences';
 import { BillingSettings } from './billing-settings';
-import { Sliders } from 'lucide-react';
+import { BadgesView } from '@/components/badges';
+import { Sliders, Trophy } from 'lucide-react';
 
 interface OrgSettingsModalProps {
   onClose: () => void;
 }
 
-type SettingsTab = 'general' | 'account' | 'preferences' | 'billing' | 'branding' | 'members' | 'notifications' | 'calendar' | 'permissions' | 'lists' | 'fields' | 'ai' | 'data' | 'audit' | 'danger';
+type SettingsTab = 'general' | 'account' | 'preferences' | 'badges' | 'billing' | 'branding' | 'members' | 'notifications' | 'calendar' | 'permissions' | 'lists' | 'fields' | 'ai' | 'data' | 'audit' | 'danger';
 
 export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
   const { organization, isOwner, isAdmin, refreshOrganizations } = useAuthStore();
@@ -93,6 +94,7 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
     { id: 'general', label: 'General', icon: <Building2 size={18} /> },
     { id: 'account', label: 'Account', icon: <User size={18} /> },
     { id: 'preferences', label: 'Preferences', icon: <Sliders size={18} /> },
+    { id: 'badges', label: 'Badges', icon: <Trophy size={18} /> },
     { id: 'billing', label: 'Billing', icon: <CreditCard size={18} />, ownerOnly: true },
     { id: 'branding', label: 'Branding', icon: <Palette size={18} />, adminOnly: true },
     { id: 'members', label: 'Members', icon: <Users size={18} /> },
@@ -316,6 +318,18 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
                   transition={{ duration: 0.15 }}
                 >
                   <Preferences />
+                </motion.div>
+              )}
+
+              {activeTab === 'badges' && (
+                <motion.div
+                  key="badges"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <BadgesView />
                 </motion.div>
               )}
 
