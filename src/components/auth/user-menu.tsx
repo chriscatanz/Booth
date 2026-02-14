@@ -5,8 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { useAuthStore } from '@/store/auth-store';
 import { 
-  LogOut, Building2, ChevronDown, Settings, Check, Zap,
+  LogOut, Building2, ChevronDown, Settings, Check, Zap, Shield,
 } from 'lucide-react';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 interface UserMenuProps {
@@ -24,6 +25,7 @@ export function UserMenu({ onOpenOrgSettings, onEnterBoothMode, canEnterBoothMod
     switchOrganization, 
     signOut,
     isAdmin,
+    isSuperAdmin,
   } = useAuthStore();
   
   const [isOpen, setIsOpen] = useState(false);
@@ -102,14 +104,21 @@ export function UserMenu({ onOpenOrgSettings, onEnterBoothMode, canEnterBoothMod
                 {user?.fullName || 'User'}
               </p>
               <p className="text-xs text-text-secondary truncate">{user?.email}</p>
-              {membership?.role && (
-                <span className={cn(
-                  'inline-block mt-1.5 px-2 py-0.5 rounded text-[10px] font-medium capitalize',
-                  roleColors[membership.role] || 'bg-bg-tertiary text-text-secondary'
-                )}>
-                  {membership.role}
-                </span>
-              )}
+              <div className="flex items-center gap-1.5 mt-1.5">
+                {isSuperAdmin && (
+                  <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-error/20 text-error">
+                    Super Admin
+                  </span>
+                )}
+                {membership?.role && (
+                  <span className={cn(
+                    'px-2 py-0.5 rounded text-[10px] font-medium capitalize',
+                    roleColors[membership.role] || 'bg-bg-tertiary text-text-secondary'
+                  )}>
+                    {membership.role}
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Organization */}
@@ -171,6 +180,17 @@ export function UserMenu({ onOpenOrgSettings, onEnterBoothMode, canEnterBoothMod
 
             {/* Actions */}
             <div className="p-2">
+              {/* Super Admin Panel */}
+              {isSuperAdmin && (
+                <Link
+                  href="/admin"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full flex items-center gap-2 px-2 py-2 rounded-lg bg-error/10 hover:bg-error/20 text-error text-sm font-medium mb-1"
+                >
+                  <Shield size={14} />
+                  Admin Panel
+                </Link>
+              )}
               {/* Booth Mode - Mobile Only */}
               {onEnterBoothMode && canEnterBoothMode && (
                 <button
