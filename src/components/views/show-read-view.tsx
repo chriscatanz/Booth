@@ -1,8 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { TradeShow, Attendee, AdditionalFile } from '@/types';
 import { 
-  totalEstimatedCost, 
+  totalEstimatedCost, totalServicesCost, estimatedHotelCost,
   parseJsonStringArray 
 } from '@/types/computed';
 import { formatCurrency, cn } from '@/lib/utils';
@@ -10,9 +11,14 @@ import { format, differenceInDays, parseISO } from 'date-fns';
 import { 
   MapPin, Calendar, Users, DollarSign, 
   Building, FileText, CheckSquare, ExternalLink,
-  ArrowRight, Globe, User2, Briefcase, Hash
+  Globe, User2, Briefcase, Truck, Package, Clock,
+  Hotel, Plane, Mail, Phone, Copy, Navigation,
+  Zap, Wifi, Wrench, Info, ClipboardList, Radio,
+  RotateCcw, AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { VenueMap } from '@/components/ui/venue-map';
+import { useToastStore } from '@/store/toast-store';
 
 interface ShowReadViewProps {
   show: TradeShow;
@@ -23,11 +29,28 @@ interface ShowReadViewProps {
   canEdit?: boolean;
 }
 
+type ReadTab = 'overview' | 'agenda' | 'booth' | 'logistics' | 'travel' | 'budget' | 'notes';
+
+const TABS: { id: ReadTab; label: string; icon: React.ReactNode }[] = [
+  { id: 'overview', label: 'Overview', icon: <Info size={16} /> },
+  { id: 'agenda', label: 'Agenda', icon: <Calendar size={16} /> },
+  { id: 'booth', label: 'Booth', icon: <Package size={16} /> },
+  { id: 'logistics', label: 'Logistics', icon: <Truck size={16} /> },
+  { id: 'travel', label: 'Travel', icon: <Plane size={16} /> },
+  { id: 'budget', label: 'Budget', icon: <DollarSign size={16} /> },
+  { id: 'notes', label: 'Notes & Tasks', icon: <FileText size={16} /> },
+];
+
 export function ShowReadView({ show, attendees, files = [], tasks, onEdit, canEdit }: ShowReadViewProps) {
+  const [activeTab, setActiveTab] = useState<ReadTab>('overview');
+  const toast = useToastStore();
+  
   // Computed values
   const totalCost = totalEstimatedCost(show);
-  const confirmedCost = (show.cost || 0) + (show.shippingCost || 0); // Rough estimate of confirmed
-  const costProgress = totalCost > 0 ? Math.min(100, Math.round((confirmedCost / totalCost) * 100)) : 0;
+  const servicesCost = totalServicesCost(show);
+  const hotelCost = estimatedHotelCost(show);
+  const graphicsToShip = parseJsonStringArray(show.graphicsToShip);
+  const packingItems = parseJsonStringArray(show.packingListItems);
   
   // Days until show
   const daysUntil = show.startDate 
@@ -35,218 +58,505 @@ export function ShowReadView({ show, attendees, files = [], tasks, onEdit, canEd
     : null;
   const isUpcoming = daysUntil !== null && daysUntil >= 0;
   
-  // Task progress
+  // Task counts
   const taskCompleted = tasks?.completed || 0;
   const taskTotal = tasks?.total || 0;
-  const taskProgress = taskTotal > 0 ? Math.round((taskCompleted / taskTotal) * 100) : 0;
 
-  // Open map for venue
-  const openMap = () => {
-    const address = show.venueAddress || show.venueName || show.location;
-    if (address) {
-      window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank');
+  // Format dates
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return null;
+    try {
+      return format(parseISO(dateStr), 'EEE, MMM d, yyyy');
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`${label} copied!`);
+  };
+
+  const openDirections = (address: string) => {
+    const encoded = encodeURIComponent(address);
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${encoded}`, '_blank');
+  };
+
+  // Tab counts for badges
+  const getTabCount = (tab: ReadTab): number | undefined => {
+    switch (tab) {
+      case 'travel': return attendees.length || undefined;
+      case 'notes': return taskTotal || undefined;
+      default: return undefined;
     }
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-      {/* Top Row: Show Info | Venue | Countdown */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Show Information Card */}
-        <Card className="md:col-span-1">
-          <CardTitle icon={<Briefcase size={16} />} title="Show Information" />
-          <div className="space-y-3 mt-4">
-            {show.managementCompany && (
-              <InfoRow label="Organization" value={show.managementCompany} />
-            )}
-            {show.totalAttending && show.totalAttending > 0 && (
-              <InfoRow label="Expected Attendance" value={`${show.totalAttending.toLocaleString()}+`} />
-            )}
-            {show.eventType && (
-              <InfoRow label="Type" value={formatEventType(show.eventType)} />
-            )}
-            {show.showWebsite && (
-              <InfoRow 
-                label="Website" 
-                value={
-                  <a 
-                    href={show.showWebsite} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-brand-purple hover:underline flex items-center gap-1"
-                  >
-                    {new URL(show.showWebsite).hostname.replace('www.', '')}
-                    <ExternalLink size={12} />
-                  </a>
-                } 
-              />
-            )}
-            {!show.managementCompany && !show.totalAttending && !show.showWebsite && (
-              <p className="text-sm text-text-tertiary italic">No show information added yet</p>
-            )}
+    <div className="flex flex-col h-full">
+      {/* Tabs */}
+      <div className="border-b border-border bg-surface sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="flex gap-1 overflow-x-auto py-2">
+            {TABS.map(tab => {
+              const count = getTabCount(tab.id);
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    'flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors',
+                    activeTab === tab.id
+                      ? 'bg-brand-purple/10 text-brand-purple'
+                      : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary'
+                  )}
+                >
+                  {tab.icon}
+                  {tab.label}
+                  {count !== undefined && (
+                    <span className={cn(
+                      'ml-1 px-1.5 py-0.5 text-xs rounded-full',
+                      activeTab === tab.id ? 'bg-brand-purple/20' : 'bg-bg-tertiary'
+                    )}>
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
-        </Card>
-
-        {/* Venue Card */}
-        <Card className="md:col-span-1">
-          <CardTitle icon={<Building size={16} />} title="Venue" />
-          <div className="space-y-3 mt-4">
-            {show.venueName && (
-              <InfoRow label="Location" value={show.venueName} />
-            )}
-            {show.venueAddress && (
-              <>
-                <InfoRow label="Address" value={show.venueAddress.split(',')[0]} />
-                {show.venueAddress.includes(',') && (
-                  <InfoRow label="City, State" value={show.venueAddress.split(',').slice(1).join(',').trim()} />
-                )}
-              </>
-            )}
-            {!show.venueName && show.location && (
-              <InfoRow label="Location" value={show.location} />
-            )}
-            {(show.venueAddress || show.venueName || show.location) && (
-              <Button variant="outline" size="sm" onClick={openMap} className="mt-2">
-                View Map
-              </Button>
-            )}
-            {!show.venueName && !show.venueAddress && !show.location && (
-              <p className="text-sm text-text-tertiary italic">No venue information added yet</p>
-            )}
-          </div>
-        </Card>
-
-        {/* Countdown Card */}
-        <Card className="md:col-span-1 flex flex-col items-center justify-center text-center bg-gradient-to-br from-brand-purple/5 to-brand-purple/10">
-          <div className="text-xs text-brand-purple font-medium uppercase tracking-wide mb-2">Countdown</div>
-          {isUpcoming && daysUntil !== null ? (
-            <>
-              <div className="text-6xl font-bold text-brand-purple">{daysUntil}</div>
-              <div className="text-text-secondary mt-1">days until show</div>
-            </>
-          ) : daysUntil !== null && daysUntil < 0 ? (
-            <>
-              <div className="text-4xl font-bold text-text-tertiary">Complete</div>
-              <div className="text-text-secondary mt-1">Show ended {Math.abs(daysUntil)} days ago</div>
-            </>
-          ) : (
-            <>
-              <div className="text-4xl font-bold text-text-tertiary">—</div>
-              <div className="text-text-secondary mt-1">No date set</div>
-            </>
-          )}
-        </Card>
+        </div>
       </div>
 
-      {/* Bottom Row: Budget | Team | Documents | Tasks */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {/* Budget Card */}
-        <SummaryCard
-          icon={<DollarSign size={16} className="text-success" />}
-          title="Budget"
-          mainValue={formatCurrency(totalCost)}
-          subText="Total estimated cost"
-          progress={costProgress}
-          progressColor="bg-success"
-          footer={confirmedCost > 0 ? `${formatCurrency(confirmedCost)} confirmed` : undefined}
-        />
-
-        {/* Team Card */}
-        <SummaryCard
-          icon={<Users size={16} className="text-brand-purple" />}
-          title="Team"
-          customContent={
-            <div className="mt-2">
-              {attendees.length > 0 ? (
-                <>
-                  <div className="flex -space-x-2 mb-2">
-                    {attendees.slice(0, 3).map((a, i) => (
-                      <div 
-                        key={a.localId}
-                        className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-cyan to-brand-purple flex items-center justify-center text-white text-sm font-medium border-2 border-surface"
-                        style={{ zIndex: 3 - i }}
-                      >
-                        {a.name?.[0]?.toUpperCase() || '?'}
-                      </div>
-                    ))}
-                    {attendees.length > 3 && (
-                      <div className="w-10 h-10 rounded-full bg-bg-tertiary flex items-center justify-center text-text-secondary text-xs font-medium border-2 border-surface">
-                        +{attendees.length - 3}
-                      </div>
+      {/* Tab Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+          
+          {/* OVERVIEW TAB */}
+          {activeTab === 'overview' && (
+            <div className="space-y-6">
+              {/* Top Row: Show Info | Venue | Countdown */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card>
+                  <CardTitle icon={<Briefcase size={16} />} title="Show Information" />
+                  <div className="space-y-3 mt-4">
+                    {show.managementCompany && <InfoRow label="Organization" value={show.managementCompany} />}
+                    {show.totalAttending && <InfoRow label="Expected Attendance" value={`${show.totalAttending.toLocaleString()}+`} />}
+                    {show.eventType && <InfoRow label="Type" value={formatEventType(show.eventType)} />}
+                    {show.showWebsite && (
+                      <InfoRow label="Website" value={
+                        <a href={show.showWebsite} target="_blank" rel="noopener noreferrer" className="text-brand-purple hover:underline flex items-center gap-1">
+                          Visit site <ExternalLink size={12} />
+                        </a>
+                      } />
+                    )}
+                    {!show.managementCompany && !show.totalAttending && !show.showWebsite && (
+                      <p className="text-sm text-text-tertiary italic">No show information added</p>
                     )}
                   </div>
-                  <p className="text-sm text-text-secondary">{attendees.length} team member{attendees.length !== 1 ? 's' : ''} assigned</p>
-                </>
-              ) : (
-                <p className="text-sm text-text-tertiary">No team assigned</p>
+                </Card>
+
+                <Card>
+                  <CardTitle icon={<Building size={16} />} title="Venue" />
+                  <div className="space-y-3 mt-4">
+                    {show.venueName && <InfoRow label="Location" value={show.venueName} />}
+                    {show.venueAddress && <InfoRow label="Address" value={show.venueAddress} />}
+                    {!show.venueName && show.location && <InfoRow label="Location" value={show.location} />}
+                    {(show.venueAddress || show.venueName || show.location) && (
+                      <Button variant="outline" size="sm" onClick={() => openDirections(show.venueAddress || show.venueName || show.location || '')} className="mt-2">
+                        View Map
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+
+                <Card className="flex flex-col items-center justify-center text-center bg-gradient-to-br from-brand-purple/5 to-brand-purple/10">
+                  <div className="text-xs text-brand-purple font-medium uppercase tracking-wide mb-2">Countdown</div>
+                  {isUpcoming && daysUntil !== null ? (
+                    <>
+                      <div className="text-6xl font-bold text-brand-purple">{daysUntil}</div>
+                      <div className="text-text-secondary mt-1">days until show</div>
+                    </>
+                  ) : daysUntil !== null && daysUntil < 0 ? (
+                    <>
+                      <div className="text-3xl font-bold text-text-tertiary">Complete</div>
+                      <div className="text-sm text-text-secondary mt-1">{Math.abs(daysUntil)} days ago</div>
+                    </>
+                  ) : (
+                    <div className="text-3xl text-text-tertiary">—</div>
+                  )}
+                </Card>
+              </div>
+
+              {/* Summary Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <SummaryCard icon={<DollarSign size={16} className="text-success" />} title="Budget" mainValue={formatCurrency(totalCost)} subText="Total estimated" />
+                <SummaryCard icon={<Users size={16} className="text-brand-purple" />} title="Team" mainValue={attendees.length.toString()} subText="attending" />
+                <SummaryCard icon={<FileText size={16} className="text-warning" />} title="Documents" mainValue={files.length.toString()} subText="files uploaded" />
+                <SummaryCard icon={<CheckSquare size={16} className="text-brand-cyan" />} title="Tasks" mainValue={`${taskCompleted}/${taskTotal}`} subText="completed" />
+              </div>
+
+              {/* Event Dates */}
+              <Card>
+                <CardTitle icon={<Calendar size={16} />} title="Event Dates" />
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <DateBlock label="Show Dates" primary={formatDate(show.startDate)} secondary={show.endDate && show.endDate !== show.startDate ? `to ${formatDate(show.endDate)}` : undefined} />
+                  {show.moveInDate && <DateBlock label="Move-In" primary={formatDate(show.moveInDate)} secondary={show.moveInTime || undefined} />}
+                  {show.moveOutDate && <DateBlock label="Move-Out" primary={formatDate(show.moveOutDate)} secondary={show.moveOutTime || undefined} />}
+                  {show.shippingCutoff && <DateBlock label="Ship By" primary={formatDate(show.shippingCutoff)} highlight />}
+                </div>
+              </Card>
+
+              {/* Map */}
+              {(show.venueAddress || show.hotelAddress) && (
+                <Card noPadding>
+                  <VenueMap venueAddress={show.venueAddress} hotelAddress={show.hotelAddress} venueName={show.venueName} hotelName={show.hotelName} />
+                </Card>
               )}
             </div>
-          }
-        />
+          )}
 
-        {/* Documents Card */}
-        <SummaryCard
-          icon={<FileText size={16} className="text-warning" />}
-          title="Documents"
-          mainValue={files.length.toString()}
-          subText="Files uploaded"
-          linkText={files.length > 0 ? "View all →" : undefined}
-        />
+          {/* AGENDA TAB */}
+          {activeTab === 'agenda' && (
+            <div className="space-y-6">
+              {show.agendaContent ? (
+                <Card>
+                  <CardTitle icon={<Calendar size={16} />} title="Event Agenda" />
+                  <div className="mt-4 prose prose-sm max-w-none text-text-secondary" dangerouslySetInnerHTML={{ __html: show.agendaContent }} />
+                </Card>
+              ) : (
+                <EmptyState icon={<Calendar size={32} />} message="No agenda content added yet" />
+              )}
+              
+              {show.showAgendaUrl && (
+                <Card>
+                  <CardTitle icon={<ExternalLink size={16} />} title="Agenda Link" />
+                  <a href={show.showAgendaUrl} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-2 text-brand-purple hover:underline">
+                    View full agenda <ExternalLink size={14} />
+                  </a>
+                </Card>
+              )}
 
-        {/* Tasks Card */}
-        <SummaryCard
-          icon={<CheckSquare size={16} className="text-brand-cyan" />}
-          title="Tasks"
-          mainValue={`${taskCompleted} / ${taskTotal}`}
-          subText="Tasks completed"
-          progress={taskProgress}
-          progressColor="bg-brand-cyan"
-          footer={taskTotal > 0 ? `${taskProgress}% complete` : undefined}
-        />
+              {show.speakingDetails && (
+                <Card>
+                  <CardTitle icon={<User2 size={16} />} title="Speaking Engagement" />
+                  <div className="mt-3 text-sm text-text-secondary whitespace-pre-wrap">{show.speakingDetails}</div>
+                </Card>
+              )}
+            </div>
+          )}
+
+          {/* BOOTH TAB */}
+          {activeTab === 'booth' && (
+            <div className="space-y-6">
+              <Card>
+                <CardTitle icon={<Package size={16} />} title="Booth Details" />
+                <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {show.boothNumber && <InfoBlock label="Booth #" value={show.boothNumber} copyable onCopy={() => copyToClipboard(show.boothNumber!, 'Booth number')} />}
+                  {show.boothSize && <InfoBlock label="Size" value={show.boothSize} />}
+                  {show.cost && <InfoBlock label="Booth Cost" value={formatCurrency(show.cost)} />}
+                </div>
+              </Card>
+
+              {/* Services */}
+              {(show.electricalCost || show.internetCost || show.laborCost || show.standardServicesCost) && (
+                <Card>
+                  <CardTitle icon={<Zap size={16} />} title="Services" />
+                  <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {show.electricalCost && <InfoBlock label="Electrical" value={formatCurrency(show.electricalCost)} icon={<Zap size={14} />} />}
+                    {show.internetCost && <InfoBlock label="Internet" value={formatCurrency(show.internetCost)} icon={<Wifi size={14} />} />}
+                    {show.laborCost && <InfoBlock label="Labor" value={formatCurrency(show.laborCost)} icon={<Wrench size={14} />} />}
+                    {show.standardServicesCost && <InfoBlock label="Drayage" value={formatCurrency(show.standardServicesCost)} icon={<Truck size={14} />} />}
+                  </div>
+                </Card>
+              )}
+
+              {/* Lead Capture */}
+              {show.leadCaptureSystem && (
+                <Card>
+                  <CardTitle icon={<Radio size={16} />} title="Lead Capture" />
+                  <div className="mt-3">
+                    <InfoBlock label="System" value={show.leadCaptureSystem} />
+                  </div>
+                </Card>
+              )}
+
+              {/* Packing List */}
+              {packingItems.length > 0 && (
+                <Card>
+                  <CardTitle icon={<ClipboardList size={16} />} title="Packing List" />
+                  <ul className="mt-3 space-y-1">
+                    {packingItems.map((item, i) => (
+                      <li key={i} className="text-sm text-text-secondary flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-brand-purple" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              )}
+            </div>
+          )}
+
+          {/* LOGISTICS TAB */}
+          {activeTab === 'logistics' && (
+            <div className="space-y-6">
+              {/* Shipping */}
+              <Card>
+                <CardTitle icon={<Truck size={16} />} title="Outbound Shipping" />
+                <div className="mt-4 space-y-4">
+                  {show.shippingCutoff && (
+                    <div className="flex items-center gap-3 p-3 bg-warning/10 rounded-lg">
+                      <Clock size={18} className="text-warning" />
+                      <div>
+                        <div className="text-sm font-medium text-text-primary">Ship by {formatDate(show.shippingCutoff)}</div>
+                        <div className="text-xs text-text-secondary">Warehouse arrival deadline</div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    {show.trackingNumber && (
+                      <InfoBlock 
+                        label="Tracking #" 
+                        value={show.trackingNumber} 
+                        copyable 
+                        onCopy={() => copyToClipboard(show.trackingNumber!, 'Tracking number')} 
+                      />
+                    )}
+                    {show.shippingCost && <InfoBlock label="Cost" value={formatCurrency(show.shippingCost)} />}
+                  </div>
+                  
+                  {show.trackingStatus && (
+                    <div className="p-3 bg-bg-tertiary rounded-lg">
+                      <div className="text-xs text-text-tertiary mb-1">Status</div>
+                      <div className="text-sm font-medium text-text-primary">{show.trackingStatus}</div>
+                      {show.trackingStatusDetails && (
+                        <div className="text-xs text-text-secondary mt-1">{show.trackingStatusDetails}</div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {show.shippingInfo && (
+                    <div className="text-sm text-text-secondary whitespace-pre-wrap">{show.shippingInfo}</div>
+                  )}
+                </div>
+              </Card>
+
+              {/* Return Shipping */}
+              {(show.returnTrackingNumber || show.returnShippingCost) && (
+                <Card>
+                  <CardTitle icon={<RotateCcw size={16} />} title="Return Shipping" />
+                  <div className="mt-4 grid grid-cols-2 gap-4">
+                    {show.returnTrackingNumber && (
+                      <InfoBlock 
+                        label="Tracking #" 
+                        value={show.returnTrackingNumber} 
+                        copyable 
+                        onCopy={() => copyToClipboard(show.returnTrackingNumber!, 'Return tracking')} 
+                      />
+                    )}
+                    {show.returnShippingCost && <InfoBlock label="Cost" value={formatCurrency(show.returnShippingCost)} />}
+                    {show.returnShipDate && <InfoBlock label="Ship Date" value={formatDate(show.returnShipDate) || ''} />}
+                  </div>
+                </Card>
+              )}
+
+              {/* Graphics to Ship */}
+              {graphicsToShip.length > 0 && (
+                <Card>
+                  <CardTitle icon={<Package size={16} />} title="Graphics to Ship" />
+                  <ul className="mt-3 space-y-1">
+                    {graphicsToShip.map((item, i) => (
+                      <li key={i} className="text-sm text-text-secondary flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              )}
+            </div>
+          )}
+
+          {/* TRAVEL TAB */}
+          {activeTab === 'travel' && (
+            <div className="space-y-6">
+              {/* Hotel */}
+              {(show.hotelName || show.hotelAddress) && (
+                <Card>
+                  <CardTitle icon={<Hotel size={16} />} title="Hotel" />
+                  <div className="mt-4 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {show.hotelName && <InfoBlock label="Hotel" value={show.hotelName} />}
+                      {show.hotelAddress && <InfoBlock label="Address" value={show.hotelAddress} />}
+                      {show.hotelConfirmationNumber && (
+                        <InfoBlock 
+                          label="Confirmation #" 
+                          value={show.hotelConfirmationNumber} 
+                          copyable 
+                          onCopy={() => copyToClipboard(show.hotelConfirmationNumber!, 'Confirmation')} 
+                        />
+                      )}
+                      {show.hotelCostPerNight && (
+                        <InfoBlock label="Rate" value={`${formatCurrency(show.hotelCostPerNight)}/night`} />
+                      )}
+                    </div>
+                    
+                    {(show.hotelAddress || show.hotelName) && (
+                      <Button variant="outline" size="sm" onClick={() => openDirections(show.hotelAddress || show.hotelName || '')}>
+                        <Navigation size={14} /> Get Directions
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+              )}
+
+              {/* Team / Attendees */}
+              <Card>
+                <CardTitle icon={<Users size={16} />} title={`Team (${attendees.length})`} />
+                {attendees.length > 0 ? (
+                  <div className="mt-4 space-y-3">
+                    {attendees.map((a) => (
+                      <div key={a.localId} className="flex items-center gap-3 p-3 bg-bg-tertiary rounded-lg">
+                        <div className="w-10 h-10 rounded-full bg-brand-purple/20 flex items-center justify-center text-brand-purple font-medium">
+                          {a.name?.[0]?.toUpperCase() || '?'}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-text-primary truncate">{a.name || 'Unnamed'}</div>
+                          {a.email && <div className="text-sm text-text-secondary truncate">{a.email}</div>}
+                          {(a.arrivalDate || a.departureDate) && (
+                            <div className="text-xs text-text-tertiary mt-1">
+                              {a.arrivalDate && `Arrives: ${formatDate(a.arrivalDate)}`}
+                              {a.arrivalDate && a.departureDate && ' • '}
+                              {a.departureDate && `Departs: ${formatDate(a.departureDate)}`}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex gap-1">
+                          {a.email && (
+                            <a href={`mailto:${a.email}`} className="p-2 text-text-tertiary hover:text-brand-purple">
+                              <Mail size={16} />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-3 text-sm text-text-tertiary">No team members assigned</p>
+                )}
+              </Card>
+            </div>
+          )}
+
+          {/* BUDGET TAB */}
+          {activeTab === 'budget' && (
+            <div className="space-y-6">
+              <Card>
+                <CardTitle icon={<DollarSign size={16} />} title="Cost Breakdown" />
+                <div className="mt-4 space-y-3">
+                  {show.cost && <BudgetRow label="Registration / Booth" amount={show.cost} />}
+                  {servicesCost > 0 && <BudgetRow label="Services (Electrical, Internet, Labor, Drayage)" amount={servicesCost} />}
+                  {show.shippingCost && <BudgetRow label="Outbound Shipping" amount={show.shippingCost} />}
+                  {show.returnShippingCost && <BudgetRow label="Return Shipping" amount={show.returnShippingCost} />}
+                  {hotelCost > 0 && <BudgetRow label="Hotel (estimated)" amount={hotelCost} />}
+                  <hr className="border-border my-2" />
+                  <BudgetRow label="Total Estimated" amount={totalCost} isTotal />
+                </div>
+              </Card>
+
+              {/* ROI */}
+              {(show.totalLeads || show.qualifiedLeads || show.revenueAttributed) && (
+                <Card>
+                  <CardTitle icon={<Briefcase size={16} />} title="ROI Metrics" />
+                  <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {show.totalLeads && <InfoBlock label="Total Leads" value={show.totalLeads.toString()} />}
+                    {show.qualifiedLeads && <InfoBlock label="Qualified Leads" value={show.qualifiedLeads.toString()} />}
+                    {show.meetingsBooked && <InfoBlock label="Meetings Booked" value={show.meetingsBooked.toString()} />}
+                    {show.revenueAttributed && <InfoBlock label="Revenue" value={formatCurrency(show.revenueAttributed)} />}
+                  </div>
+                </Card>
+              )}
+            </div>
+          )}
+
+          {/* NOTES & TASKS TAB */}
+          {activeTab === 'notes' && (
+            <div className="space-y-6">
+              {/* Notes */}
+              {show.generalNotes ? (
+                <Card>
+                  <CardTitle icon={<FileText size={16} />} title="Notes" />
+                  <div className="mt-4 prose prose-sm max-w-none text-text-secondary" dangerouslySetInnerHTML={{ __html: show.generalNotes }} />
+                </Card>
+              ) : (
+                <EmptyState icon={<FileText size={32} />} message="No notes added yet" />
+              )}
+
+              {/* Documents */}
+              {files.length > 0 && (
+                <Card>
+                  <CardTitle icon={<FileText size={16} />} title={`Documents (${files.length})`} />
+                  <div className="mt-4 space-y-2">
+                    {files.map((file) => (
+                      <a
+                        key={file.localId}
+                        href={file.filePath}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-3 rounded-lg bg-bg-tertiary hover:bg-bg-secondary transition-colors"
+                      >
+                        <span className="text-xl">{getFileIcon(file.fileType)}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-text-primary truncate">{file.fileName}</p>
+                        </div>
+                        <ExternalLink size={14} className="text-text-tertiary" />
+                      </a>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {/* Show Contact */}
+              {(show.showContactName || show.showContactEmail || show.showContactPhone) && (
+                <Card>
+                  <CardTitle icon={<User2 size={16} />} title="Show Contact" />
+                  <div className="mt-4 space-y-2">
+                    {show.showContactName && <div className="font-medium text-text-primary">{show.showContactName}</div>}
+                    {show.showContactEmail && (
+                      <a href={`mailto:${show.showContactEmail}`} className="flex items-center gap-2 text-sm text-brand-purple hover:underline">
+                        <Mail size={14} /> {show.showContactEmail}
+                      </a>
+                    )}
+                    {show.showContactPhone && (
+                      <a href={`tel:${show.showContactPhone}`} className="flex items-center gap-2 text-sm text-brand-purple hover:underline">
+                        <Phone size={14} /> {show.showContactPhone}
+                      </a>
+                    )}
+                  </div>
+                </Card>
+              )}
+
+              {/* Links */}
+              {(show.showWebsite || show.eventPortalUrl || show.showAgendaUrl) && (
+                <Card>
+                  <CardTitle icon={<ExternalLink size={16} />} title="Links" />
+                  <div className="mt-4 space-y-2">
+                    {show.showWebsite && <LinkRow label="Show Website" url={show.showWebsite} />}
+                    {show.eventPortalUrl && <LinkRow label="Exhibitor Portal" url={show.eventPortalUrl} />}
+                    {show.showAgendaUrl && <LinkRow label="Agenda" url={show.showAgendaUrl} />}
+                  </div>
+                </Card>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-
-      {/* Show Contact */}
-      {(show.showContactName || show.showContactEmail || show.showContactPhone) && (
-        <Card>
-          <CardTitle icon={<User2 size={16} />} title="Show Contact" />
-          <div className="flex flex-wrap items-center gap-4 mt-3">
-            {show.showContactName && (
-              <span className="text-text-primary font-medium">{show.showContactName}</span>
-            )}
-            {show.showContactEmail && (
-              <a href={`mailto:${show.showContactEmail}`} className="text-sm text-brand-purple hover:underline">
-                {show.showContactEmail}
-              </a>
-            )}
-            {show.showContactPhone && (
-              <a href={`tel:${show.showContactPhone}`} className="text-sm text-brand-purple hover:underline">
-                {show.showContactPhone}
-              </a>
-            )}
-          </div>
-        </Card>
-      )}
-
-      {/* Notes Preview */}
-      {show.generalNotes && (
-        <Card>
-          <CardTitle icon={<FileText size={16} />} title="Notes" />
-          <div 
-            className="mt-3 text-sm text-text-secondary line-clamp-4 whitespace-pre-wrap"
-            dangerouslySetInnerHTML={{ __html: show.generalNotes }}
-          />
-        </Card>
-      )}
 
       {/* Floating Edit Button */}
       {canEdit && onEdit && (
         <div className="fixed bottom-6 left-6 z-40">
-          <Button 
-            variant="primary" 
-            size="lg"
-            onClick={onEdit}
-            className="shadow-lg"
-          >
+          <Button variant="primary" size="lg" onClick={onEdit} className="shadow-lg">
             Edit Show
           </Button>
         </div>
@@ -259,12 +569,9 @@ export function ShowReadView({ show, attendees, files = [], tasks, onEdit, canEd
 // Sub-components
 // ============================================================================
 
-function Card({ children, className }: { children: React.ReactNode; className?: string }) {
+function Card({ children, className, noPadding }: { children: React.ReactNode; className?: string; noPadding?: boolean }) {
   return (
-    <div className={cn(
-      "bg-surface border border-border rounded-xl p-5",
-      className
-    )}>
+    <div className={cn("bg-surface border border-border rounded-xl", !noPadding && "p-5", className)}>
       {children}
     </div>
   );
@@ -288,58 +595,64 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-interface SummaryCardProps {
-  icon: React.ReactNode;
-  title: string;
-  mainValue?: string;
-  subText?: string;
-  progress?: number;
-  progressColor?: string;
-  footer?: string;
-  linkText?: string;
-  customContent?: React.ReactNode;
+function InfoBlock({ label, value, icon, copyable, onCopy }: { label: string; value: string; icon?: React.ReactNode; copyable?: boolean; onCopy?: () => void }) {
+  return (
+    <div className={cn("p-3 bg-bg-tertiary rounded-lg", copyable && "cursor-pointer hover:bg-bg-secondary")} onClick={copyable ? onCopy : undefined}>
+      <div className="text-xs text-text-tertiary flex items-center gap-1">
+        {icon}
+        {label}
+        {copyable && <Copy size={10} className="ml-1" />}
+      </div>
+      <div className="text-sm font-medium text-text-primary mt-1">{value}</div>
+    </div>
+  );
 }
 
-function SummaryCard({ 
-  icon, title, mainValue, subText, progress, progressColor, footer, linkText, customContent 
-}: SummaryCardProps) {
+function DateBlock({ label, primary, secondary, highlight }: { label: string; primary: string | null; secondary?: string; highlight?: boolean }) {
+  if (!primary) return null;
+  return (
+    <div className={cn("p-3 rounded-lg", highlight ? "bg-warning/10" : "bg-bg-tertiary")}>
+      <div className={cn("text-xs uppercase tracking-wide", highlight ? "text-warning" : "text-text-tertiary")}>{label}</div>
+      <div className={cn("text-sm font-medium mt-1", highlight ? "text-warning" : "text-text-primary")}>{primary}</div>
+      {secondary && <div className="text-xs text-text-secondary">{secondary}</div>}
+    </div>
+  );
+}
+
+function SummaryCard({ icon, title, mainValue, subText }: { icon: React.ReactNode; title: string; mainValue: string; subText: string }) {
   return (
     <Card>
-      <div className="flex items-center gap-2 mb-1">
-        {icon}
-        <span className="text-xs font-semibold text-text-tertiary uppercase tracking-wide">{title}</span>
-      </div>
-      
-      {customContent || (
-        <>
-          {mainValue && (
-            <div className="text-3xl font-bold text-text-primary mt-2">{mainValue}</div>
-          )}
-          {subText && (
-            <p className="text-sm text-text-secondary mt-1">{subText}</p>
-          )}
-        </>
-      )}
-      
-      {progress !== undefined && progress > 0 && (
-        <div className="mt-3 h-2 bg-bg-tertiary rounded-full overflow-hidden">
-          <div 
-            className={cn("h-full rounded-full transition-all", progressColor || "bg-brand-purple")}
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      )}
-      
-      {footer && (
-        <p className="text-xs text-text-tertiary mt-2">{footer}</p>
-      )}
-      
-      {linkText && (
-        <button className="text-sm text-brand-purple hover:underline mt-2 flex items-center gap-1">
-          {linkText}
-        </button>
-      )}
+      <div className="flex items-center gap-2 mb-1">{icon}<span className="text-xs font-semibold text-text-tertiary uppercase tracking-wide">{title}</span></div>
+      <div className="text-3xl font-bold text-text-primary mt-2">{mainValue}</div>
+      <p className="text-sm text-text-secondary mt-1">{subText}</p>
     </Card>
+  );
+}
+
+function BudgetRow({ label, amount, isTotal }: { label: string; amount: number; isTotal?: boolean }) {
+  return (
+    <div className={cn("flex justify-between", isTotal && "font-semibold text-lg")}>
+      <span className={cn(isTotal ? "text-text-primary" : "text-text-secondary")}>{label}</span>
+      <span className={cn(isTotal ? "text-text-primary" : "text-text-secondary")}>{formatCurrency(amount)}</span>
+    </div>
+  );
+}
+
+function LinkRow({ label, url }: { label: string; url: string }) {
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-2 -mx-2 rounded-lg hover:bg-bg-tertiary transition-colors group">
+      <span className="text-sm text-text-primary">{label}</span>
+      <ExternalLink size={14} className="text-text-tertiary group-hover:text-brand-purple" />
+    </a>
+  );
+}
+
+function EmptyState({ icon, message }: { icon: React.ReactNode; message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-12 text-text-tertiary">
+      {icon}
+      <p className="mt-2 text-sm">{message}</p>
+    </div>
   );
 }
 
@@ -350,4 +663,13 @@ function formatEventType(type: string): string {
     case 'hybrid': return 'Hybrid';
     default: return type;
   }
+}
+
+function getFileIcon(fileType: string | null): string {
+  if (!fileType) return '📄';
+  if (fileType.startsWith('image/')) return '🖼️';
+  if (fileType.includes('pdf')) return '📕';
+  if (fileType.includes('word') || fileType.includes('document')) return '📝';
+  if (fileType.includes('sheet') || fileType.includes('excel')) return '📊';
+  return '📄';
 }
