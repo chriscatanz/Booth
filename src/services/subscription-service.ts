@@ -71,7 +71,7 @@ export const TIER_CONFIG: Record<SubscriptionTier, TierConfig> = {
   },
   starter: {
     name: 'Starter',
-    price: 4900, // $49
+    price: 7400, // $74
     userLimit: 5,
     showLimit: null, // Keep shows unlimited for now
     features: {
@@ -84,7 +84,7 @@ export const TIER_CONFIG: Record<SubscriptionTier, TierConfig> = {
   },
   pro: {
     name: 'Pro',
-    price: 9900, // $99
+    price: 12400, // $124
     userLimit: null,
     showLimit: null,
     features: {

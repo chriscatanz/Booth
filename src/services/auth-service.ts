@@ -85,6 +85,35 @@ export async function signUp(email: string, password: string, fullName?: string)
   return data;
 }
 
+/**
+ * Record user consent for ToS and Privacy Policy
+ * Should be called immediately after successful signup
+ */
+export async function recordConsent(userId: string) {
+  try {
+    const response = await fetch('/api/consent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        tosAccepted: true,
+        privacyAccepted: true,
+        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
+      }),
+    });
+    
+    if (!response.ok) {
+      console.error('Failed to record consent:', await response.text());
+    }
+    
+    return response.ok;
+  } catch (error) {
+    // Don't fail signup for consent recording issues
+    console.error('Error recording consent:', error);
+    return false;
+  }
+}
+
 export async function signIn(email: string, password: string) {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,

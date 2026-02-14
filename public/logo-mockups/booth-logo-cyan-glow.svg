@@ -1,0 +1,46 @@
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9B59B6"/>
+      <stop offset="50%" style="stop-color:#8E44AD"/>
+      <stop offset="100%" style="stop-color:#6C3483"/>
+    </linearGradient>
+    <filter id="cyanGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feFlood flood-color="#00D4D4" flood-opacity="0.8"/>
+      <feComposite in2="blur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="400" fill="url(#bgGradient1)" rx="20"/>
+  
+  <!-- Left bracket -->
+  <g filter="url(#softGlow)">
+    <rect x="45" y="50" width="8" height="260" fill="white"/>
+    <rect x="60" y="50" width="4" height="260" fill="white" opacity="0.7"/>
+  </g>
+  
+  <!-- Right bracket -->
+  <g filter="url(#softGlow)">
+    <rect x="347" y="50" width="8" height="260" fill="white"/>
+    <rect x="336" y="50" width="4" height="260" fill="white" opacity="0.7"/>
+  </g>
+  
+  <!-- B with cyan glow -->
+  <text x="200" y="270" font-family="Arial Black, Arial, sans-serif" font-size="240" font-weight="900" fill="white" text-anchor="middle" filter="url(#cyanGlow)">B</text>
+  
+  <!-- Booth text -->
+  <text x="200" y="345" font-family="Arial, sans-serif" font-size="48" font-weight="300" fill="white" text-anchor="middle" letter-spacing="8">Booth</text>
+</svg>

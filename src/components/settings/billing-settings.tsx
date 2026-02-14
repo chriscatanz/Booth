@@ -221,7 +221,7 @@ export function BillingSettings() {
             <div className="flex items-center justify-between mb-3">
               <h4 className="font-semibold text-text-primary">Starter</h4>
               <span className="text-2xl font-bold text-text-primary">
-                $49<span className="text-sm font-normal text-text-secondary">/mo</span>
+                $74<span className="text-sm font-normal text-text-secondary">/mo</span>
               </span>
             </div>
             
@@ -276,7 +276,7 @@ export function BillingSettings() {
             <div className="flex items-center justify-between mb-3">
               <h4 className="font-semibold text-text-primary">Pro</h4>
               <span className="text-2xl font-bold text-text-primary">
-                $99<span className="text-sm font-normal text-text-secondary">/mo</span>
+                $124<span className="text-sm font-normal text-text-secondary">/mo</span>
               </span>
             </div>
             

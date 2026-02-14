@@ -29,7 +29,7 @@ interface AuthState {
   // Actions
   initialize: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<boolean>;
-  signUp: (email: string, password: string, fullName?: string) => Promise<boolean>;
+  signUp: (email: string, password: string, fullName?: string) => Promise<{ user: { id: string } } | null>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<boolean>;
   
@@ -135,14 +135,14 @@ export const useAuthStore = create<AuthState>()(
       signUp: async (email: string, password: string, fullName?: string) => {
         try {
           set({ isLoading: true, error: null });
-          await authService.signUp(email, password, fullName);
+          const result = await authService.signUp(email, password, fullName);
           // Note: User may need to verify email depending on Supabase settings
           set({ isLoading: false });
-          return true;
+          return result?.user ? { user: { id: result.user.id } } : null;
         } catch (err) {
           const message = err instanceof Error ? err.message : 'Sign up failed';
           set({ error: message, isLoading: false });
-          return false;
+          return null;
         }
       },
 

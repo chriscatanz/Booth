@@ -66,7 +66,7 @@ export function SubscriptionBanner({ status, orgId, onDismiss }: SubscriptionBan
               onClick={() => handleUpgrade('starter')}
               disabled={isLoading}
             >
-              $49/mo
+              $74/mo
             </Button>
             <Button 
               variant="primary" 
@@ -74,7 +74,7 @@ export function SubscriptionBanner({ status, orgId, onDismiss }: SubscriptionBan
               onClick={() => handleUpgrade('pro')}
               disabled={isLoading}
             >
-              $99/mo Pro
+              $124/mo Pro
             </Button>
             {onDismiss && (
               <button onClick={onDismiss} className="p-1 text-text-tertiary hover:text-text-secondary">
@@ -110,7 +110,7 @@ export function SubscriptionBanner({ status, orgId, onDismiss }: SubscriptionBan
               onClick={() => handleUpgrade('starter')}
               disabled={isLoading}
             >
-              Starter $49/mo
+              Starter $74/mo
             </Button>
             <Button 
               variant="primary" 
@@ -118,7 +118,7 @@ export function SubscriptionBanner({ status, orgId, onDismiss }: SubscriptionBan
               onClick={() => handleUpgrade('pro')}
               disabled={isLoading}
             >
-              Pro $99/mo
+              Pro $124/mo
             </Button>
           </div>
         </div>

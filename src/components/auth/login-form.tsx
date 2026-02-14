@@ -4,14 +4,15 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
-import { Mail, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, AlertCircle, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 interface LoginFormProps {
   onSwitchToSignUp: () => void;
   onForgotPassword: () => void;
+  onBack?: () => void;
 }
 
-export function LoginForm({ onSwitchToSignUp, onForgotPassword }: LoginFormProps) {
+export function LoginForm({ onSwitchToSignUp, onForgotPassword, onBack }: LoginFormProps) {
   const { signIn, isLoading, error, clearError } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,6 +30,16 @@ export function LoginForm({ onSwitchToSignUp, onForgotPassword }: LoginFormProps
       animate={{ opacity: 1, y: 0 }}
       className="w-full max-w-md"
     >
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          className="flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary mb-6 transition-colors"
+        >
+          <ArrowLeft size={16} />
+          Back to home
+        </button>
+      )}
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold text-text-primary">Welcome back</h1>
         <p className="text-text-secondary mt-2">Sign in to your account</p>

@@ -1,0 +1,42 @@
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient6" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9B59B6"/>
+      <stop offset="50%" style="stop-color:#8E44AD"/>
+      <stop offset="100%" style="stop-color:#6C3483"/>
+    </linearGradient>
+    <linearGradient id="bGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00D4D4"/>
+      <stop offset="50%" style="stop-color:#FFFFFF"/>
+      <stop offset="100%" style="stop-color:#FFB347"/>
+    </linearGradient>
+    <filter id="multiGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="400" fill="url(#bgGradient6)" rx="20"/>
+  
+  <!-- Left bracket -->
+  <g opacity="0.9">
+    <rect x="45" y="50" width="8" height="260" fill="white"/>
+    <rect x="60" y="50" width="4" height="260" fill="white" opacity="0.6"/>
+  </g>
+  
+  <!-- Right bracket -->
+  <g opacity="0.9">
+    <rect x="347" y="50" width="8" height="260" fill="white"/>
+    <rect x="336" y="50" width="4" height="260" fill="white" opacity="0.6"/>
+  </g>
+  
+  <!-- Gradient B -->
+  <text x="200" y="270" font-family="Arial Black, Arial, sans-serif" font-size="240" font-weight="900" fill="url(#bGradient)" text-anchor="middle" filter="url(#multiGlow)">B</text>
+  
+  <!-- Booth text -->
+  <text x="200" y="345" font-family="Arial, sans-serif" font-size="48" font-weight="300" fill="white" text-anchor="middle" letter-spacing="8">Booth</text>
+</svg>

@@ -72,6 +72,7 @@ describe('Auth Service', () => {
         password: 'password123',
         options: {
           data: { full_name: 'John Doe' },
+          emailRedirectTo: expect.stringContaining('/auth/callback'),
         },
       });
     });

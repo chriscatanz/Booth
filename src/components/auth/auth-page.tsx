@@ -115,6 +115,7 @@ export function AuthPage() {
               key="login"
               onSwitchToSignUp={() => setView('signup')}
               onForgotPassword={() => setView('forgot-password')}
+              onBack={() => setView('landing')}
             />
           )}
           {view === 'signup' && (
@@ -122,6 +123,7 @@ export function AuthPage() {
               key="signup"
               onSwitchToLogin={() => setView('login')}
               onSuccess={() => setView('login')}
+              onBack={() => setView('landing')}
             />
           )}
           {view === 'forgot-password' && (

@@ -35,7 +35,7 @@ const tiers: PricingTier[] = [
   },
   {
     name: 'Team',
-    price: '$49',
+    price: '$74',
     period: '/month',
     description: 'For small marketing teams',
     icon: <Building2 size={20} />,
@@ -53,7 +53,7 @@ const tiers: PricingTier[] = [
   },
   {
     name: 'Business',
-    price: '$99',
+    price: '$124',
     period: '/month',
     description: 'For growing organizations',
     icon: <Crown size={20} />,

@@ -16,7 +16,7 @@ export default function TermsPage() {
         </Link>
 
         <h1 className="text-3xl font-bold text-text-primary mb-2">Terms of Service</h1>
-        <p className="text-text-tertiary mb-8">Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+        <p className="text-text-tertiary mb-8">Version 2024-02-14 | Last updated: February 14, 2024</p>
 
         <div className="prose prose-invert max-w-none space-y-6 text-text-secondary">
           <section>
