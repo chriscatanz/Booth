@@ -261,6 +261,23 @@ export async function deleteComment(commentId: string): Promise<void> {
 
 // ─── Stats ───────────────────────────────────────────────────────────────────
 
+export async function fetchShowTaskCounts(showId: number): Promise<{
+  completed: number;
+  total: number;
+}> {
+  const { data, error } = await supabase
+    .from('tasks')
+    .select('status')
+    .eq('tradeshow_id', showId);
+
+  if (error) throw new Error(error.message);
+
+  const total = data?.length || 0;
+  const completed = data?.filter(t => t.status === 'done').length || 0;
+
+  return { completed, total };
+}
+
 export async function fetchTaskStats(orgId: string): Promise<{
   total: number;
   todo: number;

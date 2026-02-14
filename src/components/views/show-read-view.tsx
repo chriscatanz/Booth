@@ -2,390 +2,224 @@
 
 import { TradeShow, Attendee, AdditionalFile } from '@/types';
 import { 
-  totalEstimatedCost, totalServicesCost, estimatedHotelCost,
+  totalEstimatedCost, 
   parseJsonStringArray 
 } from '@/types/computed';
 import { formatCurrency, cn } from '@/lib/utils';
-import { format, differenceInDays, parseISO, isAfter } from 'date-fns';
+import { format, differenceInDays, parseISO } from 'date-fns';
 import { 
-  MapPin, Calendar, Hash, Users, DollarSign, 
-  Building, Hotel, Truck, Package, Clock, 
-  Phone, Mail, ExternalLink, FileText, CheckCircle2, 
-  AlertCircle, Zap, Wifi, Wrench, User, Copy,
-  Navigation, Car, Plane
+  MapPin, Calendar, Users, DollarSign, 
+  Building, FileText, CheckSquare, ExternalLink,
+  ArrowRight, Globe, User2, Briefcase, Hash
 } from 'lucide-react';
-import { VenueMap } from '@/components/ui/venue-map';
 import { Button } from '@/components/ui/button';
-import { useToastStore } from '@/store/toast-store';
 
 interface ShowReadViewProps {
   show: TradeShow;
   attendees: Attendee[];
   files?: AdditionalFile[];
+  tasks?: { completed: number; total: number };
   onEdit?: () => void;
   canEdit?: boolean;
 }
 
-const getFileIcon = (fileType: string | null) => {
-  if (!fileType) return '📄';
-  if (fileType.startsWith('image/')) return '🖼️';
-  if (fileType.includes('pdf')) return '📕';
-  if (fileType.includes('word') || fileType.includes('document')) return '📝';
-  if (fileType.includes('sheet') || fileType.includes('excel')) return '📊';
-  return '📄';
-};
-
-export function ShowReadView({ show, attendees, files = [], onEdit, canEdit }: ShowReadViewProps) {
-  const toast = useToastStore();
-  
+export function ShowReadView({ show, attendees, files = [], tasks, onEdit, canEdit }: ShowReadViewProps) {
   // Computed values
   const totalCost = totalEstimatedCost(show);
-  const servicesCost = totalServicesCost(show);
-  const hotelCost = estimatedHotelCost(show);
-  const graphicsToShip = parseJsonStringArray(show.graphicsToShip);
-  const packingItems = parseJsonStringArray(show.packingListItems);
+  const confirmedCost = (show.cost || 0) + (show.shippingCost || 0); // Rough estimate of confirmed
+  const costProgress = totalCost > 0 ? Math.min(100, Math.round((confirmedCost / totalCost) * 100)) : 0;
   
   // Days until show
   const daysUntil = show.startDate 
     ? differenceInDays(parseISO(show.startDate), new Date())
     : null;
   const isUpcoming = daysUntil !== null && daysUntil >= 0;
-  const isPast = daysUntil !== null && daysUntil < 0;
   
-  // Format dates nicely
-  const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return null;
-    try {
-      return format(parseISO(dateStr), 'EEE, MMM d, yyyy');
-    } catch {
-      return dateStr;
-    }
-  };
-  
-  const formatShortDate = (dateStr: string | null) => {
-    if (!dateStr) return null;
-    try {
-      return format(parseISO(dateStr), 'MMM d');
-    } catch {
-      return dateStr;
-    }
-  };
+  // Task progress
+  const taskCompleted = tasks?.completed || 0;
+  const taskTotal = tasks?.total || 0;
+  const taskProgress = taskTotal > 0 ? Math.round((taskCompleted / taskTotal) * 100) : 0;
 
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success(`${label} copied!`);
-  };
-
-  // Open directions
-  const openDirections = (address: string) => {
-    const encoded = encodeURIComponent(address);
-    window.open(`https://www.google.com/maps/dir/?api=1&destination=${encoded}`, '_blank');
+  // Open map for venue
+  const openMap = () => {
+    const address = show.venueAddress || show.venueName || show.location;
+    if (address) {
+      window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank');
+    }
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-      {/* Hero Stats Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {/* Days Until */}
-        {isUpcoming && daysUntil !== null && (
-          <div className="bg-brand-purple/10 rounded-xl p-4 text-center">
-            <div className="text-3xl font-bold text-brand-purple">{daysUntil}</div>
-            <div className="text-xs text-text-secondary mt-1">days to go</div>
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+      {/* Top Row: Show Info | Venue | Countdown */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Show Information Card */}
+        <Card className="md:col-span-1">
+          <CardTitle icon={<Briefcase size={16} />} title="Show Information" />
+          <div className="space-y-3 mt-4">
+            {show.managementCompany && (
+              <InfoRow label="Organization" value={show.managementCompany} />
+            )}
+            {show.totalAttending && show.totalAttending > 0 && (
+              <InfoRow label="Expected Attendance" value={`${show.totalAttending.toLocaleString()}+`} />
+            )}
+            {show.eventType && (
+              <InfoRow label="Type" value={formatEventType(show.eventType)} />
+            )}
+            {show.showWebsite && (
+              <InfoRow 
+                label="Website" 
+                value={
+                  <a 
+                    href={show.showWebsite} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-brand-purple hover:underline flex items-center gap-1"
+                  >
+                    {new URL(show.showWebsite).hostname.replace('www.', '')}
+                    <ExternalLink size={12} />
+                  </a>
+                } 
+              />
+            )}
+            {!show.managementCompany && !show.totalAttending && !show.showWebsite && (
+              <p className="text-sm text-text-tertiary italic">No show information added yet</p>
+            )}
           </div>
-        )}
-        {isPast && (
-          <div className="bg-text-tertiary/10 rounded-xl p-4 text-center">
-            <div className="text-lg font-semibold text-text-tertiary">Completed</div>
-            <div className="text-xs text-text-secondary mt-1">{formatShortDate(show.endDate)}</div>
-          </div>
-        )}
-        
-        {/* Booth */}
-        {show.boothNumber && (
-          <div 
-            className="bg-success/10 rounded-xl p-4 text-center cursor-pointer hover:bg-success/20 transition-colors"
-            onClick={() => copyToClipboard(show.boothNumber!, 'Booth number')}
-          >
-            <div className="text-2xl font-bold text-success">#{show.boothNumber}</div>
-            <div className="text-xs text-text-secondary mt-1">booth</div>
-          </div>
-        )}
-        
-        {/* Total Cost */}
-        {totalCost > 0 && (
-          <div className="bg-warning/10 rounded-xl p-4 text-center">
-            <div className="text-xl font-bold text-warning">{formatCurrency(totalCost)}</div>
-            <div className="text-xs text-text-secondary mt-1">total cost</div>
-          </div>
-        )}
-        
-        {/* Team Size */}
-        {attendees.length > 0 && (
-          <div className="bg-brand-cyan/10 rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-brand-cyan">{attendees.length}</div>
-            <div className="text-xs text-text-secondary mt-1">attending</div>
-          </div>
-        )}
-      </div>
+        </Card>
 
-      {/* Key Dates Card */}
-      <Card>
-        <CardHeader icon={<Calendar size={18} />} title="Event Dates" />
-        <div className="space-y-3">
-          <div className="flex items-start gap-3">
-            <div className="w-20 text-xs text-text-tertiary uppercase tracking-wide pt-0.5">Show</div>
-            <div className="flex-1">
-              <div className="text-text-primary font-medium">
-                {formatDate(show.startDate)}
-                {show.endDate && show.endDate !== show.startDate && (
-                  <> — {formatDate(show.endDate)}</>
+        {/* Venue Card */}
+        <Card className="md:col-span-1">
+          <CardTitle icon={<Building size={16} />} title="Venue" />
+          <div className="space-y-3 mt-4">
+            {show.venueName && (
+              <InfoRow label="Location" value={show.venueName} />
+            )}
+            {show.venueAddress && (
+              <>
+                <InfoRow label="Address" value={show.venueAddress.split(',')[0]} />
+                {show.venueAddress.includes(',') && (
+                  <InfoRow label="City, State" value={show.venueAddress.split(',').slice(1).join(',').trim()} />
                 )}
-              </div>
-              {show.location && (
-                <div className="text-sm text-text-secondary mt-0.5">{show.location}</div>
-              )}
-            </div>
+              </>
+            )}
+            {!show.venueName && show.location && (
+              <InfoRow label="Location" value={show.location} />
+            )}
+            {(show.venueAddress || show.venueName || show.location) && (
+              <Button variant="outline" size="sm" onClick={openMap} className="mt-2">
+                View Map
+              </Button>
+            )}
+            {!show.venueName && !show.venueAddress && !show.location && (
+              <p className="text-sm text-text-tertiary italic">No venue information added yet</p>
+            )}
           </div>
-          
-          {(show.moveInDate || show.moveOutDate) && (
+        </Card>
+
+        {/* Countdown Card */}
+        <Card className="md:col-span-1 flex flex-col items-center justify-center text-center bg-gradient-to-br from-brand-purple/5 to-brand-purple/10">
+          <div className="text-xs text-brand-purple font-medium uppercase tracking-wide mb-2">Countdown</div>
+          {isUpcoming && daysUntil !== null ? (
             <>
-              <hr className="border-border" />
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {show.moveInDate && (
-                  <div className="flex items-start gap-3">
-                    <div className="w-20 text-xs text-text-tertiary uppercase tracking-wide pt-0.5">Move-In</div>
-                    <div>
-                      <div className="text-text-primary">{formatDate(show.moveInDate)}</div>
-                      {show.moveInTime && (
-                        <div className="text-sm text-text-secondary">{show.moveInTime}</div>
-                      )}
-                    </div>
-                  </div>
-                )}
-                {show.moveOutDate && (
-                  <div className="flex items-start gap-3">
-                    <div className="w-20 text-xs text-text-tertiary uppercase tracking-wide pt-0.5">Move-Out</div>
-                    <div>
-                      <div className="text-text-primary">{formatDate(show.moveOutDate)}</div>
-                      {show.moveOutTime && (
-                        <div className="text-sm text-text-secondary">{show.moveOutTime}</div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
+              <div className="text-6xl font-bold text-brand-purple">{daysUntil}</div>
+              <div className="text-text-secondary mt-1">days until show</div>
+            </>
+          ) : daysUntil !== null && daysUntil < 0 ? (
+            <>
+              <div className="text-4xl font-bold text-text-tertiary">Complete</div>
+              <div className="text-text-secondary mt-1">Show ended {Math.abs(daysUntil)} days ago</div>
+            </>
+          ) : (
+            <>
+              <div className="text-4xl font-bold text-text-tertiary">—</div>
+              <div className="text-text-secondary mt-1">No date set</div>
             </>
           )}
-        </div>
-      </Card>
-
-      {/* Venue & Hotel Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Venue */}
-        {(show.venueName || show.venueAddress) && (
-          <Card>
-            <CardHeader icon={<Building size={18} />} title="Venue" />
-            <div className="space-y-3">
-              {show.venueName && (
-                <div className="text-text-primary font-medium">{show.venueName}</div>
-              )}
-              {show.venueAddress && (
-                <div className="text-sm text-text-secondary">{show.venueAddress}</div>
-              )}
-              <div className="flex gap-2 pt-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => openDirections(show.venueAddress || show.venueName || '')}
-                >
-                  <Navigation size={14} /> Directions
-                </Button>
-              </div>
-            </div>
-          </Card>
-        )}
-        
-        {/* Hotel */}
-        {(show.hotelName || show.hotelAddress) && (
-          <Card>
-            <CardHeader icon={<Hotel size={18} />} title="Hotel" />
-            <div className="space-y-3">
-              {show.hotelName && (
-                <div className="text-text-primary font-medium">{show.hotelName}</div>
-              )}
-              {show.hotelAddress && (
-                <div className="text-sm text-text-secondary">{show.hotelAddress}</div>
-              )}
-              {show.hotelConfirmationNumber && (
-                <div 
-                  className="flex items-center gap-2 cursor-pointer group"
-                  onClick={() => copyToClipboard(show.hotelConfirmationNumber!, 'Confirmation')}
-                >
-                  <span className="text-xs text-text-tertiary">Conf:</span>
-                  <span className="text-sm text-text-primary font-mono">{show.hotelConfirmationNumber}</span>
-                  <Copy size={12} className="text-text-tertiary opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-              )}
-              {show.hotelCostPerNight && (
-                <div className="text-sm text-text-secondary">
-                  {formatCurrency(show.hotelCostPerNight)}/night
-                  {hotelCost > 0 && <span className="text-text-tertiary"> • Est. {formatCurrency(hotelCost)} total</span>}
-                </div>
-              )}
-              <div className="flex gap-2 pt-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => openDirections(show.hotelAddress || show.hotelName || '')}
-                >
-                  <Navigation size={14} /> Directions
-                </Button>
-              </div>
-            </div>
-          </Card>
-        )}
+        </Card>
       </div>
 
-      {/* Map */}
-      {(show.venueAddress || show.hotelAddress) && (
-        <Card noPadding>
-          <VenueMap 
-            venueAddress={show.venueAddress} 
-            hotelAddress={show.hotelAddress}
-            venueName={show.venueName}
-            hotelName={show.hotelName}
-          />
-        </Card>
-      )}
+      {/* Bottom Row: Budget | Team | Documents | Tasks */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Budget Card */}
+        <SummaryCard
+          icon={<DollarSign size={16} className="text-success" />}
+          title="Budget"
+          mainValue={formatCurrency(totalCost)}
+          subText="Total estimated cost"
+          progress={costProgress}
+          progressColor="bg-success"
+          footer={confirmedCost > 0 ? `${formatCurrency(confirmedCost)} confirmed` : undefined}
+        />
 
-      {/* Booth & Setup */}
-      {(show.boothNumber || show.boothSize || show.leadCaptureSystem) && (
-        <Card>
-          <CardHeader icon={<Package size={18} />} title="Booth Setup" />
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {show.boothNumber && (
-              <InfoItem label="Booth #" value={show.boothNumber} />
-            )}
-            {show.boothSize && (
-              <InfoItem label="Size" value={show.boothSize} />
-            )}
-            {show.leadCaptureSystem && (
-              <InfoItem label="Lead Capture" value={show.leadCaptureSystem} />
-            )}
-          </div>
-          
-          {/* Services */}
-          {(show.utilitiesBooked || show.laborBooked || show.electricalCost || show.internetCost) && (
-            <div className="mt-4 pt-4 border-t border-border">
-              <div className="text-xs text-text-tertiary uppercase tracking-wide mb-3">Services</div>
-              <div className="flex flex-wrap gap-2">
-                {show.electricalCost && (
-                  <ServiceBadge icon={<Zap size={12} />} label="Electrical" cost={show.electricalCost} />
-                )}
-                {show.internetCost && (
-                  <ServiceBadge icon={<Wifi size={12} />} label="Internet" cost={show.internetCost} />
-                )}
-                {show.laborCost && (
-                  <ServiceBadge icon={<Wrench size={12} />} label="Labor" cost={show.laborCost} />
-                )}
-                {show.standardServicesCost && (
-                  <ServiceBadge icon={<Truck size={12} />} label="Drayage" cost={show.standardServicesCost} />
-                )}
-              </div>
+        {/* Team Card */}
+        <SummaryCard
+          icon={<Users size={16} className="text-brand-purple" />}
+          title="Team"
+          customContent={
+            <div className="mt-2">
+              {attendees.length > 0 ? (
+                <>
+                  <div className="flex -space-x-2 mb-2">
+                    {attendees.slice(0, 3).map((a, i) => (
+                      <div 
+                        key={a.localId}
+                        className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-cyan to-brand-purple flex items-center justify-center text-white text-sm font-medium border-2 border-surface"
+                        style={{ zIndex: 3 - i }}
+                      >
+                        {a.name?.[0]?.toUpperCase() || '?'}
+                      </div>
+                    ))}
+                    {attendees.length > 3 && (
+                      <div className="w-10 h-10 rounded-full bg-bg-tertiary flex items-center justify-center text-text-secondary text-xs font-medium border-2 border-surface">
+                        +{attendees.length - 3}
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-sm text-text-secondary">{attendees.length} team member{attendees.length !== 1 ? 's' : ''} assigned</p>
+                </>
+              ) : (
+                <p className="text-sm text-text-tertiary">No team assigned</p>
+              )}
             </div>
-          )}
-        </Card>
-      )}
+          }
+        />
 
-      {/* Shipping */}
-      {(show.trackingNumber || show.shippingInfo || show.shippingCutoff) && (
-        <Card>
-          <CardHeader icon={<Truck size={18} />} title="Shipping" />
-          <div className="space-y-4">
-            {show.trackingNumber && (
-              <div 
-                className="flex items-center gap-3 p-3 bg-bg-tertiary rounded-lg cursor-pointer hover:bg-bg-secondary transition-colors"
-                onClick={() => copyToClipboard(show.trackingNumber!, 'Tracking number')}
-              >
-                <Package size={16} className="text-brand-purple" />
-                <div className="flex-1">
-                  <div className="text-xs text-text-tertiary">Tracking Number</div>
-                  <div className="text-sm text-text-primary font-mono">{show.trackingNumber}</div>
-                </div>
-                <Copy size={14} className="text-text-tertiary" />
-              </div>
-            )}
-            
-            {show.shippingCutoff && (
-              <div className="flex items-start gap-3">
-                <Clock size={16} className="text-warning mt-0.5" />
-                <div>
-                  <div className="text-xs text-text-tertiary">Ship By</div>
-                  <div className="text-sm text-text-primary">{formatDate(show.shippingCutoff)}</div>
-                </div>
-              </div>
-            )}
-            
-            {show.shippingInfo && (
-              <div className="text-sm text-text-secondary whitespace-pre-wrap">{show.shippingInfo}</div>
-            )}
-          </div>
-        </Card>
-      )}
+        {/* Documents Card */}
+        <SummaryCard
+          icon={<FileText size={16} className="text-warning" />}
+          title="Documents"
+          mainValue={files.length.toString()}
+          subText="Files uploaded"
+          linkText={files.length > 0 ? "View all →" : undefined}
+        />
 
-      {/* Team */}
-      {attendees.length > 0 && (
-        <Card>
-          <CardHeader icon={<Users size={18} />} title={`Team (${attendees.length})`} />
-          <div className="space-y-3">
-            {attendees.map((attendee) => (
-              <div key={attendee.localId} className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-brand-purple/20 flex items-center justify-center text-brand-purple text-sm font-medium">
-                  {attendee.name?.[0]?.toUpperCase() || '?'}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm text-text-primary font-medium truncate">{attendee.name}</div>
-                  {attendee.email && (
-                    <div className="text-xs text-text-secondary truncate">{attendee.email}</div>
-                  )}
-                </div>
-                {attendee.email && (
-                  <a 
-                    href={`mailto:${attendee.email}`}
-                    className="p-2 text-text-tertiary hover:text-brand-purple transition-colors"
-                  >
-                    <Mail size={14} />
-                  </a>
-                )}
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
+        {/* Tasks Card */}
+        <SummaryCard
+          icon={<CheckSquare size={16} className="text-brand-cyan" />}
+          title="Tasks"
+          mainValue={`${taskCompleted} / ${taskTotal}`}
+          subText="Tasks completed"
+          progress={taskProgress}
+          progressColor="bg-brand-cyan"
+          footer={taskTotal > 0 ? `${taskProgress}% complete` : undefined}
+        />
+      </div>
 
-      {/* Contact */}
+      {/* Show Contact */}
       {(show.showContactName || show.showContactEmail || show.showContactPhone) && (
         <Card>
-          <CardHeader icon={<User size={18} />} title="Show Contact" />
-          <div className="space-y-2">
+          <CardTitle icon={<User2 size={16} />} title="Show Contact" />
+          <div className="flex flex-wrap items-center gap-4 mt-3">
             {show.showContactName && (
-              <div className="text-text-primary font-medium">{show.showContactName}</div>
+              <span className="text-text-primary font-medium">{show.showContactName}</span>
             )}
             {show.showContactEmail && (
-              <a 
-                href={`mailto:${show.showContactEmail}`}
-                className="flex items-center gap-2 text-sm text-brand-purple hover:underline"
-              >
-                <Mail size={14} />
+              <a href={`mailto:${show.showContactEmail}`} className="text-sm text-brand-purple hover:underline">
                 {show.showContactEmail}
               </a>
             )}
             {show.showContactPhone && (
-              <a 
-                href={`tel:${show.showContactPhone}`}
-                className="flex items-center gap-2 text-sm text-brand-purple hover:underline"
-              >
-                <Phone size={14} />
+              <a href={`tel:${show.showContactPhone}`} className="text-sm text-brand-purple hover:underline">
                 {show.showContactPhone}
               </a>
             )}
@@ -393,99 +227,18 @@ export function ShowReadView({ show, attendees, files = [], onEdit, canEdit }: S
         </Card>
       )}
 
-      {/* Budget Summary */}
-      {totalCost > 0 && (
-        <Card>
-          <CardHeader icon={<DollarSign size={18} />} title="Budget" />
-          <div className="space-y-3">
-            {show.cost && (
-              <BudgetRow label="Registration/Booth" amount={show.cost} />
-            )}
-            {servicesCost > 0 && (
-              <BudgetRow label="Services" amount={servicesCost} />
-            )}
-            {show.shippingCost && (
-              <BudgetRow label="Shipping" amount={show.shippingCost} />
-            )}
-            {hotelCost > 0 && (
-              <BudgetRow label="Hotel (est.)" amount={hotelCost} />
-            )}
-            <hr className="border-border" />
-            <BudgetRow label="Total" amount={totalCost} isTotal />
-          </div>
-        </Card>
-      )}
-
-      {/* Links */}
-      {(show.showWebsite || show.eventPortalUrl || show.showAgendaUrl) && (
-        <Card>
-          <CardHeader icon={<ExternalLink size={18} />} title="Links" />
-          <div className="space-y-2">
-            {show.showWebsite && (
-              <LinkRow label="Show Website" url={show.showWebsite} />
-            )}
-            {show.eventPortalUrl && (
-              <LinkRow label="Exhibitor Portal" url={show.eventPortalUrl} />
-            )}
-            {show.showAgendaUrl && (
-              <LinkRow label="Agenda" url={show.showAgendaUrl} />
-            )}
-          </div>
-        </Card>
-      )}
-
-      {/* Agenda */}
-      {show.agendaContent && (
-        <Card>
-          <CardHeader icon={<Calendar size={18} />} title="Agenda" />
-          <div 
-            className="text-sm text-text-secondary whitespace-pre-wrap [&_h3]:font-semibold [&_h3]:text-text-primary [&_h3]:mt-4 [&_h3]:mb-2 [&_h4]:font-medium [&_h4]:text-text-primary [&_h4]:mt-3 [&_h4]:mb-1 [&_ul]:list-disc [&_ul]:ml-4 [&_li]:mb-1 [&_p]:mb-2"
-            dangerouslySetInnerHTML={{ __html: show.agendaContent }}
-          />
-        </Card>
-      )}
-
-      {/* Notes */}
+      {/* Notes Preview */}
       {show.generalNotes && (
         <Card>
-          <CardHeader icon={<FileText size={18} />} title="Notes" />
+          <CardTitle icon={<FileText size={16} />} title="Notes" />
           <div 
-            className="text-sm text-text-secondary whitespace-pre-wrap [&_strong]:font-semibold [&_strong]:text-text-primary [&_ul]:list-disc [&_ul]:ml-4 [&_li]:mb-1 [&_p]:mb-2"
+            className="mt-3 text-sm text-text-secondary line-clamp-4 whitespace-pre-wrap"
             dangerouslySetInnerHTML={{ __html: show.generalNotes }}
           />
         </Card>
       )}
 
-      {/* Documents */}
-      {files.length > 0 && (
-        <Card>
-          <CardHeader icon={<FileText size={18} />} title={`Documents (${files.length})`} />
-          <div className="space-y-2">
-            {files.map((file) => (
-              <a
-                key={file.localId}
-                href={file.filePath}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 p-3 rounded-lg bg-bg-tertiary hover:bg-bg-secondary transition-colors"
-              >
-                <span className="text-xl">{getFileIcon(file.fileType)}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-text-primary truncate">{file.fileName}</p>
-                  {file.uploadedAt && (
-                    <p className="text-xs text-text-tertiary">
-                      {new Date(file.uploadedAt).toLocaleDateString()}
-                    </p>
-                  )}
-                </div>
-                <ExternalLink size={14} className="text-text-tertiary" />
-              </a>
-            ))}
-          </div>
-        </Card>
-      )}
-
-      {/* Floating Edit Button - bottom left to avoid chat widget */}
+      {/* Floating Edit Button */}
       {canEdit && onEdit && (
         <div className="fixed bottom-6 left-6 z-40">
           <Button 
@@ -506,67 +259,95 @@ export function ShowReadView({ show, attendees, files = [], onEdit, canEdit }: S
 // Sub-components
 // ============================================================================
 
-function Card({ children, noPadding }: { children: React.ReactNode; noPadding?: boolean }) {
+function Card({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={cn(
-      "bg-surface border border-border rounded-xl overflow-hidden",
-      !noPadding && "p-4 sm:p-5"
+      "bg-surface border border-border rounded-xl p-5",
+      className
     )}>
       {children}
     </div>
   );
 }
 
-function CardHeader({ icon, title }: { icon: React.ReactNode; title: string }) {
+function CardTitle({ icon, title }: { icon: React.ReactNode; title: string }) {
   return (
-    <div className="flex items-center gap-2 mb-4">
-      <span className="text-brand-purple">{icon}</span>
-      <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wide">{title}</h3>
+    <div className="flex items-center gap-2 text-text-tertiary">
+      {icon}
+      <span className="text-xs font-semibold uppercase tracking-wide">{title}</span>
     </div>
   );
 }
 
-function InfoItem({ label, value }: { label: string; value: string }) {
+function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div>
-      <div className="text-xs text-text-tertiary">{label}</div>
-      <div className="text-sm text-text-primary font-medium">{value}</div>
+    <div className="flex justify-between items-start gap-4">
+      <span className="text-sm text-text-tertiary shrink-0">{label}</span>
+      <span className="text-sm text-text-primary text-right">{value}</span>
     </div>
   );
 }
 
-function ServiceBadge({ icon, label, cost }: { icon: React.ReactNode; label: string; cost: number }) {
+interface SummaryCardProps {
+  icon: React.ReactNode;
+  title: string;
+  mainValue?: string;
+  subText?: string;
+  progress?: number;
+  progressColor?: string;
+  footer?: string;
+  linkText?: string;
+  customContent?: React.ReactNode;
+}
+
+function SummaryCard({ 
+  icon, title, mainValue, subText, progress, progressColor, footer, linkText, customContent 
+}: SummaryCardProps) {
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 bg-bg-tertiary rounded-lg">
-      <span className="text-text-tertiary">{icon}</span>
-      <span className="text-xs text-text-secondary">{label}</span>
-      <span className="text-xs text-text-primary font-medium">{formatCurrency(cost)}</span>
-    </div>
+    <Card>
+      <div className="flex items-center gap-2 mb-1">
+        {icon}
+        <span className="text-xs font-semibold text-text-tertiary uppercase tracking-wide">{title}</span>
+      </div>
+      
+      {customContent || (
+        <>
+          {mainValue && (
+            <div className="text-3xl font-bold text-text-primary mt-2">{mainValue}</div>
+          )}
+          {subText && (
+            <p className="text-sm text-text-secondary mt-1">{subText}</p>
+          )}
+        </>
+      )}
+      
+      {progress !== undefined && progress > 0 && (
+        <div className="mt-3 h-2 bg-bg-tertiary rounded-full overflow-hidden">
+          <div 
+            className={cn("h-full rounded-full transition-all", progressColor || "bg-brand-purple")}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
+      
+      {footer && (
+        <p className="text-xs text-text-tertiary mt-2">{footer}</p>
+      )}
+      
+      {linkText && (
+        <button className="text-sm text-brand-purple hover:underline mt-2 flex items-center gap-1">
+          {linkText}
+        </button>
+      )}
+    </Card>
   );
 }
 
-function BudgetRow({ label, amount, isTotal }: { label: string; amount: number; isTotal?: boolean }) {
-  return (
-    <div className={cn(
-      "flex justify-between",
-      isTotal && "font-semibold"
-    )}>
-      <span className={cn("text-sm", isTotal ? "text-text-primary" : "text-text-secondary")}>{label}</span>
-      <span className={cn("text-sm", isTotal ? "text-text-primary" : "text-text-secondary")}>{formatCurrency(amount)}</span>
-    </div>
-  );
-}
-
-function LinkRow({ label, url }: { label: string; url: string }) {
-  return (
-    <a 
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center justify-between p-2 -mx-2 rounded-lg hover:bg-bg-tertiary transition-colors group"
-    >
-      <span className="text-sm text-text-primary">{label}</span>
-      <ExternalLink size={14} className="text-text-tertiary group-hover:text-brand-purple transition-colors" />
-    </a>
-  );
+function formatEventType(type: string): string {
+  switch (type) {
+    case 'in_person': return 'In-Person';
+    case 'virtual': return 'Virtual';
+    case 'hybrid': return 'Hybrid';
+    default: return type;
+  }
 }
