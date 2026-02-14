@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import DOMPurify from 'dompurify';
 import { TradeShow, Attendee, AdditionalFile } from '@/types';
 import { 
   totalEstimatedCost, totalServicesCost, estimatedHotelCost,
@@ -61,6 +62,20 @@ export function ShowReadView({ show, attendees, files = [], tasks, onEdit, canEd
   // Task counts
   const taskCompleted = tasks?.completed || 0;
   const taskTotal = tasks?.total || 0;
+
+  // Sanitize HTML content to prevent XSS
+  const sanitizeHtml = (html: string | null) => {
+    if (!html) return '';
+    return DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 's', 'ul', 'ol', 'li', 'blockquote', 'hr', 'h1', 'h2', 'h3', 'h4'],
+      ALLOWED_ATTR: [],
+    });
+  };
+
+  // Memoize sanitized content
+  const sanitizedAgenda = useMemo(() => sanitizeHtml(show.agendaContent), [show.agendaContent]);
+  const sanitizedNotes = useMemo(() => sanitizeHtml(show.generalNotes), [show.generalNotes]);
+  const sanitizedSpeaking = useMemo(() => sanitizeHtml(show.speakingDetails), [show.speakingDetails]);
 
   // Format dates
   const formatDate = (dateStr: string | null) => {
@@ -226,7 +241,7 @@ export function ShowReadView({ show, attendees, files = [], tasks, onEdit, canEd
                     style={{
                       lineHeight: '1.7',
                     }}
-                    dangerouslySetInnerHTML={{ __html: show.agendaContent }} 
+                    dangerouslySetInnerHTML={{ __html: sanitizedAgenda }} 
                   />
                   <style jsx global>{`
                     .agenda-content p { margin-bottom: 0.75rem; }
@@ -514,7 +529,7 @@ export function ShowReadView({ show, attendees, files = [], tasks, onEdit, canEd
                   <div 
                     className="mt-4 text-sm text-text-secondary agenda-content"
                     style={{ lineHeight: '1.7' }}
-                    dangerouslySetInnerHTML={{ __html: show.generalNotes }} 
+                    dangerouslySetInnerHTML={{ __html: sanitizedNotes }} 
                   />
                 </Card>
               ) : (

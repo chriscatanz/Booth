@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import DOMPurify from 'dompurify';
 import { 
   MapPin, Hotel, Calendar, Users, FileText, 
   Navigation, MessageSquare, Clock,
@@ -24,10 +25,23 @@ interface BoothModeViewProps {
   onExit: () => void;
 }
 
+// Sanitize HTML to prevent XSS
+const sanitizeHtml = (html: string | null) => {
+  if (!html) return '';
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 's', 'ul', 'ol', 'li', 'blockquote', 'hr', 'h1', 'h2', 'h3', 'h4'],
+    ALLOWED_ATTR: [],
+  });
+};
+
 export function BoothModeView({ show, onExit }: BoothModeViewProps) {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<'info' | 'agenda' | 'notes'>('info');
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  
+  // Memoize sanitized content
+  const sanitizedAgenda = useMemo(() => sanitizeHtml(show.agendaContent), [show.agendaContent]);
+  const sanitizedNotes = useMemo(() => sanitizeHtml(show.generalNotes), [show.generalNotes]);
 
   const today = new Date();
   const startDate = show.startDate ? parseISO(show.startDate) : null;
@@ -427,7 +441,7 @@ export function BoothModeView({ show, onExit }: BoothModeViewProps) {
                   <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
                     <div 
                       className="prose prose-invert prose-sm max-w-none text-white/80"
-                      dangerouslySetInnerHTML={{ __html: show.agendaContent }}
+                      dangerouslySetInnerHTML={{ __html: sanitizedAgenda }}
                     />
                   </div>
                 ) : (
@@ -451,7 +465,7 @@ export function BoothModeView({ show, onExit }: BoothModeViewProps) {
                   <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
                     <div 
                       className="prose prose-invert prose-sm max-w-none text-white/80"
-                      dangerouslySetInnerHTML={{ __html: show.generalNotes }}
+                      dangerouslySetInnerHTML={{ __html: sanitizedNotes }}
                     />
                   </div>
                 ) : (
