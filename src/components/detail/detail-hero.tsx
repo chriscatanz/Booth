@@ -10,7 +10,7 @@ import {
   MapPin, Calendar, Hash, DollarSign, TrendingUp, 
   Users, Target, CheckCircle, AlertCircle,
   CalendarPlus, Mail, MoreHorizontal, Save, Download, FileStack, Repeat, Copy, Trash2,
-  ArrowLeft,
+  ArrowLeft, Eye, Pencil,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PermissionGate } from '@/components/auth/permission-gate';
@@ -22,6 +22,8 @@ interface DetailHeroProps {
   canEdit?: boolean;
   isNew?: boolean;
   isSaving?: boolean;
+  viewMode?: 'read' | 'edit';
+  onViewModeChange?: (mode: 'read' | 'edit') => void;
   onBack?: () => void;
   onSave?: () => void;
   onDelete?: () => void;
@@ -38,6 +40,8 @@ export function DetailHero({
   canEdit,
   isNew,
   isSaving,
+  viewMode,
+  onViewModeChange,
   onBack,
   onSave,
   onDelete,
@@ -303,11 +307,55 @@ export function DetailHero({
           )}
         </div>
 
-        {/* Show completion progress if not 100% complete */}
-        {completeness.percentage < 100 && (
+        {/* Show completion progress + View/Edit toggle */}
+        {!isNew && (completeness.percentage < 100 || onViewModeChange) && (
           <div className="mt-3 pt-3 border-t border-border-subtle">
-            <div className="max-w-md">
-              <CompletionProgress show={show} />
+            <div className="flex items-center justify-between gap-4">
+              {/* Completion progress (left) */}
+              {completeness.percentage < 100 ? (
+                <div className="flex-1 max-w-md">
+                  <CompletionProgress show={show} />
+                </div>
+              ) : (
+                <div />
+              )}
+              
+              {/* View/Edit toggle (right) */}
+              {onViewModeChange && (
+                canEdit ? (
+                  <div className="flex items-center gap-1 p-1 bg-bg-tertiary rounded-lg shrink-0">
+                    <button
+                      onClick={() => onViewModeChange('read')}
+                      className={cn(
+                        'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
+                        viewMode === 'read' 
+                          ? 'bg-surface text-text-primary shadow-sm' 
+                          : 'text-text-secondary hover:text-text-primary'
+                      )}
+                    >
+                      <Eye size={14} />
+                      <span className="hidden sm:inline">View</span>
+                    </button>
+                    <button
+                      onClick={() => onViewModeChange('edit')}
+                      className={cn(
+                        'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
+                        viewMode === 'edit' 
+                          ? 'bg-surface text-text-primary shadow-sm' 
+                          : 'text-text-secondary hover:text-text-primary'
+                      )}
+                    >
+                      <Pencil size={14} />
+                      <span className="hidden sm:inline">Edit</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-sm text-text-tertiary shrink-0">
+                    <Eye size={14} />
+                    <span>View Only</span>
+                  </div>
+                )
+              )}
             </div>
           </div>
         )}

@@ -664,14 +664,6 @@ export function ShowReadView({ show, attendees, files = [], tasks = [], taskCoun
         </div>
       </div>
 
-      {/* Floating Edit Button */}
-      {canEdit && onEdit && (
-        <div className="fixed bottom-6 left-6 z-40">
-          <Button variant="primary" size="lg" onClick={onEdit} className="shadow-lg">
-            Edit Show
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

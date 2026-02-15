@@ -51,7 +51,6 @@ import { supabase } from '@/lib/supabase';
 import * as aiService from '@/services/ai-service';
 import * as lookupService from '@/services/lookup-service';
 import { ShowReadView } from './show-read-view';
-import { Eye, Pencil } from 'lucide-react';
 
 export default function DetailView() {
   const {
@@ -227,6 +226,8 @@ Return ONLY the HTML content, no markdown, no code fences.`;
         canEdit={canEdit}
         isNew={isNew}
         isSaving={isSaving}
+        viewMode={effectiveViewMode}
+        onViewModeChange={!isNew ? setViewMode : undefined}
         onBack={() => setSelectedShow(null)}
         onSave={handleSave}
         onDelete={handleDelete}
@@ -238,45 +239,9 @@ Return ONLY the HTML content, no markdown, no code fences.`;
         onEmailDetails={() => openMailto(show)}
       />
 
-      {/* View Mode Toggle + Autosave indicator */}
-      {!isNew && (
-        <div className="flex items-center justify-between px-4 sm:px-6 py-2 border-b border-border bg-surface">
-          {/* View Mode Toggle - only for editors */}
-          {canEdit ? (
-            <div className="flex items-center gap-1 p-1 bg-bg-tertiary rounded-lg">
-              <button
-                onClick={() => setViewMode('read')}
-                className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
-                  effectiveViewMode === 'read' 
-                    ? 'bg-surface text-text-primary shadow-sm' 
-                    : 'text-text-secondary hover:text-text-primary'
-                )}
-              >
-                <Eye size={14} />
-                <span className="hidden sm:inline">View</span>
-              </button>
-              <button
-                onClick={() => setViewMode('edit')}
-                className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
-                  effectiveViewMode === 'edit' 
-                    ? 'bg-surface text-text-primary shadow-sm' 
-                    : 'text-text-secondary hover:text-text-primary'
-                )}
-              >
-                <Pencil size={14} />
-                <span className="hidden sm:inline">Edit</span>
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1.5 text-sm text-text-tertiary">
-              <Eye size={14} />
-              <span>View Only</span>
-            </div>
-          )}
-          
-          {/* Autosave indicator */}
+      {/* Autosave indicator - only shown in edit mode */}
+      {!isNew && effectiveViewMode === 'edit' && (
+        <div className="flex items-center justify-end px-4 sm:px-6 py-1.5 border-b border-border bg-surface">
           <AutosaveIndicator status={autosaveStatus} hasUnsavedChanges={hasUnsavedChanges} />
         </div>
       )}
