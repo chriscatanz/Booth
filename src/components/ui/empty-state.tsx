@@ -20,8 +20,10 @@ type EmptyStateType =
 
 interface EmptyStateProps {
   type?: EmptyStateType;
+  icon?: React.ComponentType<{ size?: number; className?: string }> | React.ReactNode;
   title?: string;
   description?: string;
+  message?: string; // Alias for description
   actionLabel?: string;
   onAction?: () => void;
   className?: string;
@@ -112,8 +114,10 @@ const defaultContent: Record<EmptyStateType, { title: string; description: strin
 
 export function EmptyState({ 
   type = 'generic', 
+  icon,
   title, 
-  description, 
+  description,
+  message,
   actionLabel, 
   onAction,
   className 
@@ -122,8 +126,24 @@ export function EmptyState({
   const defaults = defaultContent[type];
   
   const displayTitle = title || defaults.title;
-  const displayDescription = description || defaults.description;
+  const displayDescription = description || message || defaults.description;
   const displayAction = actionLabel || defaults.actionLabel;
+  
+  // Render custom icon if provided
+  const renderIcon = () => {
+    if (icon) {
+      // If it's a component (like Lucide icon), render it
+      if (typeof icon === 'function') {
+        const IconComponent = icon;
+        return <IconComponent size={48} className="text-text-tertiary" />;
+      }
+      // If it's already a ReactNode, return it
+      return icon;
+    }
+    return illustration.icon;
+  };
+  
+  const iconColor = icon ? 'text-text-tertiary' : illustration.color;
 
   return (
     <div className={cn(
@@ -135,8 +155,8 @@ export function EmptyState({
         'w-20 h-20 rounded-full flex items-center justify-center mb-4',
         'bg-gradient-to-br from-bg-tertiary to-bg-secondary'
       )}>
-        <span className={illustration.color}>
-          {illustration.icon}
+        <span className={iconColor}>
+          {renderIcon()}
         </span>
       </div>
       

@@ -6,7 +6,6 @@ import { useAuthStore } from '@/store/auth-store';
 import * as taskService from '@/services/task-service';
 import { Task, TaskStatus, TASK_STATUS_CONFIG, TASK_PRIORITY_CONFIG } from '@/types/tasks';
 import { Button } from '@/components/ui/button';
-import { EmptyState } from '@/components/ui/empty-state';
 import { cn } from '@/lib/utils';
 import {
   Plus, CheckSquare, Clock, AlertCircle,
