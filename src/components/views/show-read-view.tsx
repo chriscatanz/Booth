@@ -114,8 +114,8 @@ export function ShowReadView({ show, attendees, files = [], tasks = [], taskCoun
     <div className="flex flex-col h-full">
       {/* Tabs */}
       <div className="border-b border-border bg-surface sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="flex gap-1 overflow-x-auto py-2">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="flex gap-1 overflow-x-auto py-2 scrollbar-hide">
             {TABS.map(tab => {
               const count = getTabCount(tab.id);
               return (
@@ -148,7 +148,7 @@ export function ShowReadView({ show, attendees, files = [], tasks = [], taskCoun
 
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
           
           {/* OVERVIEW TAB */}
           {activeTab === 'overview' && (
