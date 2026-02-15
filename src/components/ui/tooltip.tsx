@@ -14,7 +14,7 @@ interface TooltipProps {
 
 export function Tooltip({ content, children, side = 'top', className }: TooltipProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = () => {
     timeoutRef.current = setTimeout(() => setIsOpen(true), 200);
