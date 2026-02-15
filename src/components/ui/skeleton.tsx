@@ -8,6 +8,7 @@ interface SkeletonProps {
   width?: string | number;
   height?: string | number;
   lines?: number;
+  rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full';
 }
 
 export function Skeleton({ 
@@ -16,6 +17,7 @@ export function Skeleton({
   width,
   height,
   lines = 1,
+  rounded,
 }: SkeletonProps) {
   const baseStyles = 'animate-pulse bg-bg-tertiary';
   
@@ -23,6 +25,14 @@ export function Skeleton({
     text: 'rounded h-4',
     circular: 'rounded-full',
     rectangular: 'rounded-lg',
+  };
+
+  const roundedStyles: Record<string, string> = {
+    none: 'rounded-none',
+    sm: 'rounded-sm',
+    md: 'rounded-md',
+    lg: 'rounded-lg',
+    full: 'rounded-full',
   };
 
   const style: React.CSSProperties = {};
@@ -48,7 +58,7 @@ export function Skeleton({
 
   return (
     <div 
-      className={cn(baseStyles, variantStyles[variant], className)} 
+      className={cn(baseStyles, rounded ? roundedStyles[rounded] : variantStyles[variant], className)} 
       style={style}
     />
   );
