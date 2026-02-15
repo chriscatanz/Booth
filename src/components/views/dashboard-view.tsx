@@ -8,6 +8,9 @@ import { DataVisibilityGate } from '@/components/auth/data-visibility-gate';
 import { ViewMode, AlertType, AlertPriority } from '@/types/enums';
 import { TradeShow } from '@/types';
 import { StatCard } from '@/components/ui/stat-card';
+import { CompletionBadge } from '@/components/ui/completion-badge';
+import { SkeletonCard, SkeletonListItem } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
 import { getMonthAbbrev, getDayNumber } from '@/lib/date-utils';
 import { daysUntilShow } from '@/types/computed';
@@ -17,6 +20,7 @@ import {
   ChevronRight, Package, UserPlus, Building2, SquareDashed, Zap, Truck,
 } from 'lucide-react';
 import { ShippingTimeline } from '@/components/ui/shipping-timeline';
+import { CompletionBadge } from '@/components/ui/completion-badge';
 import { parseISO, isValid, isSameMonth, addDays, addMonths, format } from 'date-fns';
 
 interface ShowAlert {
@@ -33,10 +37,11 @@ interface DashboardViewProps {
 }
 
 export default function DashboardView({ onViewModeChange }: DashboardViewProps) {
-  const { shows, selectShow, createNewShow, loadShows } = useTradeShowStore();
+  const { shows, selectShow, createNewShow, loadShows, isLoading } = useTradeShowStore();
   const { organization } = useAuthStore();
   // Stable reference for current time (refreshes on component mount)
   const [now] = useState(() => new Date());
+  const [showAllAlerts, setShowAllAlerts] = useState(false);
   
   // Get shipping buffer from org settings (default 7 days)
   const shippingBufferDays = (organization?.settings?.shippingBufferDays as number) || 7;
@@ -78,7 +83,14 @@ export default function DashboardView({ onViewModeChange }: DashboardViewProps) 
       const start = show.startDate ? parseISO(show.startDate) : null;
 
       if (show.registrationConfirmed !== true && start && start <= thirtyDaysOut) {
-        list.push({ show, type: AlertType.RegistrationNeeded, title: 'Registration needed', priority: AlertPriority.High });
+        const daysUntilShow = start ? Math.ceil((start.getTime() - now.getTime()) / 86400000) : null;
+        list.push({ 
+          show, 
+          type: AlertType.RegistrationNeeded, 
+          title: 'Registration needed', 
+          priority: AlertPriority.High,
+          daysUntilDeadline: daysUntilShow || undefined
+        });
       }
 
       if (show.shippingCutoff) {
@@ -97,15 +109,40 @@ export default function DashboardView({ onViewModeChange }: DashboardViewProps) 
       }
 
       if (show.hotelConfirmed !== true && show.hotelName && start && start <= fourteenDaysOut) {
-        list.push({ show, type: AlertType.HotelNotConfirmed, title: 'Hotel not confirmed', priority: AlertPriority.Medium });
+        const daysUntilShow = start ? Math.ceil((start.getTime() - now.getTime()) / 86400000) : null;
+        list.push({ 
+          show, 
+          type: AlertType.HotelNotConfirmed, 
+          title: 'Hotel not confirmed', 
+          priority: AlertPriority.Medium,
+          daysUntilDeadline: daysUntilShow || undefined
+        });
       }
 
       if ((!show.boothToShip || show.boothToShip === '[]') && start && start <= twentyOneDaysOut) {
-        list.push({ show, type: AlertType.NoBoothSelected, title: 'No booth selected', priority: AlertPriority.Low });
+        const daysUntilShow = start ? Math.ceil((start.getTime() - now.getTime()) / 86400000) : null;
+        list.push({ 
+          show, 
+          type: AlertType.NoBoothSelected, 
+          title: 'No booth selected', 
+          priority: AlertPriority.Low,
+          daysUntilDeadline: daysUntilShow || undefined
+        });
       }
     }
 
-    return list.sort((a, b) => b.priority - a.priority);
+    // Enhanced sorting: Priority first (High → Medium → Low), then by days until deadline (soonest first)
+    return list.sort((a, b) => {
+      // Sort by priority first (higher priority first)
+      if (a.priority !== b.priority) {
+        return b.priority - a.priority;
+      }
+      
+      // Within same priority, sort by days until deadline (soonest first)
+      const aDays = a.daysUntilDeadline ?? Infinity;
+      const bDays = b.daysUntilDeadline ?? Infinity;
+      return aDays - bDays;
+    });
   }, [upcomingShows, now]);
 
   // Timeline months
@@ -119,6 +156,39 @@ export default function DashboardView({ onViewModeChange }: DashboardViewProps) 
       case AlertType.ShippingDeadline: return <Package size={16} />;
       case AlertType.HotelNotConfirmed: return <Building2 size={16} />;
       case AlertType.NoBoothSelected: return <SquareDashed size={16} />;
+    }
+  };
+
+  const getAlertStyling = (priority: AlertPriority, type: AlertType, days?: number) => {
+    switch (priority) {
+      case AlertPriority.High:
+        return {
+          color: '#CF222E',
+          backgroundColor: '#CF222E1A',
+          borderColor: '#CF222E33',
+          textColor: '#CF222E',
+          pulseClass: 'animate-pulse',
+          badgeClass: 'bg-red-500 text-white'
+        };
+      case AlertPriority.Medium:
+        return {
+          color: '#BF8700',
+          backgroundColor: '#BF87001A',
+          borderColor: '#BF870033',
+          textColor: '#BF8700',
+          pulseClass: '',
+          badgeClass: 'bg-amber-500 text-white'
+        };
+      case AlertPriority.Low:
+      default:
+        return {
+          color: '#656D76',
+          backgroundColor: '#656D761A',
+          borderColor: '#656D7633',
+          textColor: '#656D76',
+          pulseClass: '',
+          badgeClass: 'bg-gray-500 text-white'
+        };
     }
   };
 
@@ -139,19 +209,30 @@ export default function DashboardView({ onViewModeChange }: DashboardViewProps) 
           <h1 className="text-3xl font-bold text-text-primary tracking-tight">Dashboard</h1>
           <p className="text-sm text-text-secondary mt-1">{format(now, 'EEEE, MMMM d, yyyy')}</p>
         </div>
-        <button onClick={() => loadShows()} className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-purple to-brand-purple-dark text-white text-sm font-medium hover:shadow-lg hover:shadow-brand-purple/25 transition-all duration-200 hover:-translate-y-0.5">
+        <Button onClick={() => loadShows()} loading={isLoading} size="sm">
           Refresh
-        </button>
+        </Button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-        <StatCard title="Total Shows" value={`${shows.length}`} subtitle="All time" icon={Calendar} color="#A62B9F" />
-        <StatCard title="Upcoming" value={`${upcomingShows.length}`} subtitle={`${showsNext30.length} in next 30 days`} icon={Clock} color="#59C8FA" />
-        <StatCard title="This Month" value={`${showsThisMonth.length}`} subtitle={format(now, 'MMMM')} icon={CalendarDays} color="#1A7F37" />
-        <DataVisibilityGate category="budget" fallback={<div />}>
-          <StatCard title="Total Budget" value={formatCurrency(totalBudget)} subtitle={`${formatCurrency(upcomingBudget)} upcoming`} icon={DollarSign} color="#BF8700" />
-        </DataVisibilityGate>
+        {isLoading ? (
+          <>
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </>
+        ) : (
+          <>
+            <StatCard title="Total Shows" value={`${shows.length}`} subtitle="All time" icon={Calendar} color="#A62B9F" />
+            <StatCard title="Upcoming" value={`${upcomingShows.length}`} subtitle={`${showsNext30.length} in next 30 days`} icon={Clock} color="#59C8FA" />
+            <StatCard title="This Month" value={`${showsThisMonth.length}`} subtitle={format(now, 'MMMM')} icon={CalendarDays} color="#1A7F37" />
+            <DataVisibilityGate category="budget" fallback={<div />}>
+              <StatCard title="Total Budget" value={formatCurrency(totalBudget)} subtitle={`${formatCurrency(upcomingBudget)} upcoming`} icon={DollarSign} color="#BF8700" />
+            </DataVisibilityGate>
+          </>
+        )}
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
@@ -176,19 +257,69 @@ export default function DashboardView({ onViewModeChange }: DashboardViewProps) 
               </div>
             ) : (
               <div className="space-y-1.5">
-                {alerts.slice(0, 5).map((alert, i) => (
-                  <button key={i} onClick={() => selectShow(alert.show)} className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-bg-tertiary transition-colors text-left">
-                    <div className="p-1.5 rounded" style={{ backgroundColor: `${alertColor(alert.type, alert.daysUntilDeadline)}1A`, color: alertColor(alert.type, alert.daysUntilDeadline) }}>
-                      {alertIcon(alert.type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-text-primary truncate">{alert.show.name}</p>
-                      <p className="text-xs" style={{ color: alertColor(alert.type, alert.daysUntilDeadline) }}>{alert.title}</p>
-                    </div>
-                    <ChevronRight size={14} className="text-border-strong" />
+                {(showAllAlerts ? alerts : alerts.slice(0, 6)).map((alert, i) => {
+                  const styling = getAlertStyling(alert.priority, alert.type, alert.daysUntilDeadline);
+                  return (
+                    <button 
+                      key={i} 
+                      onClick={() => selectShow(alert.show)} 
+                      className={`w-full flex items-center gap-3 p-3 rounded-lg hover:bg-bg-tertiary transition-all duration-200 text-left border border-transparent hover:border-border-subtle ${styling.pulseClass}`}
+                      style={{ 
+                        borderLeftColor: styling.color, 
+                        borderLeftWidth: '3px',
+                        backgroundColor: alert.priority === AlertPriority.High ? styling.backgroundColor : undefined
+                      }}
+                    >
+                      <div 
+                        className={`p-1.5 rounded relative ${alert.priority === AlertPriority.High ? 'animate-pulse' : ''}`} 
+                        style={{ backgroundColor: styling.backgroundColor, color: styling.color }}
+                      >
+                        {alert.priority === AlertPriority.High && (
+                          <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full animate-ping" />
+                        )}
+                        {alertIcon(alert.type)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium text-text-primary truncate">{alert.show.name}</p>
+                          {alert.priority === AlertPriority.High && (
+                            <span className="px-1.5 py-0.5 text-[9px] font-bold rounded-full bg-red-500 text-white">
+                              HIGH
+                            </span>
+                          )}
+                          {alert.priority === AlertPriority.Medium && (
+                            <span className="px-1.5 py-0.5 text-[9px] font-bold rounded-full bg-amber-500 text-white">
+                              MED
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs" style={{ color: styling.textColor }}>{alert.title}</p>
+                        {alert.daysUntilDeadline !== undefined && alert.daysUntilDeadline <= 7 && (
+                          <p className="text-[10px] mt-0.5 text-text-secondary">
+                            {alert.daysUntilDeadline === 0 ? 'Due today' : `${alert.daysUntilDeadline} days remaining`}
+                          </p>
+                        )}
+                      </div>
+                      <ChevronRight size={14} className="text-border-strong" />
+                    </button>
+                  );
+                })}
+                {alerts.length > 6 && !showAllAlerts && (
+                  <button 
+                    onClick={() => setShowAllAlerts(true)}
+                    className="w-full text-center py-2 text-xs font-medium text-brand-purple hover:text-brand-purple-dark transition-colors hover:bg-brand-purple/5 rounded-lg"
+                  >
+                    View all {alerts.length} alerts
                   </button>
-                ))}
-                {alerts.length > 5 && <p className="text-xs text-text-secondary text-center pt-1">+{alerts.length - 5} more items</p>}
+                )}
+                {showAllAlerts && alerts.length > 6 && (
+                  <button 
+                    onClick={() => setShowAllAlerts(false)}
+                    className="w-full text-center py-2 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors hover:bg-bg-tertiary rounded-lg"
+                  >
+                    Show less
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -199,7 +330,15 @@ export default function DashboardView({ onViewModeChange }: DashboardViewProps) 
               <CalendarClock size={16} className="text-brand-purple" />
               <h2 className="text-sm font-semibold text-text-primary">Upcoming Shows</h2>
             </div>
-            {upcomingShows.length === 0 ? (
+            {isLoading ? (
+              <div className="space-y-1">
+                <SkeletonListItem />
+                <SkeletonListItem />
+                <SkeletonListItem />
+                <SkeletonListItem />
+                <SkeletonListItem />
+              </div>
+            ) : upcomingShows.length === 0 ? (
               <div className="text-center py-8">
                 <CalendarPlus size={32} className="mx-auto text-border-strong mb-2" />
                 <p className="text-sm text-text-secondary">No upcoming shows</p>
@@ -215,7 +354,10 @@ export default function DashboardView({ onViewModeChange }: DashboardViewProps) 
                         <span className="text-lg font-bold text-text-primary leading-none">{getDayNumber(show.startDate)}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-text-primary truncate">{show.name}</p>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <p className="text-sm font-medium text-text-primary truncate flex-1">{show.name}</p>
+                          <CompletionBadge show={show} size="sm" />
+                        </div>
                         {show.location && <p className="text-xs text-text-secondary truncate">{show.location}</p>}
                       </div>
                       <span className={`text-xs font-medium px-2 py-0.5 rounded ${days !== null && days <= 7 ? 'bg-error-bg text-error' : 'bg-bg-tertiary text-text-secondary'}`}>

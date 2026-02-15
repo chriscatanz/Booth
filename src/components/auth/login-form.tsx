@@ -18,10 +18,19 @@ export function LoginForm({ onSwitchToSignUp, onForgotPassword, onBack }: LoginF
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  const [isSuccess, setIsSuccess] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
-    await signIn(email, password);
+    
+    const result = await signIn(email, password);
+    
+    // Show success animation briefly before redirect
+    if (result && !useAuthStore.getState().error) {
+      setIsSuccess(true);
+      setTimeout(() => setIsSuccess(false), 2000);
+    }
   };
 
   return (
@@ -50,10 +59,63 @@ export function LoginForm({ onSwitchToSignUp, onForgotPassword, onBack }: LoginF
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
-            className="flex items-center gap-2 p-3 rounded-lg bg-error-bg text-error text-sm"
+            className="bg-error-bg border border-error/20 rounded-lg p-4 space-y-3"
           >
-            <AlertCircle size={16} />
-            {error}
+            <div className="flex items-start gap-2">
+              <AlertCircle size={16} className="text-error mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-error text-sm font-medium">{error}</p>
+                <div className="mt-2 text-xs text-error/80">
+                  {error.toLowerCase().includes('password') ? (
+                    <>
+                      <p>• Check your password and try again</p>
+                      <p>• Use "Forgot password?" if you can't remember it</p>
+                    </>
+                  ) : error.toLowerCase().includes('email') ? (
+                    <>
+                      <p>• Verify your email address is correct</p>
+                      <p>• Make sure your account exists</p>
+                    </>
+                  ) : error.toLowerCase().includes('network') || error.toLowerCase().includes('connection') ? (
+                    <>
+                      <p>• Check your internet connection</p>
+                      <p>• Try refreshing the page</p>
+                    </>
+                  ) : (
+                    <>
+                      <p>• Double-check your email and password</p>
+                      <p>• Try refreshing the page if the issue persists</p>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  clearError();
+                  // Retry the last login attempt
+                  if (email && password) {
+                    handleSubmit(new Event('submit') as any);
+                  }
+                }}
+                className="text-xs border-error/30 text-error hover:bg-error/10"
+              >
+                Try Again
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={clearError}
+                className="text-xs border-error/30 text-error hover:bg-error/10"
+              >
+                Dismiss
+              </Button>
+            </div>
           </motion.div>
         )}
 
@@ -104,15 +166,20 @@ export function LoginForm({ onSwitchToSignUp, onForgotPassword, onBack }: LoginF
           </button>
         </div>
 
-        <Button
-          type="submit"
-          variant="primary"
-          size="lg"
-          className="w-full"
-          loading={isLoading}
+        <motion.div
+          animate={isSuccess ? { scale: [1, 1.02, 1] } : {}}
+          transition={{ duration: 0.3 }}
         >
-          Sign In
-        </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            className={`w-full transition-colors ${isSuccess ? 'bg-success hover:bg-success' : ''}`}
+            loading={isLoading}
+          >
+            {isSuccess ? '✓ Signed In!' : 'Sign In'}
+          </Button>
+        </motion.div>
 
         <p className="text-center text-sm text-text-secondary">
           Don&apos;t have an account?{' '}

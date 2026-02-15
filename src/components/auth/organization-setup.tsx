@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
+import { ProgressSteps } from '@/components/ui/progress-steps';
 import { Building2, AlertCircle, LogOut, Mail, CheckCircle } from 'lucide-react';
 import * as authService from '@/services/auth-service';
 import { Invitation } from '@/types/auth';
@@ -96,6 +97,16 @@ export function OrganizationSetup() {
           <p className="text-text-secondary mt-2">
             Create an organization to get started, or accept an invitation.
           </p>
+        </div>
+
+        {/* Onboarding Progress */}
+        <div className="mb-8">
+          <ProgressSteps
+            currentStep={2}
+            totalSteps={3}
+            steps={['Account Created', 'Organization Setup', 'Complete Setup']}
+            showStepLabels={true}
+          />
         </div>
 
         {/* Signup Success Message */}

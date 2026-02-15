@@ -29,12 +29,33 @@ export function AutosaveIndicator({ status, hasUnsavedChanges }: AutosaveIndicat
         return (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
+            animate={{ 
+              opacity: 1, 
+              scale: [0.9, 1.1, 1],
+            }}
             exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ 
+              scale: { 
+                duration: 0.4, 
+                times: [0, 0.5, 1], 
+                ease: 'easeOut' 
+              } 
+            }}
             className="flex items-center gap-1.5 text-success"
           >
-            <Check size={12} />
-            <span className="text-xs">Saved</span>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ 
+                delay: 0.1, 
+                type: 'spring', 
+                stiffness: 500, 
+                damping: 25 
+              }}
+            >
+              <Check size={12} />
+            </motion.div>
+            <span className="text-xs font-medium">Saved</span>
           </motion.div>
         );
       case 'error':

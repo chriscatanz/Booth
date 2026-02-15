@@ -22,6 +22,7 @@ export function SignUpForm({ onSwitchToLogin, onBack }: SignUpFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [success, setSuccess] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,18 +35,24 @@ export function SignUpForm({ onSwitchToLogin, onBack }: SignUpFormProps) {
     }
 
     try {
+      setIsProcessing(true);
       const result = await signUp(email, password, fullName);
       if (result?.user) {
         // Record ToS and Privacy consent with timestamp, version, and IP
         await recordConsent(result.user.id);
         
-        // Store success flag for display even if component unmounts
-        // Use sessionStorage (cleared on tab close) instead of localStorage for security
-        sessionStorage.setItem('signup_success_email', email);
-        setSuccess(true);
+        // Brief success state before showing verification screen
+        setIsProcessing(false);
+        setTimeout(() => {
+          // Store success flag for display even if component unmounts
+          // Use sessionStorage (cleared on tab close) instead of localStorage for security
+          sessionStorage.setItem('signup_success_email', email);
+          setSuccess(true);
+        }, 500);
       }
     } catch (err) {
       console.error('[SignUp] Error:', err);
+      setIsProcessing(false);
     }
   };
 
@@ -107,10 +114,65 @@ export function SignUpForm({ onSwitchToLogin, onBack }: SignUpFormProps) {
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
-            className="flex items-center gap-2 p-3 rounded-lg bg-error-bg text-error text-sm"
+            className="bg-error-bg border border-error/20 rounded-lg p-4 space-y-3"
           >
-            <AlertCircle size={16} />
-            {error}
+            <div className="flex items-start gap-2">
+              <AlertCircle size={16} className="text-error mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-error text-sm font-medium">{error}</p>
+                <div className="mt-2 text-xs text-error/80">
+                  {error.toLowerCase().includes('password') ? (
+                    <>
+                      <p>• Use at least 8 characters with mixed case</p>
+                      <p>• Include numbers and special characters</p>
+                    </>
+                  ) : error.toLowerCase().includes('email') ? (
+                    <>
+                      <p>• Make sure the email format is correct</p>
+                      <p>• This email might already be registered</p>
+                    </>
+                  ) : error.toLowerCase().includes('network') || error.toLowerCase().includes('connection') ? (
+                    <>
+                      <p>• Check your internet connection</p>
+                      <p>• Try refreshing the page</p>
+                    </>
+                  ) : (
+                    <>
+                      <p>• Check all fields are filled correctly</p>
+                      <p>• Make sure you've agreed to the terms</p>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  clearError();
+                  // Focus on the first input that might have an issue
+                  if (error.toLowerCase().includes('email')) {
+                    document.querySelector('input[type="email"]')?.focus();
+                  } else if (error.toLowerCase().includes('password')) {
+                    document.querySelector('input[type="password"]')?.focus();
+                  }
+                }}
+                className="text-xs border-error/30 text-error hover:bg-error/10"
+              >
+                Try Again
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={clearError}
+                className="text-xs border-error/30 text-error hover:bg-error/10"
+              >
+                Dismiss
+              </Button>
+            </div>
           </motion.div>
         )}
 
@@ -188,16 +250,21 @@ export function SignUpForm({ onSwitchToLogin, onBack }: SignUpFormProps) {
           </span>
         </label>
 
-        <Button
-          type="submit"
-          variant="primary"
-          size="lg"
-          className="w-full"
-          loading={isLoading}
-          disabled={!agreedToTerms}
+        <motion.div
+          animate={isProcessing ? { scale: [1, 1.02, 1] } : {}}
+          transition={{ duration: 0.3 }}
         >
-          Create Account
-        </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            className={`w-full transition-colors ${isProcessing ? 'bg-success hover:bg-success' : ''}`}
+            loading={isLoading}
+            disabled={!agreedToTerms}
+          >
+            {isProcessing ? '✓ Account Created!' : 'Create Account'}
+          </Button>
+        </motion.div>
 
         <p className="text-center text-sm text-text-secondary">
           Already have an account?{' '}

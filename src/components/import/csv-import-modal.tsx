@@ -4,6 +4,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { ProgressSteps } from '@/components/ui/progress-steps';
 import { useTradeShowStore } from '@/store/trade-show-store';
 import { useToastStore } from '@/store/toast-store';
 import { createTradeShow, saveAttendees } from '@/services/supabase-service';
@@ -302,6 +303,21 @@ export default function CSVImportModal({ onClose, onImported }: CSVImportModalPr
   return (
     <Dialog open onClose={onClose} title="Import Shows from CSV" size="xl">
       <div className="min-h-[400px]">
+        {/* Progress indicator */}
+        <div className="mb-6">
+          <ProgressSteps
+            currentStep={
+              step === 'upload' ? 1 :
+              step === 'mapping' ? 2 :
+              step === 'preview' ? 3 :
+              step === 'importing' ? 4 : 5
+            }
+            totalSteps={5}
+            steps={['Upload File', 'Map Columns', 'Preview Data', 'Importing', 'Complete']}
+            showStepLabels={false}
+          />
+        </div>
+        
         <AnimatePresence mode="wait">
           {/* Step 1: Upload */}
           {step === 'upload' && (

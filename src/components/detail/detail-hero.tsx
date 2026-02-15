@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PermissionGate } from '@/components/auth/permission-gate';
+import { CompletionBadge, CompletionProgress } from '@/components/ui/completion-badge';
+import { calculateShowCompleteness } from '@/lib/show-completeness';
 
 interface DetailHeroProps {
   show: TradeShow;
@@ -50,6 +52,7 @@ export function DetailHero({
   const estimated = totalEstimatedCost(show);
   const roi = roiPercentage(show);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
+  const completeness = calculateShowCompleteness(show);
 
   // Quick status indicators - show confirmed items as success badges
   const badges: { icon: React.ElementType; label: string; status: 'success' | 'warning' | 'neutral' }[] = [];
@@ -102,9 +105,12 @@ export function DetailHero({
                 <ArrowLeft size={20} />
               </button>
             )}
-            <h1 className="text-xl font-bold text-text-primary truncate">
-              {show.name || 'Untitled Show'}
-            </h1>
+            <div className="flex items-center gap-2 min-w-0">
+              <h1 className="text-xl font-bold text-text-primary truncate">
+                {show.name || 'Untitled Show'}
+              </h1>
+              <CompletionBadge show={show} size="md" showMessage />
+            </div>
           </div>
           
           {/* Action Buttons */}
@@ -117,6 +123,13 @@ export function DetailHero({
                 <Button variant="ghost" size="sm" onClick={onEmailDetails} title="Email Details">
                   <Mail size={14} />
                 </Button>
+                
+                {/* Complete Setup CTA for incomplete shows */}
+                {completeness.percentage < 100 && (
+                  <Button variant="secondary" size="sm" title={`${completeness.missing.length} items remaining`}>
+                    <CheckCircle size={14} /> Complete Setup
+                  </Button>
+                )}
                 
                 {/* More actions dropdown */}
                 <div className="relative">
@@ -289,6 +302,15 @@ export function DetailHero({
             </div>
           )}
         </div>
+
+        {/* Show completion progress if not 100% complete */}
+        {completeness.percentage < 100 && (
+          <div className="mt-3 pt-3 border-t border-border-subtle">
+            <div className="max-w-md">
+              <CompletionProgress show={show} />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

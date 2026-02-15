@@ -6,6 +6,7 @@ import { useTradeShowStore } from '@/store/trade-show-store';
 import { StatusBadge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Button } from '@/components/ui/button';
+import { SkeletonListItem } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
 import { formatDate } from '@/lib/date-utils';
 import { totalEstimatedCost } from '@/types/computed';
@@ -14,6 +15,7 @@ import { SHOW_STATUSES } from '@/lib/constants';
 import { TradeShow } from '@/types';
 import { List, ArrowUpDown, Trash2, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CompletionBadge } from '@/components/ui/completion-badge';
 import * as api from '@/services/supabase-service';
 
 type SortKey = 'name' | 'location' | 'startDate' | 'cost' | 'status';
@@ -148,7 +150,7 @@ function InlineDateEdit({
 
 export default function ListView() {
   const shows = useFilteredShows();
-  const { selectShow, selectedShowIds, toggleShowSelection, clearSelection, deleteSelectedShows, loadShows } = useTradeShowStore();
+  const { selectShow, selectedShowIds, toggleShowSelection, clearSelection, deleteSelectedShows, loadShows, isLoading } = useTradeShowStore();
   const [sortKey, setSortKey] = useState<SortKey>('startDate');
   const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.Asc);
 
@@ -219,7 +221,7 @@ export default function ListView() {
 
       <div className="bg-surface rounded-2xl border border-border-subtle shadow-sm overflow-hidden">
         {/* Header */}
-        <div className="grid grid-cols-[40px_1fr_100px] sm:grid-cols-[40px_1fr_120px_100px_100px] lg:grid-cols-[40px_1fr_150px_120px_100px_100px_80px] gap-2 px-4 py-3 border-b border-border bg-bg-tertiary">
+        <div className="grid grid-cols-[40px_1fr_100px_90px] sm:grid-cols-[40px_1fr_120px_100px_100px_90px] lg:grid-cols-[40px_1fr_150px_120px_100px_100px_80px_90px] gap-2 px-4 py-3 border-b border-border bg-bg-tertiary">
           <div className="flex items-center">
             <input
               type="checkbox"
@@ -237,42 +239,54 @@ export default function ListView() {
           <span className="hidden sm:block"><SortHeader label="Cost" field="cost" /></span>
           <SortHeader label="Status" field="status" />
           <span className="hidden lg:block text-xs font-medium text-text-secondary">Reg.</span>
+          <span className="text-xs font-medium text-text-secondary">Progress</span>
         </div>
 
         {/* Rows */}
-        {sorted.map(show => (
-          <div
-            key={show.id}
-            className={cn(
-              'grid grid-cols-[40px_1fr_100px] sm:grid-cols-[40px_1fr_120px_100px_100px] lg:grid-cols-[40px_1fr_150px_120px_100px_100px_80px] gap-2 px-4 py-3 border-b border-border-subtle hover:bg-bg-tertiary cursor-pointer transition-colors',
-              selectedShowIds.has(show.id) && 'bg-brand-purple/5'
-            )}
-          >
-            <div className="flex items-center" onClick={e => e.stopPropagation()}>
-              <input
-                type="checkbox"
-                checked={selectedShowIds.has(show.id)}
-                onChange={() => toggleShowSelection(show.id)}
-                className="w-4 h-4 rounded border-border text-brand-purple"
-              />
+        {isLoading ? (
+          Array.from({ length: 5 }).map((_, index) => (
+            <div key={index} className="px-4 py-3 border-b border-border-subtle">
+              <SkeletonListItem />
             </div>
-            <button onClick={() => selectShow(show)} className="text-left min-w-0">
-              <p className="text-sm font-medium text-text-primary truncate hover:text-brand-purple">{show.name}</p>
-              <p className="text-xs text-text-secondary truncate sm:hidden">{show.location}</p>
-            </button>
-            <span className="hidden lg:block text-sm text-text-secondary truncate self-center">{show.location ?? '-'}</span>
-            <div className="hidden sm:block self-center">
-              <InlineDateEdit show={show} onSave={handleInlineDateSave} />
+          ))
+        ) : (
+          sorted.map(show => (
+            <div
+              key={show.id}
+              className={cn(
+                'grid grid-cols-[40px_1fr_100px_90px] sm:grid-cols-[40px_1fr_120px_100px_100px_90px] lg:grid-cols-[40px_1fr_150px_120px_100px_100px_80px_90px] gap-2 px-4 py-3 border-b border-border-subtle hover:bg-bg-tertiary cursor-pointer transition-colors',
+                selectedShowIds.has(show.id) && 'bg-brand-purple/5'
+              )}
+            >
+              <div className="flex items-center" onClick={e => e.stopPropagation()}>
+                <input
+                  type="checkbox"
+                  checked={selectedShowIds.has(show.id)}
+                  onChange={() => toggleShowSelection(show.id)}
+                  className="w-4 h-4 rounded border-border text-brand-purple"
+                />
+              </div>
+              <button onClick={() => selectShow(show)} className="text-left min-w-0">
+                <p className="text-sm font-medium text-text-primary truncate hover:text-brand-purple">{show.name}</p>
+                <p className="text-xs text-text-secondary truncate sm:hidden">{show.location}</p>
+              </button>
+              <span className="hidden lg:block text-sm text-text-secondary truncate self-center">{show.location ?? '-'}</span>
+              <div className="hidden sm:block self-center">
+                <InlineDateEdit show={show} onSave={handleInlineDateSave} />
+              </div>
+              <span className="hidden sm:block text-sm text-text-primary self-center">{show.cost ? formatCurrency(show.cost) : '-'}</span>
+              <div className="self-center">
+                <InlineStatusEdit show={show} onSave={handleInlineStatusSave} />
+              </div>
+              <span className={cn('hidden lg:block text-xs font-medium self-center', show.registrationConfirmed ? 'text-success' : 'text-warning')}>
+                {show.registrationConfirmed ? 'Yes' : 'No'}
+              </span>
+              <div className="self-center">
+                <CompletionBadge show={show} size="sm" />
+              </div>
             </div>
-            <span className="hidden sm:block text-sm text-text-primary self-center">{show.cost ? formatCurrency(show.cost) : '-'}</span>
-            <div className="self-center">
-              <InlineStatusEdit show={show} onSave={handleInlineStatusSave} />
-            </div>
-            <span className={cn('hidden lg:block text-xs font-medium self-center', show.registrationConfirmed ? 'text-success' : 'text-warning')}>
-              {show.registrationConfirmed ? 'Yes' : 'No'}
-            </span>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );
