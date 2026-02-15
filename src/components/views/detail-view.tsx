@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTradeShowStore } from '@/store/trade-show-store';
 import * as taskService from '@/services/task-service';
+import { Task } from '@/types/tasks';
 import { useToastStore } from '@/store/toast-store';
 import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
@@ -83,18 +84,24 @@ export default function DetailView() {
   // Everyone defaults to read mode for cleaner consumption; editors can toggle to edit
   const [viewMode, setViewMode] = useState<'read' | 'edit'>('read');
   
-  // Task counts for read view
+  // Tasks for read view
+  const [showTasks, setShowTasks] = useState<Task[]>([]);
   const [taskCounts, setTaskCounts] = useState<{ completed: number; total: number }>({ completed: 0, total: 0 });
   
   // Read-only mode for viewers
   const readOnly = !canEdit;
   
-  // Fetch task counts when show changes
+  // Fetch tasks when show changes
   useEffect(() => {
     if (selectedShow && selectedShow.id > 0) {
+      // Fetch counts for badge
       taskService.fetchShowTaskCounts(selectedShow.id)
         .then(setTaskCounts)
         .catch(() => setTaskCounts({ completed: 0, total: 0 }));
+      // Fetch actual tasks for read view
+      taskService.fetchTasksByShow(selectedShow.id)
+        .then(setShowTasks)
+        .catch(() => setShowTasks([]));
     }
   }, [selectedShow?.id]);
 
@@ -298,7 +305,8 @@ Return ONLY the HTML content, no markdown, no code fences.`;
             show={show}
             attendees={attendees}
             files={additionalFiles}
-            tasks={taskCounts}
+            tasks={showTasks}
+            taskCounts={taskCounts}
             canEdit={canEdit}
             onEdit={() => setViewMode('edit')}
           />

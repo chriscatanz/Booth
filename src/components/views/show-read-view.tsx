@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import DOMPurify from 'dompurify';
 import { TradeShow, Attendee, AdditionalFile } from '@/types';
+import { Task, TASK_STATUS_CONFIG, TASK_PRIORITY_CONFIG } from '@/types/tasks';
 import { 
   totalEstimatedCost, totalServicesCost, estimatedHotelCost,
   parseJsonStringArray 
@@ -25,12 +26,13 @@ interface ShowReadViewProps {
   show: TradeShow;
   attendees: Attendee[];
   files?: AdditionalFile[];
-  tasks?: { completed: number; total: number };
+  tasks?: Task[];
+  taskCounts?: { completed: number; total: number };
   onEdit?: () => void;
   canEdit?: boolean;
 }
 
-type ReadTab = 'overview' | 'agenda' | 'booth' | 'logistics' | 'travel' | 'budget' | 'notes';
+type ReadTab = 'overview' | 'agenda' | 'booth' | 'logistics' | 'travel' | 'budget' | 'notes' | 'documents';
 
 const TABS: { id: ReadTab; label: string; icon: React.ReactNode }[] = [
   { id: 'overview', label: 'Overview', icon: <Info size={16} /> },
@@ -40,9 +42,10 @@ const TABS: { id: ReadTab; label: string; icon: React.ReactNode }[] = [
   { id: 'travel', label: 'Travel', icon: <Plane size={16} /> },
   { id: 'budget', label: 'Budget', icon: <DollarSign size={16} /> },
   { id: 'notes', label: 'Notes & Tasks', icon: <FileText size={16} /> },
+  { id: 'documents', label: 'Documents', icon: <FileText size={16} /> },
 ];
 
-export function ShowReadView({ show, attendees, files = [], tasks, onEdit, canEdit }: ShowReadViewProps) {
+export function ShowReadView({ show, attendees, files = [], tasks = [], taskCounts, onEdit, canEdit }: ShowReadViewProps) {
   const [activeTab, setActiveTab] = useState<ReadTab>('overview');
   const toast = useToastStore();
   
@@ -60,8 +63,8 @@ export function ShowReadView({ show, attendees, files = [], tasks, onEdit, canEd
   const isUpcoming = daysUntil !== null && daysUntil >= 0;
   
   // Task counts
-  const taskCompleted = tasks?.completed || 0;
-  const taskTotal = tasks?.total || 0;
+  const taskCompleted = taskCounts?.completed || 0;
+  const taskTotal = taskCounts?.total || 0;
 
   // Sanitize HTML content to prevent XSS
   const sanitizeHtml = (html: string | null) => {
@@ -101,7 +104,8 @@ export function ShowReadView({ show, attendees, files = [], tasks, onEdit, canEd
   const getTabCount = (tab: ReadTab): number | undefined => {
     switch (tab) {
       case 'travel': return attendees.length || undefined;
-      case 'notes': return taskTotal || undefined;
+      case 'notes': return tasks.length || undefined;
+      case 'documents': return files.length || undefined;
       default: return undefined;
     }
   };
@@ -536,6 +540,50 @@ export function ShowReadView({ show, attendees, files = [], tasks, onEdit, canEd
           {/* NOTES & TASKS TAB */}
           {activeTab === 'notes' && (
             <div className="space-y-6">
+              {/* Tasks */}
+              {tasks.length > 0 ? (
+                <Card>
+                  <CardTitle icon={<CheckSquare size={16} />} title={`Tasks (${taskCompleted}/${taskTotal})`} />
+                  <div className="mt-4 space-y-2">
+                    {tasks.map((task) => {
+                      const priorityConfig = TASK_PRIORITY_CONFIG[task.priority];
+                      const statusConfig = TASK_STATUS_CONFIG[task.status];
+                      return (
+                        <div
+                          key={task.id}
+                          className={cn(
+                            'flex items-center gap-3 p-3 rounded-lg bg-bg-tertiary',
+                            task.status === 'done' && 'opacity-60'
+                          )}
+                        >
+                          <div className={cn('w-2 h-2 rounded-full', priorityConfig.color.replace('text-', 'bg-'))} />
+                          <div className="flex-1 min-w-0">
+                            <p className={cn(
+                              'text-sm font-medium text-text-primary truncate',
+                              task.status === 'done' && 'line-through'
+                            )}>
+                              {task.title}
+                            </p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className={cn('text-xs px-1.5 py-0.5 rounded', statusConfig.color.replace('text-', 'bg-').replace('-600', '-100'), statusConfig.color)}>
+                                {statusConfig.label}
+                              </span>
+                              {task.dueDate && (
+                                <span className="text-xs text-text-tertiary">
+                                  Due {format(parseISO(task.dueDate), 'MMM d')}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </Card>
+              ) : (
+                <EmptyState icon={<CheckSquare size={32} />} message="No tasks for this show" />
+              )}
+
               {/* Notes */}
               {show.generalNotes ? (
                 <Card>
@@ -548,30 +596,6 @@ export function ShowReadView({ show, attendees, files = [], tasks, onEdit, canEd
                 </Card>
               ) : (
                 <EmptyState icon={<FileText size={32} />} message="No notes added yet" />
-              )}
-
-              {/* Documents */}
-              {files.length > 0 && (
-                <Card>
-                  <CardTitle icon={<FileText size={16} />} title={`Documents (${files.length})`} />
-                  <div className="mt-4 space-y-2">
-                    {files.map((file) => (
-                      <a
-                        key={file.localId}
-                        href={file.filePath}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-3 rounded-lg bg-bg-tertiary hover:bg-bg-secondary transition-colors"
-                      >
-                        <span className="text-xl">{getFileIcon(file.fileType)}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-text-primary truncate">{file.fileName}</p>
-                        </div>
-                        <ExternalLink size={14} className="text-text-tertiary" />
-                      </a>
-                    ))}
-                  </div>
-                </Card>
               )}
 
               {/* Show Contact */}
@@ -604,6 +628,36 @@ export function ShowReadView({ show, attendees, files = [], tasks, onEdit, canEd
                     {show.showAgendaUrl && <LinkRow label="Agenda" url={show.showAgendaUrl} />}
                   </div>
                 </Card>
+              )}
+            </div>
+          )}
+
+          {/* DOCUMENTS TAB */}
+          {activeTab === 'documents' && (
+            <div className="space-y-6">
+              {files.length > 0 ? (
+                <Card>
+                  <CardTitle icon={<FileText size={16} />} title={`Documents (${files.length})`} />
+                  <div className="mt-4 space-y-2">
+                    {files.map((file) => (
+                      <a
+                        key={file.localId}
+                        href={file.filePath}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-3 rounded-lg bg-bg-tertiary hover:bg-bg-secondary transition-colors"
+                      >
+                        <span className="text-xl">{getFileIcon(file.fileType)}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-text-primary truncate">{file.fileName}</p>
+                        </div>
+                        <ExternalLink size={14} className="text-text-tertiary" />
+                      </a>
+                    ))}
+                  </div>
+                </Card>
+              ) : (
+                <EmptyState icon={<FileText size={32} />} message="No documents uploaded" />
               )}
             </div>
           )}
