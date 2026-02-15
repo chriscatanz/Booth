@@ -302,7 +302,17 @@ Return ONLY the HTML content, no markdown, no code fences.`;
       {effectiveViewMode === 'read' && (
         <div className="flex-1 overflow-y-auto">
           <ShowReadView 
-            show={show}
+            show={{
+              ...show,
+              // Resolve hotel name from lookup if hotelId exists (ensures data consistency)
+              hotelName: show.hotelId 
+                ? lookups.hotels.find(h => h.id === show.hotelId)?.name || show.hotelName 
+                : show.hotelName,
+              // Resolve management company name from lookup if id exists
+              managementCompany: show.managementCompanyId 
+                ? lookups.managementCompanies.find(c => c.id === show.managementCompanyId)?.name || show.managementCompany 
+                : show.managementCompany,
+            }}
             attendees={attendees}
             files={additionalFiles}
             tasks={showTasks}
