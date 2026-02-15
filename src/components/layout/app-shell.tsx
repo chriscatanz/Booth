@@ -33,8 +33,6 @@ import { WelcomeWizard } from '@/components/onboarding';
 import { useAuthStore } from '@/store/auth-store';
 import { useSubscriptionStore } from '@/store/subscription-store';
 import { SubscriptionBanner } from '@/components/subscription/subscription-banner';
-// AI modal disabled - using full AIView now, but keep floating bubble for quick access
-// import { AIAssistantPanel } from '@/components/ai/ai-assistant-panel';
 import { AIChatBubble } from '@/components/ai/ai-chat-bubble';
 
 const pageVariants = {
@@ -317,22 +315,7 @@ export function AppShell() {
         )}
       </AnimatePresence>
 
-      {/* AI Assistant - now a full view, modal/bubble disabled */}
-      {/* <AIAssistantPanel
-        isOpen={showAIAssistant}
-        onClose={() => setShowAIAssistant(false)}
-        onOpenSettings={() => setShowOrgSettings(true)}
-        context={selectedShow ? {
-          showName: selectedShow.name,
-          showLocation: selectedShow.location || undefined,
-          showDates: selectedShow.startDate && selectedShow.endDate 
-            ? `${selectedShow.startDate} - ${selectedShow.endDate}` 
-            : undefined,
-        } : undefined}
-      /> */}
-
-      {/* Floating AI Chat Bubble - disabled, using full view */}
-      {/* Floating AI Chat Bubble - quick access to AI view */}
+      {/* Floating AI Chat Bubble */}
       <AIChatBubble />
 
       {/* Booth Mode - Immersive Mobile Experience */}

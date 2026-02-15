@@ -16,7 +16,7 @@ import { Select } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Toggle } from '@/components/ui/toggle';
 import { DatePicker } from '@/components/ui/date-picker';
-import { HotelMap } from '@/components/ui/hotel-map';
+import { VenueMap } from '@/components/ui/venue-map';
 import { VenueMap } from '@/components/ui/venue-map';
 import { formatCurrency, cn } from '@/lib/utils';
 import { 
@@ -1040,7 +1040,7 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                 )}
               </DataVisibilityGate>
               <div className="mt-4">
-                <HotelMap hotelName={show.hotelName} hotelAddress={show.hotelAddress} showLocation={show.location} />
+                <VenueMap hotelName={show.hotelName} hotelAddress={show.hotelAddress} showLocation={show.location} />
               </div>
             </TabSection>
           </div>
