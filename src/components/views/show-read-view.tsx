@@ -176,6 +176,20 @@ export function ShowReadView({ show, attendees, files = [], tasks, onEdit, canEd
                     {show.venueName && <InfoRow label="Location" value={show.venueName} />}
                     {show.venueAddress && <InfoRow label="Address" value={show.venueAddress} />}
                     {!show.venueName && show.location && <InfoRow label="Location" value={show.location} />}
+                    
+                    {/* Hotel Info */}
+                    {(show.hotelName || show.hotelAddress) && (
+                      <>
+                        <hr className="border-border my-2" />
+                        <div className="flex items-center gap-1.5 text-text-tertiary">
+                          <Hotel size={14} />
+                          <span className="text-xs font-medium uppercase tracking-wide">Hotel</span>
+                        </div>
+                        {show.hotelName && <InfoRow label="Name" value={show.hotelName} />}
+                        {show.hotelAddress && <InfoRow label="Address" value={show.hotelAddress} />}
+                      </>
+                    )}
+                    
                     {(show.venueAddress || show.venueName || show.location) && (
                       <Button variant="outline" size="sm" onClick={() => openDirections(show.venueAddress || show.venueName || show.location || '')} className="mt-2">
                         View Map
