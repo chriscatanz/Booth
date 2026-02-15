@@ -13,12 +13,12 @@ interface ConfettiPiece {
   delay: number;
 }
 
-interface ConfettiProps {
+export interface ConfettiProps {
   show: boolean;
   onComplete?: () => void;
   duration?: number;
   intensity?: 'light' | 'medium' | 'heavy';
-  colors?: string[];
+  colors?: readonly string[] | string[];
 }
 
 const DEFAULT_COLORS = [
