@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useId } from 'react';
 import { ChevronDown, Plus, X, Search, Check, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip } from './tooltip';
@@ -46,6 +46,8 @@ export function LookupSelect({
   const [search, setSearch] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listboxId = useId();
+  const labelId = useId();
 
   const selectedOption = options.find(o => o.id === value);
 
@@ -89,7 +91,7 @@ export function LookupSelect({
   return (
     <div ref={containerRef} className={cn('relative', className)}>
       {label && (
-        <label className="flex items-center gap-1.5 text-sm font-medium text-text-secondary mb-1.5">
+        <label id={labelId} className="flex items-center gap-1.5 text-sm font-medium text-text-secondary mb-1.5">
           {label}
           {help && (
             <Tooltip content={help}>
@@ -102,6 +104,11 @@ export function LookupSelect({
       {/* Trigger Button */}
       <button
         type="button"
+        role="combobox"
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-controls={isOpen ? listboxId : undefined}
+        aria-labelledby={label ? labelId : undefined}
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={cn(
@@ -120,6 +127,7 @@ export function LookupSelect({
             <button
               type="button"
               onClick={handleClear}
+              aria-label="Clear selection"
               className="p-0.5 hover:bg-bg-tertiary rounded"
             >
               <X size={14} className="text-text-tertiary" />
@@ -128,12 +136,13 @@ export function LookupSelect({
           <ChevronDown
             size={16}
             className={cn('text-text-tertiary transition-transform', isOpen && 'rotate-180')}
+            aria-hidden="true"
           />
         </div>
       </button>
 
       {error && (
-        <p className="text-xs text-error mt-1">{error}</p>
+        <p className="text-xs text-error mt-1" role="alert">{error}</p>
       )}
 
       {/* Dropdown */}
@@ -143,13 +152,14 @@ export function LookupSelect({
           {options.length > 5 && (
             <div className="p-2 border-b border-border">
               <div className="relative">
-                <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-tertiary" />
+                <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-tertiary" aria-hidden="true" />
                 <input
                   ref={inputRef}
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search..."
+                  aria-label="Search options"
                   className="w-full pl-8 pr-3 py-1.5 text-sm bg-bg-tertiary border border-border rounded-md text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-1 focus:ring-brand-purple"
                 />
               </div>
@@ -157,7 +167,7 @@ export function LookupSelect({
           )}
 
           {/* Options */}
-          <div className="max-h-60 overflow-auto">
+          <div id={listboxId} role="listbox" className="max-h-60 overflow-auto">
             {filteredOptions.length === 0 && !allowCreate && (
               <div className="px-3 py-4 text-center text-sm text-text-tertiary">
                 No options found
@@ -168,6 +178,8 @@ export function LookupSelect({
               <button
                 key={option.id}
                 type="button"
+                role="option"
+                aria-selected={option.id === value}
                 onClick={() => handleSelect(option.id)}
                 className={cn(
                   'w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-bg-tertiary transition-colors',
@@ -181,7 +193,7 @@ export function LookupSelect({
                   )}
                 </div>
                 {option.id === value && (
-                  <Check size={14} className="text-brand-purple flex-shrink-0" />
+                  <Check size={14} className="text-brand-purple flex-shrink-0" aria-hidden="true" />
                 )}
               </button>
             ))}
@@ -197,7 +209,7 @@ export function LookupSelect({
                 }}
                 className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-bg-tertiary transition-colors border-t border-border text-brand-purple"
               >
-                <Plus size={14} />
+                <Plus size={14} aria-hidden="true" />
                 <span className="text-sm font-medium">{createLabel}</span>
               </button>
             )}

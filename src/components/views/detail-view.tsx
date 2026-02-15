@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { AutosaveIndicator } from '@/components/ui/autosave-indicator';
 import { useAutosave } from '@/hooks/use-autosave';
 import { Textarea } from '@/components/ui/textarea';
-import { RichTextEditor } from '@/components/ui/rich-text-editor';
+import { LazyRichTextEditor as RichTextEditor } from '@/components/ui/rich-text-editor-lazy';
 import { Select } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Toggle } from '@/components/ui/toggle';
@@ -53,14 +53,23 @@ import * as lookupService from '@/services/lookup-service';
 import { ShowReadView } from './show-read-view';
 
 export default function DetailView() {
-  const {
-    selectedShow, setSelectedShow, updateSelectedShow,
-    attendees, addAttendee, removeAttendee, updateAttendee,
-    allAttendees,
-    additionalFiles, refreshAdditionalFiles,
-    isSaving, saveShow, deleteShow, duplicateShow, repeatYearly,
-    validationErrors,
-  } = useTradeShowStore();
+  // Use Zustand selectors to prevent unnecessary re-renders
+  const selectedShow = useTradeShowStore((state) => state.selectedShow);
+  const setSelectedShow = useTradeShowStore((state) => state.setSelectedShow);
+  const updateSelectedShow = useTradeShowStore((state) => state.updateSelectedShow);
+  const attendees = useTradeShowStore((state) => state.attendees);
+  const addAttendee = useTradeShowStore((state) => state.addAttendee);
+  const removeAttendee = useTradeShowStore((state) => state.removeAttendee);
+  const updateAttendee = useTradeShowStore((state) => state.updateAttendee);
+  const allAttendees = useTradeShowStore((state) => state.allAttendees);
+  const additionalFiles = useTradeShowStore((state) => state.additionalFiles);
+  const refreshAdditionalFiles = useTradeShowStore((state) => state.refreshAdditionalFiles);
+  const isSaving = useTradeShowStore((state) => state.isSaving);
+  const saveShow = useTradeShowStore((state) => state.saveShow);
+  const deleteShow = useTradeShowStore((state) => state.deleteShow);
+  const duplicateShow = useTradeShowStore((state) => state.duplicateShow);
+  const repeatYearly = useTradeShowStore((state) => state.repeatYearly);
+  const validationErrors = useTradeShowStore((state) => state.validationErrors);
 
   const toast = useToastStore();
   const { organization } = useAuthStore();

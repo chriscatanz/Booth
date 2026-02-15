@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useId, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -12,6 +12,7 @@ interface ModalProps {
   children: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
   className?: string;
+  'aria-label'?: string; // For modals without visible title
 }
 
 const sizeClasses = {
@@ -60,22 +61,58 @@ export function Modal({
   title, 
   children, 
   size = 'md',
-  className 
+  className,
+  'aria-label': ariaLabel,
 }: ModalProps) {
-  // Close on escape
+  const titleId = useId();
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previousActiveElement = useRef<HTMLElement | null>(null);
+
+  // Focus trap implementation
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onClose();
+      return;
+    }
+    
+    if (e.key !== 'Tab' || !modalRef.current) return;
+    
+    const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+    
+    if (e.shiftKey && document.activeElement === firstElement) {
+      e.preventDefault();
+      lastElement?.focus();
+    } else if (!e.shiftKey && document.activeElement === lastElement) {
+      e.preventDefault();
+      firstElement?.focus();
+    }
+  }, [onClose]);
+
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
+      previousActiveElement.current = document.activeElement as HTMLElement;
+      document.addEventListener('keydown', handleKeyDown);
       document.body.style.overflow = 'hidden';
+      
+      // Focus the modal or first focusable element
+      requestAnimationFrame(() => {
+        const firstFocusable = modalRef.current?.querySelector<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        firstFocusable?.focus();
+      });
     }
     return () => {
-      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = '';
+      // Restore focus to previously focused element
+      previousActiveElement.current?.focus();
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, handleKeyDown]);
 
   return (
     <AnimatePresence>
@@ -89,10 +126,16 @@ export function Modal({
             exit="hidden"
             onClick={onClose}
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            aria-hidden="true"
           />
           
           {/* Modal */}
           <motion.div
+            ref={modalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={title ? titleId : undefined}
+            aria-label={!title ? ariaLabel : undefined}
             variants={modalVariants}
             initial="hidden"
             animate="visible"
@@ -107,6 +150,7 @@ export function Modal({
             {title && (
               <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
                 <motion.h2 
+                  id={titleId}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 }}
@@ -116,6 +160,7 @@ export function Modal({
                 </motion.h2>
                 <motion.button
                   onClick={onClose}
+                  aria-label="Close dialog"
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                   className="p-1.5 rounded-lg hover:bg-bg-tertiary transition-colors"

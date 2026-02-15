@@ -68,12 +68,17 @@ export function Button({
 }
 
 // Icon button variant - min 44px for mobile touch targets
+interface IconButtonProps extends Omit<ButtonProps, 'variant' | 'size' | 'loading'> {
+  'aria-label': string; // Required for accessibility
+}
+
 export function IconButton({
   children,
   className,
   disabled,
+  'aria-label': ariaLabel,
   ...props
-}: Omit<ButtonProps, 'variant' | 'size' | 'loading'>) {
+}: IconButtonProps) {
   return (
     <motion.button
       whileHover={{ scale: disabled ? 1 : 1.1 }}
@@ -84,6 +89,7 @@ export function IconButton({
         className
       )}
       disabled={disabled}
+      aria-label={ariaLabel}
       {...props}
     >
       {children}

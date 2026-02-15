@@ -1,27 +1,52 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { useTradeShowStore } from '@/store/trade-show-store';
 import { DataVisibilityGate } from '@/components/auth/data-visibility-gate';
-import { ShieldX } from 'lucide-react';
+import { ShieldX, Loader2 } from 'lucide-react';
 import { BudgetTimeframe } from '@/types/enums';
 import { StatCard } from '@/components/ui/stat-card';
-import { formatCurrency, formatCurrencyShort } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils';
 import { totalServicesCost, roiPercentage, totalCostForShow, hotelCostForShow, flightCostForShow } from '@/types/computed';
 import {
   DollarSign, Calendar, BarChart3, UserCheck,
   Ticket, Package, Building2, Wrench, Users, Plane, TrendingUp, PieChart as PieIcon,
 } from 'lucide-react';
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend,
-} from 'recharts';
 import { parseISO, isValid, startOfQuarter, endOfQuarter, startOfYear, endOfYear, format } from 'date-fns';
 
-const PIE_COLORS = ['#A62B9F', '#59C8FA', '#1A7F37', '#BF8700', '#0969DA', '#CF222E', '#8250DF', '#57606A'];
+// Chart loading skeleton
+function ChartSkeleton({ height = 250 }: { height?: number }) {
+  return (
+    <div className="flex items-center justify-center" style={{ height }}>
+      <Loader2 className="w-8 h-8 animate-spin text-text-tertiary" />
+    </div>
+  );
+}
+
+// Dynamically import chart components to reduce initial bundle
+const BudgetCharts = dynamic(
+  () => import('@/components/views/budget-charts'),
+  { 
+    ssr: false, 
+    loading: () => (
+      <div className="flex flex-col lg:flex-row gap-4">
+        <div className="flex-1 bg-surface rounded-xl border border-border-subtle shadow-sm p-4 min-w-0">
+          <h2 className="text-sm font-semibold text-text-primary mb-4">Monthly Spending</h2>
+          <ChartSkeleton height={250} />
+        </div>
+        <div className="w-full lg:w-[350px] bg-surface rounded-xl border border-border-subtle shadow-sm p-4">
+          <h2 className="text-sm font-semibold text-text-primary mb-4">Cost Distribution</h2>
+          <ChartSkeleton height={300} />
+        </div>
+      </div>
+    )
+  }
+);
 
 export default function BudgetView() {
-  const { shows, allAttendees } = useTradeShowStore();
+  const shows = useTradeShowStore((state) => state.shows);
+  const allAttendees = useTradeShowStore((state) => state.allAttendees);
   const [timeframe, setTimeframe] = useState<BudgetTimeframe>(BudgetTimeframe.Year);
   const [customStart, setCustomStart] = useState('');
   const [customEnd, setCustomEnd] = useState('');
@@ -188,42 +213,8 @@ export default function BudgetView() {
         </div>
       </div>
 
-      {/* Charts */}
-      <div className="flex flex-col lg:flex-row gap-4">
-        <div className="flex-1 bg-surface rounded-xl border border-border-subtle shadow-sm p-4 min-w-0">
-          <h2 className="text-sm font-semibold text-text-primary mb-4">Monthly Spending</h2>
-          {monthlyData.length === 0 ? (
-            <div className="flex items-center justify-center h-[250px] text-text-secondary text-sm">No data available</div>
-          ) : (
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
-                <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="var(--text-tertiary)" />
-                <YAxis tickFormatter={v => formatCurrencyShort(v)} tick={{ fontSize: 11 }} stroke="var(--text-tertiary)" />
-                <Tooltip formatter={(v) => formatCurrency(Number(v ?? 0))} contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12 }} />
-                <Bar dataKey="cost" fill="#A62B9F" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-
-        <div className="w-full lg:w-[350px] bg-surface rounded-xl border border-border-subtle shadow-sm p-4">
-          <h2 className="text-sm font-semibold text-text-primary mb-4">Cost Distribution</h2>
-          {costByShow.length === 0 ? (
-            <div className="flex items-center justify-center h-[300px] text-text-secondary text-sm">No data available</div>
-          ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie data={costByShow} dataKey="cost" nameKey="name" cx="50%" cy="40%" innerRadius={45} outerRadius={80} paddingAngle={2}>
-                  {costByShow.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
-                </Pie>
-                <Tooltip formatter={(v) => formatCurrency(Number(v ?? 0))} contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12 }} />
-                <Legend wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />
-              </PieChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-      </div>
+      {/* Charts - dynamically loaded */}
+      <BudgetCharts monthlyData={monthlyData} costByShow={costByShow} />
 
       {/* Performance table */}
       <div className="bg-surface rounded-xl border border-border-subtle shadow-sm p-4">

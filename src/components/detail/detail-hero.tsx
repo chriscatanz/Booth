@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { TradeShow } from '@/types';
 import { formatDateRange } from '@/lib/date-utils';
@@ -58,38 +58,49 @@ export function DetailHero({
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const completeness = calculateShowCompleteness(show);
 
-  // Quick status indicators - show confirmed items as success badges
-  const badges: { icon: React.ElementType; label: string; status: 'success' | 'warning' | 'neutral' }[] = [];
-  
-  // Registration
-  if (show.registrationConfirmed) {
-    badges.push({ icon: CheckCircle, label: 'Registered', status: 'success' });
-  }
-  
-  // Hotel
-  if (show.hotelConfirmed) {
-    badges.push({ icon: CheckCircle, label: 'Hotel', status: 'success' });
-  }
-  
-  // Utilities
-  if (show.utilitiesBooked) {
-    badges.push({ icon: CheckCircle, label: 'Utilities', status: 'success' });
-  }
-  
-  // Labor
-  if (show.laborBooked) {
-    badges.push({ icon: CheckCircle, label: 'Labor', status: 'success' });
-  }
-  
-  // Shipping/Tracking
-  if (show.trackingNumber) {
-    badges.push({ icon: CheckCircle, label: 'Shipped', status: 'success' });
-  }
-  
-  // Attendee list
-  if (show.attendeeListReceived) {
-    badges.push({ icon: CheckCircle, label: 'Attendee List', status: 'success' });
-  }
+  // Memoize badges to prevent unnecessary re-renders
+  const badges = useMemo(() => {
+    const result: { icon: React.ElementType; label: string; status: 'success' | 'warning' | 'neutral' }[] = [];
+    
+    // Registration
+    if (show.registrationConfirmed) {
+      result.push({ icon: CheckCircle, label: 'Registered', status: 'success' });
+    }
+    
+    // Hotel
+    if (show.hotelConfirmed) {
+      result.push({ icon: CheckCircle, label: 'Hotel', status: 'success' });
+    }
+    
+    // Utilities
+    if (show.utilitiesBooked) {
+      result.push({ icon: CheckCircle, label: 'Utilities', status: 'success' });
+    }
+    
+    // Labor
+    if (show.laborBooked) {
+      result.push({ icon: CheckCircle, label: 'Labor', status: 'success' });
+    }
+    
+    // Shipping/Tracking
+    if (show.trackingNumber) {
+      result.push({ icon: CheckCircle, label: 'Shipped', status: 'success' });
+    }
+    
+    // Attendee list
+    if (show.attendeeListReceived) {
+      result.push({ icon: CheckCircle, label: 'Attendee List', status: 'success' });
+    }
+    
+    return result;
+  }, [
+    show.registrationConfirmed, 
+    show.hotelConfirmed, 
+    show.utilitiesBooked, 
+    show.laborBooked, 
+    show.trackingNumber, 
+    show.attendeeListReceived
+  ]);
 
   // Keep alerts for warnings only
   const alerts = badges;

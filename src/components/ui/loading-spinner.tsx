@@ -18,6 +18,8 @@ const sizeClasses = {
 export function LoadingSpinner({ size = 'md', className }: LoadingSpinnerProps) {
   return (
     <motion.svg
+      role="status"
+      aria-label="Loading"
       className={cn('text-brand-purple', sizeClasses[size], className)}
       viewBox="0 0 24 24"
       animate={{ rotate: 360 }}
@@ -32,11 +34,12 @@ export function LoadingSpinner({ size = 'md', className }: LoadingSpinnerProps) 
 // Dots loading animation
 export function LoadingDots({ className }: { className?: string }) {
   return (
-    <div className={cn('flex items-center gap-1', className)}>
+    <div className={cn('flex items-center gap-1', className)} role="status" aria-label="Loading">
       {[0, 1, 2].map((i) => (
         <motion.div
           key={i}
           className="w-2 h-2 rounded-full bg-brand-purple"
+          aria-hidden="true"
           animate={{ y: [0, -6, 0] }}
           transition={{
             duration: 0.6,
@@ -54,6 +57,8 @@ export function LoadingDots({ className }: { className?: string }) {
 export function LoadingPulse({ className }: { className?: string }) {
   return (
     <motion.div
+      role="status"
+      aria-label="Loading"
       className={cn('w-4 h-4 rounded-full bg-brand-purple', className)}
       animate={{
         scale: [1, 1.2, 1],
@@ -75,6 +80,8 @@ interface LoadingOverlayProps {
 export function LoadingOverlay({ message = 'Loading...' }: LoadingOverlayProps) {
   return (
     <motion.div 
+      role="status"
+      aria-label={message}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="flex items-center justify-center h-full min-h-[200px]"

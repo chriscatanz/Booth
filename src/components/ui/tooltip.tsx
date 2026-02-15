@@ -15,6 +15,7 @@ interface TooltipProps {
 export function Tooltip({ content, children, side = 'top', className }: TooltipProps) {
   const [isOpen, setIsOpen] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const tooltipId = useRef(`tooltip-${Math.random().toString(36).slice(2, 9)}`).current;
 
   const handleMouseEnter = () => {
     timeoutRef.current = setTimeout(() => setIsOpen(true), 200);
@@ -22,6 +23,14 @@ export function Tooltip({ content, children, side = 'top', className }: TooltipP
 
   const handleMouseLeave = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setIsOpen(false);
+  };
+
+  const handleFocus = () => {
+    setIsOpen(true);
+  };
+
+  const handleBlur = () => {
     setIsOpen(false);
   };
 
@@ -43,11 +52,16 @@ export function Tooltip({ content, children, side = 'top', className }: TooltipP
       className={cn('relative inline-flex', className)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      aria-describedby={isOpen ? tooltipId : undefined}
     >
       {children}
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            id={tooltipId}
+            role="tooltip"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
@@ -65,7 +79,7 @@ export function Tooltip({ content, children, side = 'top', className }: TooltipP
               side === 'bottom' && 'bottom-full left-1/2 -translate-x-1/2 -mb-1',
               side === 'left' && 'left-full top-1/2 -translate-y-1/2 -ml-1',
               side === 'right' && 'right-full top-1/2 -translate-y-1/2 -mr-1',
-            )} />
+            )} aria-hidden="true" />
           </motion.div>
         )}
       </AnimatePresence>

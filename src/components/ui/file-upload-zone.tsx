@@ -131,12 +131,22 @@ export function FileUploadZone({ tradeshowId, files, onFilesChange, disabled }: 
 
       {/* Upload zone */}
       <div
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+        aria-label="Upload files by clicking or dragging"
+        aria-disabled={disabled}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onClick={() => !disabled && inputRef.current?.click()}
+        onKeyDown={(e) => {
+          if (!disabled && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            inputRef.current?.click();
+          }
+        }}
         className={cn(
-          'border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors',
+          'border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-brand-purple/40 focus:border-brand-purple',
           isDragging && 'border-brand-purple bg-brand-purple/5',
           !isDragging && 'border-border hover:border-brand-purple/50 hover:bg-bg-tertiary',
           disabled && 'opacity-50 cursor-not-allowed',
@@ -211,16 +221,18 @@ export function FileUploadZone({ tradeshowId, files, onFilesChange, disabled }: 
                   href={file.filePath}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label={`Open ${file.fileName}`}
                   className="p-1.5 rounded hover:bg-brand-purple/10 text-text-tertiary hover:text-brand-purple"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <ExternalLink size={14} />
+                  <ExternalLink size={14} aria-hidden="true" />
                 </a>
                 <button
                   onClick={() => handleDelete(file)}
+                  aria-label={`Delete ${file.fileName}`}
                   className="p-1.5 rounded hover:bg-error/10 text-text-tertiary hover:text-error opacity-0 group-hover:opacity-100 transition-opacity"
                 >
-                  <Trash2 size={14} />
+                  <Trash2 size={14} aria-hidden="true" />
                 </button>
               </motion.div>
             ))}

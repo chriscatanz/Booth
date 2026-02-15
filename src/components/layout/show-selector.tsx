@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTradeShowStore } from '@/store/trade-show-store';
 import { useFilteredShows } from '@/hooks/use-filtered-shows';
@@ -26,16 +26,22 @@ export function ShowSelector() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const {
-    searchText, setSearchText,
-    filterLocation, setFilterLocation,
-    filterDateRange, setFilterDateRange,
-    filterStatus, setFilterStatus,
-    isHistorical, setIsHistorical,
-    selectedShow, selectShow, setSelectedShow,
-    createNewShow,
-    uniqueLocations,
-  } = useTradeShowStore();
+  // Use Zustand selectors to prevent unnecessary re-renders
+  const searchText = useTradeShowStore((state) => state.searchText);
+  const setSearchText = useTradeShowStore((state) => state.setSearchText);
+  const filterLocation = useTradeShowStore((state) => state.filterLocation);
+  const setFilterLocation = useTradeShowStore((state) => state.setFilterLocation);
+  const filterDateRange = useTradeShowStore((state) => state.filterDateRange);
+  const setFilterDateRange = useTradeShowStore((state) => state.setFilterDateRange);
+  const filterStatus = useTradeShowStore((state) => state.filterStatus);
+  const setFilterStatus = useTradeShowStore((state) => state.setFilterStatus);
+  const isHistorical = useTradeShowStore((state) => state.isHistorical);
+  const setIsHistorical = useTradeShowStore((state) => state.setIsHistorical);
+  const selectedShow = useTradeShowStore((state) => state.selectedShow);
+  const selectShow = useTradeShowStore((state) => state.selectShow);
+  const setSelectedShow = useTradeShowStore((state) => state.setSelectedShow);
+  const createNewShow = useTradeShowStore((state) => state.createNewShow);
+  const uniqueLocations = useTradeShowStore((state) => state.uniqueLocations);
 
   const filteredShows = useFilteredShows();
   const locations = uniqueLocations();

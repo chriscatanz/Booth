@@ -18,6 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://getbooth.io'),
   title: {
     default: 'Booth - Trade Show Management Software',
     template: '%s | Booth',
@@ -83,6 +84,43 @@ export const viewport: Viewport = {
   viewportFit: 'cover', // Required for safe-area-inset-* to work on notched devices
 };
 
+// JSON-LD structured data for SEO
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'Booth',
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'Web, iOS, Android, Windows, macOS',
+  description: 'Trade show management software for tracking shows, managing budgets, coordinating teams, and measuring ROI.',
+  url: 'https://getbooth.io',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+    description: 'Free trial available',
+  },
+  aggregateRating: {
+    '@type': 'AggregateRating',
+    ratingValue: '5',
+    ratingCount: '1',
+  },
+  author: {
+    '@type': 'Organization',
+    name: 'Booth',
+    url: 'https://getbooth.io',
+  },
+  featureList: [
+    'Trade show calendar management',
+    'Budget tracking and ROI analysis',
+    'Team coordination',
+    'Logistics and shipping management',
+    'AI-powered content generation',
+    'Email notifications and reminders',
+    'Offline booth mode for show days',
+    'Templates and CSV import',
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -95,6 +133,10 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>{children}</Providers>

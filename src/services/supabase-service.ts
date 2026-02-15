@@ -421,17 +421,18 @@ export async function saveAttendees(attendees: Attendee[], tradeshowId: number):
   const toInsert = attendees.filter(a => !a.dbId);
   const toUpdate = attendees.filter(a => a.dbId);
   const toKeepIds = new Set(toUpdate.map(a => a.dbId));
-  const toDeleteIds = [...existingIds].filter(id => !toKeepIds.has(id));
+  const toDeleteIds = [...existingIds].filter(id => !toKeepIds.has(id)) as number[];
 
-  // Delete removed
-  for (const id of toDeleteIds) {
-    await supabase.from('attendees').delete().eq('id', id);
+  // Batch delete removed attendees using .in()
+  if (toDeleteIds.length > 0) {
+    const { error } = await supabase.from('attendees').delete().in('id', toDeleteIds);
+    if (error) throw new Error(`Delete failed: ${error.message}`);
   }
 
-  // Update existing
-  for (const att of toUpdate) {
-    if (!att.dbId) continue;
-    await supabase.from('attendees').update({
+  // Batch upsert existing + new attendees
+  const upsertData = [
+    ...toUpdate.map(att => ({
+      id: att.dbId!,
       tradeshow_id: att.tradeshowId ?? tradeshowId,
       name: att.name,
       email: att.email,
@@ -439,12 +440,8 @@ export async function saveAttendees(attendees: Attendee[], tradeshowId: number):
       departure_date: dateToDBString(att.departureDate),
       flight_cost: att.flightCost,
       flight_confirmation: att.flightConfirmation,
-    }).eq('id', att.dbId);
-  }
-
-  // Insert new
-  if (toInsert.length > 0) {
-    const inserts = toInsert.map(att => ({
+    })),
+    ...toInsert.map(att => ({
       tradeshow_id: att.tradeshowId ?? tradeshowId,
       name: att.name,
       email: att.email,
@@ -452,9 +449,14 @@ export async function saveAttendees(attendees: Attendee[], tradeshowId: number):
       departure_date: dateToDBString(att.departureDate),
       flight_cost: att.flightCost,
       flight_confirmation: att.flightConfirmation,
-    }));
-    const { error } = await supabase.from('attendees').insert(inserts);
-    if (error) throw new Error(error.message);
+    })),
+  ];
+
+  if (upsertData.length > 0) {
+    const { error } = await supabase
+      .from('attendees')
+      .upsert(upsertData, { onConflict: 'id' });
+    if (error) throw new Error(`Upsert failed: ${error.message}`);
   }
 }
 

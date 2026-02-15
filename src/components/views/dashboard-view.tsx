@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useTradeShowStore } from '@/store/trade-show-store';
 import { useAuthStore } from '@/store/auth-store';
 // useFilteredShows available for future use
@@ -36,8 +36,13 @@ interface DashboardViewProps {
 }
 
 export default function DashboardView({ onViewModeChange }: DashboardViewProps) {
-  const { shows, selectShow, createNewShow, loadShows, isLoading } = useTradeShowStore();
-  const { organization } = useAuthStore();
+  // Use Zustand selectors to prevent unnecessary re-renders
+  const shows = useTradeShowStore((state) => state.shows);
+  const selectShow = useTradeShowStore((state) => state.selectShow);
+  const createNewShow = useTradeShowStore((state) => state.createNewShow);
+  const loadShows = useTradeShowStore((state) => state.loadShows);
+  const isLoading = useTradeShowStore((state) => state.isLoading);
+  const organization = useAuthStore((state) => state.organization);
   // Stable reference for current time (refreshes on component mount)
   const [now] = useState(() => new Date());
   const [showAllAlerts, setShowAllAlerts] = useState(false);

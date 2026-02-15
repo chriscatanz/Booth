@@ -76,6 +76,7 @@ function ToastItem({ toast }: { toast: Toast }) {
       </div>
       <motion.button 
         onClick={() => removeToast(toast.id)} 
+        aria-label="Dismiss notification"
         whileHover={{ scale: 1.2, rotate: 90 }}
         whileTap={{ scale: 0.9 }}
         className="shrink-0 p-0.5 rounded hover:bg-black/10 transition-colors"
@@ -90,7 +91,12 @@ export function ToastContainer() {
   const toasts = useToastStore(s => s.toasts);
 
   return (
-    <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2">
+    <div 
+      className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2"
+      role="status"
+      aria-live="polite"
+      aria-label="Notifications"
+    >
       <AnimatePresence mode="popLayout">
         {toasts.map(toast => (
           <ToastItem key={toast.id} toast={toast} />

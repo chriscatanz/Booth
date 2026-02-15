@@ -37,15 +37,18 @@ interface ToolbarButtonProps {
   disabled?: boolean;
   children: React.ReactNode;
   title?: string;
+  'aria-label': string;
 }
 
-function ToolbarButton({ onClick, isActive, disabled, children, title }: ToolbarButtonProps) {
+function ToolbarButton({ onClick, isActive, disabled, children, title, 'aria-label': ariaLabel }: ToolbarButtonProps) {
   return (
     <motion.button
       type="button"
       onClick={onClick}
       disabled={disabled}
       title={title}
+      aria-label={ariaLabel}
+      aria-pressed={isActive}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       className={cn(
@@ -73,35 +76,39 @@ function MenuBar({ editor }: MenuBarProps) {
   if (!editor) return null;
 
   return (
-    <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-border-subtle bg-bg-secondary rounded-t-lg flex-wrap">
+    <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-border-subtle bg-bg-secondary rounded-t-lg flex-wrap" role="toolbar" aria-label="Text formatting">
       {/* Text formatting */}
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleBold().run()}
         isActive={editor.isActive('bold')}
         title="Bold (Ctrl+B)"
+        aria-label="Bold"
       >
-        <Bold size={14} />
+        <Bold size={14} aria-hidden="true" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleItalic().run()}
         isActive={editor.isActive('italic')}
         title="Italic (Ctrl+I)"
+        aria-label="Italic"
       >
-        <Italic size={14} />
+        <Italic size={14} aria-hidden="true" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleUnderline().run()}
         isActive={editor.isActive('underline')}
         title="Underline (Ctrl+U)"
+        aria-label="Underline"
       >
-        <UnderlineIcon size={14} />
+        <UnderlineIcon size={14} aria-hidden="true" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleStrike().run()}
         isActive={editor.isActive('strike')}
         title="Strikethrough"
+        aria-label="Strikethrough"
       >
-        <Strikethrough size={14} />
+        <Strikethrough size={14} aria-hidden="true" />
       </ToolbarButton>
 
       <ToolbarDivider />
@@ -111,15 +118,17 @@ function MenuBar({ editor }: MenuBarProps) {
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         isActive={editor.isActive('bulletList')}
         title="Bullet List"
+        aria-label="Bullet list"
       >
-        <List size={14} />
+        <List size={14} aria-hidden="true" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
         isActive={editor.isActive('orderedList')}
         title="Numbered List"
+        aria-label="Numbered list"
       >
-        <ListOrdered size={14} />
+        <ListOrdered size={14} aria-hidden="true" />
       </ToolbarButton>
 
       <ToolbarDivider />
@@ -129,14 +138,16 @@ function MenuBar({ editor }: MenuBarProps) {
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
         isActive={editor.isActive('blockquote')}
         title="Quote"
+        aria-label="Block quote"
       >
-        <Quote size={14} />
+        <Quote size={14} aria-hidden="true" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().setHorizontalRule().run()}
         title="Horizontal Rule"
+        aria-label="Insert horizontal rule"
       >
-        <Minus size={14} />
+        <Minus size={14} aria-hidden="true" />
       </ToolbarButton>
 
       <ToolbarDivider />
@@ -146,15 +157,17 @@ function MenuBar({ editor }: MenuBarProps) {
         onClick={() => editor.chain().focus().undo().run()}
         disabled={!editor.can().undo()}
         title="Undo (Ctrl+Z)"
+        aria-label="Undo"
       >
-        <Undo size={14} />
+        <Undo size={14} aria-hidden="true" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().redo().run()}
         disabled={!editor.can().redo()}
         title="Redo (Ctrl+Y)"
+        aria-label="Redo"
       >
-        <Redo size={14} />
+        <Redo size={14} aria-hidden="true" />
       </ToolbarButton>
     </div>
   );

@@ -24,7 +24,11 @@ function showColor(show: TradeShow): string {
 }
 
 export default function CalendarView() {
-  const { shows, selectShow, loadShows, isLoading } = useTradeShowStore();
+  // Use Zustand selectors to prevent unnecessary re-renders
+  const shows = useTradeShowStore((state) => state.shows);
+  const selectShow = useTradeShowStore((state) => state.selectShow);
+  const loadShows = useTradeShowStore((state) => state.loadShows);
+  const isLoading = useTradeShowStore((state) => state.isLoading);
   const toast = useToastStore();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);

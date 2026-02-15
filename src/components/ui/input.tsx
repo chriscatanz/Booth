@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useId } from 'react';
 import { HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip } from './tooltip';
@@ -12,7 +12,10 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 export function Input({ label, help, error, className, id, ...props }: InputProps) {
-  const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
+  const generatedId = useId();
+  const inputId = id || generatedId;
+  const errorId = `${inputId}-error`;
+  
   return (
     <div className="flex flex-col gap-1">
       {label && (
@@ -27,6 +30,8 @@ export function Input({ label, help, error, className, id, ...props }: InputProp
       )}
       <input
         id={inputId}
+        aria-invalid={!!error}
+        aria-describedby={error ? errorId : undefined}
         className={cn(
           'w-full min-h-[44px] rounded-xl border-2 border-border bg-bg-secondary px-4 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-brand-purple/30 focus:border-brand-purple transition-all duration-200 hover:border-border-strong',
           error && 'border-error focus:ring-error/30 focus:border-error',
@@ -34,7 +39,7 @@ export function Input({ label, help, error, className, id, ...props }: InputProp
         )}
         {...props}
       />
-      {error && <p className="text-xs text-error">{error}</p>}
+      {error && <p id={errorId} className="text-xs text-error" role="alert">{error}</p>}
     </div>
   );
 }

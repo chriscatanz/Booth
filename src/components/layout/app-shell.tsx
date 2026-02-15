@@ -14,6 +14,7 @@ import { LoadingOverlay } from '@/components/ui/loading-spinner';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { AlertCircle, X } from 'lucide-react';
 
+import { OfflineBanner } from '@/components/ui/offline-banner';
 import DashboardView from '@/components/views/dashboard-view';
 import QuickLookView from '@/components/views/quick-look-view';
 import ListView from '@/components/views/list-view';
@@ -179,6 +180,9 @@ export function AppShell() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background">
+      {/* Offline Status Banner */}
+      <OfflineBanner />
+      
       {/* Top Navigation */}
       <TopNav
         viewMode={viewMode}
