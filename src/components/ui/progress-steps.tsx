@@ -63,11 +63,9 @@ export function ProgressSteps({
                 <motion.div
                   className={cn(
                     'w-8 h-8 rounded-full flex items-center justify-center mb-2 text-xs font-semibold',
-                    {
-                      'bg-brand-purple text-white': isCurrent,
-                      'bg-success text-white': isCompleted,
-                      'bg-border-subtle text-text-tertiary': !isCurrent && !isCompleted,
-                    }
+                    isCurrent && 'bg-brand-purple text-white',
+                    isCompleted && 'bg-success text-white',
+                    !isCurrent && !isCompleted && 'bg-border-subtle text-text-tertiary'
                   )}
                   initial={{ scale: 0.8 }}
                   animate={{ scale: isCurrent ? 1.1 : 1 }}
@@ -89,11 +87,9 @@ export function ProgressSteps({
                   <motion.span
                     className={cn(
                       'text-xs font-medium',
-                      {
-                        'text-brand-purple': isCurrent,
-                        'text-success': isCompleted,
-                        'text-text-tertiary': !isCurrent && !isCompleted,
-                      }
+                      isCurrent && 'text-brand-purple',
+                      isCompleted && 'text-success',
+                      !isCurrent && !isCompleted && 'text-text-tertiary'
                     )}
                     initial={{ opacity: 0.6 }}
                     animate={{ opacity: isCurrent || isCompleted ? 1 : 0.6 }}
