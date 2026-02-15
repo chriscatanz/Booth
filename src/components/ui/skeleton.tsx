@@ -56,7 +56,7 @@ export function Skeleton({
 
 // Pre-built skeleton layouts
 
-export function CardSkeleton({ className }: { className?: string }) {
+export function SkeletonCard({ className }: { className?: string }) {
   return (
     <div className={cn('bg-surface border border-border rounded-xl p-5 space-y-4', className)}>
       <div className="flex items-center gap-3">
@@ -71,6 +71,19 @@ export function CardSkeleton({ className }: { className?: string }) {
         <Skeleton variant="rectangular" width={80} height={32} />
         <Skeleton variant="rectangular" width={80} height={32} />
       </div>
+    </div>
+  );
+}
+
+export function SkeletonListItem({ className }: { className?: string }) {
+  return (
+    <div className={cn('flex items-center gap-3 p-3 bg-surface border border-border rounded-lg', className)}>
+      <Skeleton variant="circular" width={32} height={32} />
+      <div className="flex-1 space-y-1.5">
+        <Skeleton variant="text" width="50%" />
+        <Skeleton variant="text" width="30%" />
+      </div>
+      <Skeleton variant="rectangular" width={60} height={24} />
     </div>
   );
 }
