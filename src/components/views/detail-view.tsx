@@ -17,7 +17,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Toggle } from '@/components/ui/toggle';
 import { DatePicker } from '@/components/ui/date-picker';
 import { VenueMap } from '@/components/ui/venue-map';
-import { VenueMap } from '@/components/ui/venue-map';
 import { formatCurrency, cn } from '@/lib/utils';
 import { 
   totalEstimatedCost, totalServicesCost, estimatedHotelCost, roiPercentage, 
