@@ -154,9 +154,9 @@ export function SignUpForm({ onSwitchToLogin, onBack }: SignUpFormProps) {
                   clearError();
                   // Focus on the first input that might have an issue
                   if (error.toLowerCase().includes('email')) {
-                    document.querySelector('input[type="email"]')?.focus();
+                    (document.querySelector('input[type="email"]') as HTMLInputElement)?.focus();
                   } else if (error.toLowerCase().includes('password')) {
-                    document.querySelector('input[type="password"]')?.focus();
+                    (document.querySelector('input[type="password"]') as HTMLInputElement)?.focus();
                   }
                 }}
                 className="text-xs border-error/30 text-error hover:bg-error/10"
