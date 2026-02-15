@@ -20,7 +20,6 @@ import {
   ChevronRight, Package, UserPlus, Building2, SquareDashed, Zap, Truck,
 } from 'lucide-react';
 import { ShippingTimeline } from '@/components/ui/shipping-timeline';
-import { CompletionBadge } from '@/components/ui/completion-badge';
 import { parseISO, isValid, isSameMonth, addDays, addMonths, format } from 'date-fns';
 
 interface ShowAlert {
