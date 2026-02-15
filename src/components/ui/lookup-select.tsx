@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { ChevronDown, Plus, X, Search, Check } from 'lucide-react';
+import { ChevronDown, Plus, X, Search, Check, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Tooltip } from './tooltip';
 
 interface LookupOption {
   id: string;
@@ -16,6 +17,7 @@ interface LookupSelectProps {
   options: LookupOption[];
   placeholder?: string;
   label?: string;
+  help?: string;
   disabled?: boolean;
   allowClear?: boolean;
   allowCreate?: boolean;
@@ -31,6 +33,7 @@ export function LookupSelect({
   options,
   placeholder = 'Select...',
   label,
+  help,
   disabled = false,
   allowClear = true,
   allowCreate = true,
@@ -86,8 +89,13 @@ export function LookupSelect({
   return (
     <div ref={containerRef} className={cn('relative', className)}>
       {label && (
-        <label className="block text-sm font-medium text-text-secondary mb-1.5">
+        <label className="flex items-center gap-1.5 text-sm font-medium text-text-secondary mb-1.5">
           {label}
+          {help && (
+            <Tooltip content={help}>
+              <HelpCircle size={14} className="text-text-tertiary hover:text-text-secondary cursor-help transition-colors" />
+            </Tooltip>
+          )}
         </label>
       )}
       

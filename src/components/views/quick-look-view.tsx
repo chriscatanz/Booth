@@ -8,7 +8,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { formatCurrency } from '@/lib/utils';
 import { formatDateRange } from '@/lib/date-utils';
 import { totalEstimatedCost, daysUntilShow } from '@/types/computed';
-import { LayoutGrid, MapPin, Calendar, DollarSign, Users, Hotel, Mic, Package, CheckCircle, Truck } from 'lucide-react';
+import { MapPin, Calendar, DollarSign, Users, Hotel, Mic, Package, CheckCircle, Truck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const containerVariants = {
@@ -41,7 +41,15 @@ export default function QuickLookView() {
   const { selectShow, allAttendees } = useTradeShowStore();
 
   if (shows.length === 0) {
-    return <EmptyState icon={LayoutGrid} title="No shows found" description="Try adjusting your filters or create a new show." />;
+    return (
+      <div className="p-6 max-w-[1600px] mx-auto">
+        <EmptyState 
+          type="shows" 
+          title="No shows found" 
+          description="Try adjusting your filters or create a new show to get started."
+        />
+      </div>
+    );
   }
 
   return (

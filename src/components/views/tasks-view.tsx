@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/auth-store';
 import * as taskService from '@/services/task-service';
 import { Task, TaskStatus, TASK_STATUS_CONFIG, TASK_PRIORITY_CONFIG } from '@/types/tasks';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import { cn } from '@/lib/utils';
 import {
   Plus, CheckSquare, Clock, AlertCircle,
@@ -305,7 +306,11 @@ function KanbanColumn({
         
         {tasks.length === 0 && (
           <div className="text-center py-8 text-text-tertiary text-sm">
-            No tasks
+            <CheckSquare size={24} className="mx-auto mb-2 opacity-50" />
+            <p>No tasks</p>
+            {isEditor && status === 'todo' && (
+              <p className="text-xs mt-1">Click + to add one</p>
+            )}
           </div>
         )}
       </div>

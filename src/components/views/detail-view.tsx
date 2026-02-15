@@ -336,6 +336,7 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                 />
                 <LookupSelect
                   label="Management Company"
+                  help="The organization or association running this event (e.g., CUNA, State League)"
                   value={show.managementCompanyId}
                   onChange={v => {
                     const company = lookups.managementCompanies.find(c => c.id === v);

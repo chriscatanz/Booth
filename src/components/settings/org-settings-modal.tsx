@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import {
   X, Building2, Users, Shield, Save, User,
   Crown, AlertCircle, Check, Trash2, Settings, Clock, Download, List, Palette, Columns, Eye, Bell, Sparkles, Calendar,
-  ChevronDown, CreditCard
+  ChevronDown, CreditCard, Search
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { authenticatedFetch } from '@/lib/api';
@@ -39,6 +39,7 @@ type SettingsTab = 'general' | 'account' | 'preferences' | 'badges' | 'billing' 
 export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
   const { organization, isOwner, isAdmin, refreshOrganizations } = useAuthStore();
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
+  const [searchQuery, setSearchQuery] = useState('');
 
   // General settings form
   const [orgName, setOrgName] = useState(organization?.name || '');
@@ -90,28 +91,35 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
     setError('Organization deletion requires contacting support');
   };
 
-  const tabs: { id: SettingsTab; label: string; icon: React.ReactNode; adminOnly?: boolean; ownerOnly?: boolean }[] = [
-    { id: 'general', label: 'General', icon: <Building2 size={18} /> },
-    { id: 'account', label: 'Account', icon: <User size={18} /> },
-    { id: 'preferences', label: 'Preferences', icon: <Sliders size={18} /> },
-    { id: 'badges', label: 'Badges', icon: <Trophy size={18} /> },
-    { id: 'billing', label: 'Billing', icon: <CreditCard size={18} />, ownerOnly: true },
-    { id: 'branding', label: 'Branding', icon: <Palette size={18} />, adminOnly: true },
-    { id: 'members', label: 'Members', icon: <Users size={18} /> },
-    { id: 'notifications', label: 'Notifications', icon: <Bell size={18} /> },
-    { id: 'calendar', label: 'Calendar Sync', icon: <Calendar size={18} /> },
-    { id: 'permissions', label: 'Permissions', icon: <Eye size={18} />, adminOnly: true },
-    { id: 'lists', label: 'Custom Lists', icon: <List size={18} />, adminOnly: true },
-    { id: 'fields', label: 'Custom Fields', icon: <Columns size={18} />, adminOnly: true },
-    { id: 'ai', label: 'AI Assistant', icon: <Sparkles size={18} /> },
-    { id: 'data', label: 'Data Export', icon: <Download size={18} /> },
-    { id: 'audit', label: 'Audit Log', icon: <Clock size={18} />, adminOnly: true },
-    { id: 'danger', label: 'Danger Zone', icon: <AlertCircle size={18} />, ownerOnly: true },
+  const tabs: { id: SettingsTab; label: string; icon: React.ReactNode; adminOnly?: boolean; ownerOnly?: boolean; keywords: string[] }[] = [
+    { id: 'general', label: 'General', icon: <Building2 size={18} />, keywords: ['organization', 'name', 'shipping', 'buffer', 'company'] },
+    { id: 'account', label: 'Account', icon: <User size={18} />, keywords: ['password', 'email', 'profile', 'security', 'login'] },
+    { id: 'preferences', label: 'Preferences', icon: <Sliders size={18} />, keywords: ['theme', 'dark', 'light', 'display', 'view'] },
+    { id: 'badges', label: 'Badges', icon: <Trophy size={18} />, keywords: ['achievements', 'rewards', 'gamification', 'progress'] },
+    { id: 'billing', label: 'Billing', icon: <CreditCard size={18} />, ownerOnly: true, keywords: ['payment', 'subscription', 'plan', 'upgrade', 'invoice', 'pricing'] },
+    { id: 'branding', label: 'Branding', icon: <Palette size={18} />, adminOnly: true, keywords: ['logo', 'colors', 'theme', 'customize', 'brand'] },
+    { id: 'members', label: 'Members', icon: <Users size={18} />, keywords: ['team', 'users', 'invite', 'roles', 'people'] },
+    { id: 'notifications', label: 'Notifications', icon: <Bell size={18} />, keywords: ['alerts', 'email', 'reminders', 'updates'] },
+    { id: 'calendar', label: 'Calendar Sync', icon: <Calendar size={18} />, keywords: ['google', 'outlook', 'ics', 'subscribe', 'events'] },
+    { id: 'permissions', label: 'Permissions', icon: <Eye size={18} />, adminOnly: true, keywords: ['access', 'roles', 'viewer', 'editor', 'admin', 'visibility'] },
+    { id: 'lists', label: 'Custom Lists', icon: <List size={18} />, adminOnly: true, keywords: ['dropdown', 'options', 'categories', 'tags'] },
+    { id: 'fields', label: 'Custom Fields', icon: <Columns size={18} />, adminOnly: true, keywords: ['data', 'properties', 'attributes', 'custom'] },
+    { id: 'ai', label: 'AI Assistant', icon: <Sparkles size={18} />, keywords: ['openai', 'api', 'key', 'generate', 'content'] },
+    { id: 'data', label: 'Data Export', icon: <Download size={18} />, keywords: ['csv', 'backup', 'download', 'export'] },
+    { id: 'audit', label: 'Audit Log', icon: <Clock size={18} />, adminOnly: true, keywords: ['history', 'changes', 'activity', 'tracking'] },
+    { id: 'danger', label: 'Danger Zone', icon: <AlertCircle size={18} />, ownerOnly: true, keywords: ['delete', 'remove', 'destroy', 'cancel'] },
   ];
 
   const visibleTabs = tabs.filter(t => {
     if (t.ownerOnly && !isOwner) return false;
     if (t.adminOnly && !isAdmin) return false;
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      const matchesLabel = t.label.toLowerCase().includes(query);
+      const matchesKeywords = t.keywords.some(k => k.includes(query));
+      return matchesLabel || matchesKeywords;
+    }
     return true;
   });
 
@@ -163,6 +171,19 @@ export function OrgSettingsModal({ onClose }: OrgSettingsModalProps) {
         <div className="flex flex-1 overflow-hidden">
           {/* Sidebar Navigation - hidden on mobile */}
           <nav className="hidden sm:block w-56 shrink-0 border-r border-border bg-bg-secondary overflow-y-auto">
+            {/* Search */}
+            <div className="p-3 border-b border-border">
+              <div className="relative">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" />
+                <input
+                  type="text"
+                  placeholder="Search settings..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-8 pr-3 py-1.5 text-sm bg-surface border border-border rounded-lg text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
+                />
+              </div>
+            </div>
             <div className="py-2">
               {visibleTabs.map((tab) => (
                 <button

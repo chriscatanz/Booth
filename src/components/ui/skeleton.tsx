@@ -1,100 +1,170 @@
-﻿'use client';
+'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 interface SkeletonProps {
   className?: string;
+  variant?: 'text' | 'circular' | 'rectangular';
   width?: string | number;
   height?: string | number;
-  rounded?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  lines?: number;
 }
 
 export function Skeleton({ 
   className, 
-  width, 
+  variant = 'rectangular',
+  width,
   height,
-  rounded = 'md' 
+  lines = 1,
 }: SkeletonProps) {
-  const roundedClasses = {
-    sm: 'rounded-sm',
-    md: 'rounded-md',
-    lg: 'rounded-lg',
-    xl: 'rounded-xl',
-    full: 'rounded-full',
+  const baseStyles = 'animate-pulse bg-bg-tertiary';
+  
+  const variantStyles = {
+    text: 'rounded h-4',
+    circular: 'rounded-full',
+    rectangular: 'rounded-lg',
   };
 
+  const style: React.CSSProperties = {};
+  if (width) style.width = typeof width === 'number' ? `${width}px` : width;
+  if (height) style.height = typeof height === 'number' ? `${height}px` : height;
+
+  if (variant === 'text' && lines > 1) {
+    return (
+      <div className="space-y-2">
+        {Array.from({ length: lines }).map((_, i) => (
+          <div 
+            key={i} 
+            className={cn(baseStyles, variantStyles.text, className)}
+            style={{ 
+              ...style, 
+              width: i === lines - 1 ? '60%' : width 
+            }}
+          />
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <motion.div
-      className={cn(
-        'bg-bg-tertiary overflow-hidden',
-        roundedClasses[rounded],
-        className
-      )}
-      style={{ width, height }}
-    >
-      <motion.div
-        className="h-full w-full bg-gradient-to-r from-transparent via-white/5 to-transparent"
-        animate={{ x: ['-100%', '100%'] }}
-        transition={{ 
-          duration: 1.5, 
-          repeat: Infinity, 
-          ease: 'linear'
-        }}
-      />
-    </motion.div>
+    <div 
+      className={cn(baseStyles, variantStyles[variant], className)} 
+      style={style}
+    />
   );
 }
 
-// Skeleton card for loading states
-export function SkeletonCard({ className }: { className?: string }) {
+// Pre-built skeleton layouts
+
+export function CardSkeleton({ className }: { className?: string }) {
   return (
-    <div className={cn('p-4 rounded-xl border border-border-subtle bg-surface', className)}>
-      <div className="flex items-start gap-3">
-        <Skeleton width={40} height={40} rounded="lg" />
+    <div className={cn('bg-surface border border-border rounded-xl p-5 space-y-4', className)}>
+      <div className="flex items-center gap-3">
+        <Skeleton variant="circular" width={40} height={40} />
         <div className="flex-1 space-y-2">
-          <Skeleton height={24} width="60%" />
-          <Skeleton height={16} width="40%" />
+          <Skeleton variant="text" width="60%" />
+          <Skeleton variant="text" width="40%" />
         </div>
       </div>
-    </div>
-  );
-}
-
-// Skeleton list item
-export function SkeletonListItem({ className }: { className?: string }) {
-  return (
-    <div className={cn('px-3 py-2.5 rounded-lg', className)}>
-      <div className="flex items-center justify-between gap-2">
-        <Skeleton height={18} width="70%" />
-        <Skeleton height={18} width={32} rounded="full" />
-      </div>
-      <div className="flex items-center gap-2 mt-1.5">
-        <Skeleton height={14} width="40%" />
-        <Skeleton height={14} width="30%" />
+      <Skeleton variant="rectangular" height={100} className="w-full" />
+      <div className="flex gap-2">
+        <Skeleton variant="rectangular" width={80} height={32} />
+        <Skeleton variant="rectangular" width={80} height={32} />
       </div>
     </div>
   );
 }
 
-// Skeleton text lines
-export function SkeletonText({ 
-  lines = 3,
-  className 
-}: { 
-  lines?: number;
-  className?: string;
-}) {
+export function TableRowSkeleton({ columns = 5 }: { columns?: number }) {
   return (
-    <div className={cn('space-y-2', className)}>
-      {Array.from({ length: lines }).map((_, i) => (
-        <Skeleton 
-          key={i} 
-          height={16} 
-          width={i === lines - 1 ? '60%' : '100%'} 
-        />
+    <tr className="border-b border-border">
+      {Array.from({ length: columns }).map((_, i) => (
+        <td key={i} className="py-3 px-4">
+          <Skeleton variant="text" width={i === 0 ? '70%' : '50%'} />
+        </td>
       ))}
+    </tr>
+  );
+}
+
+export function ListSkeleton({ rows = 5, className }: { rows?: number; className?: string }) {
+  return (
+    <div className={cn('space-y-3', className)}>
+      {Array.from({ length: rows }).map((_, i) => (
+        <div key={i} className="flex items-center gap-3 p-3 bg-surface border border-border rounded-lg">
+          <Skeleton variant="circular" width={32} height={32} />
+          <div className="flex-1 space-y-1.5">
+            <Skeleton variant="text" width="50%" />
+            <Skeleton variant="text" width="30%" />
+          </div>
+          <Skeleton variant="rectangular" width={60} height={24} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function DashboardSkeleton() {
+  return (
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <Skeleton variant="text" width={200} height={32} />
+        <Skeleton variant="rectangular" width={120} height={36} />
+      </div>
+      
+      {/* Summary cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="bg-surface border border-border rounded-xl p-4 space-y-2">
+            <Skeleton variant="text" width="40%" />
+            <Skeleton variant="text" width="60%" height={28} />
+            <Skeleton variant="text" width="30%" />
+          </div>
+        ))}
+      </div>
+      
+      {/* Main content */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <CardSkeleton />
+        <CardSkeleton />
+      </div>
+    </div>
+  );
+}
+
+export function DetailSkeleton() {
+  return (
+    <div className="p-6 space-y-6 max-w-5xl mx-auto">
+      {/* Hero */}
+      <div className="flex items-start gap-4">
+        <Skeleton variant="rectangular" width={120} height={80} />
+        <div className="flex-1 space-y-2">
+          <Skeleton variant="text" width="50%" height={28} />
+          <Skeleton variant="text" width="30%" />
+          <div className="flex gap-2 mt-2">
+            <Skeleton variant="rectangular" width={60} height={24} />
+            <Skeleton variant="rectangular" width={80} height={24} />
+          </div>
+        </div>
+      </div>
+      
+      {/* Tabs */}
+      <div className="flex gap-2 border-b border-border pb-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} variant="rectangular" width={80} height={32} />
+        ))}
+      </div>
+      
+      {/* Content */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="space-y-2">
+            <Skeleton variant="text" width="30%" />
+            <Skeleton variant="rectangular" height={40} className="w-full" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
