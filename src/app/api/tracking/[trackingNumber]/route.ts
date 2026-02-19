@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const SHIPPO_API_KEY = process.env.SHIPPO_API_KEY;
-
 interface ShippoTrackingResponse {
   tracking_status: {
     status: string;
@@ -50,7 +48,10 @@ export async function GET(
       return NextResponse.json({ error: 'Carrier required' }, { status: 400 });
     }
 
-    if (!SHIPPO_API_KEY) {
+    // Read env var inside handler (not at module scope) for proper Next.js runtime behavior
+    const shippoApiKey = process.env.SHIPPO_API_KEY;
+    if (!shippoApiKey) {
+      console.error('Tracking API: SHIPPO_API_KEY not configured');
       return NextResponse.json({ error: 'Shippo API not configured' }, { status: 500 });
     }
 
@@ -59,7 +60,7 @@ export async function GET(
       `https://api.goshippo.com/tracks/${carrier}/${trackingNumber}`,
       {
         headers: {
-          'Authorization': `ShippoToken ${SHIPPO_API_KEY}`,
+          'Authorization': `ShippoToken ${shippoApiKey}`,
           'Content-Type': 'application/json',
         },
       }
@@ -67,9 +68,13 @@ export async function GET(
 
     if (!shippoResponse.ok) {
       const errorText = await shippoResponse.text();
-      console.error('Shippo API error:', errorText);
+      console.error('Shippo API error:', shippoResponse.status, errorText);
+      // Return more specific error for debugging (in prod, could simplify)
       return NextResponse.json(
-        { error: 'Failed to fetch tracking info' },
+        { 
+          error: 'Failed to fetch tracking info',
+          details: shippoResponse.status === 401 ? 'Invalid API key' : errorText 
+        },
         { status: shippoResponse.status }
       );
     }
