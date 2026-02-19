@@ -53,7 +53,9 @@ export async function getTrackingStatus(
     throw new Error('Could not detect carrier. Please specify carrier manually.');
   }
 
-  const response = await fetch(`/api/tracking/${encodeURIComponent(trackingNumber)}?carrier=${detectedCarrier}`);
+  const response = await fetch(`/api/tracking/${encodeURIComponent(trackingNumber)}?carrier=${detectedCarrier}`, {
+    credentials: 'include',
+  });
   
   if (!response.ok) {
     const error = await response.json();
