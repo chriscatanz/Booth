@@ -3,6 +3,8 @@
  * Fetches package tracking status from Shippo API
  */
 
+import { supabase } from '@/lib/supabase';
+
 export interface TrackingStatus {
   status: string; // UNKNOWN, PRE_TRANSIT, TRANSIT, DELIVERED, RETURNED, FAILURE
   statusDetails: string;
@@ -53,8 +55,19 @@ export async function getTrackingStatus(
     throw new Error('Could not detect carrier. Please specify carrier manually.');
   }
 
+  // Get auth session for API call
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+  if (session?.access_token) {
+    headers['Authorization'] = `Bearer ${session.access_token}`;
+  }
+
   const response = await fetch(`/api/tracking/${encodeURIComponent(trackingNumber)}?carrier=${detectedCarrier}`, {
     credentials: 'include',
+    headers,
   });
   
   if (!response.ok) {

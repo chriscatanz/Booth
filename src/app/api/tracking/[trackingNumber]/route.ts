@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createServerClient } from '@/lib/supabase-server';
+import { createClient } from '@supabase/supabase-js';
 
 const SHIPPO_API_KEY = process.env.SHIPPO_API_KEY;
 
@@ -34,11 +35,37 @@ export async function GET(
   context: { params: Promise<{ trackingNumber: string }> }
 ) {
   try {
-    // Auth check
-    const supabase = await createServerClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // Auth check - try SSR-based auth first (for browser requests with cookies)
+    let user = null;
     
-    if (authError || !user) {
+    try {
+      const supabase = await createServerClient();
+      const { data, error } = await supabase.auth.getUser();
+      if (!error && data?.user) {
+        user = data.user;
+      }
+    } catch {
+      // SSR client failed, try header-based auth
+    }
+
+    // Fallback to Authorization header
+    if (!user) {
+      const authHeader = request.headers.get('authorization');
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      
+      if (authHeader && supabaseUrl && supabaseAnonKey) {
+        const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+          global: { headers: { Authorization: authHeader } },
+        });
+        const { data, error } = await supabase.auth.getUser();
+        if (!error && data?.user) {
+          user = data.user;
+        }
+      }
+    }
+
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
