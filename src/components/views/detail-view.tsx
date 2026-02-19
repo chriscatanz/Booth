@@ -293,6 +293,8 @@ Return ONLY the HTML content, no markdown, no code fences.`;
             taskCounts={taskCounts}
             canEdit={canEdit}
             onEdit={() => setViewMode('edit')}
+            activeTab={activeTab as 'overview' | 'agenda' | 'booth' | 'logistics' | 'travel' | 'budget' | 'notes' | 'documents'}
+            onTabChange={(tab) => setActiveTab(tab as DetailTab)}
           />
         </div>
       )}

@@ -28,8 +28,10 @@ interface ShowReadViewProps {
   files?: AdditionalFile[];
   tasks?: Task[];
   taskCounts?: { completed: number; total: number };
-  onEdit?: () => void;
+  onEdit?: (currentTab: ReadTab) => void;
   canEdit?: boolean;
+  activeTab?: ReadTab;
+  onTabChange?: (tab: ReadTab) => void;
 }
 
 type ReadTab = 'overview' | 'agenda' | 'booth' | 'logistics' | 'travel' | 'budget' | 'notes' | 'documents';
@@ -45,8 +47,12 @@ const TABS: { id: ReadTab; label: string; icon: React.ReactNode }[] = [
   { id: 'documents', label: 'Documents', icon: <FileText size={16} /> },
 ];
 
-export function ShowReadView({ show, attendees, files = [], tasks = [], taskCounts, onEdit, canEdit }: ShowReadViewProps) {
-  const [activeTab, setActiveTab] = useState<ReadTab>('overview');
+export function ShowReadView({ show, attendees, files = [], tasks = [], taskCounts, onEdit, canEdit, activeTab: controlledTab, onTabChange }: ShowReadViewProps) {
+  const [internalTab, setInternalTab] = useState<ReadTab>('overview');
+  
+  // Use controlled tab if provided, otherwise use internal state
+  const activeTab = controlledTab ?? internalTab;
+  const setActiveTab = onTabChange ?? setInternalTab;
   const toast = useToastStore();
   
   // Computed values
