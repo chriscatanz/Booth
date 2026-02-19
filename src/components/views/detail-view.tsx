@@ -720,18 +720,6 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                 <div className="mt-4 p-3 bg-bg-tertiary rounded-lg">
                   <TrackingStatusDisplay
                     trackingNumber={show.trackingNumber}
-                    status={show.trackingStatus}
-                    statusDetails={show.trackingStatusDetails}
-                    eta={show.trackingEta}
-                    lastUpdated={show.trackingLastUpdated}
-                    onStatusUpdate={(result) => {
-                      updateSelectedShow({
-                        trackingStatus: result.status,
-                        trackingStatusDetails: result.statusDetails,
-                        trackingEta: result.eta,
-                        trackingLastUpdated: result.lastUpdated,
-                      });
-                    }}
                     disabled={readOnly}
                   />
                 </div>
