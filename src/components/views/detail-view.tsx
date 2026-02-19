@@ -220,7 +220,7 @@ Return ONLY the HTML content, no markdown, no code fences.`;
   // Tab counts for badges
   const tabCounts = {
     travel: attendees.length,
-    notes: additionalFiles.length,
+    documents: additionalFiles.length,
   };
 
   return (
@@ -1136,9 +1136,22 @@ Return ONLY the HTML content, no markdown, no code fences.`;
               </TabSection>
             </DataVisibilityGate>
 
-            {/* Documents */}
+            {/* Activity Timeline */}
+            <DataVisibilityGate category="notes">
+              <TabSection title="Activity & Notes">
+                <ActivityTimeline tradeshowId={show.id} readOnly={readOnly} />
+              </TabSection>
+            </DataVisibilityGate>
+          </div>
+        </DetailTabPanel>
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            DOCUMENTS TAB
+        ═══════════════════════════════════════════════════════════════════ */}
+        <DetailTabPanel id="documents" activeTab={activeTab}>
+          <div className="space-y-6">
             <DataVisibilityGate category="documents">
-              <TabSection title={`Documents${additionalFiles.length > 0 ? ` (${additionalFiles.length})` : ''}`} icon={Upload}>
+              <TabSection title={`Documents${additionalFiles.length > 0 ? ` (${additionalFiles.length})` : ''}`} icon={Upload} defaultOpen>
                 <FileUploadZone
                   tradeshowId={show.id}
                   files={additionalFiles}
@@ -1148,13 +1161,6 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                 {isNew && (
                   <p className="text-xs text-text-tertiary mt-2">Save the show first to upload files</p>
                 )}
-              </TabSection>
-            </DataVisibilityGate>
-
-            {/* Activity Timeline */}
-            <DataVisibilityGate category="notes">
-              <TabSection title="Activity & Notes">
-                <ActivityTimeline tradeshowId={show.id} readOnly={readOnly} />
               </TabSection>
             </DataVisibilityGate>
           </div>

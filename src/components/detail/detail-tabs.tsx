@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { 
-  Info, Calendar, Grid3X3, Truck, Plane, DollarSign, FileText,
+  Info, Calendar, Grid3X3, Truck, Plane, DollarSign, FileText, Upload,
 } from 'lucide-react';
 
-export type DetailTab = 'overview' | 'agenda' | 'booth' | 'logistics' | 'travel' | 'budget' | 'notes';
+export type DetailTab = 'overview' | 'agenda' | 'booth' | 'logistics' | 'travel' | 'budget' | 'notes' | 'documents';
 
 interface TabConfig {
   id: DetailTab;
@@ -23,6 +23,7 @@ const TABS: TabConfig[] = [
   { id: 'travel', label: 'Travel', icon: Plane },
   { id: 'budget', label: 'Budget', icon: DollarSign },
   { id: 'notes', label: 'Notes & Tasks', icon: FileText },
+  { id: 'documents', label: 'Documents', icon: Upload },
 ];
 
 interface DetailTabsProps {
