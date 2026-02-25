@@ -3,7 +3,7 @@ import { TradeShow, Attendee, AdditionalFile } from '@/types';
 import { formatDateForDB } from '@/lib/date-utils';
 import { parseISO, isValid } from 'date-fns';
 import { useAuthStore } from '@/store/auth-store';
-import { createActivity } from '@/services/activity-service';
+import { createActivity as logFeedActivity } from '@/services/activity-service';
 
 // ─── Org Context Helper ─────────────────────────────────────────────────────
 
@@ -500,7 +500,7 @@ export async function createAdditionalFile(file: AdditionalFile): Promise<Additi
 
   // Activity log — fire and forget
   if (orgId && userId) {
-    createActivity(orgId, userId, 'file_uploaded', `Uploaded ${file.fileName}`, {
+    logFeedActivity(orgId, userId, 'file_uploaded', `Uploaded ${file.fileName}`, {
       showId: file.tradeshowId?.toString(),
       metadata: { fileName: file.fileName, fileType: file.fileType },
     }).catch(() => {});
