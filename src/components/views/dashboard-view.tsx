@@ -97,7 +97,7 @@ export default function DashboardView({ onViewModeChange }: DashboardViewProps) 
         });
       }
 
-      if (show.shippingCutoff) {
+      if (show.shippingCutoff && !show.trackingNumber) {
         const cutoff = parseISO(show.shippingCutoff);
         if (isValid(cutoff)) {
           const daysToCutoff = Math.ceil((cutoff.getTime() - now.getTime()) / 86400000);
@@ -123,12 +123,12 @@ export default function DashboardView({ onViewModeChange }: DashboardViewProps) 
         });
       }
 
-      if ((!show.boothToShip || show.boothToShip === '[]') && start && start <= twentyOneDaysOut) {
+      if (!show.boothSizeId && !show.boothNumber && start && start <= twentyOneDaysOut) {
         const daysUntilShow = start ? Math.ceil((start.getTime() - now.getTime()) / 86400000) : null;
         list.push({ 
           show, 
           type: AlertType.NoBoothSelected, 
-          title: 'No booth selected', 
+          title: 'No booth size or number set', 
           priority: AlertPriority.Low,
           daysUntilDeadline: daysUntilShow || undefined
         });
