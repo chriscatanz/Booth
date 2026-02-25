@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useId } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown, Plus, X, Search, Check, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip } from './tooltip';
@@ -44,7 +45,9 @@ export function LookupSelect({
 }: LookupSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listboxId = useId();
   const labelId = useId();
@@ -76,6 +79,19 @@ export function LookupSelect({
       inputRef.current.focus();
     }
   }, [isOpen]);
+
+  const updateDropdownPosition = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownStyle({
+        position: 'fixed',
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+        zIndex: 9999,
+      });
+    }
+  };
 
   const handleSelect = (optionId: string) => {
     onChange(optionId);
@@ -109,7 +125,13 @@ export function LookupSelect({
         aria-haspopup="listbox"
         aria-controls={isOpen ? listboxId : undefined}
         aria-labelledby={label ? labelId : undefined}
-        onClick={() => !disabled && setIsOpen(!isOpen)}
+        ref={buttonRef}
+        onClick={() => {
+          if (!disabled) {
+            if (!isOpen) updateDropdownPosition();
+            setIsOpen(!isOpen);
+          }
+        }}
         disabled={disabled}
         className={cn(
           'w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border text-left transition-colors',
@@ -145,9 +167,9 @@ export function LookupSelect({
         <p className="text-xs text-error mt-1" role="alert">{error}</p>
       )}
 
-      {/* Dropdown */}
-      {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-surface border border-border rounded-lg shadow-lg overflow-hidden">
+      {/* Dropdown — portal to escape overflow/stacking context */}
+      {isOpen && typeof document !== 'undefined' && createPortal(
+        <div style={dropdownStyle} className="bg-surface border border-border rounded-lg shadow-lg overflow-hidden">
           {/* Search */}
           {options.length > 5 && (
             <div className="p-2 border-b border-border">
@@ -214,8 +236,8 @@ export function LookupSelect({
               </button>
             )}
           </div>
-        </div>
-      )}
+        </div>,
+      document.body)}
     </div>
   );
 }
