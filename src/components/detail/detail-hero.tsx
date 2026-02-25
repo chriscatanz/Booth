@@ -146,9 +146,9 @@ export function DetailHero({
 
   return (
     <div className="bg-gradient-to-br from-surface via-surface to-bg-secondary border-b border-border">
-      <div className="px-6 py-3">
+      <div className="px-4 sm:px-6 py-2 sm:py-3">
         {/* Row 1: Back + Title + Action Buttons */}
-        <div className="flex items-center justify-between gap-3 mb-2">
+        <div className="flex items-center justify-between gap-3 mb-1.5 sm:mb-2">
           <div className="flex items-center gap-2 min-w-0">
             {onBack && (
               <button
@@ -159,7 +159,7 @@ export function DetailHero({
                 <ArrowLeft size={20} />
               </button>
             )}
-            <h1 className="text-xl font-bold text-text-primary truncate min-w-0">
+            <h1 className="text-lg sm:text-xl font-bold text-text-primary truncate min-w-0">
               {show.name || 'Untitled Show'}
             </h1>
           </div>
@@ -311,7 +311,7 @@ export function DetailHero({
         </div>
 
         {/* Row 2: Meta info + Progress bar + Stats (all inline) */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 sm:gap-x-4 sm:gap-y-2">
           {/* Location & Dates & Booth */}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-secondary">
             {show.location && (
@@ -420,16 +420,20 @@ export function DetailHero({
         </div>
 
         {/* Show completion progress + View/Edit toggle */}
+        {/* On mobile: only render if there's a toggle to show (progress bar hidden on mobile to save space) */}
         {!isNew && (completeness.percentage < 100 || onViewModeChange) && (
-          <div className="mt-3 pt-3 border-t border-border-subtle">
+          <div className={cn(
+            "mt-2 pt-2 border-t border-border-subtle",
+            !onViewModeChange && "hidden sm:block"
+          )}>
             <div className="flex items-center justify-between gap-4">
-              {/* Completion progress (left) */}
+              {/* Completion progress (hidden on mobile — too cramped) */}
               {completeness.percentage < 100 ? (
-                <div className="flex-1 max-w-md">
+                <div className="hidden sm:flex flex-1 max-w-md">
                   <CompletionProgress show={show} />
                 </div>
               ) : (
-                <div />
+                <div className="hidden sm:block" />
               )}
               
               {/* View/Edit toggle (right) */}
