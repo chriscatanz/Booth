@@ -13,7 +13,6 @@ import { ToastContainer } from '@/components/ui/toast';
 import { LoadingOverlay } from '@/components/ui/loading-spinner';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { AlertCircle, X } from 'lucide-react';
-import { CompletionBadge } from '@/components/ui/completion-badge';
 
 import { OfflineBanner } from '@/components/ui/offline-banner';
 import DashboardView from '@/components/views/dashboard-view';
@@ -50,6 +49,14 @@ const pageVariants = {
     transition: { duration: 0.15 }
   },
 };
+
+/** Thin wrapper so BoothModeView subscribes to selectedShow directly,
+ *  keeping app-shell free of the full-object subscription. */
+function BoothModeShell({ onExit }: { onExit: () => void }) {
+  const selectedShow = useTradeShowStore(s => s.selectedShow);
+  if (!selectedShow) return null;
+  return <BoothModeView show={selectedShow} onExit={onExit} />;
+}
 
 export function AppShell() {
   const viewMode = useSettingsStore(s => s.currentView);
@@ -106,7 +113,10 @@ export function AppShell() {
     setShowOnboarding(false);
   };
   
-  const selectedShow = useTradeShowStore(s => s.selectedShow);
+  // Narrow selectors — avoid re-rendering the whole shell on every keystroke.
+  // Components that need the full show (DetailView, BoothModeView) subscribe directly.
+  const hasSelectedShow = useTradeShowStore(s => s.selectedShow !== null);
+  const selectedShowId  = useTradeShowStore(s => s.selectedShow?.id ?? null);
   const setSelectedShow = useTradeShowStore(s => s.setSelectedShow);
   const isLoading = useTradeShowStore(s => s.isLoading);
   const shows = useTradeShowStore(s => s.shows);
@@ -140,12 +150,12 @@ export function AppShell() {
   }, [loadShows]);
 
   const getViewKey = () => {
-    if (selectedShow) return `detail-${selectedShow.id}`;
+    if (selectedShowId !== null) return `detail-${selectedShowId}`;
     return viewMode;
   };
 
   const renderContent = () => {
-    if (selectedShow) {
+    if (hasSelectedShow) {
       return <DetailView />;
     }
 
@@ -191,7 +201,7 @@ export function AppShell() {
         onOpenSettings={() => setShowOrgSettings(true)}
         onOpenCommandPalette={() => setShowCommandPalette(true)}
         onEnterBoothMode={() => setShowBoothMode(true)}
-        canEnterBoothMode={!!selectedShow}
+        canEnterBoothMode={hasSelectedShow}
       />
       
       {/* Subscription Banner */}
@@ -208,11 +218,8 @@ export function AppShell() {
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Toolbar bar with Show Selector */}
           <div className="h-12 border-b border-border flex items-center px-2 sm:px-4 gap-2 sm:gap-4 shrink-0 bg-surface">
-            {/* Show Selector Dropdown */}
+            {/* Show Selector Dropdown (badge lives inside ShowSelector to share its subscription) */}
             <ShowSelector />
-            {selectedShow && (
-              <CompletionBadge show={selectedShow} size="sm" showMessage showPercentage={false} />
-            )}
 
             {/* Current View Label - hide on mobile */}
             <div className="hidden sm:flex items-center gap-2 text-sm text-text-secondary">
@@ -223,7 +230,7 @@ export function AppShell() {
             {/* Right side actions */}
             <div className="ml-auto flex items-center gap-2">
               {/* Import/Export buttons - only show on relevant views, hide on mobile */}
-              {(viewMode === ViewMode.List || viewMode === ViewMode.Dashboard) && !selectedShow && (
+              {(viewMode === ViewMode.List || viewMode === ViewMode.Dashboard) && !hasSelectedShow && (
                 <div className="hidden sm:flex items-center gap-2">
                   <button
                     onClick={() => setShowImport(true)}
@@ -326,14 +333,9 @@ export function AppShell() {
       {/* Floating AI Chat Bubble */}
       <AIChatBubble />
 
-      {/* Booth Mode - Immersive Mobile Experience */}
+      {/* Booth Mode - uses its own store subscription so app-shell doesn't need full selectedShow */}
       <AnimatePresence>
-        {showBoothMode && selectedShow && (
-          <BoothModeView
-            show={selectedShow}
-            onExit={() => setShowBoothMode(false)}
-          />
-        )}
+        {showBoothMode && <BoothModeShell onExit={() => setShowBoothMode(false)} />}
       </AnimatePresence>
     </div>
   );

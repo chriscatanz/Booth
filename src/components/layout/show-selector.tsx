@@ -6,6 +6,7 @@ import { useTradeShowStore } from '@/store/trade-show-store';
 import { useFilteredShows } from '@/hooks/use-filtered-shows';
 import { DateRange } from '@/types/enums';
 import { StatusBadge } from '@/components/ui/badge';
+import { CompletionBadge } from '@/components/ui/completion-badge';
 import { formatDateRange } from '@/lib/date-utils';
 import { daysUntilShow } from '@/types/computed';
 import { cn } from '@/lib/utils';
@@ -112,6 +113,7 @@ export function ShowSelector() {
               {selectedShow.showStatus && (
                 <StatusBadge status={selectedShow.showStatus} size="sm" />
               )}
+              <CompletionBadge show={selectedShow} size="sm" showMessage showPercentage={false} />
             </div>
           ) : (
             <span className="text-text-secondary">Select a show...</span>

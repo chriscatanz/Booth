@@ -86,7 +86,16 @@ export function DetailHero({
     }
   }, [show.id]);
 
-  const completeness = calculateShowCompleteness(show, { hasKitAssignment });
+  const completeness = useMemo(
+    () => calculateShowCompleteness(show, { hasKitAssignment }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [show.id, hasKitAssignment,
+     show.registrationConfirmed, show.hotelConfirmed, show.utilitiesBooked,
+     show.laborBooked, show.laborNotRequired, show.trackingNumber,
+     show.attendeeListReceived, show.boothSizeId, show.boothNumber,
+     show.leadCaptureSystemId, show.leadCaptureNotRequired,
+     show.startDate, show.venueName, show.venueAddress]
+  );
 
   // Memoize badges to prevent unnecessary re-renders
   const badges = useMemo(() => {
