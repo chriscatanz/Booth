@@ -32,6 +32,8 @@ interface ShowReadViewProps {
   canEdit?: boolean;
   activeTab?: ReadTab;
   onTabChange?: (tab: ReadTab) => void;
+  carriers?: Array<{ id: string; name: string }>;
+  laborCompanies?: Array<{ id: string; name: string }>;
 }
 
 type ReadTab = 'overview' | 'agenda' | 'booth' | 'logistics' | 'travel' | 'budget' | 'notes' | 'documents';
@@ -47,7 +49,7 @@ const TABS: { id: ReadTab; label: string; icon: React.ReactNode }[] = [
   { id: 'documents', label: 'Documents', icon: <FileText size={16} /> },
 ];
 
-export function ShowReadView({ show, attendees, files = [], tasks = [], taskCounts, onEdit, canEdit, activeTab: controlledTab, onTabChange }: ShowReadViewProps) {
+export function ShowReadView({ show, attendees, files = [], tasks = [], taskCounts, onEdit, canEdit, activeTab: controlledTab, onTabChange, carriers = [], laborCompanies = [] }: ShowReadViewProps) {
   const [internalTab, setInternalTab] = useState<ReadTab>('overview');
   
   // Use controlled tab if provided, otherwise use internal state
@@ -61,6 +63,7 @@ export function ShowReadView({ show, attendees, files = [], tasks = [], taskCoun
   const hotelCost = estimatedHotelCost(show, attendees);
   const flightCost = flightCostForShow(show, attendees);
   const graphicsToShip = parseJsonStringArray(show.graphicsToShip);
+  const boothToShip = parseJsonStringArray(show.boothToShip);
   const packingItems = parseJsonStringArray(show.packingListItems);
   
   // Days until show
@@ -364,7 +367,7 @@ export function ShowReadView({ show, attendees, files = [], tasks = [], taskCoun
           {/* LOGISTICS TAB */}
           {activeTab === 'logistics' && (
             <div className="space-y-6">
-              {/* Shipping */}
+              {/* Outbound Shipping */}
               <Card>
                 <CardTitle icon={<Truck size={16} />} title="Outbound Shipping" />
                 <div className="mt-4 space-y-4">
@@ -377,19 +380,26 @@ export function ShowReadView({ show, attendees, files = [], tasks = [], taskCoun
                       </div>
                     </div>
                   )}
-                  
+
                   <div className="grid grid-cols-2 gap-4">
+                    {show.shippingCarrierId && carriers.find(c => c.id === show.shippingCarrierId) && (
+                      <InfoBlock label="Carrier" value={carriers.find(c => c.id === show.shippingCarrierId)!.name} icon={<Truck size={14} />} />
+                    )}
                     {show.trackingNumber && (
-                      <InfoBlock 
-                        label="Tracking #" 
-                        value={show.trackingNumber} 
-                        copyable 
-                        onCopy={() => copyToClipboard(show.trackingNumber!, 'Tracking number')} 
-                      />
+                      <InfoBlock label="Tracking #" value={show.trackingNumber} copyable onCopy={() => copyToClipboard(show.trackingNumber!, 'Tracking number')} />
                     )}
                     {show.shippingCost && <InfoBlock label="Cost" value={formatCurrency(show.shippingCost)} />}
+                    {(show.shipToSite || show.shipToWarehouse) && (
+                      <div>
+                        <div className="text-xs text-text-tertiary mb-1.5">Ship To</div>
+                        <div className="flex flex-wrap gap-2">
+                          {show.shipToSite && <span className="text-xs px-2 py-0.5 rounded-full bg-brand-purple/10 text-brand-purple font-medium">Site</span>}
+                          {show.shipToWarehouse && <span className="text-xs px-2 py-0.5 rounded-full bg-brand-cyan/10 text-brand-cyan font-medium">Warehouse</span>}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  
+
                   {show.trackingStatus && (
                     <div className="p-3 bg-bg-tertiary rounded-lg">
                       <div className="text-xs text-text-tertiary mb-1">Status</div>
@@ -399,7 +409,7 @@ export function ShowReadView({ show, attendees, files = [], tasks = [], taskCoun
                       )}
                     </div>
                   )}
-                  
+
                   {show.shippingInfo && (
                     <div className="text-sm text-text-secondary whitespace-pre-wrap">{show.shippingInfo}</div>
                   )}
@@ -407,21 +417,46 @@ export function ShowReadView({ show, attendees, files = [], tasks = [], taskCoun
               </Card>
 
               {/* Return Shipping */}
-              {(show.returnTrackingNumber || show.returnShippingCost) && (
+              {(show.returnCarrierId || show.returnTrackingNumber || show.returnShippingCost || show.returnShipDate || show.returnDeliveryDate) && (
                 <Card>
                   <CardTitle icon={<RotateCcw size={16} />} title="Return Shipping" />
                   <div className="mt-4 grid grid-cols-2 gap-4">
+                    {show.returnCarrierId && carriers.find(c => c.id === show.returnCarrierId) && (
+                      <InfoBlock label="Carrier" value={carriers.find(c => c.id === show.returnCarrierId)!.name} icon={<Truck size={14} />} />
+                    )}
                     {show.returnTrackingNumber && (
-                      <InfoBlock 
-                        label="Tracking #" 
-                        value={show.returnTrackingNumber} 
-                        copyable 
-                        onCopy={() => copyToClipboard(show.returnTrackingNumber!, 'Return tracking')} 
-                      />
+                      <InfoBlock label="Tracking #" value={show.returnTrackingNumber} copyable onCopy={() => copyToClipboard(show.returnTrackingNumber!, 'Return tracking')} />
                     )}
                     {show.returnShippingCost && <InfoBlock label="Cost" value={formatCurrency(show.returnShippingCost)} />}
                     {show.returnShipDate && <InfoBlock label="Ship Date" value={formatDate(show.returnShipDate) || ''} />}
+                    {show.returnDeliveryDate && <InfoBlock label="Expected Delivery" value={formatDate(show.returnDeliveryDate) || ''} />}
                   </div>
+                </Card>
+              )}
+
+              {/* Move-In / Move-Out */}
+              {(show.moveInDate || show.moveOutDate) && (
+                <Card>
+                  <CardTitle icon={<Navigation size={16} />} title="Move-In / Move-Out" />
+                  <div className="mt-4 flex flex-wrap gap-4">
+                    {show.moveInDate && <DateBlock label="Move-In" primary={formatDate(show.moveInDate)} secondary={show.moveInTime || undefined} />}
+                    {show.moveOutDate && <DateBlock label="Move-Out" primary={formatDate(show.moveOutDate)} secondary={show.moveOutTime || undefined} />}
+                  </div>
+                </Card>
+              )}
+
+              {/* Booth to Ship */}
+              {boothToShip.length > 0 && (
+                <Card>
+                  <CardTitle icon={<Package size={16} />} title="Booth Items to Ship" />
+                  <ul className="mt-3 space-y-1">
+                    {boothToShip.map((item, i) => (
+                      <li key={i} className="text-sm text-text-secondary flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-brand-purple" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
                 </Card>
               )}
 
@@ -437,6 +472,48 @@ export function ShowReadView({ show, attendees, files = [], tasks = [], taskCoun
                       </li>
                     ))}
                   </ul>
+                </Card>
+              )}
+
+              {/* On-Site Services */}
+              {(show.utilitiesBooked || show.laborBooked || show.laborNotRequired || show.electricalCost || show.internetCost || show.laborCost || show.standardServicesCost || show.utilitiesDetails || show.laborCompanyId || show.laborDetails) && (
+                <Card>
+                  <CardTitle icon={<Wrench size={16} />} title="On-Site Services" />
+                  <div className="mt-4 space-y-4">
+                    <div className="flex flex-wrap gap-2">
+                      {show.utilitiesBooked && <span className="text-xs px-2 py-0.5 rounded-full bg-success/10 text-success font-medium flex items-center gap-1"><Zap size={10} /> Utilities Booked</span>}
+                      {show.laborBooked && <span className="text-xs px-2 py-0.5 rounded-full bg-success/10 text-success font-medium flex items-center gap-1"><Wrench size={10} /> Labor Booked</span>}
+                      {show.laborNotRequired && <span className="text-xs px-2 py-0.5 rounded-full bg-bg-tertiary text-text-secondary font-medium">No Labor Needed</span>}
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      {show.utilitiesDetails && <InfoBlock label="Utilities Details" value={show.utilitiesDetails} icon={<Zap size={14} />} />}
+                      {show.laborCompanyId && laborCompanies.find(c => c.id === show.laborCompanyId) && (
+                        <InfoBlock label="Labor / I&D Company" value={laborCompanies.find(c => c.id === show.laborCompanyId)!.name} icon={<Wrench size={14} />} />
+                      )}
+                      {show.electricalCost && <InfoBlock label="Electrical" value={formatCurrency(show.electricalCost)} icon={<Zap size={14} />} />}
+                      {show.internetCost && <InfoBlock label="Internet" value={formatCurrency(show.internetCost)} icon={<Wifi size={14} />} />}
+                      {show.laborCost && <InfoBlock label="Labor" value={formatCurrency(show.laborCost)} icon={<Wrench size={14} />} />}
+                      {show.standardServicesCost && <InfoBlock label="Standard Services" value={formatCurrency(show.standardServicesCost)} />}
+                    </div>
+                    {show.laborDetails && <div className="text-sm text-text-secondary whitespace-pre-wrap">{show.laborDetails}</div>}
+                  </div>
+                </Card>
+              )}
+
+              {/* Lead Capture */}
+              {(show.leadCaptureSystem || show.leadCaptureNotRequired) && (
+                <Card>
+                  <CardTitle icon={<Radio size={16} />} title="Lead Capture" />
+                  <div className="mt-4">
+                    {show.leadCaptureNotRequired ? (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-bg-tertiary text-text-secondary font-medium">No Lead Capture Needed</span>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-4">
+                        {show.leadCaptureSystem && <InfoBlock label="System" value={show.leadCaptureSystem} />}
+                        {show.leadCaptureCredentials && <InfoBlock label="Login" value={show.leadCaptureCredentials} />}
+                      </div>
+                    )}
+                  </div>
                 </Card>
               )}
             </div>

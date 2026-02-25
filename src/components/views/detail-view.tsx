@@ -306,6 +306,8 @@ Return ONLY the HTML content, no markdown, no code fences.`;
             onEdit={() => setViewMode('edit')}
             activeTab={activeTab as 'overview' | 'agenda' | 'booth' | 'logistics' | 'travel' | 'budget' | 'notes' | 'documents'}
             onTabChange={(tab) => setActiveTab(tab as DetailTab)}
+            carriers={lookups.shippingCarriers.map(c => ({ id: c.id, name: c.name }))}
+            laborCompanies={lookups.laborCompanies.map(c => ({ id: c.id, name: c.name }))}
           />
         </div>
       )}
