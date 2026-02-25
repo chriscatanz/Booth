@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
@@ -240,13 +241,13 @@ export function SignUpForm({ onSwitchToLogin, onBack }: SignUpFormProps) {
           />
           <span className="text-sm text-text-secondary group-hover:text-text-primary transition-colors">
             I agree to the{' '}
-            <a href="/terms" target="_blank" className="text-brand-purple hover:underline">
+            <Link href="/terms" target="_blank" className="text-brand-purple hover:underline">
               Terms of Service
-            </a>{' '}
+            </Link>{' '}
             and{' '}
-            <a href="/privacy" target="_blank" className="text-brand-purple hover:underline">
+            <Link href="/privacy" target="_blank" className="text-brand-purple hover:underline">
               Privacy Policy
-            </a>
+            </Link>
           </span>
         </label>
 

@@ -276,7 +276,10 @@ export function LookupMultiSelect({
 }: LookupMultiSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const selectedOptions = options.filter(o => values.includes(o.id));
@@ -288,9 +291,13 @@ export function LookupMultiSelect({
       )
     : options;
 
+  // Close on click outside — must check both container and portal dropdown
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      const t = event.target as Node;
+      const inContainer = containerRef.current?.contains(t);
+      const inDropdown = dropdownRef.current?.contains(t);
+      if (!inContainer && !inDropdown) {
         setIsOpen(false);
         setSearch('');
       }
@@ -304,6 +311,19 @@ export function LookupMultiSelect({
       inputRef.current.focus();
     }
   }, [isOpen]);
+
+  const updateDropdownPosition = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownStyle({
+        position: 'fixed',
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+        zIndex: 9999,
+      });
+    }
+  };
 
   const toggleOption = (optionId: string) => {
     if (values.includes(optionId)) {
@@ -329,7 +349,13 @@ export function LookupMultiSelect({
       {/* Trigger */}
       <button
         type="button"
-        onClick={() => !disabled && setIsOpen(!isOpen)}
+        ref={buttonRef}
+        onClick={() => {
+          if (!disabled) {
+            if (!isOpen) updateDropdownPosition();
+            setIsOpen(!isOpen);
+          }
+        }}
         disabled={disabled}
         className={cn(
           'w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border text-left transition-colors min-h-[42px]',
@@ -370,9 +396,9 @@ export function LookupMultiSelect({
         />
       </button>
 
-      {/* Dropdown */}
-      {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-surface border border-border rounded-lg shadow-lg overflow-hidden">
+      {/* Dropdown — portal to escape overflow/stacking context */}
+      {isOpen && typeof document !== 'undefined' && createPortal(
+        <div ref={dropdownRef} style={dropdownStyle} className="bg-surface border border-border rounded-lg shadow-lg overflow-hidden">
           {/* Search */}
           <div className="p-2 border-b border-border">
             <div className="relative">
@@ -440,8 +466,8 @@ export function LookupMultiSelect({
               </button>
             )}
           </div>
-        </div>
-      )}
+        </div>,
+      document.body)}
     </div>
   );
 }
