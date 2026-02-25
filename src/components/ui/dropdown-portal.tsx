@@ -45,7 +45,7 @@ export function DropdownPortal({
       top: rect.bottom + 4,
       left: align === 'right' ? undefined : rect.left,
       right: align === 'right' ? window.innerWidth - rect.right : undefined,
-      width: rect.width,
+      minWidth: rect.width,
       zIndex: 9999,
     });
   }, [isOpen, triggerRef, align]);

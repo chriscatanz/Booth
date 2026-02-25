@@ -179,18 +179,18 @@ export function DetailHero({
                       dropdownRef={setupDropdownRef}
                       onClose={() => setShowSetupChecklist(false)}
                       align="right"
-                      className="w-64 bg-surface border border-border rounded-lg shadow-lg overflow-hidden"
+                      className="w-80 bg-surface border border-border rounded-lg shadow-lg overflow-hidden"
                     >
-                      <div className="px-3 py-2.5 border-b border-border">
+                      <div className="px-4 py-3 border-b border-border">
                         <p className="text-sm font-semibold text-text-primary">Setup Checklist</p>
                         <p className="text-xs text-text-tertiary mt-0.5">{completeness.percentage}% complete · {completeness.missing.length} remaining</p>
                         <div className="mt-2 h-1.5 rounded-full bg-bg-tertiary overflow-hidden">
                           <div className="h-full bg-brand-purple rounded-full transition-all" style={{ width: `${completeness.percentage}%` }} />
                         </div>
                       </div>
-                      <div className="py-1 max-h-64 overflow-y-auto">
+                      <div className="py-1.5 max-h-72 overflow-y-auto">
                         {completeness.completed.map(item => (
-                          <div key={item} className="flex items-center gap-2.5 px-3 py-2">
+                          <div key={item} className="flex items-center gap-3 px-4 py-2.5">
                             <CheckCircle size={14} className="text-success flex-shrink-0" />
                             <span className="text-sm text-text-tertiary line-through">{item}</span>
                           </div>
@@ -203,7 +203,7 @@ export function DetailHero({
                               if (tab && onTabChange) onTabChange(tab);
                               setShowSetupChecklist(false);
                             }}
-                            className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-bg-tertiary text-left group"
+                            className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-bg-tertiary text-left group"
                           >
                             <div className="w-3.5 h-3.5 rounded-full border-2 border-border-strong flex-shrink-0 group-hover:border-brand-purple transition-colors" />
                             <span className="text-sm text-text-primary group-hover:text-brand-purple transition-colors">{item}</span>
