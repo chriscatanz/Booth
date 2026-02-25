@@ -194,6 +194,7 @@ export default function CSVImportModal({ onClose, onImported }: CSVImportModalPr
             utilitiesBooked: false,
             utilitiesDetails: null,
             laborBooked: false,
+            laborNotRequired: false,
             laborCompanyId: null,
             laborDetails: null,
             electricalCost: showData.electricalCost || null,
