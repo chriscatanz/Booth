@@ -5,7 +5,7 @@ import DOMPurify from 'dompurify';
 import { TradeShow, Attendee, AdditionalFile } from '@/types';
 import { Task, TASK_STATUS_CONFIG, TASK_PRIORITY_CONFIG } from '@/types/tasks';
 import { 
-  totalEstimatedCost, totalServicesCost, estimatedHotelCost,
+  totalEstimatedCost, totalServicesCost, estimatedHotelCost, flightCostForShow,
   parseJsonStringArray 
 } from '@/types/computed';
 import { formatCurrency, cn } from '@/lib/utils';
@@ -59,6 +59,7 @@ export function ShowReadView({ show, attendees, files = [], tasks = [], taskCoun
   const totalCost = totalEstimatedCost(show, attendees);
   const servicesCost = totalServicesCost(show);
   const hotelCost = estimatedHotelCost(show, attendees);
+  const flightCost = flightCostForShow(show, attendees);
   const graphicsToShip = parseJsonStringArray(show.graphicsToShip);
   const packingItems = parseJsonStringArray(show.packingListItems);
   
@@ -523,6 +524,7 @@ export function ShowReadView({ show, attendees, files = [], tasks = [], taskCoun
                   {show.shippingCost && <BudgetRow label="Outbound Shipping" amount={show.shippingCost} />}
                   {show.returnShippingCost && <BudgetRow label="Return Shipping" amount={show.returnShippingCost} />}
                   {hotelCost > 0 && <BudgetRow label="Hotel (estimated)" amount={hotelCost} />}
+                  {flightCost > 0 && <BudgetRow label="Flights (estimated)" amount={flightCost} />}
                   <hr className="border-border my-2" />
                   <BudgetRow label="Total Estimated" amount={totalCost} isTotal />
                 </div>

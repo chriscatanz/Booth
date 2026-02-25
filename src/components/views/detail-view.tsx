@@ -21,7 +21,7 @@ import { VenueMap } from '@/components/ui/venue-map';
 import { geocodeVenue } from '@/lib/geocode';
 import { formatCurrency, cn } from '@/lib/utils';
 import { 
-  totalEstimatedCost, totalServicesCost, estimatedHotelCost, roiPercentage, 
+  totalEstimatedCost, totalServicesCost, estimatedHotelCost, flightCostForShow, roiPercentage, 
   costPerLead, leadQualificationRate, dealCloseRate, 
   parseJsonStringArray 
 } from '@/types/computed';
@@ -1142,7 +1142,7 @@ Return ONLY the HTML content, no markdown, no code fences.`;
           <div className="space-y-6">
             {/* Budget Summary */}
             <TabSection title="Budget Summary" defaultOpen>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                 <div className="p-4 bg-bg-tertiary rounded-lg">
                   <span className="text-xs text-text-tertiary">Registration</span>
                   <p className="text-lg font-semibold text-text-primary mt-1">{formatCurrency(show.cost ?? 0)}</p>
@@ -1158,6 +1158,10 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                 <div className="p-4 bg-bg-tertiary rounded-lg">
                   <span className="text-xs text-text-tertiary">Hotel (Est.)</span>
                   <p className="text-lg font-semibold text-text-primary mt-1">{formatCurrency(estimatedHotelCost(show, attendees))}</p>
+                </div>
+                <div className="p-4 bg-bg-tertiary rounded-lg">
+                  <span className="text-xs text-text-tertiary">Flights (Est.)</span>
+                  <p className="text-lg font-semibold text-text-primary mt-1">{formatCurrency(flightCostForShow(show, attendees))}</p>
                 </div>
               </div>
               

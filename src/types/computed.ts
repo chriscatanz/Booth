@@ -57,12 +57,13 @@ export function estimatedHotelCost(show: TradeShow, attendees?: Attendee[]): num
   return defaultNights * costPerNight;
 }
 
-// Total estimated cost for the show
+// Total estimated cost for the show (registration + shipping + services + hotel + flights)
 export function totalEstimatedCost(show: TradeShow, attendees?: Attendee[]): number {
   return (show.cost ?? 0) +
     (show.shippingCost ?? 0) +
     totalServicesCost(show) +
-    estimatedHotelCost(show, attendees);
+    estimatedHotelCost(show, attendees) +
+    (attendees ? flightCostForShow(show, attendees) : 0);
 }
 
 // Cost per lead (uses estimated total cost - hotel based on show dates)
