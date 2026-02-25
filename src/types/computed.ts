@@ -21,24 +21,48 @@ export function totalServicesCost(show: TradeShow): number {
 }
 
 // Estimated hotel cost based on show dates
-export function estimatedHotelCost(show: TradeShow): number {
+export function estimatedHotelCost(show: TradeShow, attendees?: Attendee[]): number {
   const costPerNight = show.hotelCostPerNight;
-  if (!costPerNight || !show.startDate || !show.endDate) return 0;
+  if (!costPerNight || costPerNight <= 0) return 0;
 
-  const start = parseISO(show.startDate);
-  const end = parseISO(show.endDate);
-  if (!isValid(start) || !isValid(end)) return 0;
+  // Default nights from show dates
+  let defaultNights = 1;
+  if (show.startDate && show.endDate) {
+    const start = parseISO(show.startDate);
+    const end = parseISO(show.endDate);
+    if (isValid(start) && isValid(end)) {
+      defaultNights = Math.max(1, differenceInDays(end, start));
+    }
+  }
 
-  const nights = differenceInDays(end, start);
-  return costPerNight * Math.max(1, nights + 1); // +1 for arrival night
+  // If attendees provided, sum each person's actual stay duration
+  const showAttendees = attendees?.filter(a => a.tradeshowId === show.id) ?? [];
+  if (showAttendees.length > 0) {
+    let total = 0;
+    for (const a of showAttendees) {
+      let nights = defaultNights;
+      if (a.arrivalDate && a.departureDate) {
+        const arrival = parseISO(a.arrivalDate);
+        const departure = parseISO(a.departureDate);
+        if (isValid(arrival) && isValid(departure)) {
+          nights = Math.max(1, differenceInDays(departure, arrival));
+        }
+      }
+      total += nights * costPerNight;
+    }
+    return total;
+  }
+
+  // Fallback: no attendees — estimate using show duration only (single-room estimate)
+  return defaultNights * costPerNight;
 }
 
 // Total estimated cost for the show
-export function totalEstimatedCost(show: TradeShow): number {
+export function totalEstimatedCost(show: TradeShow, attendees?: Attendee[]): number {
   return (show.cost ?? 0) +
     (show.shippingCost ?? 0) +
     totalServicesCost(show) +
-    estimatedHotelCost(show);
+    estimatedHotelCost(show, attendees);
 }
 
 // Cost per lead (uses estimated total cost - hotel based on show dates)

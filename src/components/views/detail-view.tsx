@@ -127,7 +127,7 @@ export default function DetailView() {
 
   const show = selectedShow;
   const isNew = show.id === 0;
-  const estimated = totalEstimatedCost(show);
+  const estimated = totalEstimatedCost(show, attendees);
   const roi = roiPercentage(show);
   
   // Effective view mode: new shows always edit, viewers always read
@@ -1122,8 +1122,8 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                 <Checkbox label="Hotel Confirmed" checked={show.hotelConfirmed ?? false} onChange={v => updateSelectedShow({ hotelConfirmed: v })} disabled={readOnly} />
               </div>
               <DataVisibilityGate category="budget">
-                {estimatedHotelCost(show) > 0 && (
-                  <p className="text-sm text-text-secondary mt-3">Estimated Hotel Cost: {formatCurrency(estimatedHotelCost(show))}</p>
+                {estimatedHotelCost(show, attendees) > 0 && (
+                  <p className="text-sm text-text-secondary mt-3">Estimated Hotel Cost: {formatCurrency(estimatedHotelCost(show, attendees))}</p>
                 )}
               </DataVisibilityGate>
               <div className="mt-4">
@@ -1157,7 +1157,7 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                 </div>
                 <div className="p-4 bg-bg-tertiary rounded-lg">
                   <span className="text-xs text-text-tertiary">Hotel (Est.)</span>
-                  <p className="text-lg font-semibold text-text-primary mt-1">{formatCurrency(estimatedHotelCost(show))}</p>
+                  <p className="text-lg font-semibold text-text-primary mt-1">{formatCurrency(estimatedHotelCost(show, attendees))}</p>
                 </div>
               </div>
               

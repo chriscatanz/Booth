@@ -56,9 +56,9 @@ export function ShowReadView({ show, attendees, files = [], tasks = [], taskCoun
   const toast = useToastStore();
   
   // Computed values
-  const totalCost = totalEstimatedCost(show);
+  const totalCost = totalEstimatedCost(show, attendees);
   const servicesCost = totalServicesCost(show);
-  const hotelCost = estimatedHotelCost(show);
+  const hotelCost = estimatedHotelCost(show, attendees);
   const graphicsToShip = parseJsonStringArray(show.graphicsToShip);
   const packingItems = parseJsonStringArray(show.packingListItems);
   

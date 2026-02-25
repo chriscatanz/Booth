@@ -69,7 +69,7 @@ export default function QuickLookView() {
       >
         {shows.map((show) => {
           const days = daysUntilShow(show);
-          const totalCost = totalEstimatedCost(show);
+          const totalCost = totalEstimatedCost(show, allAttendees);
           const showAttendees = allAttendees.filter(a => a.tradeshowId === show.id);
 
           return (
