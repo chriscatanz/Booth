@@ -91,7 +91,9 @@ export function MembersModal({ onClose }: MembersModalProps) {
         console.warn('Failed to send invitation email:', emailErr);
       }
       
-      setInvitations([invite, ...invitations]);
+      // Re-fetch through v_invitations decrypt view so email shows decrypted immediately
+      const fresh = await authService.fetchInvitations(organization.id);
+      setInvitations(fresh);
       setInviteEmail('');
       setShowInviteForm(false);
       setInviteSuccess(`Invitation sent to ${inviteEmail}`);

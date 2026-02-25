@@ -633,7 +633,9 @@ function MembersContent() {
         });
       } catch {}
 
-      setInvitations([invite, ...invitations]);
+      // Re-fetch through v_invitations decrypt view so email shows decrypted immediately
+      const fresh = await authService.fetchInvitations(organization.id);
+      setInvitations(fresh);
       setInviteEmail('');
       setShowInviteForm(false);
     } catch (err) {
