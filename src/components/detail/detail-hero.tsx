@@ -34,6 +34,7 @@ interface DetailHeroProps {
   onSaveTemplate?: () => void;
   onDownloadICS?: () => void;
   onEmailDetails?: () => void;
+  onTabChange?: (tab: string) => void;
 }
 
 export function DetailHero({ 
@@ -52,6 +53,7 @@ export function DetailHero({
   onSaveTemplate,
   onDownloadICS,
   onEmailDetails,
+  onTabChange,
 }: DetailHeroProps) {
   const days = daysUntilShow(show);
   const estimated = totalEstimatedCost(show);
@@ -59,6 +61,23 @@ export function DetailHero({
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const actionsButtonRef = useRef<HTMLButtonElement>(null);
   const actionsDropdownRef = useRef<HTMLDivElement>(null);
+  const [showSetupChecklist, setShowSetupChecklist] = useState(false);
+  const setupButtonRef = useRef<HTMLButtonElement>(null);
+  const setupDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Map missing items to their relevant tab
+  const MISSING_TAB_MAP: Record<string, string> = {
+    'Basic Information': 'overview',
+    'Registration Confirmed': 'overview',
+    'Booth Details': 'booth',
+    'Hotel Booked': 'travel',
+    'Booth Kit Assigned': 'booth',
+    'Shipping Arranged': 'logistics',
+    'Utilities Booked': 'logistics',
+    'Labor Arranged': 'logistics',
+    'Attendee List Received': 'travel',
+    'Lead Capture System': 'logistics',
+  };
   const completeness = calculateShowCompleteness(show);
 
   // Memoize badges to prevent unnecessary re-renders
@@ -144,9 +163,55 @@ export function DetailHero({
                 
                 {/* Complete Setup CTA for incomplete shows */}
                 {completeness.percentage < 100 && (
-                  <Button variant="secondary" size="sm" title={`${completeness.missing.length} items remaining`}>
-                    <CheckCircle size={14} /> Complete Setup
-                  </Button>
+                  <div className="relative">
+                    <Button
+                      ref={setupButtonRef}
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setShowSetupChecklist(!showSetupChecklist)}
+                      title={`${completeness.missing.length} items remaining`}
+                    >
+                      <CheckCircle size={14} /> Complete Setup
+                    </Button>
+                    <DropdownPortal
+                      isOpen={showSetupChecklist}
+                      triggerRef={setupButtonRef}
+                      dropdownRef={setupDropdownRef}
+                      onClose={() => setShowSetupChecklist(false)}
+                      align="right"
+                      className="w-64 bg-surface border border-border rounded-lg shadow-lg overflow-hidden"
+                    >
+                      <div className="px-3 py-2.5 border-b border-border">
+                        <p className="text-sm font-semibold text-text-primary">Setup Checklist</p>
+                        <p className="text-xs text-text-tertiary mt-0.5">{completeness.percentage}% complete · {completeness.missing.length} remaining</p>
+                        <div className="mt-2 h-1.5 rounded-full bg-bg-tertiary overflow-hidden">
+                          <div className="h-full bg-brand-purple rounded-full transition-all" style={{ width: `${completeness.percentage}%` }} />
+                        </div>
+                      </div>
+                      <div className="py-1 max-h-64 overflow-y-auto">
+                        {completeness.completed.map(item => (
+                          <div key={item} className="flex items-center gap-2.5 px-3 py-2">
+                            <CheckCircle size={14} className="text-success flex-shrink-0" />
+                            <span className="text-sm text-text-tertiary line-through">{item}</span>
+                          </div>
+                        ))}
+                        {completeness.missing.map(item => (
+                          <button
+                            key={item}
+                            onClick={() => {
+                              const tab = MISSING_TAB_MAP[item];
+                              if (tab && onTabChange) onTabChange(tab);
+                              setShowSetupChecklist(false);
+                            }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-bg-tertiary text-left group"
+                          >
+                            <div className="w-3.5 h-3.5 rounded-full border-2 border-border-strong flex-shrink-0 group-hover:border-brand-purple transition-colors" />
+                            <span className="text-sm text-text-primary group-hover:text-brand-purple transition-colors">{item}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </DropdownPortal>
+                  </div>
                 )}
                 
                 {/* More actions dropdown */}

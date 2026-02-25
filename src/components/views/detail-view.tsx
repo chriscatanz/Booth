@@ -247,6 +247,7 @@ Return ONLY the HTML content, no markdown, no code fences.`;
         onSaveTemplate={() => setShowTemplateModal(true)}
         onDownloadICS={() => downloadICS([show])}
         onEmailDetails={() => openMailto(show)}
+        onTabChange={(tab) => setActiveTab(tab as import('@/components/detail').DetailTab)}
       />
 
       {/* Autosave indicator - only shown in edit mode */}
