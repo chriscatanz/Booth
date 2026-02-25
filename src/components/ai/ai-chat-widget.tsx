@@ -98,7 +98,7 @@ export function AIChatWidget({ isOpen, onClose }: AIChatWidgetProps) {
 
       // Build show context - pass raw shows array with all fields
       const showContext = shows.length > 0 ? {
-        shows: shows as Array<Record<string, unknown>>, // Pass raw shows — all fields accessible dynamically
+        shows: shows as unknown as Array<Record<string, unknown>>, // Pass raw shows — all fields accessible dynamically
         attendeesByShow: Object.keys(attendeesByShow).length > 0 ? attendeesByShow : undefined,
       } : undefined;
 
