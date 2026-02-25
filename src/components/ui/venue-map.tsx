@@ -21,14 +21,15 @@ export function VenueMap({ venueName, venueAddress, hotelName, hotelAddress, sho
   const hasBothLocations = venueQuery && hotelQuery;
   const primaryQuery = venueQuery || hotelQuery;
 
-  // Build Google Maps embed URL (no API key required for basic embeds)
+  // Build Google Maps embed URL (no API key required for basic search embeds)
+  // Note: We always embed a single search pin — the directions embed (saddr/daddr) is
+  // deprecated and zooms to world view when both points can't be resolved. Directions
+  // are offered as an external link instead.
   const getEmbedUrl = () => {
-    if (hasBothLocations) {
-      // Show directions from hotel to venue
-      return `https://www.google.com/maps?q=&saddr=${encodeURIComponent(hotelQuery!)}&daddr=${encodeURIComponent(venueQuery!)}&output=embed`;
-    } else if (primaryQuery) {
-      // Show single location
-      return `https://www.google.com/maps?q=${encodeURIComponent(primaryQuery)}&output=embed`;
+    // Always embed venue first, fall back to hotel
+    const pinQuery = venueQuery || hotelQuery;
+    if (pinQuery) {
+      return `https://www.google.com/maps?q=${encodeURIComponent(pinQuery)}&output=embed`;
     }
     return null;
   };
