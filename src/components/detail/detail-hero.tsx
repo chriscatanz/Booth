@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { TradeShow } from '@/types';
 import { formatDateRange } from '@/lib/date-utils';
@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { PermissionGate } from '@/components/auth/permission-gate';
 import { CompletionBadge, CompletionProgress } from '@/components/ui/completion-badge';
+import { DropdownPortal } from '@/components/ui/dropdown-portal';
 import { calculateShowCompleteness } from '@/lib/show-completeness';
 
 interface DetailHeroProps {
@@ -56,6 +57,8 @@ export function DetailHero({
   const estimated = totalEstimatedCost(show);
   const roi = roiPercentage(show);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
+  const actionsButtonRef = useRef<HTMLButtonElement>(null);
+  const actionsDropdownRef = useRef<HTMLDivElement>(null);
   const completeness = calculateShowCompleteness(show);
 
   // Memoize badges to prevent unnecessary re-renders
@@ -148,18 +151,24 @@ export function DetailHero({
                 
                 {/* More actions dropdown */}
                 <div className="relative">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    ref={actionsButtonRef}
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setShowActionsMenu(!showActionsMenu)}
                   >
                     <MoreHorizontal size={14} />
                   </Button>
-                  
-                  {showActionsMenu && (
-                    <>
-                      <div className="fixed inset-0 z-10" onClick={() => setShowActionsMenu(false)} />
-                      <div className="absolute right-0 top-full mt-1 w-48 bg-surface border border-border rounded-lg shadow-lg py-1 z-20">
+
+                  <DropdownPortal
+                    isOpen={showActionsMenu}
+                    triggerRef={actionsButtonRef}
+                    dropdownRef={actionsDropdownRef}
+                    onClose={() => setShowActionsMenu(false)}
+                    align="right"
+                    className="w-48 bg-surface border border-border rounded-lg shadow-lg py-1"
+                  >
+                      <div>
                         <button
                           onClick={() => { onExportCSV?.(); setShowActionsMenu(false); }}
                           className="w-full px-3 py-2 text-left text-sm hover:bg-bg-tertiary flex items-center gap-2"
@@ -195,8 +204,7 @@ export function DetailHero({
                           </button>
                         </PermissionGate>
                       </div>
-                    </>
-                  )}
+                  </DropdownPortal>
                 </div>
               </>
             )}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import * as taskService from '@/services/task-service';
@@ -12,6 +12,7 @@ import {
   MoreHorizontal, Trash2, Edit, AlertCircle, User
 } from 'lucide-react';
 import { TaskModal } from './task-modal';
+import { DropdownPortal } from '@/components/ui/dropdown-portal';
 import { format, isPast, parseISO } from 'date-fns';
 
 interface TaskListProps {
@@ -185,6 +186,8 @@ interface TaskItemProps {
 
 function TaskItem({ task, onToggle, onEdit, onDelete, isEditor }: TaskItemProps) {
   const [showMenu, setShowMenu] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const menuDropdownRef = useRef<HTMLDivElement>(null);
   const isDone = task.status === 'done';
   const priorityConfig = TASK_PRIORITY_CONFIG[task.priority];
   const isOverdue = task.dueDate && !isDone && isPast(parseISO(task.dueDate));
@@ -257,31 +260,34 @@ function TaskItem({ task, onToggle, onEdit, onDelete, isEditor }: TaskItemProps)
       {isEditor && (
         <div className="relative opacity-0 group-hover:opacity-100 transition-opacity">
           <button
+            ref={menuButtonRef}
             onClick={() => setShowMenu(!showMenu)}
             className="p-1 rounded hover:bg-bg-tertiary text-text-tertiary"
           >
             <MoreHorizontal size={14} />
           </button>
-          
-          {showMenu && (
-            <>
-              <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-              <div className="absolute right-0 top-6 bg-surface border border-border rounded-lg shadow-lg py-1 z-20 min-w-[100px]">
-                <button
-                  onClick={() => { onEdit(); setShowMenu(false); }}
-                  className="w-full px-3 py-1.5 text-left text-sm hover:bg-bg-tertiary flex items-center gap-2"
-                >
-                  <Edit size={12} /> Edit
-                </button>
-                <button
-                  onClick={() => { onDelete(); setShowMenu(false); }}
-                  className="w-full px-3 py-1.5 text-left text-sm hover:bg-bg-tertiary flex items-center gap-2 text-error"
-                >
-                  <Trash2 size={12} /> Delete
-                </button>
-              </div>
-            </>
-          )}
+
+          <DropdownPortal
+            isOpen={showMenu}
+            triggerRef={menuButtonRef}
+            dropdownRef={menuDropdownRef}
+            onClose={() => setShowMenu(false)}
+            align="right"
+            className="bg-surface border border-border rounded-lg shadow-lg py-1 min-w-[100px]"
+          >
+            <button
+              onClick={() => { onEdit(); setShowMenu(false); }}
+              className="w-full px-3 py-1.5 text-left text-sm hover:bg-bg-tertiary flex items-center gap-2"
+            >
+              <Edit size={12} /> Edit
+            </button>
+            <button
+              onClick={() => { onDelete(); setShowMenu(false); }}
+              className="w-full px-3 py-1.5 text-left text-sm hover:bg-bg-tertiary flex items-center gap-2 text-error"
+            >
+              <Trash2 size={12} /> Delete
+            </button>
+          </DropdownPortal>
         </div>
       )}
     </div>
