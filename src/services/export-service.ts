@@ -1,3 +1,10 @@
+/**
+ * export-service: Per-show download utilities.
+ * Handles single-show CSV export and ICS calendar file generation.
+ * Used by: detail-view (download show data), export-field-selector (choose CSV fields).
+ * For bulk/org-level data export, see data-export-service.ts
+ */
+
 import { TradeShow } from '@/types';
 import { ExportField } from '@/types/enums';
 import { escapeCSV, stripHtml } from '@/lib/utils';

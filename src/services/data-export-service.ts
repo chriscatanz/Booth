@@ -1,8 +1,8 @@
 /**
- * Data Export Service
- * 
- * Allows users to export their data in various formats.
- * Supports: CSV, JSON
+ * data-export-service: Org-level bulk data export.
+ * Handles exporting all shows, attendees, and files for an organization.
+ * Used by: settings/data-export (full data backup/export).
+ * For single-show CSV/ICS downloads, see export-service.ts
  */
 
 import { TradeShow, Attendee } from '@/types';

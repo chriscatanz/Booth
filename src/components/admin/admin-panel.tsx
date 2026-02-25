@@ -102,7 +102,13 @@ export function AdminPanel() {
         .limit(100);
 
       if (orgData) {
-        setOrgs(orgData.map((org: any) => ({
+        type OrgRow = {
+          id: string; name: string; slug: string; created_at: string;
+          organization_members: Array<{ count: number }>;
+          tradeshows: Array<{ count: number }>;
+          subscriptions: Array<{ tier: string; status: string }>;
+        };
+        setOrgs((orgData as OrgRow[]).map(org => ({
           id: org.id,
           name: org.name,
           slug: org.slug,
@@ -125,7 +131,12 @@ export function AdminPanel() {
         .limit(100);
 
       if (userData) {
-        setUsers(userData.map((user: any) => ({
+        type UserRow = {
+          id: string; email: string; full_name: string | null;
+          is_super_admin: boolean; last_active_at: string | null; created_at: string;
+          organization_members: Array<{ count: number }>;
+        };
+        setUsers((userData as UserRow[]).map(user => ({
           id: user.id,
           email: user.email,
           fullName: user.full_name,

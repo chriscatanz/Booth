@@ -47,6 +47,7 @@ import { Attendee } from '@/types';
 import { KitAssignmentSection } from '@/components/kits/kit-assignment-section';
 import { TrackingStatusDisplay } from '@/components/ui/tracking-status';
 import { LookupSelect } from '@/components/ui/lookup-select';
+import { NameInputModal } from '@/components/ui/name-input-modal';
 import { useLookups } from '@/hooks/use-lookups';
 import { supabase } from '@/lib/supabase';
 import * as aiService from '@/services/ai-service';
@@ -92,6 +93,14 @@ export default function DetailView() {
   // View mode: 'read' for clean consumption, 'edit' for form editing
   // Everyone defaults to read mode for cleaner consumption; editors can toggle to edit
   const [viewMode, setViewMode] = useState<'read' | 'edit'>('read');
+
+  // Shared inline modal to replace browser prompt() dialogs
+  const [nameModal, setNameModal] = useState<{
+    title: string;
+    label: string;
+    placeholder: string;
+    onConfirm: (value: string) => void;
+  } | null>(null);
   
   // Tasks for read view
   const [showTasks, setShowTasks] = useState<Task[]>([]);
@@ -343,14 +352,19 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                   options={lookups.managementCompanies.map(c => ({ id: c.id, name: c.name, subtitle: c.companyType }))}
                   placeholder="Select company..."
                   disabled={readOnly}
-                  onCreateNew={async () => {
-                    const name = prompt('Enter company name:');
-                    if (name && organization?.id) {
-                      const newCompany = await lookupService.createManagementCompany(organization.id, { name });
-                      await refreshCategory('managementCompanies');
-                      updateSelectedShow({ managementCompanyId: newCompany.id, managementCompany: newCompany.name });
-                    }
-                  }}
+                  onCreateNew={() => setNameModal({
+                    title: 'Add Company',
+                    label: 'Company Name',
+                    placeholder: 'e.g. Freeman',
+                    onConfirm: async (name) => {
+                      setNameModal(null);
+                      if (organization?.id) {
+                        const newCompany = await lookupService.createManagementCompany(organization.id, { name });
+                        await refreshCategory('managementCompanies');
+                        updateSelectedShow({ managementCompanyId: newCompany.id, managementCompany: newCompany.name });
+                      }
+                    },
+                  })}
                   createLabel="Add new company"
                 />
                 <Select
@@ -381,14 +395,19 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                     options={lookups.virtualPlatforms.map(p => ({ id: p.id, name: p.name }))}
                     placeholder="Select platform..."
                     disabled={readOnly}
-                    onCreateNew={async () => {
-                      const name = prompt('Enter platform name:');
-                      if (name && organization?.id) {
-                        const newPlatform = await lookupService.createVirtualPlatform(organization.id, { name });
-                        await refreshCategory('virtualPlatforms');
-                        updateSelectedShow({ virtualPlatformId: newPlatform.id, virtualPlatform: newPlatform.name });
-                      }
-                    }}
+                    onCreateNew={() => setNameModal({
+                      title: 'Add Platform',
+                      label: 'Platform Name',
+                      placeholder: 'e.g. Zoom Events',
+                      onConfirm: async (name) => {
+                        setNameModal(null);
+                        if (organization?.id) {
+                          const newPlatform = await lookupService.createVirtualPlatform(organization.id, { name });
+                          await refreshCategory('virtualPlatforms');
+                          updateSelectedShow({ virtualPlatformId: newPlatform.id, virtualPlatform: newPlatform.name });
+                        }
+                      },
+                    })}
                     createLabel="Add new platform"
                   />
                   <Input label="Platform URL" value={show.virtualPlatformUrl ?? ''} onChange={e => updateSelectedShow({ virtualPlatformUrl: e.target.value || null })} placeholder="https://..." disabled={readOnly} />
@@ -422,17 +441,22 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                   options={lookups.venues.map(v => ({ id: v.id, name: v.name, subtitle: v.city ? `${v.city}, ${v.state}` : undefined }))}
                   placeholder="Select venue..."
                   disabled={readOnly}
-                  onCreateNew={async () => {
-                    const name = prompt('Enter venue name:');
-                    if (name && organization?.id) {
-                      const newVenue = await lookupService.createVenue(organization.id, { name });
-                      await refreshCategory('venues');
-                      updateSelectedShow({ venueId: newVenue.id, venueName: newVenue.name });
-                      // Auto-geocode the new venue
-                      const addr = await geocodeVenue(name, show.location);
-                      if (addr) updateSelectedShow({ venueAddress: addr });
-                    }
-                  }}
+                  onCreateNew={() => setNameModal({
+                    title: 'Add Venue',
+                    label: 'Venue Name',
+                    placeholder: 'e.g. Walter E. Washington Convention Center',
+                    onConfirm: async (name) => {
+                      setNameModal(null);
+                      if (organization?.id) {
+                        const newVenue = await lookupService.createVenue(organization.id, { name });
+                        await refreshCategory('venues');
+                        updateSelectedShow({ venueId: newVenue.id, venueName: newVenue.name });
+                        // Auto-geocode the new venue
+                        const addr = await geocodeVenue(name, show.location);
+                        if (addr) updateSelectedShow({ venueAddress: addr });
+                      }
+                    },
+                  })}
                   createLabel="Add new venue"
                 />
                 <div className="relative">
@@ -660,14 +684,19 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                   options={lookups.boothSizes.map(s => ({ id: s.id, name: s.name, subtitle: s.sqFootage ? `${s.sqFootage} sq ft` : undefined }))}
                   placeholder="Select size..."
                   disabled={readOnly}
-                  onCreateNew={async () => {
-                    const name = prompt('Enter booth size (e.g., 10x10 Inline):');
-                    if (name && organization?.id) {
-                      const newSize = await lookupService.createBoothSize(organization.id, { name });
-                      await refreshCategory('boothSizes');
-                      updateSelectedShow({ boothSizeId: newSize.id, boothSize: newSize.name });
-                    }
-                  }}
+                  onCreateNew={() => setNameModal({
+                    title: 'Add Booth Size',
+                    label: 'Booth Size',
+                    placeholder: 'e.g. 10x10 Inline',
+                    onConfirm: async (name) => {
+                      setNameModal(null);
+                      if (organization?.id) {
+                        const newSize = await lookupService.createBoothSize(organization.id, { name });
+                        await refreshCategory('boothSizes');
+                        updateSelectedShow({ boothSizeId: newSize.id, boothSize: newSize.name });
+                      }
+                    },
+                  })}
                   createLabel="Add new size"
                 />
               </div>
@@ -724,14 +753,19 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                   options={lookups.shippingCarriers.map(c => ({ id: c.id, name: c.name, subtitle: c.carrierType }))}
                   placeholder="Select carrier..."
                   disabled={readOnly}
-                  onCreateNew={async () => {
-                    const name = prompt('Enter carrier name:');
-                    if (name && organization?.id) {
-                      const newCarrier = await lookupService.createShippingCarrier(organization.id, { name });
-                      await refreshCategory('shippingCarriers');
-                      updateSelectedShow({ shippingCarrierId: newCarrier.id });
-                    }
-                  }}
+                  onCreateNew={() => setNameModal({
+                    title: 'Add Carrier',
+                    label: 'Carrier Name',
+                    placeholder: 'e.g. FedEx',
+                    onConfirm: async (name) => {
+                      setNameModal(null);
+                      if (organization?.id) {
+                        const newCarrier = await lookupService.createShippingCarrier(organization.id, { name });
+                        await refreshCategory('shippingCarriers');
+                        updateSelectedShow({ shippingCarrierId: newCarrier.id });
+                      }
+                    },
+                  })}
                   createLabel="Add new carrier"
                 />
                 <Input label="Tracking Number" value={show.trackingNumber ?? ''} onChange={e => updateSelectedShow({ trackingNumber: e.target.value || null })} disabled={readOnly} />
@@ -763,14 +797,19 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                     options={lookups.shippingCarriers.map(c => ({ id: c.id, name: c.name, subtitle: c.carrierType }))}
                     placeholder="Select carrier..."
                     disabled={readOnly}
-                    onCreateNew={async () => {
-                      const name = prompt('Enter carrier name:');
-                      if (name && organization?.id) {
-                        const newCarrier = await lookupService.createShippingCarrier(organization.id, { name });
-                        await refreshCategory('shippingCarriers');
-                        updateSelectedShow({ returnCarrierId: newCarrier.id });
-                      }
-                    }}
+                    onCreateNew={() => setNameModal({
+                      title: 'Add Carrier',
+                      label: 'Carrier Name',
+                      placeholder: 'e.g. UPS',
+                      onConfirm: async (name) => {
+                        setNameModal(null);
+                        if (organization?.id) {
+                          const newCarrier = await lookupService.createShippingCarrier(organization.id, { name });
+                          await refreshCategory('shippingCarriers');
+                          updateSelectedShow({ returnCarrierId: newCarrier.id });
+                        }
+                      },
+                    })}
                     createLabel="Add new carrier"
                   />
                   <Input label="Return Tracking Number" value={show.returnTrackingNumber ?? ''} onChange={e => updateSelectedShow({ returnTrackingNumber: e.target.value || null })} disabled={readOnly} />
@@ -834,14 +873,19 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                   options={lookups.leadCaptureSystems.map(s => ({ id: s.id, name: s.name }))}
                   placeholder="Select system..."
                   disabled={readOnly}
-                  onCreateNew={async () => {
-                    const name = prompt('Enter system name:');
-                    if (name && organization?.id) {
-                      const newSystem = await lookupService.createLeadCaptureSystem(organization.id, { name });
-                      await refreshCategory('leadCaptureSystems');
-                      updateSelectedShow({ leadCaptureSystemId: newSystem.id, leadCaptureSystem: newSystem.name });
-                    }
-                  }}
+                  onCreateNew={() => setNameModal({
+                    title: 'Add Lead Capture System',
+                    label: 'System Name',
+                    placeholder: 'e.g. iCapture',
+                    onConfirm: async (name) => {
+                      setNameModal(null);
+                      if (organization?.id) {
+                        const newSystem = await lookupService.createLeadCaptureSystem(organization.id, { name });
+                        await refreshCategory('leadCaptureSystems');
+                        updateSelectedShow({ leadCaptureSystemId: newSystem.id, leadCaptureSystem: newSystem.name });
+                      }
+                    },
+                  })}
                   createLabel="Add new system"
                 />
                 <Input label="Login Credentials" type="password" value={show.leadCaptureCredentials ?? ''} onChange={e => updateSelectedShow({ leadCaptureCredentials: e.target.value || null })} placeholder="Username / Password" disabled={readOnly} />
@@ -863,14 +907,19 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                   options={lookups.laborCompanies.map(c => ({ id: c.id, name: c.name, subtitle: c.serviceRegions || undefined }))}
                   placeholder="Select company..."
                   disabled={readOnly}
-                  onCreateNew={async () => {
-                    const name = prompt('Enter company name:');
-                    if (name && organization?.id) {
-                      const newCompany = await lookupService.createLaborCompany(organization.id, { name });
-                      await refreshCategory('laborCompanies');
-                      updateSelectedShow({ laborCompanyId: newCompany.id });
-                    }
-                  }}
+                  onCreateNew={() => setNameModal({
+                    title: 'Add Labor / I&D Company',
+                    label: 'Company Name',
+                    placeholder: 'e.g. GES',
+                    onConfirm: async (name) => {
+                      setNameModal(null);
+                      if (organization?.id) {
+                        const newCompany = await lookupService.createLaborCompany(organization.id, { name });
+                        await refreshCategory('laborCompanies');
+                        updateSelectedShow({ laborCompanyId: newCompany.id });
+                      }
+                    },
+                  })}
                   createLabel="Add new company"
                 />
                 <Input label="Labor Details" value={show.laborDetails ?? ''} onChange={e => updateSelectedShow({ laborDetails: e.target.value || null })} className="sm:col-span-2" disabled={readOnly} />
@@ -1031,17 +1080,22 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                   options={lookups.hotels.map(h => ({ id: h.id, name: h.name, subtitle: h.city ? `${h.city}, ${h.state}` : h.brand || undefined }))}
                   placeholder="Select hotel..."
                   disabled={readOnly}
-                  onCreateNew={async () => {
-                    const name = prompt('Enter hotel name:');
-                    if (name && organization?.id) {
-                      const newHotel = await lookupService.createHotel(organization.id, { name });
-                      await refreshCategory('hotels');
-                      updateSelectedShow({ hotelId: newHotel.id, hotelName: newHotel.name });
-                      // Auto-geocode the new hotel
-                      const addr = await geocodeVenue(name, show.location);
-                      if (addr) updateSelectedShow({ hotelAddress: addr });
-                    }
-                  }}
+                  onCreateNew={() => setNameModal({
+                    title: 'Add Hotel',
+                    label: 'Hotel Name',
+                    placeholder: 'e.g. Marriott Marquis',
+                    onConfirm: async (name) => {
+                      setNameModal(null);
+                      if (organization?.id) {
+                        const newHotel = await lookupService.createHotel(organization.id, { name });
+                        await refreshCategory('hotels');
+                        updateSelectedShow({ hotelId: newHotel.id, hotelName: newHotel.name });
+                        // Auto-geocode the new hotel
+                        const addr = await geocodeVenue(name, show.location);
+                        if (addr) updateSelectedShow({ hotelAddress: addr });
+                      }
+                    },
+                  })}
                   createLabel="Add new hotel"
                 />
                 <div className="relative">
@@ -1231,6 +1285,17 @@ Return ONLY the HTML content, no markdown, no code fences.`;
           />
         )}
       </AnimatePresence>
+
+      {nameModal && (
+        <NameInputModal
+          isOpen={true}
+          title={nameModal.title}
+          label={nameModal.label}
+          placeholder={nameModal.placeholder}
+          onConfirm={nameModal.onConfirm}
+          onCancel={() => setNameModal(null)}
+        />
+      )}
     </motion.div>
   );
 }

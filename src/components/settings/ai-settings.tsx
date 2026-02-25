@@ -40,8 +40,7 @@ export function AISettings() {
       }
 
       // Then try loading from DB
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const key = await aiService.loadApiKeyFromOrg(supabase as any, organization.id);
+      const key = await aiService.loadApiKeyFromOrg(supabase, organization.id);
       if (key) {
         setIsConnected(true);
         setApiKey('••••••••••••••••••••••••••••••••');
@@ -63,8 +62,7 @@ export function AISettings() {
     try {
       // Save to Supabase first (encrypted) - server needs the key to test
       const saved = await aiService.saveApiKeyToOrg(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        supabase as any,
+        supabase,
         organization.id,
         apiKey
       );

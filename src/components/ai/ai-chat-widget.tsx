@@ -41,8 +41,7 @@ export function AIChatWidget({ isOpen, onClose }: AIChatWidgetProps) {
       
       if (!aiService.isKeyLoadedFromDb()) {
         try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await aiService.loadApiKeyFromOrg(supabase as any, organization.id);
+          await aiService.loadApiKeyFromOrg(supabase, organization.id);
         } catch (e) {
           console.error('Failed to load AI key status:', e);
         }
@@ -99,8 +98,7 @@ export function AIChatWidget({ isOpen, onClose }: AIChatWidgetProps) {
 
       // Build show context - pass raw shows array with all fields
       const showContext = shows.length > 0 ? {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        shows: shows as any, // Pass raw shows - they have all fields (boothSize, cost, etc.)
+        shows: shows as Array<Record<string, unknown>>, // Pass raw shows — all fields accessible dynamically
         attendeesByShow: Object.keys(attendeesByShow).length > 0 ? attendeesByShow : undefined,
       } : undefined;
 

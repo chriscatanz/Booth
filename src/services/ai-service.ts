@@ -3,6 +3,8 @@
  * Uses server-side API routes for security (no client-side API keys)
  */
 
+import type { SupabaseClient } from '@supabase/supabase-js';
+
 // Types
 export interface AISettings {
   apiKey: string | null;
@@ -49,28 +51,8 @@ export interface ChatMessage {
 export interface ShowAssistantRequest {
   messages: ChatMessage[];
   showContext?: {
-    shows?: Array<{
-      name: string;
-      dates: string;
-      location: string;
-      status: string;
-      boothNumber?: string;
-      boothSize?: string;
-      cost?: number;
-      shippingCutoff?: string;
-      shippingInfo?: string;
-      trackingNumber?: string;
-      hotelName?: string;
-      hotelConfirmed?: boolean;
-      registrationConfirmed?: boolean;
-      utilitiesBooked?: boolean;
-      laborBooked?: boolean;
-      totalLeads?: number;
-      qualifiedLeads?: number;
-      generalNotes?: string;
-      showContactName?: string;
-      showContactEmail?: string;
-    }>;
+    /** Raw TradeShow objects — typed loosely because the service accesses all fields dynamically */
+    shows?: Array<Record<string, unknown>>;
     currentShow?: Record<string, unknown>;
     attendeesByShow?: Record<string, Array<{
       name: string | null;
@@ -107,11 +89,6 @@ export function setKeyLoaded(loaded: boolean, valid: boolean = false) {
 }
 
 // Type for Supabase client (avoid circular import)
-type SupabaseClient = {
-  from: (table: string) => { select: (columns: string) => { eq: (column: string, value: string) => { single: () => Promise<{ data: Record<string, unknown> | null; error: Error | null }> } } };
-  rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: Error | null }>;
-};
-
 /**
  * Check if API key exists in org settings
  */
