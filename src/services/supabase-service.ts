@@ -3,6 +3,7 @@ import { TradeShow, Attendee, AdditionalFile } from '@/types';
 import { formatDateForDB } from '@/lib/date-utils';
 import { parseISO, isValid } from 'date-fns';
 import { useAuthStore } from '@/store/auth-store';
+import { createActivity } from '@/services/activity-service';
 
 // ─── Org Context Helper ─────────────────────────────────────────────────────
 
@@ -495,7 +496,17 @@ export async function createAdditionalFile(file: AdditionalFile): Promise<Additi
     .select()
     .single();
   if (error) throw new Error(error.message);
-  return mapAdditionalFileFromDB(data);
+  const result = mapAdditionalFileFromDB(data);
+
+  // Activity log — fire and forget
+  if (orgId && userId) {
+    createActivity(orgId, userId, 'file_uploaded', `Uploaded ${file.fileName}`, {
+      showId: file.tradeshowId?.toString(),
+      metadata: { fileName: file.fileName, fileType: file.fileType },
+    }).catch(() => {});
+  }
+
+  return result;
 }
 
 export async function deleteAdditionalFile(id: number): Promise<void> {

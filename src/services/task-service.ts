@@ -1,5 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { Task, TaskComment, CreateTaskInput, UpdateTaskInput, TaskStatus } from '@/types/tasks';
+import { createActivity } from '@/services/activity-service';
+import { useAuthStore } from '@/store/auth-store';
 
 // ─── Mappers ─────────────────────────────────────────────────────────────────
 
@@ -146,7 +148,15 @@ export async function createTask(
     .single();
 
   if (error) throw new Error(error.message);
-  return mapTask(data);
+  const task = mapTask(data);
+
+  // Activity log — fire and forget
+  createActivity(orgId, userId, 'task_created', `Created task: ${task.title}`, {
+    showId: task.tradeShowId?.toString(),
+    taskId: task.id,
+  }).catch(() => {});
+
+  return task;
 }
 
 export async function updateTask(taskId: string, input: UpdateTaskInput): Promise<Task> {
@@ -181,7 +191,20 @@ export async function updateTask(taskId: string, input: UpdateTaskInput): Promis
     .single();
 
   if (error) throw new Error(error.message);
-  return mapTask(data);
+  const task = mapTask(data);
+
+  // Activity log for completions — fire and forget
+  if (input.status === 'done') {
+    const { user, organization } = useAuthStore.getState();
+    if (user && organization) {
+      createActivity(organization.id, user.id, 'task_completed', `Completed task: ${task.title}`, {
+        showId: task.tradeShowId?.toString(),
+        taskId: task.id,
+      }).catch(() => {});
+    }
+  }
+
+  return task;
 }
 
 export async function deleteTask(taskId: string): Promise<void> {
@@ -210,6 +233,16 @@ export async function reorderTasks(
     .eq('id', taskId);
 
   if (error) throw new Error(error.message);
+
+  // Activity log for drag-to-done — fire and forget
+  if (newStatus === 'done') {
+    const { user, organization } = useAuthStore.getState();
+    if (user && organization) {
+      createActivity(organization.id, user.id, 'task_completed', 'Completed a task', {
+        taskId,
+      }).catch(() => {});
+    }
+  }
 }
 
 // ─── Comments ────────────────────────────────────────────────────────────────

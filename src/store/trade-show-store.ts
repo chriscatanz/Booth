@@ -5,6 +5,8 @@ import { shiftDateByOneYear } from '@/lib/date-utils';
 import * as api from '@/services/supabase-service';
 import * as cache from '@/services/cache-service';
 import { validateTradeShow, validateAttendees } from '@/services/validation-service';
+import { createActivity } from '@/services/activity-service';
+import { useAuthStore } from '@/store/auth-store';
 
 interface TradeShowState {
   // Data
@@ -284,6 +286,13 @@ export const useTradeShowStore = create<TradeShowState>((set, get) => ({
         // Update attendee tradeshowId references
         const updated = attendees.map(a => ({ ...a, tradeshowId: show.id }));
         set({ attendees: updated });
+        // Activity log — fire and forget
+        const { user, organization } = useAuthStore.getState();
+        if (user && organization) {
+          createActivity(organization.id, user.id, 'show_created', `Created ${show.name}`, {
+            showId: show.id.toString(),
+          }).catch(() => {});
+        }
       }
 
       await api.saveAttendees(get().attendees, show.id);
