@@ -10,7 +10,12 @@ export interface ShowCompleteness {
  * Calculate the completeness of a trade show based on key completion fields
  * This implements the Zeigarnik Effect by highlighting incomplete tasks
  */
-export function calculateShowCompleteness(show: TradeShow): ShowCompleteness {
+interface CompletenessOptions {
+  /** Pass true when the show has at least one kit assigned in the kit_assignments table */
+  hasKitAssignment?: boolean;
+}
+
+export function calculateShowCompleteness(show: TradeShow, options: CompletenessOptions = {}): ShowCompleteness {
   const tasks = [
     {
       id: 'basic_info',
@@ -35,7 +40,7 @@ export function calculateShowCompleteness(show: TradeShow): ShowCompleteness {
     {
       id: 'booth_kit',
       label: 'Booth Kit Assigned',
-      completed: !!(show.boothToShip && show.boothToShip !== '[]')
+      completed: options.hasKitAssignment === true
     },
     {
       id: 'shipping',
@@ -50,7 +55,7 @@ export function calculateShowCompleteness(show: TradeShow): ShowCompleteness {
     {
       id: 'labor',
       label: 'Labor Arranged',
-      completed: show.laborBooked === true
+      completed: show.laborBooked === true || show.laborNotRequired === true
     },
     {
       id: 'attendee_list',

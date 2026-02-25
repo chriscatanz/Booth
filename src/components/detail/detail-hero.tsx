@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { TradeShow } from '@/types';
 import { formatDateRange } from '@/lib/date-utils';
@@ -17,6 +17,7 @@ import { PermissionGate } from '@/components/auth/permission-gate';
 import { CompletionBadge, CompletionProgress } from '@/components/ui/completion-badge';
 import { DropdownPortal } from '@/components/ui/dropdown-portal';
 import { calculateShowCompleteness } from '@/lib/show-completeness';
+import { fetchAssignmentsByShow } from '@/services/booth-kit-service';
 
 interface DetailHeroProps {
   show: TradeShow;
@@ -78,7 +79,14 @@ export function DetailHero({
     'Attendee List Received': 'travel',
     'Lead Capture System': 'logistics',
   };
-  const completeness = calculateShowCompleteness(show);
+  const [hasKitAssignment, setHasKitAssignment] = useState(false);
+  useEffect(() => {
+    if (show.id && show.id > 0) {
+      fetchAssignmentsByShow(show.id).then(a => setHasKitAssignment(a.length > 0)).catch(() => {});
+    }
+  }, [show.id]);
+
+  const completeness = calculateShowCompleteness(show, { hasKitAssignment });
 
   // Memoize badges to prevent unnecessary re-renders
   const badges = useMemo(() => {

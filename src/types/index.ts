@@ -68,6 +68,7 @@ export interface TradeShow {
   utilitiesBooked: boolean | null;
   utilitiesDetails: string | null;
   laborBooked: boolean | null;
+  laborNotRequired: boolean | null;  // When true, no I&D needed — skips Labor in setup checklist
   laborCompanyId: string | null;     // FK to labor_companies
   laborDetails: string | null;
   electricalCost: number | null;
@@ -226,6 +227,7 @@ export function createNewTradeShow(): TradeShow {
     utilitiesBooked: false,
     utilitiesDetails: null,
     laborBooked: false,
+    laborNotRequired: false,
     laborCompanyId: null,
     laborDetails: null,
     electricalCost: null,

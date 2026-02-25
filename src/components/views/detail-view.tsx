@@ -894,9 +894,10 @@ Return ONLY the HTML content, no markdown, no code fences.`;
 
             {/* On-Site Services */}
             <TabSection title="On-Site Services" icon={Package}>
-              <div className="flex gap-6 mb-4">
+              <div className="flex flex-wrap gap-6 mb-4">
                 <Checkbox label="Utilities Booked" checked={show.utilitiesBooked ?? false} onChange={v => updateSelectedShow({ utilitiesBooked: v })} disabled={readOnly} />
-                <Checkbox label="Labor Booked" checked={show.laborBooked ?? false} onChange={v => updateSelectedShow({ laborBooked: v })} disabled={readOnly} />
+                <Checkbox label="Labor Booked" checked={show.laborBooked ?? false} onChange={v => updateSelectedShow({ laborBooked: v, laborNotRequired: false })} disabled={readOnly || !!show.laborNotRequired} />
+                <Checkbox label="No Labor Necessary" checked={show.laborNotRequired ?? false} onChange={v => updateSelectedShow({ laborNotRequired: v, laborBooked: false })} disabled={readOnly} />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input label="Utilities Details" value={show.utilitiesDetails ?? ''} onChange={e => updateSelectedShow({ utilitiesDetails: e.target.value || null })} disabled={readOnly} />
