@@ -250,9 +250,9 @@ export function DetailHero({
                     className="w-48 bg-surface border border-border rounded-lg shadow-lg py-1"
                   >
                       <div>
-                        {/* View / Edit mode toggle */}
+                        {/* View / Edit mode toggle — mobile only (desktop has the toggle in the hero) */}
                         {onViewModeChange && canEdit && (
-                          <>
+                          <div className="sm:hidden">
                             <button
                               onClick={() => { onViewModeChange('read'); setShowActionsMenu(false); }}
                               className="w-full px-3 py-2 text-left text-sm hover:bg-bg-tertiary flex items-center justify-between gap-2"
@@ -268,7 +268,7 @@ export function DetailHero({
                               {viewMode === 'edit' && <Check size={12} className="text-brand-purple" />}
                             </button>
                             <div className="my-1 border-t border-border" />
-                          </>
+                          </div>
                         )}
 
                         <button
@@ -440,10 +440,50 @@ export function DetailHero({
           )}
         </div>
 
-        {/* Completion progress bar — desktop only, shown inline when incomplete */}
-        {!isNew && completeness.percentage < 100 && (
-          <div className="hidden sm:block mt-2 pt-2 border-t border-border-subtle">
-            <CompletionProgress show={show} />
+        {/* Desktop only: progress bar + View/Edit toggle */}
+        {!isNew && (completeness.percentage < 100 || onViewModeChange) && (
+          <div className="hidden sm:flex items-center justify-between gap-4 mt-2 pt-2 border-t border-border-subtle">
+            {completeness.percentage < 100 ? (
+              <div className="flex-1 max-w-md">
+                <CompletionProgress show={show} />
+              </div>
+            ) : (
+              <div />
+            )}
+
+            {onViewModeChange && (
+              canEdit ? (
+                <div className="flex items-center gap-1 p-1 bg-bg-tertiary rounded-lg shrink-0">
+                  <button
+                    onClick={() => onViewModeChange('read')}
+                    className={cn(
+                      'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
+                      viewMode === 'read'
+                        ? 'bg-surface text-text-primary shadow-sm'
+                        : 'text-text-secondary hover:text-text-primary'
+                    )}
+                  >
+                    <Eye size={14} /> View
+                  </button>
+                  <button
+                    onClick={() => onViewModeChange('edit')}
+                    className={cn(
+                      'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
+                      viewMode === 'edit'
+                        ? 'bg-surface text-text-primary shadow-sm'
+                        : 'text-text-secondary hover:text-text-primary'
+                    )}
+                  >
+                    <Pencil size={14} /> Edit
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 text-sm text-text-tertiary shrink-0">
+                  <Eye size={14} />
+                  <span>View Only</span>
+                </div>
+              )
+            )}
           </div>
         )}
       </div>
