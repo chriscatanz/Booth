@@ -42,14 +42,11 @@ export function SignUpForm({ onSwitchToLogin, onBack }: SignUpFormProps) {
         // Record ToS and Privacy consent with timestamp, version, and IP
         await recordConsent(result.user.id);
         
-        // Brief success state before showing verification screen
+        // Show verification screen immediately — no timeout so it can't be lost
+        // if the parent re-renders before the timer fires
+        sessionStorage.setItem('signup_success_email', email);
         setIsProcessing(false);
-        setTimeout(() => {
-          // Store success flag for display even if component unmounts
-          // Use sessionStorage (cleared on tab close) instead of localStorage for security
-          sessionStorage.setItem('signup_success_email', email);
-          setSuccess(true);
-        }, 500);
+        setSuccess(true);
       }
     } catch (err) {
       console.error('[SignUp] Error:', err);

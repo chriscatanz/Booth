@@ -129,6 +129,11 @@ export async function signOut() {
   if (error) throw new Error(error.message);
 }
 
+export async function resendVerificationEmail(email: string) {
+  const { error } = await supabase.auth.resend({ type: 'signup', email });
+  if (error) throw error;
+}
+
 export async function resetPassword(email: string) {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${window.location.origin}/reset-password`,

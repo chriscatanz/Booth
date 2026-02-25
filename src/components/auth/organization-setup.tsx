@@ -1,23 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
 import { ProgressSteps } from '@/components/ui/progress-steps';
-import { Building2, AlertCircle, LogOut, Mail, CheckCircle } from 'lucide-react';
-import * as authService from '@/services/auth-service';
-import { Invitation } from '@/types/auth';
+import { Building2, AlertCircle, LogOut, CheckCircle } from 'lucide-react';
+import { LoadingOverlay } from '@/components/ui/loading-spinner';
 
 export function OrganizationSetup() {
-  const { user, createOrganization, isLoading, error, clearError, signOut, initialize } = useAuthStore();
+  const { user, createOrganization, isLoading, error, clearError, signOut } = useAuthStore();
+  const router = useRouter();
   const [orgName, setOrgName] = useState('');
-  const [pendingInvites, setPendingInvites] = useState<Invitation[]>([]);
-  const [, setLoadingInvites] = useState(true);
-  const [acceptingInvite, setAcceptingInvite] = useState<string | null>(null);
   const [signupSuccessEmail, setSignupSuccessEmail] = useState<string | null>(null);
+  const [redirectingToInvite, setRedirectingToInvite] = useState(false);
+  const [inviteCode, setInviteCode] = useState('');
+  const [showInviteInput, setShowInviteInput] = useState(false);
 
-  // Check for signup success message (use sessionStorage for security)
+  // Check for signup success message
   useEffect(() => {
     const email = sessionStorage.getItem('signup_success_email');
     if (email) {
@@ -26,38 +27,17 @@ export function OrganizationSetup() {
     }
   }, []);
 
-  // Check for pending invitations
+  // Auto-redirect to invite page if a pending token exists — don't let the user
+  // get stranded here when they were invited to an existing org.
   useEffect(() => {
-    async function checkInvites() {
-      if (!user?.email) return;
-      
-      setLoadingInvites(true);
-      try {
-        // Check URL params first
-        const params = new URLSearchParams(window.location.search);
-        let token = params.get('invite');
-        
-        // Also check localStorage (set by invite page before auth redirect)
-        if (!token) {
-          token = localStorage.getItem('pending_invite_token');
-        }
-        
-        if (token) {
-          const invite = await authService.fetchInvitationByToken(token);
-          if (invite) {
-            setPendingInvites([invite]);
-          }
-          // Clean up localStorage after reading
-          localStorage.removeItem('pending_invite_token');
-        }
-      } catch (err) {
-        console.error('Failed to check invites:', err);
-      }
-      setLoadingInvites(false);
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('invite') || localStorage.getItem('pending_invite_token');
+    if (token) {
+      setRedirectingToInvite(true);
+      localStorage.removeItem('pending_invite_token');
+      router.push(`/invite?token=${token}`);
     }
-    
-    checkInvites();
-  }, [user?.email]);
+  }, [router]);
 
   const handleCreateOrg = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,21 +46,25 @@ export function OrganizationSetup() {
     await createOrganization(orgName.trim());
   };
 
-  const handleAcceptInvite = async (invite: Invitation) => {
-    if (!user) return;
-    
-    setAcceptingInvite(invite.id);
+  const handleUseInviteCode = () => {
+    let token = inviteCode.trim();
+    if (!token) return;
+    // Accept full invite URLs too — extract the token param
     try {
-      await authService.acceptInvitation(invite.token, user.id);
-      // Clear URL params
-      window.history.replaceState({}, '', window.location.pathname);
-      // Refresh auth state
-      await initialize();
-    } catch (err) {
-      console.error('Failed to accept invite:', err);
-    }
-    setAcceptingInvite(null);
+      const url = new URL(token);
+      token = url.searchParams.get('token') || token;
+    } catch { /* not a URL, use as-is */ }
+    localStorage.removeItem('pending_invite_token');
+    router.push(`/invite?token=${token}`);
   };
+
+  if (redirectingToInvite) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <LoadingOverlay message="Redirecting to your invitation..." />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-8">
@@ -126,43 +110,6 @@ export function OrganizationSetup() {
           </motion.div>
         )}
 
-        {/* Pending Invitations */}
-        {pendingInvites.length > 0 && (
-          <div className="mb-6 space-y-3">
-            <h2 className="text-sm font-medium text-text-secondary flex items-center gap-2">
-              <Mail size={14} />
-              Pending Invitations
-            </h2>
-            {pendingInvites.map((invite) => (
-              <div key={invite.id} className="p-4 rounded-lg bg-brand-purple/10 border border-brand-purple/20">
-                <p className="text-sm font-medium text-text-primary">
-                  {invite.organization?.name || 'Organization'}
-                </p>
-                <p className="text-xs text-text-secondary mt-1">
-                  Invited as <span className="capitalize">{invite.role}</span>
-                </p>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  className="mt-3 w-full"
-                  onClick={() => handleAcceptInvite(invite)}
-                  loading={acceptingInvite === invite.id}
-                >
-                  Accept Invitation
-                </Button>
-              </div>
-            ))}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="px-2 bg-background text-text-tertiary">or</span>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Create Organization Form */}
         <form onSubmit={handleCreateOrg} className="space-y-4">
           {error && (
@@ -202,7 +149,38 @@ export function OrganizationSetup() {
           </Button>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-border">
+        {/* Invitation escape hatch — for users who were invited but lost their token */}
+        <div className="mt-6 pt-4 border-t border-border">
+          {!showInviteInput ? (
+            <button
+              onClick={() => setShowInviteInput(true)}
+              className="w-full text-sm text-brand-purple hover:underline text-center"
+            >
+              Have an invitation link or code?
+            </button>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-xs text-text-secondary">Paste your invitation link or token:</p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={inviteCode}
+                  onChange={e => setInviteCode(e.target.value)}
+                  placeholder="Paste invite link or token..."
+                  className="flex-1 px-3 py-2 rounded-lg bg-bg-tertiary border border-border text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-brand-purple/50"
+                />
+                <Button variant="primary" size="sm" onClick={handleUseInviteCode} disabled={!inviteCode.trim()}>
+                  Go
+                </Button>
+              </div>
+              <p className="text-xs text-text-tertiary">
+                You can paste the full invite URL or just the token portion.
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-4 pt-4 border-t border-border">
           <button
             onClick={signOut}
             className="flex items-center justify-center gap-2 w-full text-sm text-text-secondary hover:text-text-primary"

@@ -67,10 +67,16 @@ export function AuthGuard({ children }: AuthGuardProps) {
   }
 
   // Authenticated but no organization - show setup
-  // Skip this if user has a pending invite (they'll join via invite)
+  // Skip this if user has a pending invite (they'll join via invite).
+  // IMPORTANT: check localStorage directly here too — the state update from the
+  // mount effect may not have applied yet (race with fast auth init), and we
+  // must not show OrganizationSetup (which also reads+clears the token) before
+  // the redirect effect has a chance to fire.
   if (organizations.length === 0) {
-    // Check both state and sessionStorage for pending invite
-    if (!pendingInviteToken) {
+    const liveToken = typeof window !== 'undefined'
+      ? localStorage.getItem('pending_invite_token')
+      : null;
+    if (!pendingInviteToken && !liveToken) {
       return <OrganizationSetup />;
     }
     // Has pending invite - show loading until redirect happens

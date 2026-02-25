@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
-import { Mail, Lock, AlertCircle, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, AlertCircle, Eye, EyeOff, ArrowLeft, RefreshCw } from 'lucide-react';
+import { resendVerificationEmail } from '@/services/auth-service';
 
 interface LoginFormProps {
   onSwitchToSignUp: () => void;
@@ -19,6 +20,7 @@ export function LoginForm({ onSwitchToSignUp, onForgotPassword, onBack }: LoginF
   const [showPassword, setShowPassword] = useState(false);
 
   const [isSuccess, setIsSuccess] = useState(false);
+  const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,15 +68,15 @@ export function LoginForm({ onSwitchToSignUp, onForgotPassword, onBack }: LoginF
               <div className="flex-1">
                 <p className="text-error text-sm font-medium">{error}</p>
                 <div className="mt-2 text-xs text-error/80">
-                  {error.toLowerCase().includes('password') ? (
+                  {error.toLowerCase().includes('not confirmed') || error.toLowerCase().includes('confirm') ? (
+                    <>
+                      <p>• Your email address hasn&apos;t been verified yet</p>
+                      <p>• Check your inbox (and spam folder) for the confirmation email</p>
+                    </>
+                  ) : error.toLowerCase().includes('password') || error.toLowerCase().includes('invalid') ? (
                     <>
                       <p>• Check your password and try again</p>
-                      <p>• Use "Forgot password?" if you can't remember it</p>
-                    </>
-                  ) : error.toLowerCase().includes('email') ? (
-                    <>
-                      <p>• Verify your email address is correct</p>
-                      <p>• Make sure your account exists</p>
+                      <p>• Use &quot;Forgot password?&quot; if you can&apos;t remember it</p>
                     </>
                   ) : error.toLowerCase().includes('network') || error.toLowerCase().includes('connection') ? (
                     <>
@@ -90,31 +92,38 @@ export function LoginForm({ onSwitchToSignUp, onForgotPassword, onBack }: LoginF
                 </div>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  clearError();
-                  // Retry the last login attempt
-                  if (email && password) {
-                    handleSubmit(new Event('submit') as any);
-                  }
-                }}
-                className="text-xs border-error/30 text-error hover:bg-error/10"
-              >
-                Try Again
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={clearError}
-                className="text-xs border-error/30 text-error hover:bg-error/10"
-              >
-                Dismiss
-              </Button>
+            <div className="flex flex-wrap gap-2">
+              {(error.toLowerCase().includes('not confirmed') || error.toLowerCase().includes('confirm')) && email ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={resendStatus !== 'idle'}
+                  onClick={async () => {
+                    setResendStatus('sending');
+                    try {
+                      await resendVerificationEmail(email);
+                      setResendStatus('sent');
+                    } catch {
+                      setResendStatus('idle');
+                    }
+                  }}
+                  className="text-xs border-brand-purple/30 text-brand-purple hover:bg-brand-purple/10"
+                >
+                  <RefreshCw size={12} />
+                  {resendStatus === 'sending' ? 'Sending…' : resendStatus === 'sent' ? 'Email sent! Check your inbox' : 'Resend verification email'}
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={clearError}
+                  className="text-xs border-error/30 text-error hover:bg-error/10"
+                >
+                  Dismiss
+                </Button>
+              )}
             </div>
           </motion.div>
         )}
