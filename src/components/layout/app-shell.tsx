@@ -13,6 +13,7 @@ import { ToastContainer } from '@/components/ui/toast';
 import { LoadingOverlay } from '@/components/ui/loading-spinner';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { AlertCircle, X } from 'lucide-react';
+import { CompletionBadge } from '@/components/ui/completion-badge';
 
 import { OfflineBanner } from '@/components/ui/offline-banner';
 import DashboardView from '@/components/views/dashboard-view';
@@ -209,6 +210,9 @@ export function AppShell() {
           <div className="h-12 border-b border-border flex items-center px-2 sm:px-4 gap-2 sm:gap-4 shrink-0 bg-surface">
             {/* Show Selector Dropdown */}
             <ShowSelector />
+            {selectedShow && (
+              <CompletionBadge show={selectedShow} size="sm" showMessage showPercentage={false} />
+            )}
 
             {/* Current View Label - hide on mobile */}
             <div className="hidden sm:flex items-center gap-2 text-sm text-text-secondary">

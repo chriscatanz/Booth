@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PermissionGate } from '@/components/auth/permission-gate';
-import { CompletionBadge, CompletionProgress } from '@/components/ui/completion-badge';
+import { CompletionProgress } from '@/components/ui/completion-badge';
 import { DropdownPortal } from '@/components/ui/dropdown-portal';
 import { calculateShowCompleteness } from '@/lib/show-completeness';
 import { fetchAssignmentsByShow } from '@/services/booth-kit-service';
@@ -150,24 +150,23 @@ export function DetailHero({
                 <ArrowLeft size={20} />
               </button>
             )}
-            <div className="flex items-center gap-2 min-w-0">
-              <h1 className="text-xl font-bold text-text-primary truncate">
-                {show.name || 'Untitled Show'}
-              </h1>
-              <CompletionBadge show={show} size="md" showMessage />
-            </div>
+            <h1 className="text-xl font-bold text-text-primary truncate min-w-0">
+              {show.name || 'Untitled Show'}
+            </h1>
           </div>
           
           {/* Action Buttons */}
           <div className="flex items-center gap-1 shrink-0">
             {!isNew && (
               <>
-                <Button variant="ghost" size="sm" onClick={onDownloadICS} title="Add to Calendar" className="hidden sm:flex">
-                  <CalendarPlus size={14} />
-                </Button>
-                <Button variant="ghost" size="sm" onClick={onEmailDetails} title="Email Details" className="hidden sm:flex">
-                  <Mail size={14} />
-                </Button>
+                <div className="hidden sm:flex items-center gap-1">
+                  <Button variant="ghost" size="sm" onClick={onDownloadICS} title="Add to Calendar">
+                    <CalendarPlus size={14} />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={onEmailDetails} title="Email Details">
+                    <Mail size={14} />
+                  </Button>
+                </div>
                 
                 {/* Complete Setup CTA for incomplete shows — hidden on mobile (too crowded) */}
                 {completeness.percentage < 100 && (
