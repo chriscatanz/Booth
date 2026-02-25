@@ -179,7 +179,7 @@ export function AppShell() {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-background">
+    <div className="flex flex-col h-screen overflow-hidden">
       {/* Offline Status Banner */}
       <OfflineBanner />
       

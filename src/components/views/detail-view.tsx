@@ -237,7 +237,7 @@ Return ONLY the HTML content, no markdown, no code fences.`;
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="h-full flex flex-col bg-background"
+      className="h-full flex flex-col"
     >
       {/* Hero Header with integrated action buttons */}
       <DetailHero 

@@ -1159,7 +1159,7 @@ function DocumentsTab() {
       <div className="flex-1 p-4 flex flex-col overflow-hidden min-h-0">
         {extractedData ? (
           <div className="flex-1 overflow-y-auto space-y-4">
-            <div className="flex items-center justify-between sticky top-0 bg-background py-2 z-10">
+            <div className="flex items-center justify-between sticky top-0 bg-background/90 backdrop-blur-sm py-2 z-10">
               <h3 className="text-sm font-medium text-text-primary">
                 Extracted Details
               </h3>
