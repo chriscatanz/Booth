@@ -18,6 +18,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Toggle } from '@/components/ui/toggle';
 import { DatePicker } from '@/components/ui/date-picker';
 import { VenueMap } from '@/components/ui/venue-map';
+import { geocodeVenue } from '@/lib/geocode';
 import { formatCurrency, cn } from '@/lib/utils';
 import { 
   totalEstimatedCost, totalServicesCost, estimatedHotelCost, roiPercentage, 
@@ -401,13 +402,21 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                 <LookupSelect
                   label="Venue"
                   value={show.venueId}
-                  onChange={v => {
+                  onChange={async v => {
                     const venue = lookups.venues.find(ven => ven.id === v);
-                    updateSelectedShow({ 
+                    const storedAddress = venue
+                      ? `${venue.address || ''}, ${venue.city || ''}, ${venue.state || ''}`.replace(/^, |, $/g, '').replace(/^,\s*/, '') || null
+                      : null;
+                    updateSelectedShow({
                       venueId: v,
                       venueName: venue?.name || null,
-                      venueAddress: venue ? `${venue.address || ''}, ${venue.city || ''}, ${venue.state || ''}`.replace(/^, |, $/g, '') : null
+                      venueAddress: storedAddress
                     });
+                    // Auto-geocode if no stored address
+                    if (venue?.name && !storedAddress) {
+                      const addr = await geocodeVenue(venue.name, show.location);
+                      if (addr) updateSelectedShow({ venueAddress: addr });
+                    }
                   }}
                   options={lookups.venues.map(v => ({ id: v.id, name: v.name, subtitle: v.city ? `${v.city}, ${v.state}` : undefined }))}
                   placeholder="Select venue..."
@@ -418,11 +427,28 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                       const newVenue = await lookupService.createVenue(organization.id, { name });
                       await refreshCategory('venues');
                       updateSelectedShow({ venueId: newVenue.id, venueName: newVenue.name });
+                      // Auto-geocode the new venue
+                      const addr = await geocodeVenue(name, show.location);
+                      if (addr) updateSelectedShow({ venueAddress: addr });
                     }
                   }}
                   createLabel="Add new venue"
                 />
-                <Input label="Venue Address" value={show.venueAddress ?? ''} onChange={e => updateSelectedShow({ venueAddress: e.target.value || null })} placeholder="Full address" disabled={readOnly} />
+                <div className="relative">
+                  <Input label="Venue Address" value={show.venueAddress ?? ''} onChange={e => updateSelectedShow({ venueAddress: e.target.value || null })} placeholder="Full address" disabled={readOnly} />
+                  {!readOnly && show.venueName && !show.venueAddress && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const addr = await geocodeVenue(show.venueName!, show.location);
+                        if (addr) updateSelectedShow({ venueAddress: addr });
+                      }}
+                      className="absolute right-2 bottom-2 text-xs text-brand-purple hover:underline"
+                    >
+                      Lookup
+                    </button>
+                  )}
+                </div>
               </div>
               <VenueMap 
                 venueName={show.venueName}
