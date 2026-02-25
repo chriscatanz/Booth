@@ -1011,14 +1011,22 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                 <LookupSelect
                   label="Hotel"
                   value={show.hotelId}
-                  onChange={v => {
+                  onChange={async v => {
                     const hotel = lookups.hotels.find(h => h.id === v);
-                    updateSelectedShow({ 
+                    const storedAddress = hotel
+                      ? `${hotel.address || ''}, ${hotel.city || ''}, ${hotel.state || ''}`.replace(/^, |, $/g, '').replace(/^,\s*/, '') || null
+                      : null;
+                    updateSelectedShow({
                       hotelId: v,
                       hotelName: hotel?.name || null,
-                      hotelAddress: hotel ? `${hotel.address || ''}, ${hotel.city || ''}, ${hotel.state || ''}`.replace(/^, |, $/g, '') : null,
+                      hotelAddress: storedAddress,
                       hotelCostPerNight: hotel?.corporateRate || show.hotelCostPerNight
                     });
+                    // Auto-geocode if no stored address
+                    if (hotel?.name && !storedAddress) {
+                      const addr = await geocodeVenue(hotel.name, show.location);
+                      if (addr) updateSelectedShow({ hotelAddress: addr });
+                    }
                   }}
                   options={lookups.hotels.map(h => ({ id: h.id, name: h.name, subtitle: h.city ? `${h.city}, ${h.state}` : h.brand || undefined }))}
                   placeholder="Select hotel..."
@@ -1029,11 +1037,28 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                       const newHotel = await lookupService.createHotel(organization.id, { name });
                       await refreshCategory('hotels');
                       updateSelectedShow({ hotelId: newHotel.id, hotelName: newHotel.name });
+                      // Auto-geocode the new hotel
+                      const addr = await geocodeVenue(name, show.location);
+                      if (addr) updateSelectedShow({ hotelAddress: addr });
                     }
                   }}
                   createLabel="Add new hotel"
                 />
-                <Input label="Hotel Address" value={show.hotelAddress ?? ''} onChange={e => updateSelectedShow({ hotelAddress: e.target.value || null })} disabled={readOnly} />
+                <div className="relative">
+                  <Input label="Hotel Address" value={show.hotelAddress ?? ''} onChange={e => updateSelectedShow({ hotelAddress: e.target.value || null })} placeholder="Full address" disabled={readOnly} />
+                  {!readOnly && show.hotelName && !show.hotelAddress && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const addr = await geocodeVenue(show.hotelName!, show.location);
+                        if (addr) updateSelectedShow({ hotelAddress: addr });
+                      }}
+                      className="absolute right-2 bottom-2 text-xs text-brand-purple hover:underline"
+                    >
+                      Lookup
+                    </button>
+                  )}
+                </div>
                 <DataVisibilityGate category="budget">
                   <Input label="Cost Per Night" type="number" value={show.hotelCostPerNight?.toString() ?? ''} onChange={e => updateSelectedShow({ hotelCostPerNight: e.target.value ? parseFloat(e.target.value) : null })} disabled={readOnly} />
                 </DataVisibilityGate>
