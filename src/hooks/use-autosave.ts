@@ -89,7 +89,7 @@ export function useAutosave({ debounceMs = 2000, enabled = true }: UseAutosaveOp
           // Reset to idle after showing "saved" briefly
           savedTimeoutRef.current = setTimeout(() => {
             setStatus('idle');
-          }, 2000);
+          }, 1200);
         } else {
           setStatus('error');
         }
