@@ -233,7 +233,18 @@ export function ShowReadView({ show, attendees, files = [], tasks = [], taskCoun
               {/* Summary Cards */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <SummaryCard icon={<DollarSign size={16} className="text-success" />} title="Budget" mainValue={formatCurrency(totalCost)} subText="Total estimated" />
-                <SummaryCard icon={<Users size={16} className="text-brand-purple" />} title="Team" mainValue={attendees.length.toString()} subText="attending" />
+                <SummaryCard
+                  icon={<Users size={16} className="text-brand-purple" />}
+                  title="Team"
+                  mainValue={attendees.length.toString()}
+                  subText="attending"
+                  detail={attendees.length > 0 ? (
+                    <p className="text-xs text-text-tertiary leading-relaxed">
+                      {attendees.slice(0, 3).map(a => a.name || 'Unnamed').join(', ')}
+                      {attendees.length > 3 && ` +${attendees.length - 3} more`}
+                    </p>
+                  ) : undefined}
+                />
                 <SummaryCard icon={<FileText size={16} className="text-warning" />} title="Documents" mainValue={files.length.toString()} subText="files uploaded" />
                 <SummaryCard icon={<CheckSquare size={16} className="text-brand-cyan" />} title="Tasks" mainValue={`${taskCompleted}/${taskTotal}`} subText="completed" />
               </div>
@@ -807,12 +818,13 @@ function DateBlock({ label, primary, secondary, highlight }: { label: string; pr
   );
 }
 
-function SummaryCard({ icon, title, mainValue, subText }: { icon: React.ReactNode; title: string; mainValue: string; subText: string }) {
+function SummaryCard({ icon, title, mainValue, subText, detail }: { icon: React.ReactNode; title: string; mainValue: string; subText: string; detail?: React.ReactNode }) {
   return (
     <Card>
       <div className="flex items-center gap-2 mb-1">{icon}<span className="text-xs font-semibold text-text-tertiary uppercase tracking-wide">{title}</span></div>
       <div className="text-3xl font-bold text-text-primary mt-2">{mainValue}</div>
       <p className="text-sm text-text-secondary mt-1">{subText}</p>
+      {detail && <div className="mt-2">{detail}</div>}
     </Card>
   );
 }
