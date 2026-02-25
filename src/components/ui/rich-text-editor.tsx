@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import { useEditor, EditorContent, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
-import Underline from '@tiptap/extension-underline';
+// Underline is included in StarterKit v3 — no separate import needed
 import DOMPurify from 'dompurify';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -193,7 +193,6 @@ export function RichTextEditor({
         placeholder: readOnly ? '' : placeholder,
         emptyEditorClass: 'is-editor-empty',
       }),
-      Underline,
     ],
     content: value || '',
     onUpdate: ({ editor }) => {

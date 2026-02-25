@@ -548,8 +548,13 @@ async function validateFileUpload(
       headers,
     });
 
-    const result = await response.json();
-    
+    if (response.status === 413) {
+      return { valid: false, error: 'File is too large to process. Please use a smaller file.' };
+    }
+
+    const contentType = response.headers.get('content-type') ?? '';
+    const result = contentType.includes('application/json') ? await response.json() : {};
+
     if (!response.ok) {
       return { valid: false, error: result.error || 'Validation failed' };
     }
