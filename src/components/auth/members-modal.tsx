@@ -74,8 +74,9 @@ export function MembersModal({ onClose }: MembersModalProps) {
       );
       
       // Send email notification via API (authenticated)
+      let emailDelivered = true;
       try {
-        await authenticatedFetch('/api/invite', {
+        const emailRes = await authenticatedFetch('/api/invite', {
           method: 'POST',
           body: JSON.stringify({
             email: inviteEmail.trim(),
@@ -86,18 +87,27 @@ export function MembersModal({ onClose }: MembersModalProps) {
             expiresAt: invite.expiresAt,
           }),
         });
+        if (!emailRes.ok) {
+          const body = await emailRes.json().catch(() => ({}));
+          console.error('Invite email API error:', emailRes.status, body);
+          emailDelivered = false;
+        }
       } catch (emailErr) {
-        // Email is best-effort, don't fail the whole invite
-        console.warn('Failed to send invitation email:', emailErr);
+        console.error('Failed to send invitation email:', emailErr);
+        emailDelivered = false;
       }
-      
+
       // Re-fetch through v_invitations decrypt view so email shows decrypted immediately
       const fresh = await authService.fetchInvitations(organization.id);
       setInvitations(fresh);
       setInviteEmail('');
       setShowInviteForm(false);
-      setInviteSuccess(`Invitation sent to ${inviteEmail}`);
-      setTimeout(() => setInviteSuccess(null), 3000);
+      setInviteSuccess(
+        emailDelivered
+          ? `Invitation sent to ${inviteEmail}`
+          : `Invite created but email delivery failed — share the invite link manually`
+      );
+      setTimeout(() => setInviteSuccess(null), 6000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to send invitation');
     }

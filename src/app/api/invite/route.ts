@@ -128,9 +128,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Failed to send invitation email:', error);
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('Failed to send invitation email:', msg);
     return NextResponse.json(
-      { error: 'Failed to send invitation email' },
+      { error: `Failed to send invitation email: ${msg}` },
       { status: 500 }
     );
   }
