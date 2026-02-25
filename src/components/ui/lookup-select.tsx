@@ -48,6 +48,7 @@ export function LookupSelect({
   const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listboxId = useId();
   const labelId = useId();
@@ -61,10 +62,13 @@ export function LookupSelect({
       )
     : options;
 
-  // Close on click outside
+  // Close on click outside (must also check portal dropdown)
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const inContainer = containerRef.current?.contains(target);
+      const inDropdown = dropdownRef.current?.contains(target);
+      if (!inContainer && !inDropdown) {
         setIsOpen(false);
         setSearch('');
       }
@@ -169,7 +173,7 @@ export function LookupSelect({
 
       {/* Dropdown — portal to escape overflow/stacking context */}
       {isOpen && typeof document !== 'undefined' && createPortal(
-        <div style={dropdownStyle} className="bg-surface border border-border rounded-lg shadow-lg overflow-hidden">
+        <div ref={dropdownRef} style={dropdownStyle} className="bg-surface border border-border rounded-lg shadow-lg overflow-hidden">
           {/* Search */}
           {options.length > 5 && (
             <div className="p-2 border-b border-border">
