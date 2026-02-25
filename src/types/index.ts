@@ -59,6 +59,7 @@ export interface TradeShow {
   leadCaptureSystemId: string | null; // FK to lead_capture_systems
   leadCaptureSystem: string | null;
   leadCaptureCredentials: string | null;
+  leadCaptureNotRequired: boolean | null; // When true, no lead capture system needed — skips Lead Capture in setup checklist
 
   // Booth Equipment
   boothToShip: string | null;       // JSON array string
@@ -222,6 +223,7 @@ export function createNewTradeShow(): TradeShow {
     leadCaptureSystemId: null,
     leadCaptureSystem: null,
     leadCaptureCredentials: null,
+    leadCaptureNotRequired: false,
     boothToShip: '[]',
     graphicsToShip: '[]',
     utilitiesBooked: false,

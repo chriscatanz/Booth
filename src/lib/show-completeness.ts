@@ -65,7 +65,7 @@ export function calculateShowCompleteness(show: TradeShow, options: Completeness
     {
       id: 'lead_capture',
       label: 'Lead Capture System',
-      completed: !!(show.leadCaptureSystemId && show.leadCaptureSystem)
+      completed: !!(show.leadCaptureSystemId && show.leadCaptureSystem) || show.leadCaptureNotRequired === true
     }
   ];
 

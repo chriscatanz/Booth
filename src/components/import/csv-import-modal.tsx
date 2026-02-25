@@ -189,6 +189,7 @@ export default function CSVImportModal({ onClose, onImported }: CSVImportModalPr
             leadCaptureSystemId: null,
             leadCaptureSystem: null,
             leadCaptureCredentials: null,
+            leadCaptureNotRequired: false,
             boothToShip: null,
             graphicsToShip: null,
             utilitiesBooked: false,
