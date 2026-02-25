@@ -169,9 +169,9 @@ export function DetailHero({
                   <Mail size={14} />
                 </Button>
                 
-                {/* Complete Setup CTA for incomplete shows */}
+                {/* Complete Setup CTA for incomplete shows — hidden on mobile (too crowded) */}
                 {completeness.percentage < 100 && (
-                  <div className="relative">
+                  <div className="relative hidden sm:block">
                     <Button
                       ref={setupButtonRef}
                       variant="secondary"
