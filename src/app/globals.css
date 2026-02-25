@@ -292,3 +292,7 @@ select option {
 .shine:hover::after {
   transform: translateX(100%);
 }
+
+/* Hide scrollbar while preserving scroll functionality */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

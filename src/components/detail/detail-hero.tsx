@@ -162,10 +162,10 @@ export function DetailHero({
           <div className="flex items-center gap-1 shrink-0">
             {!isNew && (
               <>
-                <Button variant="ghost" size="sm" onClick={onDownloadICS} title="Add to Calendar">
+                <Button variant="ghost" size="sm" onClick={onDownloadICS} title="Add to Calendar" className="hidden sm:flex">
                   <CalendarPlus size={14} />
                 </Button>
-                <Button variant="ghost" size="sm" onClick={onEmailDetails} title="Email Details">
+                <Button variant="ghost" size="sm" onClick={onEmailDetails} title="Email Details" className="hidden sm:flex">
                   <Mail size={14} />
                 </Button>
                 
@@ -242,6 +242,18 @@ export function DetailHero({
                     className="w-48 bg-surface border border-border rounded-lg shadow-lg py-1"
                   >
                       <div>
+                        <button
+                          onClick={() => { onDownloadICS?.(); setShowActionsMenu(false); }}
+                          className="w-full px-3 py-2 text-left text-sm hover:bg-bg-tertiary flex items-center gap-2 sm:hidden"
+                        >
+                          <CalendarPlus size={14} /> Add to Calendar
+                        </button>
+                        <button
+                          onClick={() => { onEmailDetails?.(); setShowActionsMenu(false); }}
+                          className="w-full px-3 py-2 text-left text-sm hover:bg-bg-tertiary flex items-center gap-2 sm:hidden"
+                        >
+                          <Mail size={14} /> Email Details
+                        </button>
                         <button
                           onClick={() => { onExportCSV?.(); setShowActionsMenu(false); }}
                           className="w-full px-3 py-2 text-left text-sm hover:bg-bg-tertiary flex items-center gap-2"
@@ -380,7 +392,7 @@ export function DetailHero({
 
           {/* Alert badges (inline) */}
           {alerts.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex gap-1.5 overflow-x-auto no-scrollbar flex-nowrap sm:flex-wrap w-full sm:w-auto -mx-6 px-6 sm:mx-0 sm:px-0 pb-0.5 sm:pb-0">
               {alerts.map((alert, i) => (
                 <span
                   key={i}
