@@ -35,6 +35,8 @@ import { useAuthStore } from '@/store/auth-store';
 import { useSubscriptionStore } from '@/store/subscription-store';
 import { SubscriptionBanner } from '@/components/subscription/subscription-banner';
 import { AIChatBubble } from '@/components/ai/ai-chat-bubble';
+import { useBoothMode } from '@/hooks/use-booth-mode';
+import { BoothModeShell as BoothModeFullShell } from '@/components/booth-mode/booth-mode-shell';
 
 const pageVariants = {
   initial: { opacity: 0, y: 8 },
@@ -66,6 +68,9 @@ export function AppShell() {
   const [showOrgSettings, setShowOrgSettings] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [showBoothMode, setShowBoothMode] = useState(false);
+
+  // Booth Mode detection (mobile only)
+  const boothMode = useBoothMode();
   // const [showAIAssistant, setShowAIAssistant] = useState(false); // Disabled - using full AIView
   
   // Onboarding wizard
@@ -333,9 +338,61 @@ export function AppShell() {
       {/* Floating AI Chat Bubble */}
       <AIChatBubble />
 
-      {/* Booth Mode - uses its own store subscription so app-shell doesn't need full selectedShow */}
+      {/* Legacy Booth Mode (manual trigger from top nav, uses existing BoothModeView) */}
       <AnimatePresence>
         {showBoothMode && <BoothModeShell onExit={() => setShowBoothMode(false)} />}
+      </AnimatePresence>
+
+      {/* Auto Booth Mode (mobile, active show detection) */}
+      <AnimatePresence>
+        {boothMode.isInBoothMode && boothMode.activeShow && (
+          <BoothModeFullShell show={boothMode.activeShow} onExit={boothMode.exitBoothMode} />
+        )}
+      </AnimatePresence>
+
+      {/* Booth Mode Prompt Banner (mobile only) */}
+      <AnimatePresence>
+        {boothMode.pendingShow && !boothMode.isInBoothMode && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-surface border-t border-border"
+          >
+            <div className="flex items-start gap-3">
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-text-primary">
+                  🎪 {boothMode.pendingShow.name} is live!
+                </p>
+                <p className="text-xs text-text-secondary mt-0.5">
+                  Enter Booth Mode for a focused show experience.
+                </p>
+              </div>
+              <button
+                onClick={boothMode.dismissPrompt}
+                className="p-1 text-text-tertiary hover:text-text-secondary transition-colors"
+                aria-label="Dismiss"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div className="flex gap-2 mt-3">
+              <button
+                onClick={boothMode.enterBoothMode}
+                className="flex-1 py-2.5 rounded-lg bg-brand text-white text-sm font-semibold transition-opacity active:opacity-80"
+                style={{ background: 'var(--brand-color)' }}
+              >
+                Enter Booth Mode
+              </button>
+              <button
+                onClick={boothMode.dismissPrompt}
+                className="flex-1 py-2.5 rounded-lg bg-surface-secondary text-text-secondary text-sm font-medium border border-border"
+              >
+                Not now
+              </button>
+            </div>
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   );
