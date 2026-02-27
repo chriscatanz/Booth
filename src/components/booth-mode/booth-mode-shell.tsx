@@ -2,15 +2,17 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, UserPlus, ClipboardList, FolderOpen, Users } from 'lucide-react';
+import { X, MapPin, Calendar, UserPlus, ClipboardList, FolderOpen, Users } from 'lucide-react';
 import { TradeShow } from '@/types';
 import { format, parseISO } from 'date-fns';
+import { BoothModeInfo } from './booth-mode-info';
+import { BoothModeAgenda } from './booth-mode-agenda';
 import { BoothModeLeadCapture } from './booth-mode-lead-capture';
 import { BoothModeTasks } from './booth-mode-tasks';
 import { BoothModeFiles } from './booth-mode-files';
 import { BoothModeTeam } from './booth-mode-team';
 
-type TabId = 'leads' | 'tasks' | 'files' | 'team';
+type TabId = 'info' | 'agenda' | 'leads' | 'tasks' | 'files' | 'team';
 
 interface Tab {
   id: TabId;
@@ -19,10 +21,12 @@ interface Tab {
 }
 
 const TABS: Tab[] = [
-  { id: 'leads', label: 'Leads', Icon: UserPlus },
-  { id: 'tasks', label: 'Tasks', Icon: ClipboardList },
-  { id: 'files', label: 'Files', Icon: FolderOpen },
-  { id: 'team', label: 'Team', Icon: Users },
+  { id: 'info',   label: 'Info',   Icon: MapPin },
+  { id: 'agenda', label: 'Agenda', Icon: Calendar },
+  { id: 'leads',  label: 'Leads',  Icon: UserPlus },
+  { id: 'tasks',  label: 'Tasks',  Icon: ClipboardList },
+  { id: 'files',  label: 'Files',  Icon: FolderOpen },
+  { id: 'team',   label: 'Team',   Icon: Users },
 ];
 
 interface BoothModeShellProps {
@@ -31,7 +35,7 @@ interface BoothModeShellProps {
 }
 
 export function BoothModeShell({ show, onExit }: BoothModeShellProps) {
-  const [activeTab, setActiveTab] = useState<TabId>('leads');
+  const [activeTab, setActiveTab] = useState<TabId>('info');
 
   const startDate = show.startDate ? parseISO(show.startDate) : null;
   const endDate = show.endDate ? parseISO(show.endDate) : null;
@@ -84,15 +88,17 @@ export function BoothModeShell({ show, onExit }: BoothModeShellProps) {
             exit={{ opacity: 0, x: -12 }}
             transition={{ duration: 0.15 }}
           >
-            {activeTab === 'leads' && <BoothModeLeadCapture show={show} />}
-            {activeTab === 'tasks' && <BoothModeTasks show={show} />}
-            {activeTab === 'files' && <BoothModeFiles showId={show.id} />}
-            {activeTab === 'team'  && <BoothModeTeam showId={show.id} />}
+            {activeTab === 'info'   && <BoothModeInfo show={show} />}
+            {activeTab === 'agenda' && <BoothModeAgenda show={show} />}
+            {activeTab === 'leads'  && <BoothModeLeadCapture show={show} />}
+            {activeTab === 'tasks'  && <BoothModeTasks show={show} />}
+            {activeTab === 'files'  && <BoothModeFiles showId={show.id} />}
+            {activeTab === 'team'   && <BoothModeTeam showId={show.id} />}
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* Bottom tab bar */}
+      {/* Bottom tab bar — 6 tabs, compact */}
       <nav className="relative flex-shrink-0 border-t border-white/10 bg-[#0a0a0f]/90 backdrop-blur-md pb-safe">
         <div className="flex">
           {TABS.map(tab => {
@@ -101,14 +107,14 @@ export function BoothModeShell({ show, onExit }: BoothModeShellProps) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${
+                className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 transition-colors relative ${
                   active ? 'text-white' : 'text-white/40 hover:text-white/60'
                 }`}
               >
-                <tab.Icon size={20} />
-                <span className="text-[10px] font-medium">{tab.label}</span>
+                <tab.Icon size={18} />
+                <span className="text-[9px] font-medium leading-tight">{tab.label}</span>
                 {active && (
-                  <span className="absolute bottom-0 h-0.5 w-8 bg-brand-purple rounded-t-full" />
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 w-6 bg-brand-purple rounded-t-full" />
                 )}
               </button>
             );
