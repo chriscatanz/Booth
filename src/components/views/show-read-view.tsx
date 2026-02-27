@@ -349,11 +349,21 @@ export function ShowReadView({ show, attendees, files = [], tasks = [], taskCoun
               )}
 
               {/* Lead Capture */}
-              {show.leadCaptureSystem && (
+              {(show.leadCaptureSystem || show.leadCaptureNotRequired) && (
                 <Card>
                   <CardTitle icon={<Radio size={16} />} title="Lead Capture" />
                   <div className="mt-3">
-                    <InfoBlock label="System" value={show.leadCaptureSystem} />
+                    {show.leadCaptureNotRequired ? (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-bg-tertiary text-text-secondary font-medium">No Lead Capture Needed</span>
+                    ) : (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-4">
+                          {show.leadCaptureSystem && <InfoBlock label="System" value={show.leadCaptureSystem} />}
+                          {show.leadCaptureCredentials && <InfoBlock label="Login Info" value={show.leadCaptureCredentials} />}
+                        </div>
+                        {show.leadCaptureAppUrl && <InfoBlock label="App URL" value={show.leadCaptureAppUrl} />}
+                      </div>
+                    )}
                   </div>
                 </Card>
               )}
@@ -519,9 +529,12 @@ export function ShowReadView({ show, attendees, files = [], tasks = [], taskCoun
                     {show.leadCaptureNotRequired ? (
                       <span className="text-xs px-2 py-0.5 rounded-full bg-bg-tertiary text-text-secondary font-medium">No Lead Capture Needed</span>
                     ) : (
-                      <div className="grid grid-cols-2 gap-4">
-                        {show.leadCaptureSystem && <InfoBlock label="System" value={show.leadCaptureSystem} />}
-                        {show.leadCaptureCredentials && <InfoBlock label="Login" value={show.leadCaptureCredentials} />}
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-4">
+                          {show.leadCaptureSystem && <InfoBlock label="System" value={show.leadCaptureSystem} />}
+                          {show.leadCaptureCredentials && <InfoBlock label="Login Info" value={show.leadCaptureCredentials} />}
+                        </div>
+                        {show.leadCaptureAppUrl && <InfoBlock label="App URL" value={show.leadCaptureAppUrl} />}
                       </div>
                     )}
                   </div>
