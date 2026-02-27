@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FeaturePageLayout } from '@/components/marketing/feature-page-layout';
 import { 
   Calendar, Clock, Eye, Filter, 
-  CalendarDays, Map, AlertTriangle, RefreshCw, Globe, Smartphone
+  Map, AlertTriangle, RefreshCw, Globe, Smartphone
 } from 'lucide-react';
 
 export default function CalendarFeaturePage() {

@@ -137,7 +137,7 @@ export function SignUpForm({ onSwitchToLogin, onBack }: SignUpFormProps) {
                   ) : (
                     <>
                       <p>• Check all fields are filled correctly</p>
-                      <p>• Make sure you've agreed to the terms</p>
+                      <p>• Make sure you&apos;ve agreed to the terms</p>
                     </>
                   )}
                 </div>

@@ -5,7 +5,6 @@ import { FeaturePageLayout } from '@/components/marketing/feature-page-layout';
 import { 
   Smartphone, 
   MapPin, 
-  Users, 
   Car, 
   Calendar, 
   FileText,

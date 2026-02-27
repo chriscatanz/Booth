@@ -122,12 +122,12 @@ export function MarketingHeader({ onGetStarted, onSignIn }: MarketingHeaderProps
               </AnimatePresence>
             </div>
 
-            <a 
+            <Link 
               href="/#pricing"
               className="text-base font-semibold text-text-secondary hover:text-text-primary transition-colors"
             >
               Pricing
-            </a>
+            </Link>
 
             <Link 
               href="/about"
@@ -214,13 +214,13 @@ export function MarketingHeader({ onGetStarted, onSignIn }: MarketingHeaderProps
                   </div>
                 </div>
 
-                <a 
+                <Link 
                   href="/#pricing"
                   className="block px-2 py-2 text-base font-semibold text-text-secondary hover:text-text-primary transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Pricing
-                </a>
+                </Link>
 
                 <Link 
                   href="/about"

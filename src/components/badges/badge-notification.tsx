@@ -13,6 +13,11 @@ export function BadgeNotification({ badge, onDismiss }: BadgeNotificationProps) 
   const [visible, setVisible] = useState(false);
   const [leaving, setLeaving] = useState(false);
 
+  const handleDismiss = () => {
+    setLeaving(true);
+    setTimeout(onDismiss, 300);
+  };
+
   useEffect(() => {
     // Animate in
     requestAnimationFrame(() => setVisible(true));
@@ -23,12 +28,8 @@ export function BadgeNotification({ badge, onDismiss }: BadgeNotificationProps) 
     }, 5000);
 
     return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const handleDismiss = () => {
-    setLeaving(true);
-    setTimeout(onDismiss, 300);
-  };
 
   const badgeInfo = badge.badge;
 

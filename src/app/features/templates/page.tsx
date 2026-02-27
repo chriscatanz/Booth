@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FeaturePageLayout } from '@/components/marketing/feature-page-layout';
 import { 
   Layers, Copy, FolderOpen,
-  Zap, Settings, Repeat, Upload, FileSpreadsheet, FileJson, Users
+  Zap, Repeat, Upload, FileSpreadsheet, FileJson, Users
 } from 'lucide-react';
 
 export default function TemplatesFeaturePage() {

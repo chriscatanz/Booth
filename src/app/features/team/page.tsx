@@ -4,8 +4,8 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { FeaturePageLayout } from '@/components/marketing/feature-page-layout';
 import { 
-  Users, Shield, Activity, Bell, 
-  UserPlus, Eye, Lock, FileText, BookOpen
+  Users, Shield, Activity,
+  UserPlus, Lock, FileText, BookOpen
 } from 'lucide-react';
 
 export default function TeamFeaturePage() {

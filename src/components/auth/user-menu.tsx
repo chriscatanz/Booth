@@ -24,7 +24,6 @@ export function UserMenu({ onOpenOrgSettings, onEnterBoothMode, canEnterBoothMod
     membership,
     switchOrganization, 
     signOut,
-    isAdmin,
     isSuperAdmin,
   } = useAuthStore();
   

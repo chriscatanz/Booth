@@ -9,7 +9,6 @@ import {
   CreditCard, 
   Calendar,
   Search,
-  ExternalLink,
   RefreshCw,
   TrendingUp,
   AlertTriangle
@@ -391,7 +390,7 @@ function StatCard({
   );
 }
 
-function TierBadge({ tier, status }: { tier: string; status: string }) {
+function TierBadge({ tier }: { tier: string; status?: string }) {
   const tierColors: Record<string, string> = {
     trial: 'bg-blue-500/10 text-blue-500',
     starter: 'bg-brand-purple/10 text-brand-purple',
