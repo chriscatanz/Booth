@@ -55,6 +55,7 @@ function mapShowFromRow(row: Record<string, unknown>): TradeShow {
     leadCaptureSystemId: row.lead_capture_system_id as string | null,
     leadCaptureSystem: row.lead_capture_system as string | null,
     leadCaptureCredentials: row.lead_capture_credentials as string | null,
+    leadCaptureAppUrl: (row.lead_capture_app_url as string | null) ?? null,
     leadCaptureNotRequired: row.lead_capture_not_required as boolean | null,
     boothToShip: row.booth_to_ship as string | null,
     graphicsToShip: row.graphics_to_ship as string | null,

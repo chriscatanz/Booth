@@ -734,6 +734,56 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                 </div>
               </TabSection>
             </DataVisibilityGate>
+
+            {/* Lead Capture */}
+            <TabSection title="Lead Capture">
+              <div className="space-y-4">
+                <Checkbox label="No Lead Capture Needed" checked={show.leadCaptureNotRequired ?? false} onChange={v => updateSelectedShow({ leadCaptureNotRequired: v, leadCaptureSystemId: v ? null : show.leadCaptureSystemId, leadCaptureSystem: v ? null : show.leadCaptureSystem })} disabled={readOnly} />
+                {!show.leadCaptureNotRequired && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <LookupSelect
+                      label="Lead Capture System"
+                      value={show.leadCaptureSystemId}
+                      onChange={v => {
+                        const system = lookups.leadCaptureSystems.find(s => s.id === v);
+                        updateSelectedShow({ 
+                          leadCaptureSystemId: v,
+                          leadCaptureSystem: system?.name || null,
+                          leadCaptureNotRequired: false,
+                        });
+                      }}
+                      options={lookups.leadCaptureSystems.map(s => ({ id: s.id, name: s.name }))}
+                      placeholder="Select system..."
+                      disabled={readOnly}
+                      onCreateNew={() => setNameModal({
+                        title: 'Add Lead Capture System',
+                        label: 'System Name',
+                        placeholder: 'e.g. iCapture',
+                        onConfirm: async (name) => {
+                          setNameModal(null);
+                          if (organization?.id) {
+                            const newSystem = await lookupService.createLeadCaptureSystem(organization.id, { name });
+                            await refreshCategory('leadCaptureSystems');
+                            updateSelectedShow({ leadCaptureSystemId: newSystem.id, leadCaptureSystem: newSystem.name, leadCaptureNotRequired: false });
+                          }
+                        },
+                      })}
+                      createLabel="Add new system"
+                    />
+                    <Input label="Login Credentials" type="text" value={show.leadCaptureCredentials ?? ''} onChange={e => updateSelectedShow({ leadCaptureCredentials: e.target.value || null })} placeholder="Username / Password" disabled={readOnly} />
+                    <Input
+                      label="App URL"
+                      type="url"
+                      value={show.leadCaptureAppUrl ?? ''}
+                      onChange={e => updateSelectedShow({ leadCaptureAppUrl: e.target.value || null })}
+                      placeholder="https://app.leadpod.com"
+                      disabled={readOnly}
+                      className="sm:col-span-2"
+                    />
+                  </div>
+                )}
+              </div>
+            </TabSection>
           </div>
         </DetailTabPanel>
 
@@ -859,44 +909,7 @@ Return ONLY the HTML content, no markdown, no code fences.`;
               </div>
             </TabSection>
 
-            {/* Lead Capture */}
-            <TabSection title="Lead Capture">
-              <div className="flex flex-wrap gap-6 mb-4">
-                <Checkbox label="No Lead Capture Needed" checked={show.leadCaptureNotRequired ?? false} onChange={v => updateSelectedShow({ leadCaptureNotRequired: v, leadCaptureSystemId: v ? null : show.leadCaptureSystemId, leadCaptureSystem: v ? null : show.leadCaptureSystem })} disabled={readOnly} />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <LookupSelect
-                  label="Lead Capture System"
-                  value={show.leadCaptureSystemId}
-                  onChange={v => {
-                    const system = lookups.leadCaptureSystems.find(s => s.id === v);
-                    updateSelectedShow({ 
-                      leadCaptureSystemId: v,
-                      leadCaptureSystem: system?.name || null,
-                      leadCaptureNotRequired: false,
-                    });
-                  }}
-                  options={lookups.leadCaptureSystems.map(s => ({ id: s.id, name: s.name }))}
-                  placeholder="Select system..."
-                  disabled={readOnly || !!show.leadCaptureNotRequired}
-                  onCreateNew={() => setNameModal({
-                    title: 'Add Lead Capture System',
-                    label: 'System Name',
-                    placeholder: 'e.g. iCapture',
-                    onConfirm: async (name) => {
-                      setNameModal(null);
-                      if (organization?.id) {
-                        const newSystem = await lookupService.createLeadCaptureSystem(organization.id, { name });
-                        await refreshCategory('leadCaptureSystems');
-                        updateSelectedShow({ leadCaptureSystemId: newSystem.id, leadCaptureSystem: newSystem.name, leadCaptureNotRequired: false });
-                      }
-                    },
-                  })}
-                  createLabel="Add new system"
-                />
-                <Input label="Login Credentials" type="text" value={show.leadCaptureCredentials ?? ''} onChange={e => updateSelectedShow({ leadCaptureCredentials: e.target.value || null })} placeholder="Username / Password" disabled={readOnly || !!show.leadCaptureNotRequired} />
-              </div>
-            </TabSection>
+
 
             {/* On-Site Services */}
             <TabSection title="On-Site Services" icon={Package}>
