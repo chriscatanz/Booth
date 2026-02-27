@@ -624,11 +624,8 @@ function MembersContent() {
           method: 'POST',
           body: JSON.stringify({
             email: inviteEmail,
-            inviterName: user.fullName || user.email,
-            organizationName: organization.name,
             role: inviteRole,
             token: invite.token,
-            expiresAt: invite.expiresAt,
           }),
         });
       } catch {}

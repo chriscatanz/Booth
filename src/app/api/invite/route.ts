@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { sendInvitationEmail } from '@/services/email-service';
 
 // HTML entity encoding for XSS prevention
 function escapeHtml(text: string): string {
@@ -28,15 +27,16 @@ export async function POST(request: NextRequest) {
     const authHeader = request.headers.get('authorization');
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceRoleKey) {
       return NextResponse.json(
         { error: 'Server configuration error' },
         { status: 500 }
       );
     }
 
-    // Create Supabase client with the user's token
+    // Create Supabase client with the user's token (for auth verification + rate limiting)
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       global: {
         headers: authHeader ? { Authorization: authHeader } : {},
@@ -73,16 +73,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { email, inviterName, organizationName, role, token, expiresAt } = body;
+    const { email, role, token } = body;
 
     // Validate and sanitize required fields
     const sanitizedEmail = sanitizeString(email, 320);
-    const sanitizedInviterName = sanitizeString(inviterName, 100);
-    const sanitizedOrgName = sanitizeString(organizationName, 100);
     const sanitizedRole = sanitizeString(role, 20);
     const sanitizedToken = sanitizeString(token, 100);
 
-    if (!sanitizedEmail || !sanitizedInviterName || !sanitizedOrgName || !sanitizedRole || !sanitizedToken || !expiresAt) {
+    if (!sanitizedEmail || !sanitizedRole || !sanitizedToken) {
       return NextResponse.json(
         { error: 'Missing or invalid required fields' },
         { status: 400 }
@@ -107,31 +105,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate expiry date is in the future
-    const expiryDate = new Date(expiresAt);
-    if (isNaN(expiryDate.getTime()) || expiryDate <= new Date()) {
+    // Create service role client for admin operations
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
+
+    // Build the redirect URL — Supabase will append #access_token=...&type=invite to this
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://getbooth.io';
+    const redirectTo = `${appUrl}/invite/accept?token=${sanitizedToken}`;
+
+    // Send invite via Supabase Auth admin API (one email, pre-confirmed account)
+    const { error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
+      sanitizedEmail,
+      { redirectTo }
+    );
+
+    if (inviteError) {
+      console.error('Failed to send Supabase invite:', inviteError);
       return NextResponse.json(
-        { error: 'Expiry date must be in the future' },
-        { status: 400 }
+        { error: `Failed to send invitation: ${inviteError.message}` },
+        { status: 500 }
       );
     }
-
-    // Send the invitation email
-    await sendInvitationEmail(
-      sanitizedEmail,
-      sanitizedInviterName,
-      sanitizedOrgName,
-      sanitizedRole,
-      sanitizedToken,
-      expiresAt
-    );
 
     return NextResponse.json({ success: true });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    console.error('Failed to send invitation email:', msg);
+    console.error('Failed to send invitation:', msg);
     return NextResponse.json(
-      { error: `Failed to send invitation email: ${msg}` },
+      { error: `Failed to send invitation: ${msg}` },
       { status: 500 }
     );
   }

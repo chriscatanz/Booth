@@ -80,11 +80,8 @@ export function MembersModal({ onClose }: MembersModalProps) {
           method: 'POST',
           body: JSON.stringify({
             email: inviteEmail.trim(),
-            inviterName: user.fullName || user.email,
-            organizationName: organization.name,
             role: inviteRole,
             token: invite.token,
-            expiresAt: invite.expiresAt,
           }),
         });
         if (!emailRes.ok) {
