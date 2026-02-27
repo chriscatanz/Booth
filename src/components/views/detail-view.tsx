@@ -894,7 +894,7 @@ Return ONLY the HTML content, no markdown, no code fences.`;
                   })}
                   createLabel="Add new system"
                 />
-                <Input label="Login Credentials" type="password" value={show.leadCaptureCredentials ?? ''} onChange={e => updateSelectedShow({ leadCaptureCredentials: e.target.value || null })} placeholder="Username / Password" disabled={readOnly || !!show.leadCaptureNotRequired} />
+                <Input label="Login Credentials" type="text" value={show.leadCaptureCredentials ?? ''} onChange={e => updateSelectedShow({ leadCaptureCredentials: e.target.value || null })} placeholder="Username / Password" disabled={readOnly || !!show.leadCaptureNotRequired} />
               </div>
             </TabSection>
 
