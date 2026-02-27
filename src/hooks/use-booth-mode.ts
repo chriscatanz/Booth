@@ -180,8 +180,9 @@ export function useBoothMode(): BoothModeState {
       }
 
       // Find tradeshows where this user is an attendee and live today
+      // Use v_attendees (decrypted view) since email column is PII-encrypted
       const { data: attendeeRows } = await supabase
-        .from('attendees')
+        .from('v_attendees')
         .select('tradeshow_id')
         .eq('email', user.email ?? '');
 
