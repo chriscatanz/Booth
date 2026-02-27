@@ -5,12 +5,11 @@ import { createClient } from '@supabase/supabase-js';
 export const CURRENT_TOS_VERSION = '2024-02-14';
 export const CURRENT_PRIVACY_VERSION = '2024-02-14';
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export async function POST(request: NextRequest) {
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
   try {
     const { userId, tosAccepted, privacyAccepted, userAgent } = await request.json();
 
