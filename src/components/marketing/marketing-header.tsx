@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Menu, X, Sparkles, Layers, Calendar, DollarSign, Users, Truck, Bell, Smartphone } from 'lucide-react';
@@ -46,9 +47,13 @@ export function MarketingHeader({ onGetStarted, onSignIn }: MarketingHeaderProps
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-purple to-brand-purple-dark flex items-center justify-center shadow-lg shadow-brand-purple/25">
-              <span className="text-white text-lg font-black">B</span>
-            </div>
+            <Image
+              src="/booth-logo.png"
+              alt="Booth"
+              width={36}
+              height={36}
+              className="rounded-xl"
+            />
             <span className="font-black text-xl text-text-primary">Booth</span>
           </Link>
 

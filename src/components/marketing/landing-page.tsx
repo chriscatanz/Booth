@@ -111,9 +111,7 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-purple to-brand-purple-dark flex items-center justify-center shadow-lg shadow-brand-purple/25">
-                <span className="text-white text-lg font-black">B</span>
-              </div>
+              <Image src="/booth-logo.png" alt="Booth" width={36} height={36} className="rounded-xl" />
               <span className="font-black text-xl text-text-primary">Booth</span>
             </div>
 
@@ -612,9 +610,7 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
       <footer className="border-t border-border py-8 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-brand-purple to-brand-purple-dark flex items-center justify-center">
-              <span className="text-white text-xs font-black">B</span>
-            </div>
+            <Image src="/booth-logo.png" alt="Booth" width={24} height={24} className="rounded-lg" />
             <span className="text-sm font-bold text-text-secondary">Booth</span>
           </div>
           <div className="flex items-center gap-6 text-sm text-text-tertiary">
