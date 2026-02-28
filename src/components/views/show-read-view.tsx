@@ -21,6 +21,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { VenueMap } from '@/components/ui/venue-map';
 import { useToastStore } from '@/store/toast-store';
+import { useDataVisibility } from '@/hooks/use-data-visibility';
 
 interface ShowReadViewProps {
   show: TradeShow;
@@ -56,6 +57,17 @@ export function ShowReadView({ show, attendees, files = [], tasks = [], taskCoun
   const activeTab = controlledTab ?? internalTab;
   const setActiveTab = onTabChange ?? setInternalTab;
   const toast = useToastStore();
+  const { canSeeCategory } = useDataVisibility();
+
+  // Filter tabs based on role visibility permissions
+  const visibleTabs = TABS.filter(tab => {
+    if (tab.id === 'budget') return canSeeCategory('budget');
+    if (tab.id === 'logistics') return canSeeCategory('logistics');
+    if (tab.id === 'travel') return canSeeCategory('travel');
+    if (tab.id === 'notes') return canSeeCategory('notes') || canSeeCategory('tasks');
+    if (tab.id === 'documents') return canSeeCategory('documents');
+    return true;
+  });
   
   // Computed values
   const totalCost = totalEstimatedCost(show, attendees);
@@ -126,7 +138,7 @@ export function ShowReadView({ show, attendees, files = [], tasks = [], taskCoun
       <div className="border-b border-border bg-surface sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex gap-1 overflow-x-auto py-2 scrollbar-hide">
-            {TABS.map(tab => {
+            {visibleTabs.map(tab => {
               const count = getTabCount(tab.id);
               return (
                 <button
@@ -386,7 +398,10 @@ export function ShowReadView({ show, attendees, files = [], tasks = [], taskCoun
           )}
 
           {/* LOGISTICS TAB */}
-          {activeTab === 'logistics' && (
+          {activeTab === 'logistics' && !canSeeCategory('logistics') && (
+            <div className="p-6 text-center text-text-secondary">You don&apos;t have access to logistics information.</div>
+          )}
+          {activeTab === 'logistics' && canSeeCategory('logistics') && (
             <div className="space-y-6">
               {/* Outbound Shipping */}
               <Card>
@@ -615,7 +630,10 @@ export function ShowReadView({ show, attendees, files = [], tasks = [], taskCoun
           )}
 
           {/* BUDGET TAB */}
-          {activeTab === 'budget' && (
+          {activeTab === 'budget' && !canSeeCategory('budget') && (
+            <div className="p-6 text-center text-text-secondary">You don&apos;t have access to budget information.</div>
+          )}
+          {activeTab === 'budget' && canSeeCategory('budget') && (
             <div className="space-y-6">
               <Card>
                 <CardTitle icon={<DollarSign size={16} />} title="Cost Breakdown" />
