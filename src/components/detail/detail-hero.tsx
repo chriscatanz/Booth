@@ -2,9 +2,9 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { TradeShow } from '@/types';
+import { TradeShow, Attendee } from '@/types';
 import { formatDateRange } from '@/lib/date-utils';
-import { daysUntilShow, totalEstimatedCost, roiPercentage } from '@/types/computed';
+import { daysUntilShow, totalEstimatedCost, totalCostForShow, roiPercentage } from '@/types/computed';
 import { formatCurrency, cn } from '@/lib/utils';
 import { 
   MapPin, Calendar, Hash, DollarSign, TrendingUp, 
@@ -21,6 +21,7 @@ import { fetchAssignmentsByShow } from '@/services/booth-kit-service';
 
 interface DetailHeroProps {
   show: TradeShow;
+  attendees?: Attendee[];
   canEdit?: boolean;
   isNew?: boolean;
   isSaving?: boolean;
@@ -39,7 +40,8 @@ interface DetailHeroProps {
 }
 
 export function DetailHero({ 
-  show, 
+  show,
+  attendees,
   canEdit,
   isNew,
   isSaving,
@@ -57,7 +59,9 @@ export function DetailHero({
   onTabChange,
 }: DetailHeroProps) {
   const days = daysUntilShow(show);
-  const estimated = totalEstimatedCost(show);
+  const estimated = attendees && attendees.length > 0
+    ? totalCostForShow(show, attendees)
+    : totalEstimatedCost(show);
   const roi = roiPercentage(show);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const actionsButtonRef = useRef<HTMLButtonElement>(null);

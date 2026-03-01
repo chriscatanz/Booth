@@ -241,7 +241,8 @@ Return ONLY the HTML content, no markdown, no code fences.`;
     >
       {/* Hero Header with integrated action buttons */}
       <DetailHero 
-        show={show} 
+        show={show}
+        attendees={attendees}
         canEdit={canEdit}
         isNew={isNew}
         isSaving={isSaving}
