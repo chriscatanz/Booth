@@ -210,13 +210,27 @@ export function useBoothMode(): BoothModeState {
     detectActiveShow();
   }, [user, isMobile, dismissed]);
 
-  const enterBoothMode = useCallback(() => {
+  const enterBoothMode = useCallback(async () => {
     if (!pendingShow) return;
     localStorage.setItem(BOOTH_MODE_KEY, 'true');
     localStorage.setItem(BOOTH_MODE_SHOW_KEY, String(pendingShow.id));
-    setActiveShow(pendingShow);
     setPendingShow(null);
     setIsInBoothMode(true);
+
+    // Always re-fetch fresh data so hotel/venue/any changes are reflected immediately
+    if (supabase) {
+      const { data: shows } = await supabase
+        .from('v_tradeshows')
+        .select('*')
+        .eq('id', pendingShow.id)
+        .limit(1);
+      if (shows && shows.length > 0) {
+        setActiveShow(mapShowFromRow(shows[0] as Record<string, unknown>));
+        return;
+      }
+    }
+    // Fallback to pending data if fetch fails
+    setActiveShow(pendingShow);
   }, [pendingShow]);
 
   const dismissPrompt = useCallback(() => {
