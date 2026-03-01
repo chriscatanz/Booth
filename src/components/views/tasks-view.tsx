@@ -255,7 +255,7 @@ function KanbanColumn({
   
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const taskId = e.dataTransfer.getData('taskId');
+    const taskId = e.dataTransfer.getData('text/plain');
     if (taskId) {
       onStatusChange(taskId, status);
     }
@@ -263,6 +263,7 @@ function KanbanColumn({
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
   };
 
   return (
@@ -333,21 +334,18 @@ function TaskCard({ task, onEdit, onDelete, isEditor }: TaskCardProps) {
   const isOverdue = task.dueDate && task.status !== 'done' && isPast(parseISO(task.dueDate));
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
+    <div
       draggable={isEditor}
-      onDragStart={(e) => {
-        const event = e as unknown as React.DragEvent;
-        event.dataTransfer?.setData('taskId', task.id);
-      }}
+      onDragStart={isEditor ? (e: React.DragEvent<HTMLDivElement>) => {
+        e.dataTransfer.setData('text/plain', task.id);
+        e.dataTransfer.effectAllowed = 'move';
+      } : undefined}
       className={cn(
-        'p-3 rounded-lg bg-surface border border-border cursor-pointer hover:border-brand-purple/50 transition-colors',
+        'p-3 rounded-lg bg-surface border border-border hover:border-brand-purple/50 transition-colors',
         isEditor && 'cursor-grab active:cursor-grabbing'
       )}
       onClick={onEdit}
+      style={{ cursor: isEditor ? 'grab' : 'pointer' }}
     >
       {/* Title & Menu */}
       <div className="flex items-start justify-between gap-2">
@@ -431,6 +429,6 @@ function TaskCard({ task, onEdit, onDelete, isEditor }: TaskCardProps) {
           </span>
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }
