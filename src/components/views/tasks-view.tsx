@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/auth-store';
 import * as taskService from '@/services/task-service';
@@ -252,9 +252,11 @@ function KanbanColumn({
   isEditor,
 }: KanbanColumnProps) {
   const config = TASK_STATUS_CONFIG[status];
+  const [isDragOver, setIsDragOver] = useState(false);
   
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    setIsDragOver(false);
     const taskId = e.dataTransfer.getData('text/plain');
     if (taskId) {
       onStatusChange(taskId, status);
@@ -264,13 +266,24 @@ function KanbanColumn({
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDragOver(false);
+    }
   };
 
   return (
     <div
-      className="w-72 sm:w-80 flex-shrink-0 flex flex-col bg-bg-tertiary/50 rounded-xl"
+      className={cn(
+        'w-72 sm:w-80 flex-shrink-0 flex flex-col rounded-xl transition-colors',
+        isDragOver ? 'bg-brand-purple/10 ring-2 ring-brand-purple/30' : 'bg-bg-tertiary/50'
+      )}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
     >
       {/* Column Header */}
       <div className="px-4 py-3 border-b border-border flex items-center justify-between">
@@ -329,6 +342,7 @@ interface TaskCardProps {
 
 function TaskCard({ task, onEdit, onDelete, isEditor }: TaskCardProps) {
   const [showMenu, setShowMenu] = useState(false);
+  const dragging = useRef(false);
   const priorityConfig = TASK_PRIORITY_CONFIG[task.priority];
   
   const isOverdue = task.dueDate && task.status !== 'done' && isPast(parseISO(task.dueDate));
@@ -337,14 +351,16 @@ function TaskCard({ task, onEdit, onDelete, isEditor }: TaskCardProps) {
     <div
       draggable={isEditor}
       onDragStart={isEditor ? (e: React.DragEvent<HTMLDivElement>) => {
+        dragging.current = true;
         e.dataTransfer.setData('text/plain', task.id);
         e.dataTransfer.effectAllowed = 'move';
       } : undefined}
+      onDragEnd={() => { setTimeout(() => { dragging.current = false; }, 50); }}
       className={cn(
         'p-3 rounded-lg bg-surface border border-border hover:border-brand-purple/50 transition-colors',
         isEditor && 'cursor-grab active:cursor-grabbing'
       )}
-      onClick={onEdit}
+      onClick={() => { if (!dragging.current) onEdit(); }}
       style={{ cursor: isEditor ? 'grab' : 'pointer' }}
     >
       {/* Title & Menu */}
