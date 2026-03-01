@@ -436,9 +436,9 @@ export async function saveAttendees(attendees: Attendee[], tradeshowId: number):
     if (error) throw new Error(`Delete failed: ${error.message}`);
   }
 
-  // Batch upsert existing + new attendees
-  const upsertData = [
-    ...toUpdate.map(att => ({
+  // Update existing attendees (have a dbId)
+  if (toUpdate.length > 0) {
+    const updateData = toUpdate.map(att => ({
       id: att.dbId!,
       tradeshow_id: att.tradeshowId ?? tradeshowId,
       name: att.name,
@@ -447,8 +447,16 @@ export async function saveAttendees(attendees: Attendee[], tradeshowId: number):
       departure_date: dateToDBString(att.departureDate),
       flight_cost: att.flightCost,
       flight_confirmation: att.flightConfirmation,
-    })),
-    ...toInsert.map(att => ({
+    }));
+    const { error } = await supabase
+      .from('attendees')
+      .upsert(updateData, { onConflict: 'id' });
+    if (error) throw new Error(`Update failed: ${error.message}`);
+  }
+
+  // Insert new attendees — no id, let DB assign serial
+  if (toInsert.length > 0) {
+    const insertData = toInsert.map(att => ({
       tradeshow_id: att.tradeshowId ?? tradeshowId,
       name: att.name,
       email: att.email,
@@ -456,14 +464,11 @@ export async function saveAttendees(attendees: Attendee[], tradeshowId: number):
       departure_date: dateToDBString(att.departureDate),
       flight_cost: att.flightCost,
       flight_confirmation: att.flightConfirmation,
-    })),
-  ];
-
-  if (upsertData.length > 0) {
+    }));
     const { error } = await supabase
       .from('attendees')
-      .upsert(upsertData, { onConflict: 'id' });
-    if (error) throw new Error(`Upsert failed: ${error.message}`);
+      .insert(insertData);
+    if (error) throw new Error(`Insert failed: ${error.message}`);
   }
 }
 
