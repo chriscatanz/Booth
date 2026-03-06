@@ -18,7 +18,7 @@ export function middleware(request: NextRequest) {
     "img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in https://*.openstreetmap.org https://*.tile.openstreetmap.org https://unpkg.com https://*.google.com https://*.googleapis.com https://*.gstatic.com",
     "font-src 'self' data:",
     "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://nominatim.openstreetmap.org https://photon.komoot.io https://api.anthropic.com",
-    "frame-src https://www.google.com https://maps.google.com https://*.google.com", // Google Maps embeds
+    "frame-src https://www.google.com https://maps.google.com https://*.google.com https://*.supabase.co https://*.supabase.in", // Google Maps + Supabase file previews
     "frame-ancestors 'none'",
     "form-action 'self'",
     "base-uri 'self'",
