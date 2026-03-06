@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import { FilePreviewModal } from '@/components/ui/file-preview-modal';
 import DOMPurify from 'dompurify';
 import { TradeShow, Attendee, AdditionalFile } from '@/types';
 import { Task, TASK_STATUS_CONFIG, TASK_PRIORITY_CONFIG } from '@/types/tasks';
@@ -52,6 +53,8 @@ const TABS: { id: ReadTab; label: string; icon: React.ReactNode }[] = [
 
 export function ShowReadView({ show, attendees, files = [], tasks = [], taskCounts, onEdit, canEdit, activeTab: controlledTab, onTabChange, carriers = [], laborCompanies = [] }: ShowReadViewProps) {
   const [internalTab, setInternalTab] = useState<ReadTab>('overview');
+  const [previewFile, setPreviewFile] = useState<AdditionalFile | null>(null);
+  const openPreview = useCallback((file: AdditionalFile) => setPreviewFile(file), []);
   
   // Use controlled tab if provided, otherwise use internal state
   const activeTab = controlledTab ?? internalTab;
@@ -767,19 +770,17 @@ export function ShowReadView({ show, attendees, files = [], tasks = [], taskCoun
                   <CardTitle icon={<FileText size={16} />} title={`Documents (${files.length})`} />
                   <div className="mt-4 space-y-2">
                     {files.map((file) => (
-                      <a
+                      <button
                         key={file.localId}
-                        href={file.filePath}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-3 rounded-lg bg-bg-tertiary hover:bg-bg-secondary transition-colors"
+                        onClick={() => openPreview(file)}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg bg-bg-tertiary hover:bg-bg-secondary transition-colors text-left"
                       >
                         <span className="text-xl">{getFileIcon(file.fileType)}</span>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-text-primary truncate">{file.fileName}</p>
                         </div>
-                        <ExternalLink size={14} className="text-text-tertiary" />
-                      </a>
+                        <span className="text-xs text-text-tertiary">Preview</span>
+                      </button>
                     ))}
                   </div>
                 </Card>
@@ -791,6 +792,14 @@ export function ShowReadView({ show, attendees, files = [], tasks = [], taskCoun
         </div>
       </div>
 
+      {previewFile && (
+        <FilePreviewModal
+          filePath={previewFile.filePath}
+          fileName={previewFile.fileName}
+          fileType={previewFile.fileType}
+          onClose={() => setPreviewFile(null)}
+        />
+      )}
     </div>
   );
 }

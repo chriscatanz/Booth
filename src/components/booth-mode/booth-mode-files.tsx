@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { FileText, Download, Loader2, FolderOpen } from 'lucide-react';
+import { FileText, Loader2, FolderOpen } from 'lucide-react';
 import { fetchAdditionalFiles } from '@/services/supabase-service';
 import { useToastStore } from '@/store/toast-store';
 import { AdditionalFile } from '@/types';
-import { supabase } from '@/lib/supabase';
 import { format, parseISO } from 'date-fns';
+import { FilePreviewModal } from '@/components/ui/file-preview-modal';
 
 interface BoothModeFilesProps {
   showId: number;
@@ -16,6 +16,7 @@ export function BoothModeFiles({ showId }: BoothModeFilesProps) {
   const toast = useToastStore();
   const [files, setFiles] = useState<AdditionalFile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [previewFile, setPreviewFile] = useState<AdditionalFile | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -33,19 +34,8 @@ export function BoothModeFiles({ showId }: BoothModeFilesProps) {
     load();
   }, [showId, toast]);
 
-  const handleDownload = async (file: AdditionalFile) => {
-    if (!supabase) return;
-    try {
-      const { data, error } = await supabase.storage
-        .from('show-files')
-        .createSignedUrl(file.filePath, 60);
-      if (error) throw error;
-      window.open(data.signedUrl, '_blank');
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Download failed';
-      toast.error('Download failed', msg);
-    }
-  };
+  // suppress unused toast warning — still used in load()
+  void toast;
 
   if (loading) {
     return (
@@ -65,31 +55,37 @@ export function BoothModeFiles({ showId }: BoothModeFilesProps) {
   }
 
   return (
-    <div className="p-4 space-y-2">
-      {files.map(file => (
-        <div
-          key={file.localId}
-          className="rounded-xl bg-white/5 border border-white/10 p-3 flex items-center gap-3"
-        >
-          <div className="p-2 rounded-lg bg-white/10 flex-shrink-0">
-            <FileText size={18} className="text-white/60" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">{file.fileName}</p>
-            <p className="text-xs text-white/40 mt-0.5">
-              {file.fileType ?? 'File'}
-              {file.uploadedAt && ` · ${format(parseISO(file.uploadedAt), 'MMM d, yyyy')}`}
-            </p>
-          </div>
+    <>
+      <div className="p-4 space-y-2">
+        {files.map(file => (
           <button
-            onClick={() => handleDownload(file)}
-            className="p-2 rounded-lg bg-white/5 hover:bg-white/15 transition-colors flex-shrink-0"
-            aria-label="Download file"
+            key={file.localId}
+            onClick={() => setPreviewFile(file)}
+            className="w-full rounded-xl bg-white/5 border border-white/10 p-3 flex items-center gap-3 text-left hover:bg-white/10 transition-colors"
           >
-            <Download size={16} className="text-white/60" />
+            <div className="p-2 rounded-lg bg-white/10 flex-shrink-0">
+              <FileText size={18} className="text-white/60" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">{file.fileName}</p>
+              <p className="text-xs text-white/40 mt-0.5">
+                {file.fileType ?? 'File'}
+                {file.uploadedAt && ` · ${format(parseISO(file.uploadedAt), 'MMM d, yyyy')}`}
+              </p>
+            </div>
+            <span className="text-xs text-white/30 flex-shrink-0">Preview</span>
           </button>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+
+      {previewFile && (
+        <FilePreviewModal
+          filePath={previewFile.filePath}
+          fileName={previewFile.fileName}
+          fileType={previewFile.fileType}
+          onClose={() => setPreviewFile(null)}
+        />
+      )}
+    </>
   );
 }
